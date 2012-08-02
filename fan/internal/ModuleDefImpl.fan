@@ -30,11 +30,7 @@ internal class ModuleDefImpl : ModuleDef {
 	
 	
 	// ---- ModuleDef Methods ---------------------------------------------------------------------
-	
-//	override Str loggerName() {
-//		moduleType.name
-//	}
-	
+		
     Void addServiceDef(ServiceDef serviceDef) {
 		ServiceDef? existing := serviceDefs[serviceDef.serviceId]
 		if (existing != null) {
@@ -44,6 +40,10 @@ internal class ModuleDefImpl : ModuleDef {
 		serviceDefs[serviceDef.serviceId] = serviceDef
     }	
 
+	override Str loggerName() {
+		moduleType.name
+	}
+	
 	
 	
 	// ---- Private Methods -----------------------------------------------------------------------
