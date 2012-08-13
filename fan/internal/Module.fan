@@ -21,19 +21,19 @@ internal class Module {
 		this.logger 		= logger
 		this.serviceDefs	= moduleDef.serviceDefs.dup
 	}
+
 	
-		
 	ServiceDef serviceDef(Str serviceId) {
 		serviceDefs[serviceId]
 	}
-	
+
 	Obj serviceById(Str serviceId) {
 		services.getOrAdd(serviceId) {
 			def := serviceDef(serviceId)
 			create(def)
 		}
 	}
-	
+
 //	override Str[] findServiceIdsForType(Type serviceType) {
 //		serviceDefs.findAll |def| {
 //			def.serviceType.fits(serviceType)
