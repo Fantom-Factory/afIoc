@@ -11,7 +11,7 @@ mixin ServiceBindingOptions {
 	** Uses the the simple (unqualified) class name of the implementation class as the id of the service.
 	abstract This withSimpleId()
 
-	** Turns eager loading on for this service.
-	abstract This eagerLoad();
+//	** Turns eager loading on for this service.
+//	abstract This eagerLoad();
 
 }

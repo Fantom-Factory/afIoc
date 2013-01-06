@@ -9,7 +9,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Str? 			serviceId
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
-	private Bool?			eagerLoadFlag
+//	private Bool?			eagerLoadFlag
 	private |->Obj|? 		source
 	private Str? 			description
 
@@ -29,7 +29,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
         this.serviceMixin	= serviceMixin
         this.serviceImpl 	= serviceImpl
-        this.eagerLoadFlag	= serviceImpl.hasFacet(EagerLoad#)
+//        this.eagerLoadFlag	= serviceImpl.hasFacet(EagerLoad#)
         this.serviceId 		= serviceMixin.name
 
         return this
@@ -60,7 +60,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
         this.serviceId 		= serviceInterface.name
         this.serviceMixin 	= serviceInterface
-        this.eagerLoadFlag	= false
+//        this.eagerLoadFlag	= false
         this.source 		= builder
         this.description	= builder.toStr
         return this
@@ -82,11 +82,11 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
         return withId(serviceImpl.name)		
 	}
 
-	override This eagerLoad() {
-        lock.check
-        this.eagerLoadFlag = true
-		return this		
-	}
+//	override This eagerLoad() {
+//        lock.check
+//        this.eagerLoadFlag = true
+//		return this		
+//	}
 	
 	
 	
@@ -111,7 +111,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		serviceDef := ServiceDefImpl() {
 			it.serviceId 	= this.serviceId
 			it.serviceType 	= this.serviceMixin
-			it.isEagerLoad 	= this.eagerLoadFlag
+//			it.isEagerLoad 	= this.eagerLoadFlag
 			it.source		= this.source
 			it.description	= this.description
 		}
@@ -124,7 +124,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		serviceId 		= null
 		serviceMixin	= null
 		serviceImpl		= null
-		eagerLoadFlag	= null
+//		eagerLoadFlag	= null
 		source 			= null
 		description		= null
 	}
@@ -135,9 +135,9 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		if (constructor == null)
 			throw IocErr(IocMessages.noConstructor(serviceImpl, serviceId))
 
-		// FIXME: Don't think this works!
-		// TODO: inject services into ctor
-		this.source 		= |->Obj| { constructor.call }
+		this.source = |->Obj| { 
+			constructor.call 
+		}
 		this.description 	= constructor.toStr
 	}	
 }

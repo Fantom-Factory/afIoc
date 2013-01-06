@@ -1,5 +1,4 @@
 
-// TODO: Make thread safe
 internal class OneShotLock {
 	
 	private Bool lockFlag

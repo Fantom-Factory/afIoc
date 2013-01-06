@@ -11,25 +11,29 @@ class RegistryBuilder {
 	}
 	
 	This addTypes(Type[] moduleTypes) {
-		lock.check
-		
+		lock.check		
 		moduleTypes.each |moduleType| {
-			moduleDef := ModuleDefImpl(moduleType)
-            addModuleDef(moduleDef)
-			// TODO: Check for @SubModule facets
+			addType(moduleType)
 		}
+		return this
+	}
+
+	This addType(Type moduleType) {
+		lock.check
+
+		moduleDef := ModuleDefImpl(moduleType)
+		addModuleDef(moduleDef)
+		// TODO: Check for @SubModule facets
+		
 		return this
 	}
 	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible for invoking
 	** `Registry#performRegistryStartup()`
-	**// FIMXE: null
-    public Registry? build() {
+    Registry build() {
 		lock.lock
-
-		return null
-		// FIXME:
-//        return RegistryImpl(moduleDefs)
+		
+        return RegistryImpl(moduleDefs)
     }
 	
 }
