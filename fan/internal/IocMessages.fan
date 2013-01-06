@@ -1,7 +1,7 @@
 
+// TODO: use Messages
 internal const class IocMessages {
 	
-	// TODO: use Messages
 	
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
 		"Module class ${moduleType.qname} contains unrecognised public methods: ${methods}"		
@@ -31,11 +31,22 @@ internal const class IocMessages {
 		"Type ${implementationClass} (implementation of service '${serviceId}') does not contain any public constructors."
 	}
 	
-//	// service-id-conflict=Service id '%s' has already been defined by %s and may not be redefined by %s. \n You should rename one of the service builder methods.
-//	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
-//		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
-//	}
-//	
+	// service-id-conflict=Service id '%s' has already been defined by %s and may not be redefined by %s. \n You should rename one of the service builder methods.
+	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
+		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
+	}
+
+	
+	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
+	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
+		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."
+	}
+	
+	// many-service-matches=Service interface %s is matched by %d services: %s. Automatic dependency resolution requires that exactly one service implement the interface.
+	static Str manyServiceMatches(Type serviceType, Str[] ids) {
+		"Service interface ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
+	}
+	
 //	// unknown-scope=Unknown service scope '%s'.
 //	static Str unknownScope(Str name) {
 //		"Unknown service scope '${name}'."

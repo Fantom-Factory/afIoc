@@ -5,11 +5,10 @@
 public mixin ModuleDef {
 
 	** Returns a map services built/provided by the module mapped by service id (case is ignored)
-	abstract Str:ServiceDef serviceDefs()
+	abstract Str:ServiceDef serviceDefs()	//	{ caseInsensitive=true }
 
-	// TODO: is empty for now
-	** Returns all the contribution definitions built/provided by this module.
-	abstract ContributionDef[] contributionDefs()
+//	** Returns all the contribution definitions built/provided by this module.
+//	abstract ContributionDef[] contributionDefs()
 
 	** Returns the class that will be instantiated. 
     abstract Type moduleType()

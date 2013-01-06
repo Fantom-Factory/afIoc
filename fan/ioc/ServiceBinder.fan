@@ -1,6 +1,6 @@
 
 **
-** Allows a module to bind service interfaces to service implementation classes in support of autobuilding services. A
+** Allows a module to bind service facets to service implementation classes in support of autobuilding services. A
 ** ServiceBinder is passed to to a method with the following signature: 'static Void bind(ServiceBinder binder)'. This 
 ** is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
 ** 

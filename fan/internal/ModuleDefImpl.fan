@@ -10,15 +10,14 @@ internal class ModuleDefImpl : ModuleDef {
 	private static const Method[] OBJECT_METHODS 			:= Obj#.methods
 	
 	override 	Type 				moduleType
-	override 	ContributionDef[] 	contributionDefs		:= [,]
-	override 	Str:ServiceDef 		serviceDefs				:= [:] { caseInsensitive = true }
+	override 	Str:ServiceDef		serviceDefs				:= Str:ServiceDef[:] { caseInsensitive = true }
 	
 	new make(Type moduleType) {
 		this.moduleType = moduleType
 
 		// Want to verify that every public method is meaningful to Tapestry IoC. Remaining methods
 		// might have typos, i.e., "createFoo" that should be "buildFoo".
-		methods := moduleType.methods.exclude |method| { OBJECT_METHODS.contains(method)  }
+		methods := moduleType.methods.exclude |method| { OBJECT_METHODS.contains(method) || method.isCtor }
 
 		grind(methods)
 		bind(methods)
@@ -49,7 +48,7 @@ internal class ModuleDefImpl : ModuleDef {
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	private Void grind(Method[] remainingMethods) {
-		methods := moduleType.methods.sort |Method a, Method b -> Int| { 
+		methods := moduleType.methods.dup.sort |Method a, Method b -> Int| { 
 			a.name <=> b.name 
 		}
 
@@ -74,7 +73,7 @@ internal class ModuleDefImpl : ModuleDef {
 		serviceDef	:= ServiceDefImpl {
 			it.serviceId 	= extractServiceId(method)
 			it.serviceType	= method.returns
-			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
+//			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
 			it.description	= method.toStr
 			it.source		= |->Obj| { method.call }	// TODO: inject services into method
 		}

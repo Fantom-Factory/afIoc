@@ -3,7 +3,6 @@ internal class ServiceDefImpl : ServiceDef {
 	
 	override const Str 	serviceId
 	override const Type serviceType
-	override const Bool isEagerLoad
 	
 			|->Obj| 	source
 			Str 		description
@@ -13,7 +12,7 @@ internal class ServiceDefImpl : ServiceDef {
 	}
 	
 	override |->Obj| createServiceBuilder() {
-		source()
+		source
 	}
 	
 	override Str toStr() {

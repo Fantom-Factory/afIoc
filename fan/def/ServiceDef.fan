@@ -12,12 +12,12 @@ mixin ServiceDef {
 	** ultimate disambiguation, but their primary purpose is to support service contribution methods.
 	abstract Str serviceId()
 
-	** Returns the service interface associated with this service. This is the interface exposed to the outside world.
-	** In cases where the service is *not* defined in terms of an interface, this will return the actual implementation 
+	** Returns the service facet associated with this service. This is the facet exposed to the outside world.
+	** In cases where the service is *not* defined in terms of a facet, this will return the actual implementation 
 	** class of the service. 
 	abstract Type serviceType()
 
-	** Returns true if the service should be eagerly loaded at Registry startup.
-	abstract Bool isEagerLoad()
+//	** Returns true if the service should be eagerly loaded at Registry startup.
+//	abstract Bool isEagerLoad()
 	
 }

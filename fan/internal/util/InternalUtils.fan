@@ -38,9 +38,30 @@ internal const class InternalUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
 	
-	** Extracts the message from an exception. If the exception's message is null, returns the exceptions class name.
-	@Deprecated
-	static Str toMessage(Err exception) {
-		exception.msg
-	}	
+//	** Extracts the message from an exception. If the exception's message is null, returns the exceptions class name.
+//	@Deprecated
+//	static Str toMessage(Err exception) {
+//		exception.msg
+//	}
+	
+	** Injects into the fields (of all visibilities) when the @Inject facet is present.
+	public static Void injectIntoFields(Obj object, ObjLocator locator) {
+		object.typeof.fields.each |field| { 
+
+			// Ignore all static and final fields.
+	    	if (field.isStatic || field.isConst)
+	    		return
+
+	    	if (field.hasFacet(Inject#)) {
+				// TODO: getObj() or find service by Id - use an annotationProvider...?
+				service := locator.serviceByType(field.type)
+                inject(object, field, service)
+            }
+		}
+    }
+
+	private static Void inject(Obj target, Field field, Obj value) {
+		field.set(target, value)
+	}
+	
 }
