@@ -4,7 +4,7 @@
 ** 
 mixin ServiceDef {
 
-	** Returns an factory func that creates the service implementation
+	** Returns a factory func that creates the service implementation
 	abstract |->Obj| createServiceBuilder()
 
 	** Returns the service id, derived from the method name or the unqualified service interface name. Service ids must
