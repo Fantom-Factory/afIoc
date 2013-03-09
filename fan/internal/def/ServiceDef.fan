@@ -2,7 +2,7 @@
 **
 ** Defines the contents of a module. 
 ** 
-mixin ServiceDef {
+internal mixin ServiceDef {
 
 	** Returns a factory func that creates the service implementation
 	abstract |->Obj| createServiceBuilder()

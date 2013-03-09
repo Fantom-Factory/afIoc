@@ -12,7 +12,7 @@ class Build : BuildPod {
 					"proj.name"		: "AF-IOC"
 				  ]
 		
-		srcDirs = [`test/`, `fan/`, `fan/ioc/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/util/`, `fan/internal/services/`, `fan/facets/`, `fan/def/`]
+		srcDirs = [`test/`, `fan/`, `fan/ioc/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/util/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
 		depends = ["sys 1.0", "concurrent 1.0"]
 		
 		docApi = true

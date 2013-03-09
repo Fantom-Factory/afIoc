@@ -3,13 +3,6 @@ class RegistryBuilder {
 	private OneShotLock lock		:= OneShotLock()
 	private ModuleDef[]	moduleDefs	:= [,]
 	
-	This addModuleDef(ModuleDef moduleDef) {
-		lock.check
-
-		this.moduleDefs.add(moduleDef)
-		return this
-	}
-	
 	This addTypes(Type[] moduleTypes) {
 		lock.check		
 		moduleTypes.each |moduleType| {
@@ -36,4 +29,10 @@ class RegistryBuilder {
         return RegistryImpl(moduleDefs)
     }
 	
+	private This addModuleDef(ModuleDef moduleDef) {
+		lock.check
+
+		this.moduleDefs.add(moduleDef)
+		return this
+	}
 }
