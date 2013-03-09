@@ -2,95 +2,78 @@ using concurrent
 
 const class IocService : Service, ObjLocator {
 	private static const Log 	log 	:= Log.get(IocService#.name)
-	private const IocState 		state 	:= IocState(ActorPool()) 
-	
+	private const LocalStash 	stash	:= LocalStash(typeof)
+
 	override Void onStart() {
-		withState |state| {
-			log.info("Starting IOC...");
-		
-			try {
-				regBuilder := RegistryBuilder()
-				
-				moduleNames := Env.cur.index("afIoc.module")
-				moduleNames.each |moduleName| {
-					regBuilder.addType(Type.find(moduleName))
-				}
-				
-				registry := regBuilder.build.performRegistryStartup
+		log.info("Starting IOC...");
+	
+		try {
+			regBuilder := RegistryBuilder()
 			
-				state.registry = registry
-				
-			} catch (Err e) {
-				log.err("Err starting IOC", e)
+			moduleNames := Env.cur.index("afIoc.module")
+			moduleNames.each |moduleName| {
+				regBuilder.addType(Type.find(moduleName))
 			}
+			
+			registry = regBuilder.build.performRegistryStartup
+			
+		} catch (Err e) {
+			log.err("Err starting IOC", e)
 		}
 	}
 
 	override Void onStop() {
-		withState |state| {
-			log.info("Stopping IOC...");
-			state.registry.shutdown
-		}
+		log.info("Stopping IOC...");
+		registry.shutdown
 	}
 	
 	// ---- Registry Methods --------------------------------------------------
 	
 	override Obj serviceById(Str serviceId) {
-        getState |state| {
-			state.registry.serviceById(serviceId)
-        }
+		registry.serviceById(serviceId)
 	}
 	
 	override Obj serviceByType(Type serviceType) {
-        getState |state| {
-			state.registry.serviceByType(serviceType)
-        }
+		registry.serviceByType(serviceType)
 	}
 
 	override Obj autobuild(Type type, Str description := "Building '$type.qname'") {
-        getState |state| {
-			state.registry.autobuild(type, description)
-        }
+		registry.autobuild(type, description)
 	}
 	
 	// ---- Private -----------------------------------------------------------
 	
-	private Void withState(|IocState| f) {
-		state.send(f.toImmutable)
-	}
-
-	private Obj? getState(|IocState -> Obj?| f) {
-		// use Unsafe as the services are neither const nor serializable 
-		fImmute := f.toImmutable
-		return state.send(|state->Unsafe| {
-			Unsafe(fImmute.call(state))
-		}).get->val
+	Registry registry {
+		get { stash["registry"] }
+		private set { stash["registry"] = it }
 	}
 }
 
-internal const class IocState : Actor {
-	private const Log log 			:= Log.get(typeof.name)
-	private const LocalStash stash	:= LocalStash(typeof)
+internal const class LocalStash {
+	private const Str prefix
 	
-	new make(ActorPool ap) : super(ap) { } 
-	
-	Registry registry {
-		get { stash["registry"] }
-		set { stash["registry"] = it }
+	new make(Type type) {
+		this.prefix = type.qname
 	}
 	
-	override Obj? receive(Obj? msg) {
-		func := (msg as |Obj?->Obj?|)
-
-		try {
-			return func.call(this)
-			
-		} catch (Err e) {
-			// if the func has a return type, then an the Err is rethrown on assignment
-			// else we log the Err so the Thread doesn't fail silently
-			if (func.returns == Void#)
-				log.err("receive()", e)
-			throw e
+	@Operator
+	Obj? get(Str name, |->Obj|? valFunc := null) {
+		val := Actor.locals[key(name)]
+		if (val == null) {
+			if (valFunc != null) {
+				val = valFunc.call
+				set(name, val)
+			}
 		}
-	}	
+		return val
+	}
+
+	@Operator
+	Void set(Str name, Obj? value) {
+		Actor.locals[key(name)] = value
+	}
+	
+	private Str key(Str name) {
+		return "${prefix}.${name}"
+	}
 }
