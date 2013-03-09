@@ -15,6 +15,8 @@ internal class ModuleImpl : Module {
 		}
 	}
 	
+	// ---- Public Methods ----------------------------------------------------
+	
 	override ServiceDef serviceDef(Str serviceId) {
 		serviceDefs[serviceId]
 	}
@@ -30,6 +32,8 @@ internal class ModuleImpl : Module {
         service := findOrCreate(def)
         return service
 	}
+
+	// ---- Private Methods ----------------------------------------------------
 
 	private Obj findOrCreate(ServiceDef def) {
 		services.getOrAdd(def.serviceId) {
