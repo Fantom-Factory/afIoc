@@ -2,7 +2,6 @@
 // TODO: use Messages
 internal const class IocMessages {
 	
-	
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
 		"Module class ${moduleType.qname} contains unrecognised public methods: ${methods}"		
 	}
