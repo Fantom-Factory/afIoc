@@ -19,8 +19,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		clear
 	}
 
-	
-	
+
+
 	// ---- ServiceBinder Method ------------------------------------------------------------------
 	
     override ServiceBindingOptions bind(Type serviceMixin, Type serviceImpl) {

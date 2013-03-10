@@ -17,4 +17,5 @@ mixin ObjLocator {
 	** `Inject` facet. 
     abstract Obj autobuild(Type type, Str description := "Building '$type.qname'")
 
+	abstract Obj injectIntoFields(Obj service)
 }
