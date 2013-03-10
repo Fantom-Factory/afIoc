@@ -12,4 +12,8 @@ internal class OneShotLock {
 		if (lockFlag)
 			throw IocErr("Method %s may no longer be invoked.")
 	}
+	
+	override Str toStr() {
+		(lockFlag ? "" : "(un)") + "locked"
+	}
 }

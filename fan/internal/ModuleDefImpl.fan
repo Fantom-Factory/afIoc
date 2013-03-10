@@ -43,6 +43,10 @@ internal class ModuleDefImpl : ModuleDef {
 		moduleType.name
 	}
 	
+	override Str toStr() {
+		"Def for ${moduleType.name}"
+	}
+	
 	
 	
 	// ---- Private Methods -----------------------------------------------------------------------

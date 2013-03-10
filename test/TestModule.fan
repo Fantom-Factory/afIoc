@@ -3,7 +3,7 @@ class TestModule : Test {
 	
 	Void testUnrecognisedModuleMethods() {
 		verifyErr(IocErr#) {   			
-			reg := RegistryBuilder().addType(T_MyModule2#).build
+			reg := RegistryBuilder().addModule(T_MyModule2#).build
 		}
 	}
 	

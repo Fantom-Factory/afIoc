@@ -12,10 +12,10 @@ const class IocService : Service, ObjLocator {
 			
 			moduleNames := Env.cur.index("afIoc.module")
 			moduleNames.each |moduleName| {
-				regBuilder.addType(Type.find(moduleName))
+				regBuilder.addModule(Type.find(moduleName))
 			}
 			
-			registry = regBuilder.build.performRegistryStartup
+			registry = regBuilder.build.startup
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)

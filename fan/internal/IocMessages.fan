@@ -26,8 +26,8 @@ internal const class IocMessages {
 		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service interface to a specific implementation type."
 	}
 
-	static Str noConstructor(Type implementationClass, Str serviceId) {
-		"Type ${implementationClass} (implementation of service '${serviceId}') does not contain any public constructors."
+	static Str noConstructor(Type implementationClass) {
+		"Type ${implementationClass} does not contain any constructors suitable for autobuilding."
 	}
 	
 	// service-id-conflict=Service id '%s' has already been defined by %s and may not be redefined by %s. \n You should rename one of the service builder methods.
@@ -36,14 +36,14 @@ internal const class IocMessages {
 	}
 
 	
-	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
-	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
-		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."
-	}
+//	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
+//	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
+//		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."
+//	}
 	
 	// many-service-matches=Service interface %s is matched by %d services: %s. Automatic dependency resolution requires that exactly one service implement the interface.
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
-		"Service interface ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
+		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
 	}
 	
 //	// unknown-scope=Unknown service scope '%s'.
