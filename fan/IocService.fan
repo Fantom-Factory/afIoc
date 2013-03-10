@@ -27,7 +27,9 @@ const class IocService : Service, ObjLocator {
 		registry.shutdown
 	}
 	
-	// ---- Registry Methods --------------------------------------------------
+	
+	
+	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	override Obj serviceById(Str serviceId) {
 		registry.serviceById(serviceId)
@@ -41,7 +43,13 @@ const class IocService : Service, ObjLocator {
 		registry.autobuild(type, description)
 	}
 	
-	// ---- Private -----------------------------------------------------------
+	override Obj injectIntoFields(Obj service) {
+		registry.injectIntoFields(service)
+	}
+	
+	
+	
+	// ---- Private -------------------------------------------------------------------------------
 	
 	Registry registry {
 		get { stash["registry"] }

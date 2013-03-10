@@ -15,6 +15,24 @@ internal const class InternalUtils {
 		return obj
 	}
 	
+	** Injects into the fields (of all visibilities) when the @Inject facet is present.
+	static Obj injectIntoFields(ObjLocator objLocator, Obj object) {
+		object.typeof.fields.each |field| { 
+
+			// Ignore all static and final fields.
+	    	if (field.isStatic || field.isConst)
+	    		return
+
+	    	if (field.hasFacet(Inject#)) {
+				// TODO: getObj() or find service by Id - use an annotationProvider...?
+				service := objLocator.serviceByType(field.type)
+                inject(object, field, service)
+            }
+		}
+		
+		return object
+    }
+
 	
 	
 	// ---- Private Methods -----------------------------------------------------------------------
@@ -53,22 +71,6 @@ internal const class InternalUtils {
 		}
 		return ctor.callList(args)
 	}
-	
-	** Injects into the fields (of all visibilities) when the @Inject facet is present.
-	private static Void injectIntoFields(ObjLocator objLocator, Obj object) {
-		object.typeof.fields.each |field| { 
-
-			// Ignore all static and final fields.
-	    	if (field.isStatic || field.isConst)
-	    		return
-
-	    	if (field.hasFacet(Inject#)) {
-				// TODO: getObj() or find service by Id - use an annotationProvider...?
-				service := objLocator.serviceByType(field.type)
-                inject(object, field, service)
-            }
-		}
-    }
 
 	private static Method[] findConstructors(Type type) { 
 		type.methods.findAll |method| { method.isCtor && method.parent == type }

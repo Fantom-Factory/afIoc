@@ -80,6 +80,10 @@ internal class RegistryImpl : Registry, ObjLocator {
 		return InternalUtils.autobuild(this, type)
 	}
 	
+	override Obj injectIntoFields(Obj object) {
+		return InternalUtils.injectIntoFields(this, object)
+	}
+	
     private Str[] findServiceIdsForType(Type serviceType) {
         Str[] result := [,]
 
