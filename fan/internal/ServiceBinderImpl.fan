@@ -10,7 +10,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
 //	private Bool?			eagerLoadFlag
-	private |->Obj|? 		source
+	private |ObjLocator->Obj|? 		source
 	private Str? 			description
 
 	new make(ModuleDefImpl moduleDef, Method bindMethod) {
@@ -103,7 +103,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 		// source will be null when the implementation class is provided; non-null when using
 		// a ServiceBuilder callback
-
 		if (source == null)
 			// sets source and description
 			createStandardConstructorBuilder
@@ -130,15 +129,12 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	}
 	
 	private Void createStandardConstructorBuilder() {
-		constructor := InternalUtils.findAutobuildConstructor(serviceImpl)
-
-		if (constructor == null)
-			throw IocErr(IocMessages.noConstructor(serviceImpl, serviceId))
-
-		this.source = |->Obj| { 
-			constructor.call 
+		// lock down the service Impl type so it can't change behind our backs
+		serviceImplType	:= this.serviceImpl
+		description 	 = "Standard Constructor Builder"
+		source 			 = |ObjLocator objLocator -> Obj| {
+			InternalUtils.autobuild(objLocator, serviceImplType)
 		}
-		this.description 	= constructor.toStr
 	}	
 }
 
