@@ -4,16 +4,28 @@ const class IocService : Service, ObjLocator {
 	private static const Log 	log 	:= Log.get(IocService#.name)
 	private const LocalStash 	stash	:= LocalStash(typeof)
 
+	private const Bool			loadModulesFromIndexProps
+	private const Type[]		moduleTypes
+	
+	new make(Bool loadModulesFromIndexProps, Type[] moduleTypes) {
+		this.loadModulesFromIndexProps = loadModulesFromIndexProps
+		this.moduleTypes = moduleTypes
+	}
+	
 	override Void onStart() {
 		log.info("Starting IOC...");
 	
 		try {
 			regBuilder := RegistryBuilder()
 			
-			moduleNames := Env.cur.index("afIoc.module")
-			moduleNames.each |moduleName| {
-				regBuilder.addModule(Type.find(moduleName))
+			if (loadModulesFromIndexProps) {
+				moduleNames := Env.cur.index("afIoc.module")
+				moduleNames.each |moduleName| {
+					regBuilder.addModule(Type.find(moduleName))
+				}
 			}
+			
+			regBuilder.addModules(moduleTypes)
 			
 			registry = regBuilder.build.startup
 			
