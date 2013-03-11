@@ -1,5 +1,7 @@
 
 class RegistryBuilder {
+	private const static Log 	log 		:= Log.get(RegistryBuilder#.name)
+	
 	private OneShotLock lock		:= OneShotLock()
 	private ModuleDef[]	moduleDefs	:= [,]
 	
@@ -14,6 +16,8 @@ class RegistryBuilder {
 	This addModule(Type moduleType) {
 		lock.check
 
+		log.info("Adding module definition for $moduleType.qname");
+		
 		moduleDef := ModuleDefImpl(moduleType)
 		addModuleDef(moduleDef)
 		// TODO: Check for @SubModule facets
