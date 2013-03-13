@@ -130,6 +130,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	
 	private Void createStandardConstructorBuilder() {
 		// lock down the service Impl type so it can't change behind our backs
+		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl
 		description 	 = "Standard Constructor Builder"
 		source 			 = |ObjLocator objLocator -> Obj| {

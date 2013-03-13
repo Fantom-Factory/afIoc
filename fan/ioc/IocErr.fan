@@ -8,6 +8,6 @@ const class UnknownValueErr : IocErr {
 
 	Str availableValues(Str valueType, Obj[] values) {
 		vals := values.map |Obj? value->Str?| { value?.toStr }.exclude |value| { value == null }.join(", ")
-		return " AvailableValues[${valueType}: ${vals}]"
+		return " Available $valueType = ${valueType}: ${vals}"
 	}	
 }
