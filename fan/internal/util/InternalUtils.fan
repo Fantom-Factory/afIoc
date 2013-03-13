@@ -1,5 +1,6 @@
 
 internal const class InternalUtils {
+	private const static Log 	log 		:= Log.get(InternalUtils#.name)
 	
 	// TODO: Stoopid F4 thinks the facets method is a reserved word!
 	static Facet findFacet(Obj slot, Type annotation) {
@@ -9,6 +10,7 @@ internal const class InternalUtils {
 	}
 	
 	static Obj autobuild(ObjLocator objLocator, Type type) {
+		log.info("Building $type.qname")
 		ctor := findAutobuildConstructor(type)
 		obj  := createViaConstructor(objLocator, ctor)
 		injectIntoFields(objLocator, obj)
