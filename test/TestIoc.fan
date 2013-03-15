@@ -23,18 +23,18 @@ class TestIoc : Test {
 	}
 }
 
-class T_MyModule1 {
+internal class T_MyModule1 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService1#)
 		binder.bindImpl(T_MyService2#)
 	}
 }
 
-class T_MyService1 {
+internal class T_MyService1 {
 	@Inject
 	T_MyService2? service
 }
 
-class T_MyService2 {
+internal class T_MyService2 {
 	Str kick	:= "ASS!"
 }

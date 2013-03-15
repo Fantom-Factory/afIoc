@@ -9,7 +9,7 @@ class TestModule : Test {
 	
 }
 
-class T_MyModule2 {
+internal class T_MyModule2 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService1#)		
 	}
