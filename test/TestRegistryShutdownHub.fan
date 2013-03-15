@@ -11,13 +11,13 @@ class TestRegistryShutdownHub : Test {
 	
 }
 
-class T_MyModule3 {
+internal class T_MyModule3 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService3#)
 	}
 }
 
-class T_MyService3 {
+internal class T_MyService3 {
 	Bool called
 	new make(RegistryShutdownHub shutdownHub) {
 		shutdownHub.addRegistryShutdownListener |->| { called = true; }
