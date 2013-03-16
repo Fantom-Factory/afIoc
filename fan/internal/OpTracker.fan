@@ -34,7 +34,7 @@ class OpTracker {
 		        logger.err(err.msg.isEmpty ? err.typeof.qname : err.msg)
 		        logger.err("Operations trace:")
 		        operations.each |op, i| {   
-		        	logger.err("[${i.toStr.justr(2)}] $op")
+		        	logger.err("[${(i+1).toStr.justr(2)}] $op")
 		        }
 				logged = true
 			}
@@ -51,9 +51,9 @@ class OpTracker {
 	
 	Void log(Str description) {
 		if (logger.isDebug) {
-			depth 	  := operations.size + 1
+			depth 	  := operations.size
 			pad 	  := "".justr(depth)		
-			logger.debug("[${depth.toStr.justr(3)}] ${pad} > $description")
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}  > $description")
 		}
 	}
 }
