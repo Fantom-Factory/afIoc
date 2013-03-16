@@ -102,7 +102,7 @@ internal const class InternalUtils {
 	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType) {
 		// FUTURE: this could take an facetProvider to give more hints on dependency finding
 		tracker.track("Locating dependency for type $dependencyType") |->Obj| {
-			return objLocator.serviceByType(dependencyType)			
+			return objLocator.dependencyByType(dependencyType)			
 		}
 	}
 	

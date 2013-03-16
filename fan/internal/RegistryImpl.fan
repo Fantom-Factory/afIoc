@@ -64,13 +64,14 @@ internal class RegistryImpl : Registry, ObjLocator {
         return containingModule.service(serviceId)
 	}
 	
-	override Obj serviceByType(Type serviceType) {
-        Str[] serviceIds := findServiceIdsForType(serviceType)
+	override Obj dependencyByType(Type dependencyType) {
+        Str[] serviceIds := findServiceIdsForType(dependencyType)
 
+		// FUTURE: if no service found, ask other object locators
 		if (serviceIds.isEmpty)
-			throw IocErr(IocMessages.noServiceMatchesType(serviceType))
+			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
 		if (serviceIds.size > 1)
-			throw IocErr(IocMessages.manyServiceMatches(serviceType, serviceIds))
+			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceIds))
 
 		serviceId := serviceIds.get(0)
         return serviceById(serviceId)

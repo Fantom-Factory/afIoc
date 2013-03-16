@@ -1,6 +1,6 @@
 using concurrent
 
-const class IocService : Service, ObjLocator {
+const class IocService : Service {
 	private static const Log 	log 	:= Log.get(IocService#.name)
 	private const LocalStash 	stash	:= LocalStash(typeof)
 
@@ -43,19 +43,19 @@ const class IocService : Service, ObjLocator {
 	
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
-	override Obj serviceById(Str serviceId) {
+	Obj serviceById(Str serviceId) {
 		registry.serviceById(serviceId)
 	}
 	
-	override Obj serviceByType(Type serviceType) {
-		registry.serviceByType(serviceType)
+	Obj dependencyByType(Type serviceType) {
+		registry.dependencyByType(serviceType)
 	}
 
-	override Obj autobuild(Type type) {
+	Obj autobuild(Type type) {
 		registry.autobuild(type)
 	}
 	
-	override Obj injectIntoFields(Obj service) {
+	Obj injectIntoFields(Obj service) {
 		registry.injectIntoFields(service)
 	}
 	
