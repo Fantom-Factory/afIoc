@@ -46,17 +46,37 @@ internal class RegistryImpl : Registry, ObjLocator {
 //        validateContributeDefs(moduleDefs);
 	}
 	
+	// ---- Registry Methods ----------------------------------------------------------------------
+	
 	override This startup() {
 		// TODO: do earger loading
 		return this
 	}
-	
+
 	override This shutdown() {
 		registryShutdownHub.fireRegistryDidShutdown()
 		return this
 	}
 
 	override Obj serviceById(Str serviceId) {
+		trackServiceById(OpTracker(), serviceId)
+	}
+
+	override Obj dependencyByType(Type dependencyType) {
+		trackDependencyByType(OpTracker(), dependencyType)
+	}
+
+	override Obj autobuild(Type type) {
+		trackAutobuild(OpTracker(), type)
+	}
+
+	override Obj injectIntoFields(Obj object) {
+		trackInjectIntoFields(OpTracker(), object)
+	}
+
+	// ---- ObjLocator Methods --------------------------------------------------------------------
+
+	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
 		if (builtinServices.containsKey(serviceId))
 			return builtinServices[serviceId]
 
@@ -64,7 +84,7 @@ internal class RegistryImpl : Registry, ObjLocator {
         return containingModule.service(serviceId)
 	}
 	
-	override Obj dependencyByType(Type dependencyType) {
+	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
         Str[] serviceIds := findServiceIdsForType(dependencyType)
 
 		// FUTURE: if no service found, ask other object locators
@@ -77,13 +97,15 @@ internal class RegistryImpl : Registry, ObjLocator {
         return serviceById(serviceId)
 	}
 
-	override Obj autobuild(Type type) {
+	override Obj trackAutobuild(OpTracker tracker, Type type) {
 		return InternalUtils.autobuild(OpTracker(), this, type)
 	}
 	
-	override Obj injectIntoFields(Obj object) {
+	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
 		return InternalUtils.injectIntoFields(OpTracker(), this, object)
 	}
+
+	// ---- Private Methods -----------------------------------------------------------------------
 	
     private Str[] findServiceIdsForType(Type serviceType) {
         Str[] result := [,]

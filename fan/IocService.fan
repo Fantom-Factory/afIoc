@@ -7,10 +7,17 @@ const class IocService : Service {
 	private const Bool			loadModulesFromIndexProps
 	private const Type[]		moduleTypes
 	
+	Registry registry {
+		get { stash["registry"] }
+		private set { stash["registry"] = it }
+	}
+	
 	new make(Bool loadModulesFromIndexProps, Type[] moduleTypes) {
 		this.loadModulesFromIndexProps = loadModulesFromIndexProps
 		this.moduleTypes = moduleTypes
 	}
+	
+	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 	
 	override Void onStart() {
 		log.info("Starting IOC...");
@@ -39,34 +46,27 @@ const class IocService : Service {
 		registry.shutdown
 	}
 	
-	
-	
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
+	** Convenience for `Registry#serviceById`
 	Obj serviceById(Str serviceId) {
 		registry.serviceById(serviceId)
 	}
 	
+	** Convenience for `Registry#dependencyByType`
 	Obj dependencyByType(Type serviceType) {
 		registry.dependencyByType(serviceType)
 	}
 
+	** Convenience for `Registry#autobuild`
 	Obj autobuild(Type type) {
 		registry.autobuild(type)
 	}
 	
+	** Convenience for `Registry#injectIntoFields`
 	Obj injectIntoFields(Obj service) {
 		registry.injectIntoFields(service)
-	}
-	
-	
-	
-	// ---- Private -------------------------------------------------------------------------------
-	
-	Registry registry {
-		get { stash["registry"] }
-		private set { stash["registry"] = it }
-	}
+	}	
 }
 
 internal const class LocalStash {
