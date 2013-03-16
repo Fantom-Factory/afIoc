@@ -1,6 +1,7 @@
 
-//class RegistryImpl : Registry, RegistryShutdownHub {
+** TODO: add some stats - e.g. hits - to the scoreboard
 internal class RegistryImpl : Registry, ObjLocator {
+	private const static Log log := Utils.getLog(RegistryImpl#)
 	
 	private RegistryShutdownHubImpl registryShutdownHub
 
@@ -67,11 +68,13 @@ internal class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj autobuild(Type type) {
-		trackAutobuild(OpTracker(), type)
+		log.info("Autobuilding $type.qname")
+		return trackAutobuild(OpTracker(), type)
 	}
 
 	override Obj injectIntoFields(Obj object) {
-		trackInjectIntoFields(OpTracker(), object)
+		log.info("Injecting dependencies into fields of $object.typeof.qname")
+		return trackInjectIntoFields(OpTracker(), object)
 	}
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------

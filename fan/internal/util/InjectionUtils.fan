@@ -4,7 +4,6 @@ internal const class InjectionUtils {
 	
 	static Obj autobuild(OpTracker tracker, ObjLocator objLocator, Type type) {
 		tracker.track("Autobuilding $type.qname") |->Obj| {
-			log.info("Autobuilding $type.qname")
 			ctor := findAutobuildConstructor(tracker, type)
 			obj  := createViaConstructor(tracker, objLocator, ctor)
 			injectIntoFields(tracker, objLocator, obj)
