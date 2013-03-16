@@ -1,13 +1,6 @@
 
-internal const class InternalUtils {
-	private const static Log 	log 		:= Utils.getLog(InternalUtils#)
-	
-	// TODO: Stoopid F4 thinks the 'facet' method is a reserved word!
-	static Bool hasFacet(Slot slot, Type annotation) {
-		slot.facets.find |fac| { 
-			fac.typeof == annotation
-		} != null		
-	}
+internal const class InjectionUtils {
+	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 	
 	static Obj autobuild(OpTracker tracker, ObjLocator objLocator, Type type) {
 		tracker.track("Autobuilding $type.qname") |->Obj| {
@@ -50,7 +43,7 @@ internal const class InternalUtils {
 		tracker.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
-					hasFacet(method, PostInjection#) 
+					Utils.hasFacet(method, PostInjection#) 
 				}
 				.reduce(false) |bool, method| {
 					tracker.log("Found method $method.signature")

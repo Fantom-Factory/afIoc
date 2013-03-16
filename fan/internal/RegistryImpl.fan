@@ -99,11 +99,11 @@ internal class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackAutobuild(OpTracker tracker, Type type) {
-		return InternalUtils.autobuild(tracker, this, type)
+		return InjectionUtils.autobuild(tracker, this, type)
 	}
 	
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
-		return InternalUtils.injectIntoFields(tracker, this, object)
+		return InjectionUtils.injectIntoFields(tracker, this, object)
 	}
 
 	// ---- Private Methods -----------------------------------------------------------------------
