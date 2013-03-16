@@ -4,14 +4,14 @@ internal class ServiceDefImpl : ServiceDef {
 	override const Str 	serviceId
 	override const Type serviceType
 	
-	|ObjLocator->Obj| 	source
+	|OpTracker, ObjLocator->Obj| 	source
 			Str 		description
 	
 	new make(|This|? f := null) {
 		f?.call(this)
 	}
 	
-	override |ObjLocator->Obj| createServiceBuilder() {
+	override |OpTracker, ObjLocator->Obj| createServiceBuilder() {
 		source
 	}
 	

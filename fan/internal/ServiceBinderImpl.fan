@@ -10,7 +10,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
 //	private Bool?			eagerLoadFlag
-	private |ObjLocator->Obj|? 		source
+	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
 	new make(ModuleDefImpl moduleDef, Method bindMethod) {
@@ -134,9 +134,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl
 		serviceId		:= this.serviceId
-		tracker 		:= OpTracker()
 		description 	= "Standard Ctor Builder"
-		source 			 = |ObjLocator objLocator -> Obj| {
+		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
 			tracker.track("Creating Serivce '$serviceId' via a standard ctor builder") |->Obj| {
 				InternalUtils.autobuild(tracker, objLocator, serviceImplType)
 			}

@@ -3,10 +3,10 @@ internal class ModuleImpl : Module {
 	
 	private Str:ServiceDef	serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
 	private Str:Obj			services	:= Str:Obj[:] 			{ caseInsensitive = true }
-	private RegistryImpl 	regImpl
+	private ObjLocator		objLocator
 	
-	new make(RegistryImpl regImpl, ModuleDef moduleDef, Log log) {
-		this.regImpl = regImpl
+	new make(ObjLocator objLocator, ModuleDef moduleDef, Log log) {
+		this.objLocator = objLocator
 		moduleDef.serviceDefs.each |def| { 
 			serviceDefs[def.serviceId] = def
 		}
@@ -24,23 +24,25 @@ internal class ModuleImpl : Module {
         }.keys
     }
 
-	override Obj service(Str serviceId) {
+	override Obj service(OpTracker tracker, Str serviceId) {
         def 	:= serviceDefs[serviceId]
-        service := findOrCreate(def)
+        service := findOrCreate(tracker, def)
         return service
 	}
 
 	// ---- Private Methods ----------------------------------------------------
 
-	private Obj findOrCreate(ServiceDef def) {
+	private Obj findOrCreate(OpTracker tracker, ServiceDef def) {
 		services.getOrAdd(def.serviceId) {
-			create(def)
+			tracker.track("Creating Service '$def.serviceId'") |->Obj| {
+				create(tracker, def)
+			}
 		}
     }
 
-    private Obj create(ServiceDef def) {
+    private Obj create(OpTracker tracker, ServiceDef def) {
         creator := def.createServiceBuilder
-        service := creator.call(regImpl)
+        service := creator.call(tracker, objLocator)
 		return service
     }	
 

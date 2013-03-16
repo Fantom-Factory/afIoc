@@ -81,7 +81,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 			return builtinServices[serviceId]
 
 		containingModule := locateModuleForService(serviceId)
-        return containingModule.service(serviceId)
+        return containingModule.service(tracker, serviceId)
 	}
 	
 	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
@@ -94,15 +94,16 @@ internal class RegistryImpl : Registry, ObjLocator {
 			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceIds))
 
 		serviceId := serviceIds.get(0)
-        return serviceById(serviceId)
+		tracker.log("Found Service '$serviceId'")
+        return trackServiceById(tracker, serviceId)
 	}
 
 	override Obj trackAutobuild(OpTracker tracker, Type type) {
-		return InternalUtils.autobuild(OpTracker(), this, type)
+		return InternalUtils.autobuild(tracker, this, type)
 	}
 	
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
-		return InternalUtils.injectIntoFields(OpTracker(), this, object)
+		return InternalUtils.injectIntoFields(tracker, this, object)
 	}
 
 	// ---- Private Methods -----------------------------------------------------------------------
