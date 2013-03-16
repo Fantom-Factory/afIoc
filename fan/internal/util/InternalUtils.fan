@@ -19,35 +19,45 @@ internal const class InternalUtils {
 		}
 	}
 	
-	** Injects into the fields (of all visibilities) when the @Inject facet is present.
+	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object) {
-		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->Obj| {
-			object.typeof.fields.each |field| { 
-				// Ignore all static and final fields.
-		    	if (field.isStatic || field.isConst)
-		    		return
-	
-		    	if (field.hasFacet(Inject#)) {
+		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
+			if (!object.typeof.fields
+				.findAll |field| {
+					// Ignore all static and final fields.
+			    	if (field.isStatic || field.isConst)
+			    		return false
+		
+			    	if (!field.hasFacet(Inject#)) 
+			    		return false
+					
+		    		tracker.log("Found field $field.signature")
+					return true
+				}
+				.reduce(false) |bool, field| {
 					dependency := findDependencyByType(tracker, objLocator, field.type)
 	                inject(tracker, object, field, dependency)
-	            }
-			}
-			
-			callPostInjectMethods(tracker, objLocator, object)
-			return object
+	                return true
+	            })
+				tracker.log("No injection fields found")
 		}
+		callPostInjectMethods(tracker, objLocator, object)
+		return object
     }
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
 	static Obj callPostInjectMethods(OpTracker tracker, ObjLocator objLocator, Obj object) {
 		tracker.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
-			object.typeof.methods
+			if (!object.typeof.methods
 				.findAll |method| {
 					hasFacet(method, PostInjection#) 
 				}
-				.each |method| {
+				.reduce(false) |bool, method| {
+					tracker.log("Found method $method.signature")
 					callMethod(tracker, objLocator, method, object)
-				}
+					return true
+				})
+				tracker.log("No post injection methods found")
 			return object
 		}
 	}
@@ -55,53 +65,62 @@ internal const class InternalUtils {
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	private static Method findAutobuildConstructor(OpTracker tracker, Type type) {
-		tracker.track("Locating suitable ctor for autobiuld $type.qname") |->Method| {
-			constructors := findConstructors(type)
+		tracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
+			ctor := |->Method| {
+				constructors := findConstructors(type)
+				
+				if (constructors.isEmpty)
+					throw IocErr(IocMessages.noConstructor(type))
+				
+				if (constructors.size == 1)
+					return constructors[0]
+		
+				Method? annotated := constructors.find |c| {
+					c.hasFacet(Inject#)
+				}		
+				if (annotated != null)
+					return annotated
+				
+				// Choose a constructor with the most parameters.
+				return constructors.sort |c1, c2| {
+					c1.params.size <=> c2.params.size
+				} [0]
+			}()
 			
-			if (constructors.isEmpty)
-				throw IocErr(IocMessages.noConstructor(type))
-			
-			if (constructors.size == 1)
-				return constructors[0]
-	
-			Method? annotated := constructors.find |c| {
-				c.hasFacet(Inject#)
-			}		
-			if (annotated != null)
-				return annotated
-			
-			// Choose a constructor with the most parameters.
-			return constructors.sort |c1, c2| {
-				c1.params.size <=> c2.params.size
-			} [0]
+			tracker.log("Found $ctor.signature")
+			return ctor
 		}
 	}
 	
 	private static Obj createViaConstructor(OpTracker tracker, ObjLocator objLocator, Method ctor) {
-		tracker.track("Instantiating $ctor.parent via $ctor.signature") |->Obj| {
-			args := determineInjectionParams(tracker, objLocator, ctor)
+		args := determineInjectionParams(tracker, objLocator, ctor)
+		return tracker.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}
 
-	private static Obj callMethod(OpTracker tracker, ObjLocator objLocator, Method method, Obj obj) {
-		tracker.track("Invoking $method.signature on $obj.typeof") |->Obj| {
-			args := determineInjectionParams(tracker, objLocator, method)
-			return method.callOn(obj, args)
+	private static Void callMethod(OpTracker tracker, ObjLocator objLocator, Method method, Obj obj) {
+		args := determineInjectionParams(tracker, objLocator, method)
+		tracker.track("Invoking $method.signature on ${obj.typeof}...") |->| {
+			method.callOn(obj, args)
 		}
 	}
 	
 	private static Obj[] determineInjectionParams(OpTracker tracker, ObjLocator objLocator, Method method) {
-		tracker.track("Determining injection parameters for $method.signature") |->Obj[]| {
-			return method.params.map |param| {
-				findDependencyByType(tracker, objLocator, param.type)
-			}			
+		return tracker.track("Determining injection parameters for $method.signature") |->Obj[]| {
+			params := method.params.map |param| {
+				tracker.log("Found parameter $param.type")
+				return findDependencyByType(tracker, objLocator, param.type)
+			}		
+			if (params.isEmpty)
+				tracker.log("No injection parameters found")
+			return params
 		}
 	}
 
 	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType) {
 		// FUTURE: this could take an facetProvider to give more hints on dependency finding
-		tracker.track("Locating dependency for type $dependencyType") |->Obj| {
+		return tracker.track("Looking for dependency of type $dependencyType") |->Obj| {
 			return objLocator.trackDependencyByType(tracker, dependencyType)			
 		}
 	}

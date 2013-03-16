@@ -5,7 +5,7 @@
 internal mixin ServiceDef {
 
 	** Returns a factory func that creates the service implementation
-	abstract |ObjLocator->Obj| createServiceBuilder()
+	abstract |OpTracker, ObjLocator->Obj| createServiceBuilder()
 
 	** Returns the service id, which is usually the unqualified service type name.
 	abstract Str serviceId()

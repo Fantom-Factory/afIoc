@@ -4,17 +4,17 @@
 ** Sometimes, when an error occurs, the Stack Trace just doesn't give enough contextual 
 ** information. That's where 'OperationTracker' comes in.   
 class OpTracker {
-	private const static Log 	log 		:= Utils.getLog(OpTracker#)
+	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
 	private Str[] 				operations	:= [,]
 	private Bool				logged		:= false
 	
 	Obj? track(Str description, |->Obj?| operation) {
-		
 		startTime := Duration.now
 		depth 	  := operations.size + 1
+		pad 	  := "".justr(depth)
 		
-		if (log.isDebug) {
-			log.debug("[${depth.toStr.justr(3)}] --> $description")
+		if (logger.isDebug) {
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $description")
 		}
 		
 		operations.push(description)
@@ -22,19 +22,19 @@ class OpTracker {
 		try {
 			ret := operation()
 
-			if (log.isDebug) {
+			if (logger.isDebug) {
 				millis := (Duration.now - startTime).toMillis.toLocale("#,000")
-				log.debug("[${depth.toStr.justr(3)}] <-- $description [${millis}ms]")
+				logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $description [${millis}ms]")
 			}
-			
+
 			return ret
 			
 		} catch (Err err) {
 			if (!logged) {
-		        log.err(err.msg.isEmpty ? err.typeof.qname : err.msg)
-		        log.err("Operations trace:")
+		        logger.err(err.msg.isEmpty ? err.typeof.qname : err.msg)
+		        logger.err("Operations trace:")
 		        operations.each |op, i| {   
-		        	log.err("[${i.toStr.justr(2)}] $op")
+		        	logger.err("[${i.toStr.justr(2)}] $op")
 		        }
 				logged = true
 			}
@@ -47,6 +47,13 @@ class OpTracker {
             if (operations.isEmpty)
                 logged = false	
 		}
-		
+	}
+	
+	Void log(Str description) {
+		if (logger.isDebug) {
+			depth 	  := operations.size + 1
+			pad 	  := "".justr(depth)		
+			logger.debug("[${depth.toStr.justr(3)}] ${pad} > $description")
+		}
 	}
 }

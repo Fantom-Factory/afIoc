@@ -8,6 +8,6 @@ internal mixin Module {
     ** assignable to the provided service type (is a super-class or super-mixin).
 	abstract Str[] findServiceIdsForType(Type serviceType)
 	
-	** Locates a service given a service id
-	abstract Obj service(Str serviceId)
+	** Locates (and builds if necessary) a service given a service id
+	abstract Obj service(OpTracker tracker, Str serviceId)
 }
