@@ -1,4 +1,5 @@
 
+// TODO: not sure why we still have this mixin
 internal mixin Module {
 
 	** Returns the service definition for the given service id

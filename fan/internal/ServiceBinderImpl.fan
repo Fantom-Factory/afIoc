@@ -1,6 +1,6 @@
 
 internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
-
+	private const static Log log := Utils.getLog(ServiceBinderImpl#)
 	private OneShotLock 	lock := OneShotLock()
 	
 	private ModuleDefImpl	moduleDef
@@ -137,7 +137,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		description 	= "Standard Ctor Builder"
 		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
 			tracker.track("Creating Serivce '$serviceId' via a standard ctor builder") |->Obj| {
-				InjectionUtils.autobuild(tracker, objLocator, serviceImplType)
+				log.info("Creating Service '$serviceId'")
+				return InjectionUtils.autobuild(tracker, objLocator, serviceImplType)
 			}
 		}
 	}	
