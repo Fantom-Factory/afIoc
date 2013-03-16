@@ -2,11 +2,11 @@
 internal const class InternalUtils {
 	private const static Log 	log 		:= Log.get(InternalUtils#.name)
 	
-	// TODO: Stoopid F4 thinks the facets method is a reserved word!
-	static Facet findFacet(Obj slot, Type annotation) {
-		(slot->facets as Facet[]).find |fac| { 
-			fac.typeof == annotation 
-		} ?: throw ArgErr("Slot '$slot->qname' does not contain facet '$annotation.qname")
+	// TODO: Stoopid F4 thinks the 'facet' method is a reserved word!
+	static Bool hasFacet(Slot slot, Type annotation) {
+		slot.facets.find |fac| { 
+			fac.typeof == annotation
+		} != null		
 	}
 	
 	static Obj autobuild(ObjLocator objLocator, Type type) {
@@ -14,6 +14,7 @@ internal const class InternalUtils {
 		ctor := findAutobuildConstructor(type)
 		obj  := createViaConstructor(objLocator, ctor)
 		injectIntoFields(objLocator, obj)
+		callPostInjectMethods(objLocator, obj)
 		return obj
 	}
 	
@@ -35,7 +36,17 @@ internal const class InternalUtils {
 		return object
     }
 
-	
+	** Calls methods (of all visibilities) that have the @PostInjection facet
+	static Obj callPostInjectMethods(ObjLocator objLocator, Obj object) {
+		object.typeof.methods
+			.findAll |method| {
+				hasFacet(method, PostInjection#) 
+			}
+			.each |method| {
+				callMethod(objLocator, method, object)
+			}
+		return object
+	}
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 
@@ -67,11 +78,17 @@ internal const class InternalUtils {
 	}
 	
 	private static Obj createViaConstructor(ObjLocator objLocator, Method ctor) {
-		args := [,]
-		ctor.params.each |param| {
-			args.add(objLocator.serviceByType(param.type))
+		args := ctor.params.map |param| {
+			objLocator.serviceByType(param.type)
 		}
 		return ctor.callList(args)
+	}
+
+	private static Obj callMethod(ObjLocator objLocator, Method method, Obj obj) {
+		args := method.params.map |param| {
+			objLocator.serviceByType(param.type)
+		}
+		return method.callOn(obj, args)
 	}
 
 	private static Method[] findConstructors(Type type) { 
