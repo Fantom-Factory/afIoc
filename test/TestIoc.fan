@@ -10,9 +10,9 @@ class TestIoc : Test {
 
 	Void testServiceByType() {
 		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
-		T_MyService1 myService1 := reg.serviceByType(T_MyService1#)
+		T_MyService1 myService1 := reg.dependencyByType(T_MyService1#)
 		verifyEq(myService1.service.kick, "ASS!")
-		verifySame(myService1, reg.serviceByType(T_MyService1#))
+		verifySame(myService1, reg.dependencyByType(T_MyService1#))
 	}
 
 	Void testAutobuild() {
