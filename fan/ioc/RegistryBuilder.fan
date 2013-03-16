@@ -1,6 +1,6 @@
 
 class RegistryBuilder {
-	private const static Log 	log 		:= Log.get(RegistryBuilder#.name)
+	private const static Log 	log 		:= Utils.getLog(RegistryBuilder#)
 	
 	private OneShotLock lock		:= OneShotLock()
 	private ModuleDef[]	moduleDefs	:= [,]

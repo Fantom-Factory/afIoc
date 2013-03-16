@@ -76,12 +76,12 @@ internal class RegistryImpl : Registry, ObjLocator {
         return serviceById(serviceId)
 	}
 
-	override Obj autobuild(Type type, Str description := "Building '$type.qname'") {
-		return InternalUtils.autobuild(this, type)
+	override Obj autobuild(Type type) {
+		return InternalUtils.autobuild(OpTracker(), this, type)
 	}
 	
 	override Obj injectIntoFields(Obj object) {
-		return InternalUtils.injectIntoFields(this, object)
+		return InternalUtils.injectIntoFields(OpTracker(), this, object)
 	}
 	
     private Str[] findServiceIdsForType(Type serviceType) {
