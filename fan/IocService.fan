@@ -51,8 +51,8 @@ const class IocService : Service, ObjLocator {
 		registry.serviceByType(serviceType)
 	}
 
-	override Obj autobuild(Type type, Str description := "Building '$type.qname'") {
-		registry.autobuild(type, description)
+	override Obj autobuild(Type type) {
+		registry.autobuild(type)
 	}
 	
 	override Obj injectIntoFields(Obj service) {

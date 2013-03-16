@@ -7,15 +7,15 @@ mixin ObjLocator {
 	** Obtains a service via its unique service id. 
     abstract Obj serviceById(Str serviceId)
 
-	** Locates a service given a service interface. A single service must implement the service
-	** interface. The search takes into account inheritance of the service mixin
-	** (not the service *implementation*), which may result in a failure due to extra matches.
+	** Locates a service of the given type. The search takes into account inheritance of the 
+	** service mixin, not the service *implementation*.
     abstract Obj serviceByType(Type serviceType)
 
-	** Autobuilds a class by finding the public constructor with the most parameters. Services and other resources or
-	** dependencies will be injected into the parameters of the constructor and into private fields marked with the
-	** `Inject` facet. 
-    abstract Obj autobuild(Type type, Str description := "Building '$type.qname'")
+	** Autobuilds a class via a ctor marked with '@Inject', failing that, the ctor with the most 
+	** parameters. Services and dependencies will be injected into the ctor parameters, and into 
+	** fields (of all visibilities) marked with '@Inject'. 
+    abstract Obj autobuild(Type type)
 
+	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	abstract Obj injectIntoFields(Obj service)
 }

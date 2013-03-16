@@ -129,12 +129,17 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	}
 	
 	private Void createStandardConstructorBuilder() {
+		
 		// lock down the service Impl type so it can't change behind our backs
 		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl
-		description 	 = "Standard Constructor Builder"
+		serviceId		:= this.serviceId
+		tracker 		:= OpTracker()
+		description 	= "Standard Ctor Builder"
 		source 			 = |ObjLocator objLocator -> Obj| {
-			InternalUtils.autobuild(objLocator, serviceImplType)
+			tracker.track("Creating Serivce '$serviceId' via a standard ctor builder") |->Obj| {
+				InternalUtils.autobuild(tracker, objLocator, serviceImplType)
+			}
 		}
 	}	
 }
