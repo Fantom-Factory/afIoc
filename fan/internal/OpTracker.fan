@@ -2,8 +2,8 @@
 ** What's the plan, Stan?
 ** 
 ** Sometimes, when an error occurs, the Stack Trace just doesn't give enough contextual 
-** information. That's where 'OperationTracker' comes in.   
-class OpTracker {
+** information. That's where the 'OpTracker' comes in.   
+internal class OpTracker {
 	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
 	private Str[] 				operations	:= [,]
 	private Bool				logged		:= false

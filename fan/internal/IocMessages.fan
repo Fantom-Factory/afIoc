@@ -1,5 +1,4 @@
 
-// TODO: use Messages
 internal const class IocMessages {
 	
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
@@ -30,12 +29,14 @@ internal const class IocMessages {
 		"Type ${implementationClass} does not contain any constructors suitable for autobuilding."
 	}
 	
-	// service-id-conflict=Service id '%s' has already been defined by %s and may not be redefined by %s. \n You should rename one of the service builder methods.
 	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
 		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
 	}
-
 	
+	static Str oneShotLockViolation() {
+		"Method may no longer be invoked."
+	}
+
 //	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
 //	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
 //		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."
@@ -46,19 +47,9 @@ internal const class IocMessages {
 		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
 	}
 	
-//	// unknown-scope=Unknown service scope '%s'.
-//	static Str unknownScope(Str name) {
-//		"Unknown service scope '${name}'."
-//	}
-//	
 //	// error-building-service=Error building service proxy for service '%s' (at %s): %s
 //	static Str errorBuildingService(Str serviceId, ServiceDef serviceDef, Err cause) {
 //		"Error building service proxy for service '${serviceId}' (at ${serviceDef}): ${cause}"
-//	}
-//	
-//	// no-public-constructors=Module class %s does not contain any public constructors.
-//	static Str noPublicConstructors(Type moduleType) {
-//		"Module class ${moduleType} does not contain any public constructors."
 //	}
 //	
 //	// recursive-module-constructor=The constructor for module class %s is recursive: it depends on itself in some way. \n The constructor, %s, is in some way is triggering a service builder, decorator or contribution method within the class.

@@ -8,9 +8,8 @@ internal class OneShotLock {
 	}
 	
 	public Void check() {
-		// TODO: Put in UtilMessages.properties / messages
 		if (lockFlag)
-			throw IocErr("Method %s may no longer be invoked.")
+			throw IocErr(IocMessages.oneShotLockViolation)
 	}
 	
 	override Str toStr() {
