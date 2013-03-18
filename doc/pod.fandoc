@@ -1,0 +1,44 @@
+Overview [#overview]
+********************
+IoC is an Inversion of Control (IoC) container, or Depdendency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond other IoC containers, this IoC offers:
+ - distributed service configuration between pods and modules
+ - judicious use of convention over configurations
+ - lazy service loading
+ - extensive error reporting
+ - case insensitive
+
+Terminology [#terminology]
+**************************
+IoC distinquishes between **Services** and **Dependencies**.
+
+A **service** is a singleton class of which there is only one instance. Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin.
+
+A **dependency** is any class or object that another class depends on. A dependancy may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service.
+
+A **module** is a class where services and contributions are defined.
+
+Defining Services [#definingServices]
+*************************************
+Services are defined in Module classes, where each method has meaning. Module are not defined by a Mixin or inheritence, instead, convention is given to the method names. A common method is 'bind' which must take the following signature:
+
+  static Void bind(ServiceBinder binder) {
+
+    // has service ID of 'myServiceMixin'
+    binder.bind(MyService#, MyServiceImpl#)
+
+    // has service ID of 'myOtherServiceImpl'
+    binder.bindImpl(MyOtherServiceImpl#)
+
+    // has service ID of 'wotever'
+    binder.bindBuilder(EmailService#) { EmailService() }.withId("wotever")
+  }
+
+(Note all methods in a Module class should be static.) Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build':
+
+  // defines EmailService with an ID of 'penguin'. 'config' is passed in when the service is built.
+  static EmailService buildPenquin(EmailConfig config) {
+    EmailServiceImpl(config)
+  }
+
+Builder methods may take dependencies as parameters. These dependencies are realised and passed in when the service is built.
+

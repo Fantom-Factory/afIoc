@@ -64,7 +64,7 @@ internal class ModuleDefImpl : ModuleDef {
 				return
 			}
 
-			// TODO:
+			// TODO: @Startup
 //			if (method.hasFacet(Startup#))) {
 //				addStartupDef(method)
 //				remainingMethods.remove(method)

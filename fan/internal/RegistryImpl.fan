@@ -17,7 +17,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 		moduleDefs.each |def| {   
 			logger := Log.get(def.loggerName)
 			
-			module := ModuleImpl(this, def, logger)
+			module := Module(this, def, logger)
 			ServiceDef[] moduleServiceDefs := [,]
 			
 			def.serviceDefs.keys.each |serviceId| {
@@ -45,14 +45,14 @@ internal class RegistryImpl : Registry, ObjLocator {
 
 //        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 
-		// TODO:
+		// TODO: contributions
 //        validateContributeDefs(moduleDefs);
 	}
 	
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	override This startup() {
-		// TODO: do earger loading
+		// TODO: do service startup loading
 		return this
 	}
 
