@@ -1,0 +1,3 @@
+
+facet class Autobuild {
+}

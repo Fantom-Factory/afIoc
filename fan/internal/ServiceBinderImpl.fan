@@ -136,7 +136,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		serviceId		:= this.serviceId
 		description 	= "Standard Ctor Builder"
 		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
-			tracker.track("Creating Serivce '$serviceId' via a standard ctor builder") |->Obj| {
+			tracker.track("Creating Serivce '$serviceId' via a standard ctor autobuild") |->Obj| {
 				log.info("Creating Service '$serviceId'")
 				return InjectionUtils.autobuild(tracker, objLocator, serviceImplType)
 			}

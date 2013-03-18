@@ -14,24 +14,22 @@ internal const class InjectionUtils {
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object) {
 		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!object.typeof.fields
-				.findAll |field| {
-					// Ignore all static and final fields.
-			    	if (field.isStatic || field.isConst)
-			    		return false
-		
-			    	if (!field.hasFacet(Inject#)) 
-			    		return false
-					
-		    		tracker.log("Found field $field.signature")
-					return true
-				}
+			if (!findFieldsWithFacet(tracker, object.typeof, Inject#)
 				.reduce(false) |bool, field| {
 					dependency := findDependencyByType(tracker, objLocator, field.type)
 	                inject(tracker, object, field, dependency)
 	                return true
 	            })
 				tracker.log("No injection fields found")
+		}
+		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
+			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#)
+				.reduce(false) |bool, field| {
+					dependency := autobuild(tracker, objLocator, field.type)
+	                inject(tracker, object, field, dependency)
+	                return true
+	            })
+				tracker.log("No autobuild fields found")
 		}
 		callPostInjectMethods(tracker, objLocator, object)
 		return object
@@ -112,6 +110,7 @@ internal const class InjectionUtils {
 
 	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType) {
 		// FUTURE: this could take an facetProvider to give more hints on dependency finding
+		// e.g. @Autobuild
 		return tracker.track("Looking for dependency of type $dependencyType") |->Obj| {
 			return objLocator.trackDependencyByType(tracker, dependencyType)			
 		}
@@ -127,4 +126,17 @@ internal const class InjectionUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
 	
+	private static Field[] findFieldsWithFacet(OpTracker tracker, Type type, Type facetType) {
+		type.fields.findAll |field| {
+			// Ignore all static and final fields.
+	    	if (field.isStatic || field.isConst)
+	    		return false
+
+	    	if (!field.hasFacet(facetType)) 
+	    		return false
+			
+    		tracker.log("Found field $field.signature")
+			return true
+		}
+	}
 }
