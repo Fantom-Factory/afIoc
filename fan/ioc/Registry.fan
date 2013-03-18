@@ -13,7 +13,7 @@ mixin Registry {
 	** Obtains a service via its unique service id. 
     abstract Obj serviceById(Str serviceId)
 
-	** Locates a service of the given type. The search takes into account inheritance of the 
+	** Locates a dependency of the given type. The search takes into account inheritance of the 
 	** service mixin, not the service *implementation*.
     abstract Obj dependencyByType(Type dependencyType)
 

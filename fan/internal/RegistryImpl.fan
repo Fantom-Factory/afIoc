@@ -1,5 +1,6 @@
 
 ** TODO: add some stats - e.g. hits - to the scoreboard
+** TODO: internal class RegistryState - methods check to see if reg is started up / shut down, etc... 
 internal class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
@@ -38,6 +39,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 			modules.add(module)
 		}
 		
+		builtinServices["registry"] = this
 		registryShutdownHub = RegistryShutdownHubImpl()
 		builtinServices["registryShutdownHub"] = registryShutdownHub
 
@@ -56,15 +58,26 @@ internal class RegistryImpl : Registry, ObjLocator {
 
 	override This shutdown() {
 		registryShutdownHub.fireRegistryDidShutdown()
+		
+		// destroy all internal refs
+		builtinServices.clear
+		allServiceDefs.clear
+		modules.clear
+		serviceIdToModule.clear
+		
 		return this
 	}
 
 	override Obj serviceById(Str serviceId) {
-		trackServiceById(OpTracker(), serviceId)
+		OpTracker().track("Locating service by ID '$serviceId'") |tracker| {
+			trackServiceById(tracker, serviceId)
+		}
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
-		trackDependencyByType(OpTracker(), dependencyType)
+		OpTracker().track("Locating dependency by type '$dependencyType.qname'") |tracker| {
+			trackDependencyByType(tracker, dependencyType)
+		}
 	}
 
 	override Obj autobuild(Type type) {

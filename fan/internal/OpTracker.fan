@@ -8,7 +8,7 @@ class OpTracker {
 	private Str[] 				operations	:= [,]
 	private Bool				logged		:= false
 	
-	Obj? track(Str description, |->Obj?| operation) {
+	Obj? track(Str description, |OpTracker->Obj?| operation) {
 		startTime := Duration.now
 		depth 	  := operations.size + 1
 		pad 	  := "".justr(depth)
@@ -20,7 +20,7 @@ class OpTracker {
 		operations.push(description)
 		
 		try {
-			ret := operation()
+			ret := operation(this)
 
 			if (logger.isDebug) {
 				millis := (Duration.now - startTime).toMillis.toLocale("#,000")
