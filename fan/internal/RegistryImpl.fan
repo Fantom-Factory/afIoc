@@ -12,9 +12,23 @@ internal class RegistryImpl : Registry, ObjLocator {
 		serviceIdToModule := Str:Module[:]
 		
 		tracker.track("Defining Built-In services") |->| {
-			builtInModule := BuiltInModule()
+			builtInModule := BuiltInModule(this)
 			builtInModule.addBuiltInService("registry", Registry#, this)
 			builtInModule.addBuiltInService("registryShutdownHub", RegistryShutdownHub#, registryShutdownHub)
+			
+			builtInModule.addBuiltInServiceDef(StandardServiceDef() {
+				it.serviceId 	= "ctorFieldInjector"
+				it.serviceType 	= |This|#
+				it.description 	= "'$it.serviceId' : Autobuilt. Always."
+				it.source		= |OpTracker trakker, ObjLocator objLoc->Obj| {
+					|Obj service| {
+						trakker.track("Injecting via Ctor Field Injector") {
+							InjectionUtils.injectIntoFields(trakker, objLoc, service)
+						}
+					}
+				}
+			})
+			
 		// TODO: add some stats - e.g. hits - to the scoreboard
 	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 			
