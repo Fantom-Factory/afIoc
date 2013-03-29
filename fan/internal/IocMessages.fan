@@ -12,8 +12,12 @@ internal const class IocMessages {
         "Service ${serviceId} (defined by ${conflict}) conflicts with previously defined service defined by ${existing}."
     }
 	
-	static Str bindMethodMustBeStatic(Str methodId) {
-		"Method ${methodId} appears to be a service binder method, but is an instance method, not a static method."
+	static Str bindMethodMustBeStatic(Method method) {
+		"Binder method ${method.qname} must be a static method."
+	}
+
+	static Str bindMethodWrongParams(Method method) {
+		"Binder method ${method.qname} must only take one parameter of type 'ServiceBinder' : ${method.signature}"
 	}
 	
 	static Str errorInBindMethod(Str methodId, Err cause) {

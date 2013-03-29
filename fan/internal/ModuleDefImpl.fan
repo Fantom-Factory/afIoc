@@ -57,8 +57,10 @@ internal const class ModuleDefImpl : ModuleDef {
 		methods.each |method| {
 			
 			if (method.name.startsWith(BUILD_METHOD_NAME_PREFIX)) {
-				addServiceDefFromMethod(serviceDefs, method)
-				remainingMethods.remove(method)
+				tracker.track("Found builder method $method.qname") |->| {
+					addServiceDefFromMethod(tracker, serviceDefs, method)
+					remainingMethods.remove(method)
+				}
 				return
 			}
 
@@ -71,7 +73,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		}
 	}
 	
-	private Void addServiceDefFromMethod(Str:ServiceDef serviceDefs, Method method) {
+	private Void addServiceDefFromMethod(OpTracker trakker, Str:ServiceDef serviceDefs, Method method) {
 		serviceDef	:= ServiceDefImpl {
 			it.serviceId 	= extractServiceId(method)
 			it.serviceType	= method.returns
@@ -87,10 +89,12 @@ internal const class ModuleDefImpl : ModuleDef {
 				}
 			}			
 		}
-		addServiceDef(serviceDefs, serviceDef)
+		addServiceDef(trakker, serviceDefs, serviceDef)
 	}	
 	
-    private Void addServiceDef(Str:ServiceDef serviceDefs, ServiceDef serviceDef) {
+    private Void addServiceDef(OpTracker tracker, Str:ServiceDef serviceDefs, ServiceDef serviceDef) {
+		tracker.log("Adding service definition for service '$serviceDef.serviceId' -> ${serviceDef.serviceType.qname}")
+		
 		ServiceDef? existing := serviceDefs[serviceDef.serviceId]
 		if (existing != null) {
 			throw IocErr(IocMessages.buildMethodConflict(serviceDef.serviceId, serviceDef.toStr, existing.toStr))
@@ -119,21 +123,26 @@ internal const class ModuleDefImpl : ModuleDef {
 			// No problem! Many modules will not have such a method.
 			return
 		
-		if (!bindMethod.isStatic)
-			throw IocErr(IocMessages.bindMethodMustBeStatic(bindMethod.qname))
-		
-		binder := ServiceBinderImpl(bindMethod) |ServiceDef serviceDef| {
-			addServiceDef(serviceDefs, serviceDef)
+		tracker.track("Found binder method $bindMethod.qname") |->| {
+			if (!bindMethod.isStatic)
+				throw IocErr(IocMessages.bindMethodMustBeStatic(bindMethod))
+			
+			if (bindMethod.params.size != 1 || !bindMethod.params[0].type.fits(ServiceBinder#))
+				throw IocErr(IocMessages.bindMethodWrongParams(bindMethod))
+			
+			binder := ServiceBinderImpl(bindMethod) |ServiceDef serviceDef| {
+				addServiceDef(tracker, serviceDefs, serviceDef)
+			}
+			
+			try {
+				bindMethod.call(binder)			
+			} catch (Err e) {
+				throw IocErr(IocMessages.errorInBindMethod(bindMethod.qname, e), e)
+			}
+			
+			binder.finish
+			remainingMethods.remove(bindMethod)
 		}
-		
-		try {
-			bindMethod.call(binder)			
-		} catch (Err e) {
-			throw IocErr(IocMessages.errorInBindMethod(bindMethod.qname, e), e)
-		}
-		
-		binder.finish
-		remainingMethods.remove(bindMethod)
 	}
 }
 
