@@ -28,7 +28,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 			moduleDefs.each |moduleDef| {
 				module := StandardModule(this, moduleDef)
 				modules.add(module)
-				
+
 				moduleDef.serviceDefs.keys.each |serviceId| {
 					if (serviceIdToModule.containsKey(serviceId)) {
 						existingDef 	:= serviceIdToModule[serviceId].serviceDef(serviceId)

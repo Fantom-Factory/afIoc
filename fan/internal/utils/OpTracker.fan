@@ -5,37 +5,25 @@
 ** information. That's where the 'OpTracker' comes in.   
 internal class OpTracker {
 	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
-	private Str[] 				operations	:= [,]
+	private OpTrackerOp[]		operations	:= [,]
 	private Bool				logged		:= false
 
-	private Str?				createMsg
-	private Duration			createTime	:= Duration.now
-	
 	new make(Str? lifetimeMsg := null) {
-		if (lifetimeMsg != null) {
-			logDescIn(lifetimeMsg)
-			operations.push(lifetimeMsg)
-			createMsg = lifetimeMsg
-		}
+		if (lifetimeMsg != null)
+			pushOp(lifetimeMsg)
 	}
 	
 	Void end() {
-		if (createMsg == null) throw Err("Stoopid!")
-		// TODO: should have a obj to hold this stuff
-		logDescOut(createMsg, createTime)
-		operations.pop
+		if (operations.size != 1)
+			throw Err("OpTracker.end() invoked when the operations stack has $operations.size op(s). There should only be ONE... Fool.")
+		popOp
 	}
 	
 	Obj? track(Str description, |OpTracker->Obj?| operation) {
-		startTime := Duration.now
-		
-		logDescIn(description)
-		operations.push(description)
+		pushOp(description)
 		
 		try {
-			ret := operation(this)
-			logDescOut(description, startTime)
-			return ret
+			return operation(this)
 			
 		} catch (Err err) {
 			if (!logged) {
@@ -49,7 +37,7 @@ internal class OpTracker {
 			throw err
 
 		} finally {
-			operations.pop
+			popOp
 			
             // we've finally backed out of the operation stack ... but more maybe added!
             if (operations.isEmpty)
@@ -65,21 +53,35 @@ internal class OpTracker {
 		}
 	}
 	
-	private Void logDescIn(Str description) {
+	private Void pushOp(Str description) {
+		op := OpTrackerOp {
+			it.description 	= description
+			it.startTime	= Duration.now
+		}
+		
 		if (logger.isDebug) {
 			depth 	:= operations.size + 1
 			pad		:= "".justr(depth)
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $description")
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $op.description")
 		}
+
+		operations.push(op)
 	}
 
-	private Void logDescOut(Str description, Duration startTime) {
+	private Void popOp() {
+		op := operations.pop
 		if (logger.isDebug) {
-			depth 	:= operations.size
+			depth 	:= operations.size + 1
 			pad		:= "".justr(depth)			
-			millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $description [${millis}ms]")
+			millis	:= (Duration.now - op.startTime).toMillis.toLocale("#,000")
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $op.description [${millis}ms]")
 		}
 	}
+}
+
+internal const class OpTrackerOp {
+	const Str 		description
+	const Duration 	startTime
 	
+	new make(|This|? f := null) { f?.call(this)	}
 }
