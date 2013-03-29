@@ -12,9 +12,7 @@ class TestCtorInjection : Test {
 	}
 
 	Void testCtorWithMostParamsIsPicked() {
-		Utils.setLoglevelDebug
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		Utils.setLoglevelInfo
 		verifyEq(reg.dependencyByType(T_MyService6#)->picked, "2 params" )
 	}
 
@@ -30,9 +28,11 @@ class TestCtorInjection : Test {
 	}
 
 	Void testFieldsAreNotInjectedTwice() {
+		Utils.debugOperation |->| {   
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
 		T_MyService9 ser9 := reg.dependencyByType(T_MyService9#)
 		verifyEq(ser9.service2.kick, "Can't Touch This!" )
+		}
 	}
 	
 }
