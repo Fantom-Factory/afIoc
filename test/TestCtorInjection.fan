@@ -20,6 +20,18 @@ class TestCtorInjection : Test {
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
 		verifyEq(reg.dependencyByType(T_MyService7#)->picked, "1 param" )
 	}
+
+	Void testCtorWithFieldInjector() {
+		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
+		T_MyService8 ser8 := reg.dependencyByType(T_MyService8#)
+		verifyEq(ser8.service2.kick, "ASS!" )
+	}
+
+	Void testFieldsAreNotInjectedTwice() {
+		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
+		T_MyService9 ser9 := reg.dependencyByType(T_MyService9#)
+		verifyEq(ser9.service2.kick, "Can't Touch This!" )
+	}
 	
 }
 
@@ -31,6 +43,8 @@ internal class T_MyModule6 {
 		binder.bindImpl(T_MyService5#)
 		binder.bindImpl(T_MyService6#)
 		binder.bindImpl(T_MyService7#)
+		binder.bindImpl(T_MyService8#)
+		binder.bindImpl(T_MyService9#)
 	}	
 }
 
@@ -59,4 +73,21 @@ internal class T_MyService7 {
 	@Inject
 	new make1(T_MyService1 ser) { picked = "1 param" }
 	new make2(T_MyService1 ser, T_MyService1 ser2) { picked = "2 params" }
+}
+
+internal class T_MyService8 {
+	@Inject
+	T_MyService2 service2
+	new make(|This| injectInto) { injectInto(this) }
+}
+
+internal class T_MyService9 {
+	@Inject
+	T_MyService2 service2
+	new make(|This| injectInto) { 
+		injectInto(this)
+		// override the injector
+		service2 = T_MyService2()
+		service2.kick = "Can't Touch This!"
+	}
 }

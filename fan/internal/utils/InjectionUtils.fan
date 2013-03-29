@@ -115,9 +115,17 @@ internal const class InjectionUtils {
 	}
 
 	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType) {
-		// FUTURE: this could take an facetProvider to give more hints on dependency finding
+		// FUTURE: this could take an FacetProvider to give more hints on dependency finding
 		// e.g. @Autobuild
 		return tracker.track("Looking for dependency of type $dependencyType") |->Obj| {
+			t:=|This|#
+			if (dependencyType == t) {
+				return |Obj service| {
+					// FIXME: tidy up
+					Env.cur.err.printLine("Injecting into $service Mufa Fuckers!")
+					injectIntoFields(tracker, objLocator, service)
+				}
+			}
 			return objLocator.trackDependencyByType(tracker, dependencyType)			
 		}
 	}
