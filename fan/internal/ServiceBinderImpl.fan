@@ -3,8 +3,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private const static Log log := Utils.getLog(ServiceBinderImpl#)
 	private OneShotLock 	lock := OneShotLock(IocMessages.serviceDefined)
 	
-	private ModuleDefImpl	moduleDef
 	private Method 			bindMethod
+	|ServiceDef serviceDef| addServiceDef
 
 	private Str? 			serviceId
 	private Type? 			serviceMixin
@@ -13,8 +13,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
-	new make(ModuleDefImpl moduleDef, Method bindMethod) {
-		this.moduleDef	= moduleDef
+	new make(Method bindMethod, |ServiceDef serviceDef| addServiceDef) {
+		this.addServiceDef = addServiceDef
 		this.bindMethod = bindMethod
 		clear
 	}
@@ -115,7 +115,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.description	= this.description
 		}
 
-		moduleDef.addServiceDef(serviceDef)
+		addServiceDef(serviceDef)
 		clear
 	}
 	

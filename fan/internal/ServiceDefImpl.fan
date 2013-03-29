@@ -1,11 +1,14 @@
 
-internal class ServiceDefImpl : ServiceDef {
+internal const class ServiceDefImpl : ServiceDef {
 	
-	override const Str 	serviceId
-	override const Type serviceType
+	override 
+	const Str 	serviceId
 	
-	|OpTracker, ObjLocator->Obj| 	source
-			Str 		description
+	override 
+	const Type	serviceType
+	
+	const |OpTracker, ObjLocator->Obj| 	source
+	const Str	description
 	
 	new make(|This|? f := null) {
 		f?.call(this)

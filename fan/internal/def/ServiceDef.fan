@@ -2,7 +2,7 @@
 **
 ** Meta info that defines a service 
 ** 
-internal mixin ServiceDef {
+internal const mixin ServiceDef {
 
 	** Returns a factory func that creates the service implementation
 	abstract |OpTracker, ObjLocator->Obj| createServiceBuilder()

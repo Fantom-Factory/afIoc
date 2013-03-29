@@ -2,7 +2,7 @@
 **
 ** Defines the contents of a module. 
 ** 
-internal mixin ModuleDef {
+internal const mixin ModuleDef {
 
 	** Returns a map services built/provided by the module mapped by service id (case is ignored)
 	abstract Str:ServiceDef serviceDefs()
