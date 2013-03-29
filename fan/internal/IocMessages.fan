@@ -1,7 +1,9 @@
 
 // TODO: rename to InternalMsgs...?
 internal const class IocMessages {
-	
+
+	// ---- Err Messages --------------------------------------------------------------------------
+
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
 		"Module class ${moduleType.qname} contains unrecognised public methods: ${methods}"		
 	}
@@ -34,8 +36,8 @@ internal const class IocMessages {
 		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
 	}
 	
-	static Str oneShotLockViolation() {
-		"Method may no longer be invoked."
+	static Str oneShotLockViolation(Str because) {
+		"Method may no longer be invoked - $because"
 	}
 
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {
@@ -50,28 +52,31 @@ internal const class IocMessages {
 		"Builder method $method.qname does not define a service ID. Rename it to ${method.qname}XXX where XXX is the service ID."
 	}
 	
-//	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
-//	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
-//		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."
-//	}
-	
 	// many-service-matches=Service interface %s is matched by %d services: %s. Automatic dependency resolution requires that exactly one service implement the interface.
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
 		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
 	}
 	
-//	// error-building-service=Error building service proxy for service '%s' (at %s): %s
-//	static Str errorBuildingService(Str serviceId, ServiceDef serviceDef, Err cause) {
-//		"Error building service proxy for service '${serviceId}' (at ${serviceDef}): ${cause}"
-//	}
-//	
 //	// recursive-module-constructor=The constructor for module class %s is recursive: it depends on itself in some way. \n The constructor, %s, is in some way is triggering a service builder, decorator or contribution method within the class.
 //	static Str recursiveModuleConstructor(Type moduleType, Method constructor) {
 //		"The constructor for module class ${moduleType} is recursive: it depends on itself in some way. \n The constructor, ${constructor}, is in some way is triggering a service builder, decorator or contribution method within the class."
 //	}
-//	
-//	// instantiate-builder-error=Unable to instantiate class %s as a module: %s
-//	static Str instantiateBuilderError(Type moduleType, Err cause) {
-//		"instantiate-builder-error=Unable to instantiate class ${moduleType} as a module: ${cause}"
-//	}
+	
+	// ---- One Shot Lock Messages ----------------------------------------------------------------
+	
+	static Str registryBuilt() {
+		"Registry has already been built"
+	}
+
+	static Str registryStarted() {
+		"Registry has already started"
+	}
+
+	static Str registryShutdown() {
+		"Registry has already been shutdown"
+	}
+
+	static Str serviceDefined() {
+		"Service has already been defined"
+	}
 }

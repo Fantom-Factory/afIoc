@@ -2,7 +2,7 @@
 internal class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 	log 		:= Log.get(RegistryShutdownHubImpl#.name)
 	
-	private OneShotLock lock 			:= OneShotLock()
+	private OneShotLock lock 			:= OneShotLock(IocMessages.registryShutdown)
 	private |->|[] 		preListeners 	:= [,]
 	private |->|[] 		listeners 		:= [,]
 
@@ -19,7 +19,7 @@ internal class RegistryShutdownHubImpl : RegistryShutdownHub {
 	}
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
-	Void fireRegistryDidShutdown() {
+	internal Void fireRegistryDidShutdown() {
 		lock.lock
 
 		preListeners.each |listener| {

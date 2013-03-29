@@ -1,7 +1,12 @@
 
 internal class OneShotLock {
 	
-	private Bool lockFlag
+	private Str 	because
+	private Bool	lockFlag
+	
+	new make(Str because) {
+		this.because = because
+	}
 	
 	Void lock() {
 		check	// you can't lock twice!
@@ -10,7 +15,7 @@ internal class OneShotLock {
 	
 	public Void check() {
 		if (lockFlag)
-			throw IocErr(IocMessages.oneShotLockViolation)
+			throw IocErr(IocMessages.oneShotLockViolation(because))
 	}
 	
 	override Str toStr() {
