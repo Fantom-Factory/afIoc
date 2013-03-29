@@ -13,6 +13,4 @@ internal const mixin ModuleDef {
 	** Returns the class that will be instantiated. 
     abstract Type moduleType()
 
-	** Returns the name used to create a Logger instance. This is typically the module type name.
-	abstract Str loggerName()
 }

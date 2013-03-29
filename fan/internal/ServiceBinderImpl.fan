@@ -107,7 +107,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			// sets source and description
 			createStandardConstructorBuilder
 
-		serviceDef := ServiceDefImpl() {
+		serviceDef := StandardServiceDef() {
 			it.serviceId 	= this.serviceId
 			it.serviceType 	= this.serviceMixin
 //			it.isEagerLoad 	= this.eagerLoadFlag
@@ -134,7 +134,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl
 		serviceId		:= this.serviceId
-		description 	= "Standard Ctor Builder"
+		description 	= "'$serviceId' : Standard Ctor Builder"
 		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
 			tracker.track("Creating Serivce '$serviceId' via a standard ctor autobuild") |->Obj| {
 				log.info("Creating Service '$serviceId'")

@@ -1,5 +1,5 @@
 
-internal const class ServiceDefImpl : ServiceDef {
+internal const class StandardServiceDef : ServiceDef {
 	
 	override 
 	const Str 	serviceId
@@ -10,9 +10,7 @@ internal const class ServiceDefImpl : ServiceDef {
 	const |OpTracker, ObjLocator->Obj| 	source
 	const Str	description
 	
-	new make(|This|? f := null) {
-		f?.call(this)
-	}
+	new make(|This|? f := null) { f?.call(this)	}
 	
 	override |OpTracker, ObjLocator->Obj| createServiceBuilder() {
 		source

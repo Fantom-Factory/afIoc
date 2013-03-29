@@ -1,52 +1,45 @@
 
-** TODO: add some stats - e.g. hits - to the scoreboard
-** TODO: internal class RegistryState - methods check to see if reg is started up / shut down, etc... 
 internal class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
 	private OneShotLock 			startupLock 		:= OneShotLock(IocMessages.registryStarted)
 	private OneShotLock 			shutdownLock 		:= OneShotLock(IocMessages.registryShutdown)
-	
 	private RegistryShutdownHubImpl registryShutdownHub	:= RegistryShutdownHubImpl()
 
-	private Str:Obj					builtinServices 	:= Str:Obj[:] 		{ caseInsensitive = true }
-	
-	private ServiceDef[]			allServiceDefs		:= [,]
 	private Module[]				modules				:= [,]
-	private Str:Module				serviceIdToModule 	:= Str:Module[:]	{ caseInsensitive = true }
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
+		serviceIdToModule := Str:Module[:]
 		
-		moduleDefs.each |def| {   
-			logger := Log.get(def.loggerName)
+		tracker.track("Defining Built-In services") |->| {
+			builtInModule := BuiltInModule()
+			builtInModule.addBuiltInService("registry", Registry#, this)
+			builtInModule.addBuiltInService("registryShutdownHub", RegistryShutdownHub#, registryShutdownHub)
+		// TODO: add some stats - e.g. hits - to the scoreboard
+	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 			
-			module := Module(this, def, logger)
-			ServiceDef[] moduleServiceDefs := [,]
-			
-			def.serviceDefs.keys.each |serviceId| {
-				serviceDef := module.serviceDef(serviceId)
-				moduleServiceDefs.add(serviceDef)
-				allServiceDefs.add(serviceDef)
-				
-				if (serviceIdToModule.containsKey(serviceId)) {
-					existing := serviceIdToModule[serviceId]
-					throw IocErr(IocMessages.serviceIdConflict(serviceId, existing.serviceDef(serviceId), serviceDef))
-				}
-
-				serviceIdToModule[serviceId] = module
-
-				// The service is defined but will not have gone further than that.
-//				tracker.define(serviceDef, Status.DEFINED)
+			modules.add(builtInModule)
+			builtInModule.serviceDefs.each {
+				serviceIdToModule[it.serviceId] = builtInModule			
 			}
-			
-			modules.add(module)
+		}
+
+		tracker.track("Consolidating module definitions") |->| {
+			moduleDefs.each |moduleDef| {
+				module := StandardModule(this, moduleDef)
+				modules.add(module)
+				
+				moduleDef.serviceDefs.keys.each |serviceId| {
+					if (serviceIdToModule.containsKey(serviceId)) {
+						existingDef 	:= serviceIdToModule[serviceId].serviceDef(serviceId)
+						conflictingDef 	:= module.serviceDef(serviceId)
+						throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
+					}
+					serviceIdToModule[serviceId] = module
+				}				
+			}
 		}
 		
-		builtinServices["registry"] = this
-		builtinServices["registryShutdownHub"] = registryShutdownHub
-
-//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
-
 		// TODO: contributions
 //        validateContributeDefs(moduleDefs);
 	}
@@ -64,10 +57,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 		registryShutdownHub.fireRegistryDidShutdown()
 		
 		// destroy all internal refs
-		builtinServices.clear
-		allServiceDefs.clear
 		modules.clear
-		serviceIdToModule.clear
 		
 		return this
 	}
@@ -101,15 +91,23 @@ internal class RegistryImpl : Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
-		if (builtinServices.containsKey(serviceId))
-			return builtinServices[serviceId]
+        Obj[] services := modules.map {
+			it.service(tracker, serviceId)
+		}.exclude { it == null }
 
-		containingModule := locateModuleForService(serviceId)
-        return containingModule.service(tracker, serviceId)
+		if (services.isEmpty) 
+            throw IocErr(IocMessages.serviceIdNotFound(serviceId))
+		
+		if (services.size > 1)
+			throw WtfErr("Multiple services defined for service id $serviceId")
+		
+        return services[0]
 	}
 	
 	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
-        Str[] serviceIds := findServiceIdsForType(dependencyType)
+        Str[] serviceIds := modules.map |module| {
+			module.findServiceIdsForType(dependencyType)
+		}.flatten	// FIXME: how to empty lists flatten?
 
 		// FUTURE: if no service found, ask other object locators
 		if (serviceIds.isEmpty)
@@ -129,27 +127,4 @@ internal class RegistryImpl : Registry, ObjLocator {
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
 		return InjectionUtils.injectIntoFields(tracker, this, object)
 	}
-
-	// ---- Private Methods -----------------------------------------------------------------------
-	
-    private Str[] findServiceIdsForType(Type serviceType) {
-        Str[] result := [,]
-
-		modules.each |module| {
-			result.addAll(module.findServiceIdsForType(serviceType))
-		}
-
-		builtinServices.each |service, serviceId| {
-			if (service.typeof.fits(serviceType))
-				result.add(serviceId)
-		}
-
-        return result;
-    }	
-
-	private Module locateModuleForService(Str serviceId) {
-		if (!serviceIdToModule.containsKey(serviceId))
-            throw UnknownValueErr("Service id '${serviceId}' is not defined by any module.", "Defined service ids", serviceIdToModule.keys)
-        return serviceIdToModule[serviceId]
-    }
 }
