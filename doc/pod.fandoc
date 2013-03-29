@@ -1,25 +1,62 @@
 Overview [#overview]
 ********************
-IoC is an Inversion of Control (IoC) container, or Depdendency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond other IoC containers, this IoC offers:
+IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond other IoC containers, this IoC offers:
  - distributed service configuration between pods and modules
  - judicious use of convention over configurations
  - lazy service loading
  - extensive error reporting
- - case insensitive
+ - case insensitivity
+
+Quick Start [#quickStart]
+*************************
+
+pre>
+class Main {
+  static Void main(Str[] args) {
+    registry := IocService(false, [MyModule#]).install.start.registry
+
+    MyService1 test1 := registry.serviceById("myservice1")
+
+    MyService1 test2 := registry.dependencyByType(MyService1#)
+
+    MyService1 test3 := registry.autobuild(MyService1#)
+
+    MyService1 test4 := registry.injectIntoFields(MyService1())
+
+    Service.find(IocService#).stop.uninstall
+  }
+}
+
+class MyService1 {
+  @Inject
+  MyService2? service2
+}
+
+class MyService2 {
+  Str kick := "Ass!"
+}
+
+class MyModule {
+  static Void bind(ServiceBinder binder) {
+    binder.bindImpl(MyService1#)
+    binder.bindImpl(MyService2#)
+  }
+}
+<pre
 
 Terminology [#terminology]
 **************************
-IoC distinquishes between **Services** and **Dependencies**.
+IoC distinguishes between **Services** and **Dependencies**.
 
 A **service** is a singleton class of which there is only one instance. Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin.
 
-A **dependency** is any class or object that another class depends on. A dependancy may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service.
+A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service.
 
 A **module** is a class where services and contributions are defined.
 
 Defining Services [#definingServices]
 *************************************
-Services are defined in Module classes, where each method has meaning. Module are not defined by a Mixin or inheritence, instead, convention is given to the method names. A common method is 'bind' which must take the following signature:
+Services are defined in Module classes, where each method has meaning. Module are not defined by a Mixin or inheritance, instead, convention is given to the method names. A common method is 'bind' which must take the following signature:
 
   static Void bind(ServiceBinder binder) {
 
@@ -33,12 +70,22 @@ Services are defined in Module classes, where each method has meaning. Module ar
     binder.bindBuilder(EmailService#) { EmailService() }.withId("wotever")
   }
 
-(Note all methods in a Module class should be static.) Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build':
+(Note all methods in a Module class should be static.) Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
 
-  // defines EmailService with an ID of 'penguin'. 'config' is passed in when the service is built.
   static EmailService buildPenquin(EmailConfig config) {
     EmailServiceImpl(config)
   }
 
 Builder methods may take dependencies as parameters. These dependencies are realised and passed in when the service is built.
+
+Dependency Injection [#dependencyInjection]
+*******************************************
+IoC performs both ctor and field injection.
+
+When IoC builds a service it locates a suitable ctor, this is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
+
+
+
+Auto-Building [#autobuilding]
+*****************************
 

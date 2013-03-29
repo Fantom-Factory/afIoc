@@ -5,7 +5,7 @@
 internal mixin ModuleDef {
 
 	** Returns a map services built/provided by the module mapped by service id (case is ignored)
-	abstract Str:ServiceDef serviceDefs()	//	{ caseInsensitive=true }
+	abstract Str:ServiceDef serviceDefs()
 
 //	** Returns all the contribution definitions built/provided by this module.
 //	abstract ContributionDef[] contributionDefs()

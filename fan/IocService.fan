@@ -3,20 +3,39 @@ using concurrent
 const class IocService : Service {
 	private static const Log 	log 	:= Log.get(IocService#.name)
 	private const LocalStash 	stash	:= LocalStash(typeof)
-
-	private const Bool			loadModulesFromIndexProps
 	private const Type[]		moduleTypes
 	
+	private Bool dependencies {
+		get { stash["dependencies"] }
+		set { stash["dependencies"] = it }
+	}
+
+	private Bool indexProps {
+		get { stash["indexProps"] }
+		set { stash["indexProps"] = it }
+	}
+
 	Registry registry {
 		get { stash["registry"] }
 		private set { stash["registry"] = it }
 	}
 	
-	new make(Bool loadModulesFromIndexProps, Type[] moduleTypes) {
-		this.loadModulesFromIndexProps = loadModulesFromIndexProps
+	// ---- Public Builder Methods ---------------------------------------------------------------- 
+
+	new make(Type[] moduleTypes := [,]) {
 		this.moduleTypes = moduleTypes
 	}
 	
+	This loadModulesFromDependencies() {
+		dependencies = true
+		return this
+	}
+
+	This loadModulesFromIndexProperties() {
+		indexProps = true
+		return this
+	}
+
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 	
 	override Void onStart() {
@@ -25,12 +44,11 @@ const class IocService : Service {
 		try {
 			regBuilder := RegistryBuilder()
 			
-			if (loadModulesFromIndexProps) {
-				moduleNames := Env.cur.index("afIoc.module")
-				moduleNames.each |moduleName| {
-					regBuilder.addModule(Type.find(moduleName))
-				}
-			}
+			if (indexProps)
+				regBuilder.addModulesFromIndexProperties
+			
+			if (dependencies)
+				regBuilder.addModulesFromDependencies
 			
 			regBuilder.addModules(moduleTypes)
 			
@@ -38,6 +56,7 @@ const class IocService : Service {
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)
+			throw e
 		}
 	}
 
@@ -48,22 +67,22 @@ const class IocService : Service {
 	
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
-	** Convenience for `Registry#serviceById`
+	** Convenience for `Registry.serviceById`
 	Obj serviceById(Str serviceId) {
 		registry.serviceById(serviceId)
 	}
 	
-	** Convenience for `Registry#dependencyByType`
+	** Convenience for `Registry.dependencyByType`
 	Obj dependencyByType(Type serviceType) {
 		registry.dependencyByType(serviceType)
 	}
 
-	** Convenience for `Registry#autobuild`
+	** Convenience for `Registry.autobuild`
 	Obj autobuild(Type type) {
 		registry.autobuild(type)
 	}
 	
-	** Convenience for `Registry#injectIntoFields`
+	** Convenience for `Registry.injectIntoFields`
 	Obj injectIntoFields(Obj service) {
 		registry.injectIntoFields(service)
 	}	

@@ -1,5 +1,5 @@
 
-class TestIoc : Test {
+class TestIocService : Test {
 
 	Void testServiceById() {
 		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
@@ -8,7 +8,7 @@ class TestIoc : Test {
 		verifySame(myService1, reg.serviceById("t_MyService1"))
 	}
 
-	Void testServiceByType() {
+	Void testDependencyByType() {
 		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
 		T_MyService1 myService1 := reg.dependencyByType(T_MyService1#)
 		verifyEq(myService1.service.kick, "ASS!")
@@ -20,6 +20,14 @@ class TestIoc : Test {
 		T_MyService1 myService1 := reg.autobuild(T_MyService1#)
 		verifyEq(myService1.service.kick, "ASS!")
 		verifyNotSame(myService1, reg.autobuild(T_MyService1#))
+	}
+	
+	Void testInjectIntoFields() {
+		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
+		T_MyService1 myService1 := T_MyService1()
+		verifyNull(myService1.service)
+		reg.injectIntoFields(myService1)
+		verifyEq(myService1.service.kick, "ASS!")
 	}
 }
 
