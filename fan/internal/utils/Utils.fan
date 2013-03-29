@@ -6,6 +6,27 @@ internal class Utils {
 		type.pod.log
 	}
 
+	static Void setLoglevel(LogLevel logLevel) {
+		Utils#.pod.log.level = logLevel
+	}
+
+	static Void setLoglevelDebug() {
+		setLoglevel(LogLevel.debug)
+	}
+
+	static Void setLoglevelInfo() {
+		setLoglevel(LogLevel.info)
+	}
+	
+	static Void debugOperation(|->| operation) {
+		setLoglevel(LogLevel.debug)
+		try {
+			operation()
+		} finally {
+			setLoglevel(LogLevel.info)
+		}
+	}
+
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
 	static Bool hasFacet(Slot slot, Type annotation) {
 		slot.facets.find |fac| { 

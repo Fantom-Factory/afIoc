@@ -7,26 +7,34 @@ internal class OpTracker {
 	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
 	private Str[] 				operations	:= [,]
 	private Bool				logged		:= false
+
+	private Str?				createMsg
+	private Duration			createTime	:= Duration.now
+	
+	new make(Str? lifetimeMsg := null) {
+		if (lifetimeMsg != null) {
+			logDescIn(lifetimeMsg)
+			operations.push(lifetimeMsg)
+			createMsg = lifetimeMsg
+		}
+	}
+	
+	Void end() {
+		if (createMsg == null) throw Err("Stoopid!")
+		// TODO: should have a obj to hold this stuff
+		logDescOut(createMsg, createTime)
+		operations.pop
+	}
 	
 	Obj? track(Str description, |OpTracker->Obj?| operation) {
 		startTime := Duration.now
-		depth 	  := operations.size + 1
-		pad 	  := "".justr(depth)
 		
-		if (logger.isDebug) {
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $description")
-		}
-		
+		logDescIn(description)
 		operations.push(description)
 		
 		try {
 			ret := operation(this)
-
-			if (logger.isDebug) {
-				millis := (Duration.now - startTime).toMillis.toLocale("#,000")
-				logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $description [${millis}ms]")
-			}
-
+			logDescOut(description, startTime)
 			return ret
 			
 		} catch (Err err) {
@@ -56,4 +64,22 @@ internal class OpTracker {
 			logger.debug("[${depth.toStr.justr(3)}] ${pad}  > $description")
 		}
 	}
+	
+	private Void logDescIn(Str description) {
+		if (logger.isDebug) {
+			depth 	:= operations.size + 1
+			pad		:= "".justr(depth)
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $description")
+		}
+	}
+
+	private Void logDescOut(Str description, Duration startTime) {
+		if (logger.isDebug) {
+			depth 	:= operations.size
+			pad		:= "".justr(depth)			
+			millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+			logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $description [${millis}ms]")
+		}
+	}
+	
 }

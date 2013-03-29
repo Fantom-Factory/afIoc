@@ -100,3 +100,16 @@ After object construction and field injection you may perform extra setup via me
 Auto-Building [#autobuilding]
 *****************************
 
+
+
+Tips & Good Practicies
+**********************
+
+Define both pod meta and index props. Only define one module per pod, use @SubModule for depdendant modules (or defining more than one)
+
+use 'injectInto fields of ' Flux objs (as you have no say in how they're created
+use 'autobuikd' for other gui objss
+
+most useful when building guis - a panel or content pane isn't a service, but needs access to serives. commands can be auto build on the fly to invoke serive actions
+
+

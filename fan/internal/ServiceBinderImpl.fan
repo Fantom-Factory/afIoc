@@ -1,7 +1,7 @@
 
 internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private const static Log log := Utils.getLog(ServiceBinderImpl#)
-	private OneShotLock 	lock := OneShotLock()
+	private OneShotLock 	lock := OneShotLock(IocMessages.serviceDefined)
 	
 	private ModuleDefImpl	moduleDef
 	private Method 			bindMethod

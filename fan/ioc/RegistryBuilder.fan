@@ -1,61 +1,59 @@
 
-** Builds a `Registry` from Modules. Modules may be added manually, defined my meta-data in 
-** dependent pods or defined by [index properties]`docLang::Env#index`
+** Builds a `Registry` from Modules. Modules may be added manually, defined by 
+** [meta-data]`Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
 class RegistryBuilder {
-	private const static Log 	log 		:= Utils.getLog(RegistryBuilder#)
+	private const static Log 	logger 		:= Utils.getLog(RegistryBuilder#)
 	
-	private OneShotLock lock		:= OneShotLock()
+	private OpTracker	tracker 	:= OpTracker("Building IoC Registry")
+	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
 	
-	// FIXME: use tracker!
-	private OpTracker	tracker 	:= OpTracker()
+	
+	** Adds a module to the registry
+	This addModule(Type moduleType) {
+		tracker.track("Adding module definition for '$moduleType.qname'") |->Obj?| {
+			lock.check
+			logger.info("Adding module definition for $moduleType.qname")
+			
+			moduleDef := ModuleDefImpl(tracker, moduleType)
+			addModuleDef(moduleDef)
+			
+			// TODO: Check for @SubModule facets
+			
+			return null
+		}
+		return this
+	}
 	
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
-		lock.check		
+		lock.check
 		moduleTypes.each |moduleType| {
 			addModule(moduleType)
 		}
 		return this
 	}
-
-	** Adds a module to the registry
-	This addModule(Type moduleType) {
-		lock.check
-
-		log.info("Adding module definition for $moduleType.qname");
-		moduleDef := ModuleDefImpl(moduleType)
-		addModuleDef(moduleDef)
-		// TODO: Check for @SubModule facets
-		return this
-	}
 	
-	** Adds all modules from all the dependencies of the given pod that are defined by the meta-data
-	This addModulesFromDependencies(Pod pod) {
-		lock.check
-		
-		pod.depends
-			.map { 
-				Pod.find(it.name).meta["afIoc.module"]
-			}
-			.exclude {
-				it == null
-			}
-			.map {
-				Type.find(it)
-			}
-			.each {
-				addModule(it)
-			}
-		
+	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
+	** which defines the qualified name of a module to load.
+	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
+		logger.info("Adding modules from dependencies of '$pod.name'")
+		addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
 		return this
 	}
 
+	** Looks for all index properties of the key 'afIoc.module' which defines a qualified name of 
+	** a module to load.
 	This addModulesFromIndexProperties() {
-		lock.check
-		moduleNames := Env.cur.index("afIoc.module")
-		moduleNames.each |moduleName| {
-			addModule(Type.find(moduleName))
+		logger.info("Adding modules from index properties")
+		tracker.track("Adding modules from index properties") |->| {
+			lock.check
+			moduleNames := Env.cur.index("afIoc.module")
+			moduleNames.each {
+				addModuleFromTypeName(tracker, it)
+			}
+			if (moduleNames.isEmpty)
+				tracker.log("No modules found")
 		}
 		return this
 	}
@@ -64,9 +62,63 @@ class RegistryBuilder {
 	** `Registry.startup`
     Registry build() {
 		lock.lock
-        return RegistryImpl(tracker, moduleDefs)
+        registry := RegistryImpl(tracker, moduleDefs)
+		tracker.end
+		return registry
     }
 	
+	// ---- Private Methods -----------------------------------------------------------------------
+	
+	Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
+		tracker.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
+			lock.check
+			
+			Type?[] modTypes := [,]
+			
+			// don't forget me!
+			modType := addModuleFromPod(tracker, pod)
+			modTypes.add(modType)
+			
+			pod.depends.each {
+				dependency := Pod.find(it.name)
+				mod := addModuleFromPod(tracker, dependency)
+				modTypes.add(mod)
+				
+				if (addTransitiveDependencies) {
+					mods := tracker.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
+						deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
+						if (deps.isEmpty)
+							tracker.log("No transitive dependencies found")
+						return deps
+					} 
+					modTypes.addAll(mods)
+				} else
+					tracker.log("Not looking for transitive dependencies")
+			}
+			
+			modTypes = modTypes.exclude { it == null }
+			if (modTypes.isEmpty)
+				tracker.log("No modules found")
+			
+			return modTypes
+		}
+	}	
+	
+	private Type? addModuleFromPod(OpTracker tracker, Pod pod) {
+		qname := pod.meta[IocConstants.podMetaModuleName]
+		if (qname != null) {
+			tracker.log("Pod '$pod.name' defines module of type $qname")
+			return addModuleFromTypeName(tracker, qname)
+		}
+		return null
+	}
+
+	private Type addModuleFromTypeName(OpTracker tracker, Str moduleTypeName) {
+		moduleType := Type.find(moduleTypeName)
+		addModule(moduleType)
+		return moduleType
+	}
+
 	private This addModuleDef(ModuleDef moduleDef) {
 		this.moduleDefs.add(moduleDef)
 		return this

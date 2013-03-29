@@ -13,7 +13,8 @@ internal class ModuleDefImpl : ModuleDef {
 	override 	Type 				moduleType
 	override 	Str:ServiceDef		serviceDefs				:= Str:ServiceDef[:] { caseInsensitive = true }
 	
-	new make(Type moduleType) {
+	// FIXME: use tracker
+	new make(OpTracker tracker, Type moduleType) {
 		this.moduleType = moduleType
 
 		// Want to verify that every public method is meaningful to Tapestry IoC. Remaining methods
