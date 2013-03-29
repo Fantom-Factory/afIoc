@@ -1,5 +1,6 @@
 
 internal class ModuleDefImpl : ModuleDef {
+	private const static Log log := Utils.getLog(ModuleDefImpl#)
 	
 	** The prefix used to identify service builder methods.
 	private static const Str BUILD_METHOD_NAME_PREFIX 		:= "build"
@@ -80,20 +81,23 @@ internal class ModuleDefImpl : ModuleDef {
 //			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
 			it.description	= method.toStr
 			it.source		= |->Obj| { method.call }	// TODO: inject services into method
+			
+			serviceId 		:= it.serviceId
+			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {
+				tracker.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
+					log.info("Creating Service '$serviceId'")
+					return InjectionUtils.callMethod(tracker, objLocator, method, null)
+				}
+			}			
 		}
-		
 		addServiceDef(serviceDef)
 	}	
 	
 	private Str extractServiceId(Method method) {
-		Str? serviceId
-		
-		if (serviceId == null)
-			serviceId = stripMethodPrefix(method, BUILD_METHOD_NAME_PREFIX)
+		serviceId := stripMethodPrefix(method, BUILD_METHOD_NAME_PREFIX)
 
-        // If the method name was just "build()", then work from the return type.
-        if (serviceId == "")
-            serviceId = method.returns.name
+        if (serviceId.isEmpty)
+            throw IocErr(IocMessages.buildMethodDoesNotDefineServiceId(method))
 		
 		return serviceId
 	}

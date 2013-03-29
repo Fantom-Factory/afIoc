@@ -1,4 +1,5 @@
 
+// TODO: rename Msgs
 internal const class IocMessages {
 	
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
@@ -37,6 +38,18 @@ internal const class IocMessages {
 		"Method may no longer be invoked."
 	}
 
+	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {
+		"Only 1 ctor is allowed to have the @${Inject#.name} facet, ${serviceType.qname} has ${noOfCtors}!"
+	}
+	
+	static Str ctorsWithSameNoOfParams(Type serviceType, Int noOfParams) {
+		"${serviceType.qname} has too many ctors with ${noOfParams} params - try annotating one with the @${Inject#.name} facet."
+	}
+	
+	static Str buildMethodDoesNotDefineServiceId(Method method) {
+		"Builder method $method.qname does not define a service ID. Rename it to ${method.qname}XXX where XXX is the service ID."
+	}
+	
 //	// service-wrong-interface=Service '%s' implements interface %s, which is not compatible with the requested type %s.
 //	static Str serviceWrongType(Str serviceId, Type actualType, Type requestedType) {
 //		"Service '${serviceId}' implements interface ${actualType}, which is not compatible with the requested type ${requestedType}."

@@ -52,6 +52,13 @@ internal const class InjectionUtils {
 		}
 	}
 	
+	static Obj callMethod(OpTracker tracker, ObjLocator objLocator, Method method, Obj? obj) {
+		args := determineInjectionParams(tracker, objLocator, method)
+		return tracker.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
+			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
+		}
+	}
+
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	private static Method findAutobuildConstructor(OpTracker tracker, Type type) {
@@ -65,16 +72,22 @@ internal const class InjectionUtils {
 				if (constructors.size == 1)
 					return constructors[0]
 		
-				Method? annotated := constructors.find |c| {
+				annotated := constructors.findAll |c| {
 					c.hasFacet(Inject#)
-				}		
-				if (annotated != null)
-					return annotated
+				}
+				if (annotated.size == 1)
+					return annotated[0]
+				if (annotated.size > 1)
+					throw IocErr(IocMessages.onlyOneCtorWithInjectFacetAllowed(type, annotated.size))				
 				
 				// Choose a constructor with the most parameters.
-				return constructors.sort |c1, c2| {
+				params := constructors.sortr |c1, c2| {
 					c1.params.size <=> c2.params.size
-				} [0]
+				}
+				if (params[0].params.size == params[1].params.size)
+					throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
+				
+				return params[0]
 			}()
 			
 			tracker.log("Found $ctor.signature")
@@ -86,13 +99,6 @@ internal const class InjectionUtils {
 		args := determineInjectionParams(tracker, objLocator, ctor)
 		return tracker.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
-		}
-	}
-
-	private static Void callMethod(OpTracker tracker, ObjLocator objLocator, Method method, Obj obj) {
-		args := determineInjectionParams(tracker, objLocator, method)
-		tracker.track("Invoking $method.signature on ${obj.typeof}...") |->| {
-			method.callOn(obj, args)
 		}
 	}
 	

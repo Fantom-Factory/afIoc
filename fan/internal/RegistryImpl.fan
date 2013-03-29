@@ -4,7 +4,10 @@
 internal class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
-	private RegistryShutdownHubImpl registryShutdownHub
+	private OneShotLock 			startupLock 		:= OneShotLock()
+	private OneShotLock 			shutdownLock 		:= OneShotLock()
+	
+	private RegistryShutdownHubImpl registryShutdownHub	:= RegistryShutdownHubImpl()
 
 	private Str:Obj					builtinServices 	:= Str:Obj[:] 		{ caseInsensitive = true }
 	
@@ -40,7 +43,6 @@ internal class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		builtinServices["registry"] = this
-		registryShutdownHub = RegistryShutdownHubImpl()
 		builtinServices["registryShutdownHub"] = registryShutdownHub
 
 //        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
@@ -52,11 +54,13 @@ internal class RegistryImpl : Registry, ObjLocator {
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	override This startup() {
+		startupLock.lock
 		// TODO: do service startup loading
 		return this
 	}
 
 	override This shutdown() {
+		shutdownLock.lock
 		registryShutdownHub.fireRegistryDidShutdown()
 		
 		// destroy all internal refs
@@ -69,23 +73,27 @@ internal class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj serviceById(Str serviceId) {
-		OpTracker().track("Locating service by ID '$serviceId'") |tracker| {
+		shutdownLock.check
+		return OpTracker().track("Locating service by ID '$serviceId'") |tracker| {
 			trackServiceById(tracker, serviceId)
 		}
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
-		OpTracker().track("Locating dependency by type '$dependencyType.qname'") |tracker| {
+		shutdownLock.check
+		return OpTracker().track("Locating dependency by type '$dependencyType.qname'") |tracker| {
 			trackDependencyByType(tracker, dependencyType)
 		}
 	}
 
 	override Obj autobuild(Type type) {
+		shutdownLock.check
 		log.info("Autobuilding $type.qname")
 		return trackAutobuild(OpTracker(), type)
 	}
 
 	override Obj injectIntoFields(Obj object) {
+		shutdownLock.check
 		log.info("Injecting dependencies into fields of $object.typeof.qname")
 		return trackInjectIntoFields(OpTracker(), object)
 	}
