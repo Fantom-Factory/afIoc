@@ -94,14 +94,14 @@ internal const class InjectionUtils {
 			return ctor
 		}
 	}
-	
+
 	private static Obj createViaConstructor(OpTracker tracker, ObjLocator objLocator, Method ctor) {
 		args := determineInjectionParams(tracker, objLocator, ctor)
 		return tracker.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}
-	
+
 	private static Obj[] determineInjectionParams(OpTracker tracker, ObjLocator objLocator, Method method) {
 		return tracker.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			params := method.params.map |param| {
@@ -116,7 +116,7 @@ internal const class InjectionUtils {
 
 	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType) {
 		// FUTURE: this could take an FacetProvider to give more hints on dependency finding
-		// e.g. @Autobuild
+		// e.g. @Autobuild, @ServiceId
 		return tracker.track("Looking for dependency of type $dependencyType") |->Obj| {
 			t:=|This|#
 			if (dependencyType == t) {
@@ -132,6 +132,10 @@ internal const class InjectionUtils {
 	
 	private static Void inject(OpTracker tracker, Obj target, Field field, Obj value) {
 		tracker.track("Injecting $value.typeof.qname into field $field.signature") |->| {
+			if (field.get(target) != null) {
+				tracker.log("Field has non null value. Aborting injection.")
+				return
+			}
 			field.set(target, value)
 		}
 	}
