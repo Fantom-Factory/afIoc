@@ -29,5 +29,16 @@ class TestRegistry : Test {
 		verifyErr(IocErr#) { reg.injectIntoFields(T_MyService1()) }
 	}
 	
+	Void testServiceIdConflict() {
+		verifyErr(IocErr#) { 
+			RegistryBuilder().addModules([T_MyModule1#, T_MyModule1#]).build
+		}
+	}
+	
 }
 
+internal class T_MyModule11 {
+	static Void bind(ServiceBinder binder) {
+		
+	}
+}

@@ -40,6 +40,10 @@ internal const class IocMessages {
 		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
 	}
 	
+	static Str serviceIdNotFound(Str serviceId) {
+		"Service id '${serviceId}' is not defined by any module."
+	}
+	
 	static Str oneShotLockViolation(Str because) {
 		"Method may no longer be invoked - $because"
 	}

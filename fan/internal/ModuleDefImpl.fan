@@ -37,10 +37,6 @@ internal const class ModuleDefImpl : ModuleDef {
 
 
 	// ---- ModuleDef Methods ---------------------------------------------------------------------
-
-	override Str loggerName() {
-		moduleType.name
-	}
 	
 	override Str toStr() {
 		"Def for ${moduleType.name}"
@@ -74,11 +70,11 @@ internal const class ModuleDefImpl : ModuleDef {
 	}
 	
 	private Void addServiceDefFromMethod(OpTracker trakker, Str:ServiceDef serviceDefs, Method method) {
-		serviceDef	:= ServiceDefImpl {
+		serviceDef	:= StandardServiceDef {
 			it.serviceId 	= extractServiceId(method)
 			it.serviceType	= method.returns
 //			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
-			it.description	= method.toStr
+			it.description	= "'$serviceId' : Builder method $method.qname"
 			it.source		= |->Obj| { method.call }	// TODO: inject services into method
 			
 			serviceId 		:= it.serviceId
