@@ -54,6 +54,11 @@ A **dependency** is any class or object that another class depends on. A depende
 
 A **module** is a class where services and contributions are defined.
 
+Locating Modules [#locatingModules]
+***********************************
+
+
+
 Defining Services [#definingServices]
 *************************************
 Services are defined in Module classes, where each method has meaning. Module are not defined by a Mixin or inheritance, instead, convention is given to the method names. A common method is 'bind' which must take the following signature:
@@ -82,8 +87,14 @@ Dependency Injection [#dependencyInjection]
 *******************************************
 IoC performs both ctor and field injection.
 
-When IoC builds a service it locates a suitable ctor, this is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
+When IoC builds a service it locates a suitable ctor. This is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
 
+Field injection happens *after* the object has been created and so must be declared as nullable:
+
+  @Inject
+  MyService? myService
+
+After object construction and field injection you may perform extra setup via methods annotated with the '@PostInjection' facet. These may be of any visibility and all parameters are resolved as dependencies.
 
 
 Auto-Building [#autobuilding]

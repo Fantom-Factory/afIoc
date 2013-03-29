@@ -15,7 +15,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 	private Module[]				modules				:= [,]
 	private Str:Module				serviceIdToModule 	:= Str:Module[:]	{ caseInsensitive = true }
 	
-	new make(ModuleDef[] moduleDefs) {
+	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
 		
 		moduleDefs.each |def| {   
 			logger := Log.get(def.loggerName)

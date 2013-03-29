@@ -1,5 +1,5 @@
 
-// TODO: rename Msgs
+// TODO: rename to InternalMsgs...?
 internal const class IocMessages {
 	
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {

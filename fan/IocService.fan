@@ -10,6 +10,11 @@ const class IocService : Service {
 		set { stash["dependencies"] = it }
 	}
 
+	private Pod dependencyPod {
+		get { stash["dependencyPod"] }
+		set { stash["dependencyPod"] = it }
+	}
+
 	private Bool indexProps {
 		get { stash["indexProps"] }
 		set { stash["indexProps"] = it }
@@ -26,8 +31,9 @@ const class IocService : Service {
 		this.moduleTypes = moduleTypes
 	}
 	
-	This loadModulesFromDependencies() {
+	This loadModulesFromDependencies(Pod dependenciesOf) {
 		dependencies = true
+		dependencyPod = dependenciesOf
 		return this
 	}
 
@@ -48,7 +54,7 @@ const class IocService : Service {
 				regBuilder.addModulesFromIndexProperties
 			
 			if (dependencies)
-				regBuilder.addModulesFromDependencies
+				regBuilder.addModulesFromDependencies(dependencyPod)
 			
 			regBuilder.addModules(moduleTypes)
 			

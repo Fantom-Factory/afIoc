@@ -1,10 +1,16 @@
 
+** Builds a `Registry` from Modules. Modules may be added manually, defined my meta-data in 
+** dependent pods or defined by [index properties]`docLang::Env#index`
 class RegistryBuilder {
 	private const static Log 	log 		:= Utils.getLog(RegistryBuilder#)
 	
 	private OneShotLock lock		:= OneShotLock()
 	private ModuleDef[]	moduleDefs	:= [,]
 	
+	// FIXME: use tracker!
+	private OpTracker	tracker 	:= OpTracker()
+	
+	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
 		lock.check		
 		moduleTypes.each |moduleType| {
@@ -13,6 +19,7 @@ class RegistryBuilder {
 		return this
 	}
 
+	** Adds a module to the registry
 	This addModule(Type moduleType) {
 		lock.check
 
@@ -23,10 +30,24 @@ class RegistryBuilder {
 		return this
 	}
 	
-	This addModulesFromDependencies() {
+	** Adds all modules from all the dependencies of the given pod that are defined by the meta-data
+	This addModulesFromDependencies(Pod pod) {
 		lock.check
-		// TODO: addModulesFromDependencies
-//		Pod.find("").depends[0].
+		
+		pod.depends
+			.map { 
+				Pod.find(it.name).meta["afIoc.module"]
+			}
+			.exclude {
+				it == null
+			}
+			.map {
+				Type.find(it)
+			}
+			.each {
+				addModule(it)
+			}
+		
 		return this
 	}
 
@@ -43,7 +64,7 @@ class RegistryBuilder {
 	** `Registry.startup`
     Registry build() {
 		lock.lock
-        return RegistryImpl(moduleDefs)
+        return RegistryImpl(tracker, moduleDefs)
     }
 	
 	private This addModuleDef(ModuleDef moduleDef) {
