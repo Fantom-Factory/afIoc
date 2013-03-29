@@ -12,7 +12,9 @@ class TestCtorInjection : Test {
 	}
 
 	Void testCtorWithMostParamsIsPicked() {
+		Utils.setLoglevelDebug
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
+		Utils.setLoglevelInfo
 		verifyEq(reg.dependencyByType(T_MyService6#)->picked, "2 params" )
 	}
 

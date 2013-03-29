@@ -11,7 +11,7 @@ class RegistryBuilder {
 	
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
-		tracker.track("Adding module definition for '$moduleType.qname'") |->Obj?| {
+		tracker.track("Adding module definition for '$moduleType.qname'") |->| {
 			lock.check
 			logger.info("Adding module definition for $moduleType.qname")
 			
@@ -19,8 +19,6 @@ class RegistryBuilder {
 			addModuleDef(moduleDef)
 			
 			// TODO: Check for @SubModule facets
-			
-			return null
 		}
 		return this
 	}

@@ -1,45 +1,42 @@
 
-internal class ModuleDefImpl : ModuleDef {
+internal const class ModuleDefImpl : ModuleDef {
 	private const static Log log := Utils.getLog(ModuleDefImpl#)
 	
-	** The prefix used to identify service builder methods.
-	private static const Str BUILD_METHOD_NAME_PREFIX 		:= "build"
+	** prefix used to identify service builder methods
+	private static const Str 			BUILD_METHOD_NAME_PREFIX 		:= "build"
 
-	** The prefix used to identify service contribution methods.
-	private static const Str CONTRIBUTE_METHOD_NAME_PREFIX 	:= "contribute"
+	** prefix used to identify service contribution methods
+	private static const Str 			CONTRIBUTE_METHOD_NAME_PREFIX 	:= "contribute"
 
-	private static const Method[] OBJECT_METHODS 			:= Obj#.methods
+	private static const Method[]		OBJECT_METHODS 					:= Obj#.methods
 	
-	override 	Type 				moduleType
-	override 	Str:ServiceDef		serviceDefs				:= Str:ServiceDef[:] { caseInsensitive = true }
+	override 	const Type 				moduleType
+	override 	const Str:ServiceDef	serviceDefs
 	
-	// FIXME: use tracker
+
 	new make(OpTracker tracker, Type moduleType) {
 		this.moduleType = moduleType
 
-		// Want to verify that every public method is meaningful to Tapestry IoC. Remaining methods
-		// might have typos, i.e., "createFoo" that should be "buildFoo".
-		methods := moduleType.methods.exclude |method| { OBJECT_METHODS.contains(method) || method.isCtor }
-
-		grind(methods)
-		bind(methods)
-
-		if (!methods.isEmpty)
-			throw IocErr(IocMessages.unrecognisedModuleMethods(moduleType, methods))		
+		tracker.track("Inspecting module $moduleType.qname") |->| {
+			serviceDefs := Str:ServiceDef[:] { caseInsensitive = true }
+			
+			methods := moduleType.methods.exclude |method| { OBJECT_METHODS.contains(method) || method.isCtor }
+	
+			grind(tracker, serviceDefs, methods)
+			bind(tracker, serviceDefs, methods)
+	
+			// verify that every public method is meaningful to IoC. Any remaining methods may be 
+			// typos, i.e. "createFoo" instead of "buildFoo"
+			methods = methods.exclude { !it.isPublic }
+			if (!methods.isEmpty)
+				throw IocErr(IocMessages.unrecognisedModuleMethods(moduleType, methods))
+			
+			this.serviceDefs = serviceDefs
+		}
 	}
 
-	
-	
+
 	// ---- ModuleDef Methods ---------------------------------------------------------------------
-		
-    Void addServiceDef(ServiceDef serviceDef) {
-		ServiceDef? existing := serviceDefs[serviceDef.serviceId]
-		if (existing != null) {
-			throw IocErr(IocMessages.buildMethodConflict(serviceDef.serviceId, serviceDef.toStr, existing.toStr))
-		}
-		
-		serviceDefs[serviceDef.serviceId] = serviceDef
-    }	
 
 	override Str loggerName() {
 		moduleType.name
@@ -50,10 +47,9 @@ internal class ModuleDefImpl : ModuleDef {
 	}
 	
 	
-	
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private Void grind(Method[] remainingMethods) {
+	private Void grind(OpTracker tracker, Str:ServiceDef serviceDefs, Method[] remainingMethods) {
 		methods := moduleType.methods.dup.sort |Method a, Method b -> Int| { 
 			a.name <=> b.name 
 		}
@@ -61,7 +57,7 @@ internal class ModuleDefImpl : ModuleDef {
 		methods.each |method| {
 			
 			if (method.name.startsWith(BUILD_METHOD_NAME_PREFIX)) {
-				addServiceDefFromMethod(method)
+				addServiceDefFromMethod(serviceDefs, method)
 				remainingMethods.remove(method)
 				return
 			}
@@ -75,7 +71,7 @@ internal class ModuleDefImpl : ModuleDef {
 		}
 	}
 	
-	private Void addServiceDefFromMethod(Method method) {
+	private Void addServiceDefFromMethod(Str:ServiceDef serviceDefs, Method method) {
 		serviceDef	:= ServiceDefImpl {
 			it.serviceId 	= extractServiceId(method)
 			it.serviceType	= method.returns
@@ -91,8 +87,17 @@ internal class ModuleDefImpl : ModuleDef {
 				}
 			}			
 		}
-		addServiceDef(serviceDef)
+		addServiceDef(serviceDefs, serviceDef)
 	}	
+	
+    private Void addServiceDef(Str:ServiceDef serviceDefs, ServiceDef serviceDef) {
+		ServiceDef? existing := serviceDefs[serviceDef.serviceId]
+		if (existing != null) {
+			throw IocErr(IocMessages.buildMethodConflict(serviceDef.serviceId, serviceDef.toStr, existing.toStr))
+		}
+		
+		serviceDefs[serviceDef.serviceId] = serviceDef
+    }	
 	
 	private Str extractServiceId(Method method) {
 		serviceId := stripMethodPrefix(method, BUILD_METHOD_NAME_PREFIX)
@@ -107,7 +112,7 @@ internal class ModuleDefImpl : ModuleDef {
 		method.name[prefix.size..-1]
 	}
 	
-	private Void bind(Method[] remainingMethods) {
+	private Void bind(OpTracker tracker, Str:ServiceDef serviceDefs, Method[] remainingMethods) {
 		Method? bindMethod := moduleType.method("bind", false)
 		
 		if (bindMethod == null)
@@ -117,7 +122,9 @@ internal class ModuleDefImpl : ModuleDef {
 		if (!bindMethod.isStatic)
 			throw IocErr(IocMessages.bindMethodMustBeStatic(bindMethod.qname))
 		
-		binder := ServiceBinderImpl(this, bindMethod)
+		binder := ServiceBinderImpl(bindMethod) |ServiceDef serviceDef| {
+			addServiceDef(serviceDefs, serviceDef)
+		}
 		
 		try {
 			bindMethod.call(binder)			
@@ -126,7 +133,7 @@ internal class ModuleDefImpl : ModuleDef {
 		}
 		
 		binder.finish
-		remainingMethods.remove(bindMethod)	
+		remainingMethods.remove(bindMethod)
 	}
 }
 
