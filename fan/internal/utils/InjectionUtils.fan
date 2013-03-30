@@ -40,7 +40,7 @@ internal const class InjectionUtils {
 		tracker.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
-					Utils.hasFacet(method, PostInjection#) 
+					method.hasFacet(PostInjection#)
 				}
 				.reduce(false) |bool, method| {
 					tracker.log("Found method $method.signature")

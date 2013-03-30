@@ -27,11 +27,19 @@ internal class Utils {
 		}
 	}
 
+//	** Stoopid F4 thinks the 'facet' method is a reserved word!
+//	static Bool hasFacet(Slot slot, Type annotation) {
+//		slot.facets.find |fac| { 
+//			fac.typeof == annotation
+//		} != null		
+//	}
+
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
-	static Bool hasFacet(Slot slot, Type annotation) {
-		slot.facets.find |fac| { 
+	** 'hasFacet' is available on Type.
+	static Facet getFacet(Type type, Type annotation) {
+		type.facets.find |fac| { 
 			fac.typeof == annotation
-		} != null		
+		} ?: throw Err("Facet $annotation.qname not found on $type.qname")
 	}
 	
 }
