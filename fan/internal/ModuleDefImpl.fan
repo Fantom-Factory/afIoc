@@ -38,8 +38,12 @@ internal const class ModuleDefImpl : ModuleDef {
 
 	// ---- ModuleDef Methods ---------------------------------------------------------------------
 	
+	override Str moduleId() {
+		moduleType.qname
+	}
+	
 	override Str toStr() {
-		"Def for ${moduleType.name}"
+		"Def for ${moduleId}"
 	}
 	
 	
@@ -72,6 +76,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	private Void addServiceDefFromMethod(OpTracker trakker, Str:ServiceDef serviceDefs, Method method) {
 		serviceDef	:= StandardServiceDef {
 			it.serviceId 	= extractServiceId(method)
+			it.moduleId 	= this.moduleId
 			it.serviceType	= method.returns
 //			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
 			it.description	= "'$serviceId' : Builder method $method.qname"
@@ -126,11 +131,11 @@ internal const class ModuleDefImpl : ModuleDef {
 		tracker.track("Found binder method $bindMethod.qname") |->| {
 			if (!bindMethod.isStatic)
 				throw IocErr(IocMessages.bindMethodMustBeStatic(bindMethod))
-			
+
 			if (bindMethod.params.size != 1 || !bindMethod.params[0].type.fits(ServiceBinder#))
 				throw IocErr(IocMessages.bindMethodWrongParams(bindMethod))
-			
-			binder := ServiceBinderImpl(bindMethod) |ServiceDef serviceDef| {
+
+			binder := ServiceBinderImpl(bindMethod, this) |ServiceDef serviceDef| {
 				addServiceDef(tracker, serviceDefs, serviceDef)
 			}
 			

@@ -3,6 +3,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private const static Log log := Utils.getLog(ServiceBinderImpl#)
 	private OneShotLock 	lock := OneShotLock(IocMessages.serviceDefined)
 	
+	private ModuleDef		moduleDef
 	private Method 			bindMethod
 	|ServiceDef serviceDef| addServiceDef
 
@@ -14,9 +15,10 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
-	new make(Method bindMethod, |ServiceDef serviceDef| addServiceDef) {
+	new make(Method bindMethod, ModuleDef moduleDef, |ServiceDef serviceDef| addServiceDef) {
 		this.addServiceDef = addServiceDef
 		this.bindMethod = bindMethod
+		this.moduleDef = moduleDef
 		clear
 	}
 
@@ -95,11 +97,12 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			return
 
 		// sets source and description
-		createStandardConstructorBuilder
 		setDefaultScope
+		createStandardConstructorBuilder
 
 		serviceDef := StandardServiceDef() {
 			it.serviceId 	= this.serviceId
+			it.moduleId 	= this.moduleDef.moduleId
 			it.serviceType 	= this.serviceMixin
 //			it.isEagerLoad 	= this.eagerLoadFlag
 			it.source		= this.source
@@ -132,11 +135,12 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl
 		serviceId		:= this.serviceId
+		scope			:= this.scope
 		description 	= "'$serviceId' : Standard Ctor Builder"
 		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
 			tracker.track("Creating Serivce '$serviceId' via a standard ctor autobuild") |->Obj| {
 				log.info("Creating Service '$serviceId'")
-				return InjectionUtils.autobuild(tracker, objLocator, serviceImplType)
+				return InjectionUtils.autobuild(tracker, objLocator, serviceImplType, scope)
 			}
 		}
 	}	

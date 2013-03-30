@@ -2,12 +2,13 @@
 internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
+	private const static Str 				builtInModuleId		:= "BuiltIn Module"
 	private const RegistryShutdownHubImpl 	registryShutdownHub	:= RegistryShutdownHubImpl()
-	private const Module[]					modules
+	private const Str:Module				modules
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) : super(RegistryState#) {
 		serviceIdToModule := Str:Module[:]
-		modules := [,]
+		modules := [:]
 
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]
@@ -17,6 +18,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 			
 			services[StandardServiceDef() {
 				it.serviceId 	= "ctorFieldInjector"
+				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
 				it.scope		= ScopeDef.perInjection
 				it.description 	= "'$it.serviceId' : Autobuilt. Always."
@@ -25,7 +27,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 						trakker.track("Injecting via Ctor Field Injector") {
 							// TODO: Cannot reflectively set const fields, even in the ctor
 							// see http://fantom.org/sidewalk/topic/2119
-							InjectionUtils.injectIntoFields(trakker, objLoc, service, false)
+							InjectionUtils.injectIntoFields(trakker, objLoc, service, false, ScopeDef.perInjection)
 						}
 					}
 				}
@@ -34,9 +36,9 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 		// TODO: add some stats - e.g. hits - to the scoreboard
 	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 
-			builtInModule := StandardModule(this, services)
+			builtInModule := ModuleImpl(this, builtInModuleId, services)
 
-			modules.add(builtInModule)
+			modules[builtInModuleId] = builtInModule
 			services.keys.each {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
@@ -50,8 +52,8 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 				mIdToModule	:= iIdToModule.rw
 				
 				moduleDefs.each |moduleDef| {
-					module := StandardModule(this, moduleDef)
-					mModules.add(module)
+					module := ModuleImpl(this, moduleDef)
+					mModules[moduleDef.moduleId] = module
 
 					moduleDef.serviceDefs.keys.each |serviceId| {
 						if (mIdToModule.containsKey(serviceId)) {
@@ -124,7 +126,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
-        Obj[] services := modules.map |module| {
+        Obj[] services := modules.vals.map |module| {
 			module.service(tracker, serviceId)
 		}.exclude { it == null }
 
@@ -138,7 +140,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	}
 	
 	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
-        Str[] serviceIds := modules.map |module| {
+        Str[] serviceIds := modules.vals.map |module| {
 			module.findServiceIdsForType(dependencyType)
 		}.flatten
 
@@ -155,11 +157,11 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	}
 
 	override Obj trackAutobuild(OpTracker tracker, Type type) {
-		return InjectionUtils.autobuild(tracker, this, type)
+		return InjectionUtils.autobuild(tracker, this, type, null)
 	}
 	
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
-		return InjectionUtils.injectIntoFields(tracker, this, object, false)
+		return InjectionUtils.injectIntoFields(tracker, this, object, false, null)
 	}
 	
 	// ---- Helper Methods ------------------------------------------------------------------------
@@ -181,6 +183,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {
 		BuiltInServiceDef() {
 			it.serviceId = serviceId
+			it.moduleId = builtInModuleId
 			it.serviceType = serviceType
 			it.scope = ScopeDef.perApplication
 		}

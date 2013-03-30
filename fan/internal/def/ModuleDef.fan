@@ -4,6 +4,8 @@
 ** 
 internal const mixin ModuleDef {
 
+	abstract Str moduleId() 
+	
 	** Returns a map services built/provided by the module mapped by service id (case is ignored)
 	abstract Str:ServiceDef serviceDefs()
 

@@ -1,6 +1,9 @@
 
 internal mixin Module {
 
+	** Usually the qualified name of the Module Type 
+	abstract Str moduleId() 
+	
 	** Returns the service definition for the given service id
 	abstract ServiceDef? serviceDef(Str serviceId)
 

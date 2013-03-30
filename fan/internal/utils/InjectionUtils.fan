@@ -2,17 +2,17 @@
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 	
-	static Obj autobuild(OpTracker tracker, ObjLocator objLocator, Type type) {
+	static Obj autobuild(OpTracker tracker, ObjLocator objLocator, Type type, ScopeDef? scope) {
 		tracker.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(tracker, type)
 			obj  := createViaConstructor(tracker, objLocator, ctor)
-			injectIntoFields(tracker, objLocator, obj, false)
+			injectIntoFields(tracker, objLocator, obj, false, scope)
 			return obj
 		}
 	}
 	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool injectConstFields) {
+	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool injectConstFields, ScopeDef? scope) {
 		
 		// FIXME: Err if have const fields but not injecting into them
 		
@@ -25,15 +25,17 @@ internal const class InjectionUtils {
 	            })
 				tracker.log("No injection fields found")
 		}
-		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#, injectConstFields)
-				.reduce(false) |bool, field| {
-					dependency := autobuild(tracker, objLocator, field.type)
-	                inject(tracker, object, field, dependency)
-	                return true
-	            })
-				tracker.log("No autobuild fields found")
-		}
+		
+//		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
+//			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#, injectConstFields)
+//				.reduce(false) |bool, field| {
+//					dependency := autobuild(tracker, objLocator, field.type)
+//	                inject(tracker, object, field, dependency)
+//	                return true
+//	            })
+//				tracker.log("No autobuild fields found")
+//		}
+		
 		callPostInjectMethods(tracker, objLocator, object)
 		return object
     }
@@ -68,13 +70,13 @@ internal const class InjectionUtils {
 		tracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
 			ctor := |->Method| {
 				constructors := findConstructors(type)
-				
+
 				if (constructors.isEmpty)
 					throw IocErr(IocMessages.noConstructor(type))
-				
+
 				if (constructors.size == 1)
 					return constructors[0]
-		
+
 				annotated := constructors.findAll |c| {
 					c.hasFacet(Inject#)
 				}
@@ -138,7 +140,7 @@ internal const class InjectionUtils {
 	private static Method[] findConstructors(Type type) { 
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
-	
+
 	private static Field[] findFieldsWithFacet(OpTracker tracker, Type type, Type facetType, Bool includeConst) {
 		type.fields.findAll |field| {
 			// Ignore all static and final fields.
