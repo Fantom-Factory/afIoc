@@ -81,10 +81,10 @@ internal const class ModuleImpl : ConcurrentState, Module {
 		throw WtfErr("What scope is {$def.scope}???")
 	}
 
-    override Str[] findServiceIdsForType(Type serviceType) {
+    override ServiceDef[] serviceDefsByType(Type serviceType) {
         serviceDefs.findAll |serviceDef, serviceId| {
 			serviceDef.serviceType.fits(serviceType)
-        }.keys
+        }.vals
     }
 	
 	override Void clear() {
