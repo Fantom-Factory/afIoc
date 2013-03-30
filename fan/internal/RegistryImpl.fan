@@ -23,7 +23,9 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 				it.source		= |OpTracker trakker, ObjLocator objLoc->Obj| {
 					|Obj service| {
 						trakker.track("Injecting via Ctor Field Injector") {
-							InjectionUtils.injectIntoFields(trakker, objLoc, service)
+							// TODO: Cannot reflectively set const fields, even in the ctor
+							// see http://fantom.org/sidewalk/topic/2119
+							InjectionUtils.injectIntoFields(trakker, objLoc, service, false)
 						}
 					}
 				}
@@ -157,7 +159,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	}
 	
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
-		return InjectionUtils.injectIntoFields(tracker, this, object)
+		return InjectionUtils.injectIntoFields(tracker, this, object, false)
 	}
 	
 	// ---- Helper Methods ------------------------------------------------------------------------
