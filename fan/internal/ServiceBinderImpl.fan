@@ -28,6 +28,12 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
         lock.check
         flush
 
+		if (serviceImpl.isMixin) 
+			throw IocErr(IocMessages.bindImplNotClass(serviceImpl))
+
+		if (!serviceImpl.fits(serviceMixin)) 
+			throw IocErr(IocMessages.bindImplDoesNotFit(serviceMixin, serviceImpl))
+
         this.serviceMixin	= serviceMixin
         this.serviceImpl 	= serviceImpl
         this.serviceId 		= serviceMixin.name
@@ -37,18 +43,13 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	
 	override ServiceBindingOptions bindImpl(Type serviceType) {
 		if (serviceType.isMixin) {
-			try {	// FIXME: test
-				expectedImplName 	:= serviceType.qname + "Impl"
-				implType 			:= Type.find(expectedImplName)
-				
-				if (implType.isMixin || !implType.fits(serviceType)) 
-					throw IocErr(IocMessages.noServiceMatchesType(serviceType))
-
-				return bind(serviceType, implType)
-				
-			} catch (UnknownTypeErr ex) {
+			expectedImplName 	:= serviceType.qname + "Impl"
+			implType 			:= Type.find(expectedImplName, false)
+			
+			if (implType == null)
 				throw IocErr(IocMessages.couldNotFindImplType(serviceType))
-			}
+
+			return bind(serviceType, implType)
 		}
 
 		return bind(serviceType, serviceType);

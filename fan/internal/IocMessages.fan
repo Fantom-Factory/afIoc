@@ -20,6 +20,14 @@ internal const class IocMessages {
 		"Binder method ${method.qname} must only take one parameter of type 'ServiceBinder' : ${method.signature}"
 	}
 	
+	static Str bindImplDoesNotFit(Type service, Type impl) {
+		"Service Implementation ${impl.qname} does not fit ${service.qname}"
+	}
+	
+	static Str bindImplNotClass(Type impl) {
+		"Service Implementation ${impl.qname} is not instantiatable"
+	}
+	
 	static Str errorInBindMethod(Str methodId, Err cause) {
 		"Error invoking service binder method ${methodId}: ${cause}"
 	}

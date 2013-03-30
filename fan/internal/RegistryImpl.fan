@@ -122,7 +122,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
         Str[] serviceIds := modules.map |module| {
 			module.findServiceIdsForType(dependencyType)
-		}.flatten	// FIXME: how to empty lists flatten?
+		}.flatten
 
 		// FUTURE: if no service found, ask other object locators
 		if (serviceIds.isEmpty)
