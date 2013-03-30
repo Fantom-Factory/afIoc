@@ -1,23 +1,21 @@
 
-internal class RegistryImpl : Registry, ObjLocator {
+internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
-	private const RegistryShutdownHubImpl registryShutdownHub	:= RegistryShutdownHubImpl()
-
-	private OneShotLock 			startupLock 		:= OneShotLock(IocMessages.registryStarted)
-	private OneShotLock 			shutdownLock 		:= OneShotLock(IocMessages.registryShutdown)
-
-	private Module[]				modules				:= [,]
+	private const RegistryShutdownHubImpl 	registryShutdownHub	:= RegistryShutdownHubImpl()
+	private const Module[]					modules
 	
-	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
+	new make(OpTracker tracker, ModuleDef[] moduleDefs) : super(RegistryState#) {
 		serviceIdToModule := Str:Module[:]
-		
+		modules := [,]
+
 		tracker.track("Defining Built-In services") |->| {
-			builtInModule := BuiltInModule(this)
-			builtInModule.addBuiltInService("registry", Registry#, this)
-			builtInModule.addBuiltInService("registryShutdownHub", RegistryShutdownHub#, registryShutdownHub)
+			services := ServiceDef:Obj?[:]
 			
-			builtInModule.addBuiltInServiceDef(StandardServiceDef() {
+			services[makeBuiltInServiceDef("registry", Registry#)] = this 
+			services[makeBuiltInServiceDef("registryShutdownHub", RegistryShutdownHub#)] = registryShutdownHub
+			
+			services[StandardServiceDef() {
 				it.serviceId 	= "ctorFieldInjector"
 				it.serviceType 	= |This|#
 				it.scope		= ScopeDef.perInjection
@@ -29,33 +27,45 @@ internal class RegistryImpl : Registry, ObjLocator {
 						}
 					}
 				}
-			})
+			}] = null
 			
 		// TODO: add some stats - e.g. hits - to the scoreboard
 	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
-			
+
+			builtInModule := StandardModule(this, services)
+
 			modules.add(builtInModule)
-			builtInModule.serviceDefs.each {
+			services.keys.each {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
 		}
 
 		tracker.track("Consolidating module definitions") |->| {
-			moduleDefs.each |moduleDef| {
-				module := StandardModule(this, moduleDef)
-				modules.add(module)
+			iModules 	:= modules.toImmutable
+			iIdToModule	:= serviceIdToModule.toImmutable
+			modules = getMyState |state| {
+				mModules 	:= iModules.rw
+				mIdToModule	:= iIdToModule.rw
+				
+				moduleDefs.each |moduleDef| {
+					module := StandardModule(this, moduleDef)
+					mModules.add(module)
 
-				moduleDef.serviceDefs.keys.each |serviceId| {
-					if (serviceIdToModule.containsKey(serviceId)) {
-						existingDef 	:= serviceIdToModule[serviceId].serviceDef(serviceId)
-						conflictingDef 	:= module.serviceDef(serviceId)
-						throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
-					}
-					serviceIdToModule[serviceId] = module
-				}				
+					moduleDef.serviceDefs.keys.each |serviceId| {
+						if (mIdToModule.containsKey(serviceId)) {
+							existingDef 	:= mIdToModule[serviceId].serviceDef(serviceId)
+							conflictingDef 	:= module.serviceDef(serviceId)
+							throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
+						}
+						mIdToModule[serviceId] = module
+					}				
+				}
+				
+				return mModules.toImmutable
 			}
 		}
 		
+		this.modules = modules
 		// TODO: contributions
 //        validateContributeDefs(moduleDefs);
 	}
@@ -63,43 +73,48 @@ internal class RegistryImpl : Registry, ObjLocator {
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	override This startup() {
-		startupLock.lock
+		withMyState |state| {
+			state.startupLock.lock
+		}
 		// TODO: do service startup loading
 		return this
 	}
 
 	override This shutdown() {
-		shutdownLock.lock
+		withMyState |state| {
+			state.shutdownLock.lock
+		}
+
 		registryShutdownHub.fireRegistryDidShutdown()
 		
 		// destroy all internal refs
-		modules.clear
+		modules.each { it.clear }
 		
 		return this
 	}
 
 	override Obj serviceById(Str serviceId) {
-		shutdownLock.check
+		shutdownLockCheck
 		return OpTracker().track("Locating service by ID '$serviceId'") |tracker| {
 			trackServiceById(tracker, serviceId)
 		}
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
-		shutdownLock.check
+		shutdownLockCheck
 		return OpTracker().track("Locating dependency by type '$dependencyType.qname'") |tracker| {
 			trackDependencyByType(tracker, dependencyType)
 		}
 	}
 
 	override Obj autobuild(Type type) {
-		shutdownLock.check
+		shutdownLockCheck
 		log.info("Autobuilding $type.qname")
 		return trackAutobuild(OpTracker(), type)
 	}
 
 	override Obj injectIntoFields(Obj object) {
-		shutdownLock.check
+		shutdownLockCheck
 		log.info("Injecting dependencies into fields of $object.typeof.qname")
 		return trackInjectIntoFields(OpTracker(), object)
 	}
@@ -107,8 +122,8 @@ internal class RegistryImpl : Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
-        Obj[] services := modules.map {
-			it.service(tracker, serviceId)
+        Obj[] services := modules.map |module| {
+			module.service(tracker, serviceId)
 		}.exclude { it == null }
 
 		if (services.isEmpty) 
@@ -125,7 +140,8 @@ internal class RegistryImpl : Registry, ObjLocator {
 			module.findServiceIdsForType(dependencyType)
 		}.flatten
 
-		// FUTURE: if no service found, ask other object locators
+		// TODO: if not service found, ask other object locators
+		
 		if (serviceIds.isEmpty)
 			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
 		if (serviceIds.size > 1)
@@ -143,4 +159,33 @@ internal class RegistryImpl : Registry, ObjLocator {
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
 		return InjectionUtils.injectIntoFields(tracker, this, object)
 	}
+	
+	// ---- Helper Methods ------------------------------------------------------------------------
+
+	private Void shutdownLockCheck() {
+		withMyState |state| {
+			state.shutdownLock.check
+		}		
+	}
+	
+	private Void withMyState(|RegistryState| state) {
+		super.withState(state)
+	}
+
+	private Obj? getMyState(|RegistryState -> Obj| state) {
+		super.getState(state)
+	}
+	
+	ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {
+		BuiltInServiceDef() {
+			it.serviceId = serviceId
+			it.serviceType = serviceType
+			it.scope = ScopeDef.perApplication
+		}
+	}
+}
+
+internal class RegistryState {
+	OneShotLock 			startupLock 		:= OneShotLock(IocMessages.registryStarted)
+	OneShotLock 			shutdownLock 		:= OneShotLock(IocMessages.registryShutdown)
 }

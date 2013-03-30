@@ -26,7 +26,7 @@ const class ConcurrentState {
 		try {
 			state := Actor.locals[stateType.qname]
 			
-			// lazily create out state
+			// lazily create our state
 			if (state == null) {
 				state = stateType.make
 				Actor.locals[stateType.qname] = state
@@ -37,8 +37,8 @@ const class ConcurrentState {
 		} catch (Err e) {
 			// if the func has a return type, then an the Err is rethrown on assignment
 			// else we log the Err so the Thread doesn't fail silently
-			if (func.returns == Void#)
-				log.err("receive()", e)
+//			if (func.returns == Void#)
+//				log.err("receive()", e)
 			throw e
 		}
 	}	
