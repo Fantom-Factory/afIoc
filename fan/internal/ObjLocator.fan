@@ -1,6 +1,6 @@
 
-// TODO: rename
-internal mixin ObjLocator {
+// TODO: rename -> Dependency...?
+internal const mixin ObjLocator {
 
 	** Obtains a service via its unique service id. 
     abstract Obj trackServiceById(OpTracker tracker, Str serviceId)

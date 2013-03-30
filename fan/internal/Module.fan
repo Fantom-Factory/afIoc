@@ -10,4 +10,6 @@ internal mixin Module {
 	** Locates the ids of all services that implement the provided service type, or whose service type is
     ** assignable to the provided service type (is a super-class or super-mixin).
     abstract Str[] findServiceIdsForType(Type serviceType)
+	
+	abstract Void clear()
 }
