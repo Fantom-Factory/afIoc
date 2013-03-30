@@ -11,7 +11,7 @@ internal class StandardModule : Module {
 			serviceDefs[def.serviceId] = def
 		}
 	}
-	
+
 	// ---- Module Methods ----------------------------------------------------
 	
 	override ServiceDef? serviceDef(Str serviceId) {

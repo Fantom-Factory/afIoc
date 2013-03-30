@@ -2,9 +2,10 @@
 internal class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
+	private const RegistryShutdownHubImpl registryShutdownHub	:= RegistryShutdownHubImpl()
+
 	private OneShotLock 			startupLock 		:= OneShotLock(IocMessages.registryStarted)
 	private OneShotLock 			shutdownLock 		:= OneShotLock(IocMessages.registryShutdown)
-	private RegistryShutdownHubImpl registryShutdownHub	:= RegistryShutdownHubImpl()
 
 	private Module[]				modules				:= [,]
 	
