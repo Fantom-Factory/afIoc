@@ -18,7 +18,15 @@ class RegistryBuilder {
 			moduleDef := ModuleDefImpl(tracker, moduleType)
 			addModuleDef(moduleDef)
 			
-			// TODO: Check for @SubModule facets
+			if (moduleType.hasFacet(SubModule#)) {
+				subModule := Utils.getFacet(moduleType, SubModule#) as SubModule
+				tracker.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
+					subModule.modules.each { 
+						addModule(it)
+					}
+				}
+			} else
+				tracker.log("No SubModules found")
 		}
 		return this
 	}

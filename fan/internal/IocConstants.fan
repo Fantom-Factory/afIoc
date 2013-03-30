@@ -1,5 +1,5 @@
 
-mixin IocConstants {
+internal mixin IocConstants {
 	
 	static const Str podMetaModuleName		:= "afIoc.module"
 	

@@ -24,6 +24,11 @@ class TestModule : Test {
 			reg := RegistryBuilder().addModule(T_MyModule10#).build
 		}		
 	}
+	
+	Void testSubModule() {
+		reg := RegistryBuilder().addModule(T_MyModule12#).build
+		reg.dependencyByType(T_MyService2#)
+	}
 }
 
 internal class T_MyModule2 {
@@ -46,4 +51,8 @@ internal class T_MyModule9 {
 
 internal class T_MyModule10 {
 	static Void bind(Obj wotever) { }
+}
+
+@SubModule{modules=[T_MyModule1#]}
+internal class T_MyModule12 {
 }
