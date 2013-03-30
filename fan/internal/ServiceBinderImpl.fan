@@ -9,6 +9,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Str? 			serviceId
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
+	private ScopeDef? 		scope
 //	private Bool?			eagerLoadFlag
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
@@ -21,7 +22,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 
 
-	// ---- ServiceBinder Method ------------------------------------------------------------------
+	// ---- ServiceBinder Methods -----------------------------------------------------------------
 	
     override ServiceBindingOptions bind(Type serviceMixin, Type serviceImpl) {
         lock.check
@@ -29,7 +30,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
         this.serviceMixin	= serviceMixin
         this.serviceImpl 	= serviceImpl
-//        this.eagerLoadFlag	= serviceImpl.hasFacet(EagerLoad#)
         this.serviceId 		= serviceMixin.name
 
         return this
@@ -37,7 +37,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	
 	override ServiceBindingOptions bindImpl(Type serviceType) {
 		if (serviceType.isMixin) {
-			try {
+			try {	// FIXME: test
 				expectedImplName 	:= serviceType.qname + "Impl"
 				implType 			:= Type.find(expectedImplName)
 				
@@ -52,21 +52,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		}
 
 		return bind(serviceType, serviceType);
-	}	
-	
-	override ServiceBindingOptions bindBuilder(Type serviceInterface, |->Obj| builder) {
-        lock.check
-        flush
+	}
 
-        this.serviceId 		= serviceInterface.name
-        this.serviceMixin 	= serviceInterface
-//        this.eagerLoadFlag	= false
-        this.source 		= builder
-        this.description	= builder.toStr
-        return this
-    }		
-
-	
 	
 	// ---- ServiceBindingOptions Methods ---------------------------------------------------------
 
@@ -101,17 +88,16 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		if (serviceMixin == null)
 			return
 
-		// source will be null when the implementation class is provided; non-null when using
-		// a ServiceBuilder callback
-		if (source == null)
-			// sets source and description
-			createStandardConstructorBuilder
+		// sets source and description
+		createStandardConstructorBuilder
+		setDefaultScope
 
 		serviceDef := StandardServiceDef() {
 			it.serviceId 	= this.serviceId
 			it.serviceType 	= this.serviceMixin
 //			it.isEagerLoad 	= this.eagerLoadFlag
 			it.source		= this.source
+			it.scope		= this.scope
 			it.description	= this.description
 		}
 
@@ -125,11 +111,17 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		serviceImpl		= null
 //		eagerLoadFlag	= null
 		source 			= null
+		scope 			= null
 		description		= null
 	}
 	
+	private Void setDefaultScope() {
+		if (scope != null)
+			return
+		scope = serviceImpl.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
+	}
+	
 	private Void createStandardConstructorBuilder() {
-		
 		// lock down the service Impl type so it can't change behind our backs
 		// or... I could Func.bind()
 		serviceImplType	:= this.serviceImpl

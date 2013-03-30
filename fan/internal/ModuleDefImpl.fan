@@ -75,7 +75,11 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.serviceType	= method.returns
 //			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
 			it.description	= "'$serviceId' : Builder method $method.qname"
-			it.source		= |->Obj| { method.call }	// TODO: inject services into method
+
+			if (method.returns.isMixin)
+				it.scope	= ScopeDef.perThread
+			else
+				it.scope 	= method.returns.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
 			
 			serviceId 		:= it.serviceId
 			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {

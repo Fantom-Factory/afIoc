@@ -1,11 +1,9 @@
 
 internal const class StandardServiceDef : ServiceDef {
 	
-	override 
-	const Str 	serviceId
-	
-	override 
-	const Type	serviceType
+	override const Str 		serviceId
+	override const Type		serviceType
+	override const ScopeDef	scope
 	
 	const |OpTracker, ObjLocator->Obj| 	source
 	const Str	description

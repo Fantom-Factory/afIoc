@@ -1,10 +1,10 @@
-
-	@SubModule
 	
-	threads / actors
+	threads / actors / scope
 	
 	@ServiceId / @AutoBuild
 	
 	Add other Object providers
 	
 	contributions
+	
+	contributions overrides
