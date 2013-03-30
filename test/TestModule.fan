@@ -29,6 +29,23 @@ class TestModule : Test {
 		reg := RegistryBuilder().addModule(T_MyModule12#).build
 		reg.dependencyByType(T_MyService2#)
 	}
+	
+	Void testBindImplFindsImpl() {
+		reg :=  RegistryBuilder().addModule(T_MyModule13#).build.startup
+		reg.serviceById("yo")
+	}
+	
+	Void testBindImplFitsMixin() {
+		verifyErr(IocErr#) {   			
+			RegistryBuilder().addModule(T_MyModule14#).build
+		}
+	}
+	
+	Void testBindImplFitsMixinErrIfNot() {
+		verifyErr(IocErr#) {   			
+			RegistryBuilder().addModule(T_MyModule15#).build
+		}
+	}
 }
 
 internal class T_MyModule2 {
@@ -56,3 +73,28 @@ internal class T_MyModule10 {
 @SubModule{modules=[T_MyModule1#]}
 internal class T_MyModule12 {
 }
+
+internal class T_MyModule13 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService10#).withId("yo")
+	}
+}
+
+internal class T_MyModule14 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService11#).withId("yo")
+	}
+}
+
+internal class T_MyModule15 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService1#, T_MyService2#)
+	}
+}
+
+internal mixin T_MyService10 { }
+internal class T_MyService10Impl : T_MyService10 { }
+
+internal mixin T_MyService11 { }
+internal mixin T_MyService11Impl : T_MyService11 { }
+

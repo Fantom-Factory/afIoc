@@ -136,6 +136,8 @@ internal const class ModuleDefImpl : ModuleDef {
 			
 			try {
 				bindMethod.call(binder)			
+			} catch (IocErr e) {
+				throw e
 			} catch (Err e) {
 				throw IocErr(IocMessages.errorInBindMethod(bindMethod.qname, e), e)
 			}
