@@ -1,35 +1,36 @@
 
-internal class RegistryShutdownHubImpl : RegistryShutdownHub {
-	private const static Log 	log 		:= Log.get(RegistryShutdownHubImpl#.name)
+internal const class RegistryShutdownHubImpl : ConcurrentState, RegistryShutdownHub {
+	private const static Log 	log 				:= Log.get(RegistryShutdownHubImpl#.name)
 	
-	private OneShotLock lock 			:= OneShotLock(IocMessages.registryShutdown)
-	private |->|[] 		preListeners 	:= [,]
-	private |->|[] 		listeners 		:= [,]
-
-	
+	new make() : super(RegistryShutdownHubState#) { }
 	
 	override Void addRegistryShutdownListener(|->| listener) {
-		lock.check
-		listeners.add(listener)
+		withMyState |state| {
+			state.lock.check
+			state.listeners.add(listener)
+		}
 	}
 
 	override Void addRegistryWillShutdownListener(|->| listener) {
-		lock.check
-		preListeners.add(listener)
+		withMyState |state| {
+			state.lock.check
+			state.preListeners.add(listener)
+		}
 	}
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
 	internal Void fireRegistryDidShutdown() {
-		lock.lock
+		withMyState |state| {
+			state.lock.lock
+		}
 
-		preListeners.each |listener| {
+		preListeners.each | |->| listener| {
 			try {
 				listener()
 			} catch (Err e) {
 				log.err(ServiceMessages.shutdownListenerError(listener, e))
 			}
 		}
-		preListeners.clear
 
 		listeners.each |listener| {
 			try {
@@ -37,7 +38,33 @@ internal class RegistryShutdownHubImpl : RegistryShutdownHub {
 			} catch (Err e) {
 				log.err(ServiceMessages.shutdownListenerError(listener, e))
 			}
-		}		
-		listeners.clear
+		}
+		
+		withMyState |state| {
+			state.preListeners.clear
+			state.listeners.clear
+		}
 	}
+	
+	private |->|[] preListeners() {
+		getMyState |state| { state.preListeners.toImmutable }
+	}
+
+	private |->|[] listeners() {
+		getMyState |state| { state.listeners.toImmutable }
+	}
+
+	private Void withMyState(|RegistryShutdownHubState| state) {
+		super.withState(state)
+	}
+
+	private Obj? getMyState(|RegistryShutdownHubState -> Obj| state) {
+		super.getState(state)
+	}
+}
+
+internal class RegistryShutdownHubState {
+	OneShotLock lock	:= OneShotLock(IocMessages.registryShutdown)
+	|->|[] preListeners	:= [,]
+	|->|[] listeners	:= [,]
 }

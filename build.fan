@@ -15,7 +15,7 @@ class Build : BuildPod {
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0"]
-		srcDirs = [`test/`, `fan/`, `fan/ioc/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
+		srcDirs = [`test/`, `fan/`, `fan/ioc/`, `fan/ioc/utils/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
 		resDirs = [`doc/`]
 		
 		docApi = true

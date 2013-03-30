@@ -1,7 +1,7 @@
 **
 ** Event hub for notifications when the IOC `Registry` shuts down.
 ** 
-mixin RegistryShutdownHub {
+const mixin RegistryShutdownHub {
 
 	** Adds a listener for eventual notification when the registry shuts down. 
 	** Runtime exceptions thrown by the listener will be logged and ignored.

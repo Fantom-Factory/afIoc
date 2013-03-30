@@ -8,7 +8,7 @@ class TestRegistryShutdownHub : Test {
 		
 		verify(service.called)
 	}
-	
+
 }
 
 internal class T_MyModule3 {
@@ -17,9 +17,15 @@ internal class T_MyModule3 {
 	}
 }
 
-internal class T_MyService3 {
-	Bool called
+internal const class T_MyService3 {
+	private const LocalStash 	stash	:= LocalStash(typeof)
+	
+	Bool called {
+		get { stash["called"] }
+		set { stash["called"] = it }
+	}
+	
 	new make(RegistryShutdownHub shutdownHub) {
-		shutdownHub.addRegistryShutdownListener |->| { called = true; }
+		shutdownHub.addRegistryShutdownListener |->| { called = true }
 	}
 }
