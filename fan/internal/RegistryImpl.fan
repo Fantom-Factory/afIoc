@@ -126,34 +126,37 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
-        Obj[] services := modules.vals.map |module| {
-			module.service(tracker, serviceId)
+        ServiceDef[] serviceDefs := modules.vals.map |module| {
+			module.serviceDef(serviceId)
 		}.exclude { it == null }
 
-		if (services.isEmpty) 
+		if (serviceDefs.isEmpty) 
             throw IocErr(IocMessages.serviceIdNotFound(serviceId))
 		
-		if (services.size > 1)
+		if (serviceDefs.size > 1)
 			throw WtfErr("Multiple services defined for service id $serviceId")
 		
-        return services[0]
+		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
+        return modules[serviceDefs[0].moduleId].service(tracker, serviceId)
 	}
 	
 	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
-        Str[] serviceIds := modules.vals.map |module| {
-			module.findServiceIdsForType(dependencyType)
+        ServiceDef[] serviceDefs := modules.vals.map |module| {
+			module.serviceDefsByType(dependencyType)
 		}.flatten
 
 		// TODO: if not service found, ask other object locators
 		
-		if (serviceIds.isEmpty)
+		if (serviceDefs.isEmpty)
 			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
-		if (serviceIds.size > 1)
-			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceIds))
+		if (serviceDefs.size > 1)
+			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceDefs.map { it.serviceId }))
 
-		serviceId := serviceIds.get(0)
+		serviceId := serviceDefs[0].serviceId
 		tracker.log("Found Service '$serviceId'")
-        return trackServiceById(tracker, serviceId)
+
+		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
+        return modules[serviceDefs[0].moduleId].service(tracker, serviceId)
 	}
 
 	override Obj trackAutobuild(OpTracker tracker, Type type) {
