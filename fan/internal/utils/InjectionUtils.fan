@@ -6,15 +6,18 @@ internal const class InjectionUtils {
 		tracker.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(tracker, type)
 			obj  := createViaConstructor(tracker, objLocator, ctor)
-			injectIntoFields(tracker, objLocator, obj)
+			injectIntoFields(tracker, objLocator, obj, false)
 			return obj
 		}
 	}
 	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object) {
+	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool injectConstFields) {
+		
+		// FIXME: Err if have const fields but not injecting into them
+		
 		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(tracker, object.typeof, Inject#)
+			if (!findFieldsWithFacet(tracker, object.typeof, Inject#, injectConstFields)
 				.reduce(false) |bool, field| {
 					dependency := findDependencyByType(tracker, objLocator, field.type)
 	                inject(tracker, object, field, dependency)
@@ -23,7 +26,7 @@ internal const class InjectionUtils {
 				tracker.log("No injection fields found")
 		}
 		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#)
+			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#, injectConstFields)
 				.reduce(false) |bool, field| {
 					dependency := autobuild(tracker, objLocator, field.type)
 	                inject(tracker, object, field, dependency)
@@ -136,11 +139,14 @@ internal const class InjectionUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
 	
-	private static Field[] findFieldsWithFacet(OpTracker tracker, Type type, Type facetType) {
+	private static Field[] findFieldsWithFacet(OpTracker tracker, Type type, Type facetType, Bool includeConst) {
 		type.fields.findAll |field| {
 			// Ignore all static and final fields.
-	    	if (field.isStatic || field.isConst)
+	    	if (field.isStatic)
 	    		return false
+			
+			if (field.isConst && !includeConst)
+				return false
 
 	    	if (!field.hasFacet(facetType)) 
 	    		return false

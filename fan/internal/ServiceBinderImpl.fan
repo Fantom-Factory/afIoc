@@ -60,14 +60,19 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 	override This withId(Str id) {
         lock.check
-        serviceId = id
+        this.serviceId = id
         return this
 	}
 
 	override This withSimpleId() {
-        if (serviceImpl == null)
-			throw ArgErr("No defined implementation class to generate simple id from.")
-        return withId(serviceImpl.name)		
+        withId(serviceImpl.name)		
+	}
+
+	override This withScope(ScopeDef scope) {
+		if (scope == ScopeDef.perApplication && !serviceImpl.isConst)	// FIXME: test
+			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceImpl))
+		this.scope = scope
+		return this
 	}
 
 //	override This eagerLoad() {

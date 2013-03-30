@@ -28,6 +28,10 @@ internal const class IocMessages {
 		"Service Implementation ${impl.qname} is not instantiatable"
 	}
 	
+	static Str perAppScopeOnlyForConstClasses(Type impl) {
+		"'perApplication' scope is only for const classes : $impl.qname"
+	}
+	
 	static Str errorInBindMethod(Str methodId, Err cause) {
 		"Error invoking service binder method ${methodId}: ${cause}"
 	}

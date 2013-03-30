@@ -30,7 +30,7 @@ internal class OpTracker {
 		        logger.err(err.msg.isEmpty ? err.typeof.qname : err.msg)
 		        logger.err("Operations trace:")
 		        operations.each |op, i| {   
-		        	logger.err("[${(i+1).toStr.justr(2)}] $op")
+		        	logger.err("[${(i+1).toStr.justr(2)}] $op.description")
 		        }
 				logged = true
 			}

@@ -1,5 +1,5 @@
 
-mixin Registry {
+const mixin Registry {
 	
  	** Invoked to execute all contributions to the Startup service.
 	abstract This startup()
