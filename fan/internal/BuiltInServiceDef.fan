@@ -1,8 +1,9 @@
 
 internal const class BuiltInServiceDef : ServiceDef {
 
-	override const Str 	serviceId
-	override const Type serviceType	
+	override const Str 		serviceId
+	override const Type 	serviceType	
+	override const ScopeDef scope
 	
 	new make(|This|? f := null) { f?.call(this)	}
 

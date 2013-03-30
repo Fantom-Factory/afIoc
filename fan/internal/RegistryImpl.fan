@@ -19,6 +19,7 @@ internal class RegistryImpl : Registry, ObjLocator {
 			builtInModule.addBuiltInServiceDef(StandardServiceDef() {
 				it.serviceId 	= "ctorFieldInjector"
 				it.serviceType 	= |This|#
+				it.scope		= ScopeDef.perInjection
 				it.description 	= "'$it.serviceId' : Autobuilt. Always."
 				it.source		= |OpTracker trakker, ObjLocator objLoc->Obj| {
 					|Obj service| {

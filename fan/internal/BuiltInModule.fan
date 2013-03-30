@@ -13,6 +13,7 @@ internal class BuiltInModule : Module {
 		serviceDefs[serviceId] = BuiltInServiceDef() {
 			it.serviceId = serviceId
 			it.serviceType = serviceType
+			it.scope = ScopeDef.perApplication
 		}
 		services[serviceId] = service
 	}
