@@ -32,18 +32,21 @@ class TestThreadedAccess : Test {
 		s12 := reg.serviceById("s12")	// perThread
 		s13 := reg.serviceById("s13")	// perApp
 
-		Actor(ActorPool()) |->| {
-			s12i := reg.serviceById("s12")
-			assertNotSame(s12, s12i)
-
-			s13i := reg.serviceById("s13")
-			assertSame(s13, s13i)
-
-			// FIXME: should err 
-			// TODO: Think about having a PerThread wrapper service
-			assertNotSame(s13->s12, s13i->s12)
-
-		}.send(null).get
+//		Actor(ActorPool()) |->| {
+//			s12i := reg.serviceById("s12")
+//			assertNotSame(s12, s12i)
+//
+//			s13i := reg.serviceById("s13")
+//			assertSame(s13, s13i)
+//
+//			// FIXME: should err 
+//			// TODO: Think about having a PerThread wrapper Injection Provider : PerThread.get
+//			assertNotSame(s13->s12, s13i->s12)
+//
+//		}.send(null).get
+		
+		// thread in apps, not allowed
+		verifyErr(IocErr#) { reg.serviceById("s14") }
 	}
 
 	Void testAppInThread() {
@@ -62,6 +65,11 @@ class TestThreadedAccess : Test {
 			assertSame(s13->s12, s13i->s12)
 			
 		}.send(null).get
+	}
+
+	Void testErrThrownWhenConstFieldNotSet() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule19#).build.startup
+		verifyErr(IocErr#) { reg.serviceById("s14") }
 	}
 
 	static Void assertSame(Obj? o1, Obj? o2) {
@@ -88,6 +96,7 @@ internal class T_MyModule17 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService12#).withId("s12").withScope(ScopeDef.perThread)
 		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeDef.perApplication)
+		binder.bindImpl(T_MyService13#).withId("s14").withScope(ScopeDef.perApplication)
 	}
 }
 
@@ -97,6 +106,18 @@ internal class T_MyModule18 {
 		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeDef.perThread)
 	}
 }
+
+internal class T_MyModule19 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService14#).withId("s14")
+	}
+}
+
+//internal class T_MyModule19 {
+//	static Void bind(ServiceBinder binder) {
+//		binder.bindImpl(T_MyService14#).withId("s14")
+//	}
+//}
 
 internal const class T_MyService12 {
 	const Str kick	:= "DREDD"
@@ -109,3 +130,9 @@ internal const class T_MyService13 {
 //	new make(|This|in) { in(this) }
 	new make(T_MyService12 s12) { this.s12 = s12 }
 }
+
+internal class T_MyService14 {
+	@Inject
+	const T_MyService12? s12	
+}
+

@@ -1,6 +1,7 @@
 
-internal const class StandardModule : ConcurrentState, Module {
+internal const class ModuleImpl : ConcurrentState, Module {
 	
+	override const Str				moduleId
 	private const LocalStash 		stash	:= LocalStash(typeof)
 	private const Str:ServiceDef	serviceDefs
 	private const ObjLocator		objLocator
@@ -10,7 +11,7 @@ internal const class StandardModule : ConcurrentState, Module {
 		set { }
 	}	
 
-	new makeBuiltIn(ObjLocator objLocator, ServiceDef:Obj? services) : super.make(StandardModuleState#) {
+	new makeBuiltIn(ObjLocator objLocator, Str moduleId, ServiceDef:Obj? services) : super.make(StandardModuleState#) {
 		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
 	
 		services.each |service, def| {
@@ -25,6 +26,7 @@ internal const class StandardModule : ConcurrentState, Module {
 			serviceDefs[def.serviceId] = def
 		}
 		
+		this.moduleId		= moduleId
 		this.serviceDefs	= serviceDefs
 		this.objLocator 	= objLocator
 	}
@@ -36,6 +38,7 @@ internal const class StandardModule : ConcurrentState, Module {
 			serviceDefs[def.serviceId] = def
 		}
 		
+		this.moduleId		= moduleDef.moduleId
 		this.serviceDefs	= serviceDefs
 		this.objLocator 	= objLocator
 	}
