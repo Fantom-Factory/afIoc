@@ -9,7 +9,12 @@ internal const class StandardServiceDef : ServiceDef {
 	const |InjectionCtx->Obj| 	source
 	const Str	description
 	
-	new make(|This|? f := null) { f?.call(this)	}
+	new make(|This|? f := null) { 
+		f?.call(this)
+		
+		if (scope == ScopeDef.perApplication && !serviceType.isConst)
+			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))			
+	}
 	
 	override |InjectionCtx->Obj| createServiceBuilder() {
 		source

@@ -74,17 +74,19 @@ internal const class ModuleDefImpl : ModuleDef {
 	}
 	
 	private Void addServiceDefFromMethod(OpTracker tracker, Str:ServiceDef serviceDefs, Method method) {
+		
+		scope := method.returns.isConst ? ScopeDef.perApplication : ScopeDef.perThread
+		
+		if (method.hasFacet(Scope#))
+			scope = (Utils.getFacetOnSlot(method, Scope#) as Scope).scope
+		
 		serviceDef	:= StandardServiceDef {
 			it.serviceId 	= extractServiceId(method)
 			it.moduleId 	= this.moduleId
 			it.serviceType	= method.returns
 //			it.isEagerLoad 	= method.hasFacet(EagerLoad#)
 			it.description	= "'$serviceId' : Builder method $method.qname"
-
-			if (method.returns.isMixin)
-				it.scope	= ScopeDef.perThread
-			else
-				it.scope 	= method.returns.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
+			it.scope 		= scope 
 			
 			serviceId 		:= it.serviceId
 			it.source 		= |InjectionCtx ctx -> Obj| {

@@ -24,6 +24,18 @@ class TestModuleBuilderMethods : Test {
 	Void testBuilderMethodsMustDefineAnId() {
 		verifyErr(IocErr#) { RegistryBuilder().addModule(T_MyModule7#).build }
 	}
+	
+	Void testWrongScope1() {
+		verifyErr(IocErr#) { 
+			RegistryBuilder().addModule(T_MyModule21#).build
+		}
+	}
+
+	Void testWrongScope2() {
+		verifyErr(IocErr#) { 
+			RegistryBuilder().addModule(T_MyModule22#).build
+		}
+	}
 }
 
 internal class T_MyModule4 {
@@ -62,6 +74,19 @@ internal class T_MyModule5 {
 
 internal class T_MyModule7 {
 	static T_MyService1 build() {
+		return T_MyService1()
+	}
+}
+
+internal class T_MyModule21 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService1#).withScope(ScopeDef.perApplication)
+	}
+}
+
+internal class T_MyModule22 {
+	@Scope{scope=ScopeDef.perApplication}
+	static T_MyService1 buildT1() {
 		return T_MyService1()
 	}
 }
