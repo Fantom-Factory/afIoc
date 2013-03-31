@@ -2,17 +2,17 @@
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 	
-	static Obj autobuild(InjectionCtx ctx, Type type, ServiceDef? owningDef) {
+	static Obj autobuild(InjectionCtx ctx, Type type) {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
-			obj  := createViaConstructor(ctx, ctor, owningDef)
-			injectIntoFields(ctx, obj, false, owningDef)
+			obj  := createViaConstructor(ctx, ctor)
+			injectIntoFields(ctx, obj, false)
 			return obj
 		}
 	}
 	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(InjectionCtx ctx, Obj object, Bool insideCtor, ServiceDef? owningDef) {
+	static Obj injectIntoFields(InjectionCtx ctx, Obj object, Bool insideCtor) {
 		
 		// FIXME: Err if have const fields but not injecting into them
 		
@@ -27,7 +27,7 @@ internal const class InjectionUtils {
 							throw IocErr(IocMessages.cannotSetConstFields(field))
 //					}
 					
-					dependency := findDependencyByType(ctx, field.type, owningDef)
+					dependency := findDependencyByType(ctx, field.type)
 	                inject(ctx, object, field, dependency)
 	                return true
 	            })
@@ -44,12 +44,12 @@ internal const class InjectionUtils {
 //				tracker.log("No autobuild fields found")
 //		}
 		
-		callPostInjectMethods(ctx, object, owningDef)
+		callPostInjectMethods(ctx, object)
 		return object
     }
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
-	static Obj callPostInjectMethods(InjectionCtx ctx, Obj object, ServiceDef? owningDef) {
+	static Obj callPostInjectMethods(InjectionCtx ctx, Obj object) {
 		ctx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
@@ -57,7 +57,7 @@ internal const class InjectionUtils {
 				}
 				.reduce(false) |bool, method| {
 					ctx.log("Found method $method.signature")
-					callMethod(ctx, method, object, owningDef)
+					callMethod(ctx, method, object)
 					return true
 				})
 				ctx.log("No post injection methods found")
@@ -65,8 +65,8 @@ internal const class InjectionUtils {
 		}
 	}
 	
-	static Obj callMethod(InjectionCtx ctx, Method method, Obj? obj, ServiceDef? owningDef) {
-		args := determineInjectionParams(ctx, method, owningDef)
+	static Obj callMethod(InjectionCtx ctx, Method method, Obj? obj) {
+		args := determineInjectionParams(ctx, method)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
@@ -108,18 +108,18 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj createViaConstructor(InjectionCtx ctx, Method ctor, ServiceDef? owningDef) {
-		args := determineInjectionParams(ctx, ctor, owningDef)
+	private static Obj createViaConstructor(InjectionCtx ctx, Method ctor) {
+		args := determineInjectionParams(ctx, ctor)
 		return ctx.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}
 
-	private static Obj[] determineInjectionParams(InjectionCtx ctx, Method method, ServiceDef? owningDef) {
+	private static Obj[] determineInjectionParams(InjectionCtx ctx, Method method) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			params := method.params.map |param| {
 				ctx.log("Found parameter $param.type")
-				return findDependencyByType(ctx, param.type, owningDef)
+				return findDependencyByType(ctx, param.type)
 			}		
 			if (params.isEmpty)
 				ctx.log("No injection parameters found")
@@ -127,11 +127,11 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj findDependencyByType(InjectionCtx ctx, Type dependencyType, ServiceDef? owningDef) {
+	private static Obj findDependencyByType(InjectionCtx ctx, Type dependencyType) {
 		// FUTURE: this could take an FacetProvider to give more hints on dependency finding
 		// e.g. @Autobuild, @ServiceId
 		ctx.track("Looking for dependency of type $dependencyType") |->Obj| {
-			ctx.objLocator.trackDependencyByType(ctx, dependencyType, owningDef)			
+			ctx.objLocator.trackDependencyByType(ctx, dependencyType)			
 		}
 	}
 	

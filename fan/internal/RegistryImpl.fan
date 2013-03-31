@@ -18,7 +18,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[makeBuiltInServiceDef("registryShutdownHub", RegistryShutdownHub#)] = registryShutdownHub
 			
 			services[StandardServiceDef() {
-				owningDef		:= it
 				it.serviceId 	= "ctorFieldInjector"
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
@@ -27,7 +26,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= |InjectionCtx ctx->Obj| {
 					|Obj service| {
 						ctx.track("Injecting via Ctor Field Injector") |->| {
-							InjectionUtils.injectIntoFields(ctx, service, true, owningDef)
+							InjectionUtils.injectIntoFields(ctx, service, true)
 						}
 					}
 				}
@@ -101,7 +100,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		shutdownLockCheck
 		ctx := InjectionCtx(this)
 		return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
-			trackServiceById(ctx, serviceId, null)
+			trackServiceById(ctx, serviceId)
 		}
 	}
 
@@ -109,7 +108,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		shutdownLockCheck
 		ctx := InjectionCtx(this)
 		return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-			trackDependencyByType(ctx, dependencyType, null)
+			trackDependencyByType(ctx, dependencyType)
 		}
 	}
 
@@ -127,7 +126,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
-	override Obj trackServiceById(InjectionCtx ctx, Str serviceId, ServiceDef? owningDef) {
+	override Obj trackServiceById(InjectionCtx ctx, Str serviceId) {
         ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDef(serviceId)
 		}.exclude { it == null }
@@ -139,10 +138,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			throw WtfErr("Multiple services defined for service id $serviceId")
 		
 		serviceDef := serviceDefs[0]
-		return getService(ctx, serviceDef, owningDef)
+		return getService(ctx, serviceDef)
 	}
 
-	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType, ServiceDef? owningDef) {
+	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
         ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDefsByType(dependencyType)
 		}.flatten
@@ -158,22 +157,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceId  := serviceDefs[0].serviceId
 		ctx.log("Found Service '$serviceId'")
 
-		return getService(ctx, serviceDef, owningDef)
+		return getService(ctx, serviceDef)
 	}
 
 	override Obj trackAutobuild(InjectionCtx ctx, Type type) {
-		return InjectionUtils.autobuild(ctx, type, null)
+		return InjectionUtils.autobuild(ctx, type)
 	}
 
 	override Obj trackInjectIntoFields(InjectionCtx ctx, Obj object) {
-		return InjectionUtils.injectIntoFields(ctx, object, false, null)
+		return InjectionUtils.injectIntoFields(ctx, object, false)
 	}
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 
-	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef, ServiceDef? owningDef) {
-		if (owningDef?.scope == ScopeDef.perApplication && serviceDef.scope == ScopeDef.perThread)
-			throw IocErr(IocMessages.threadScopeInAppScope(owningDef.serviceId, serviceDef.serviceId))
+	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
+		if (ctx.defStack.peek?.scope == ScopeDef.perApplication && serviceDef.scope == ScopeDef.perThread)
+			throw IocErr(IocMessages.threadScopeInAppScope(ctx.defStack.peek.serviceId, serviceDef.serviceId))
 		
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
         return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
