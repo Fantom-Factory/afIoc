@@ -4,6 +4,10 @@ internal const class IocMessages {
 
 	// ---- Err Messages --------------------------------------------------------------------------
 
+	static Str registryNotBuild() {
+		"Registry has not been built"		
+	}
+
 	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
 		"Module class ${moduleType.qname} contains unrecognised public methods: ${methods}"		
 	}

@@ -76,13 +76,11 @@ class TestThreadedAccess : Test {
 	}
 
 	static Void assertSame(Obj? o1, Obj? o2) {
-		Env.cur.err.printLine("$o1 : $o2")
 		if (o1 !== o2)
 			throw Err("Are NOT the same - $o1 : $o2")
 	}
 
 	static Void assertNotSame(Obj? o1, Obj? o2) {
-		Env.cur.err.printLine("$o1 : $o2")
 		if (o1 === o2)
 			throw Err("ARE the same - $o1 : $o2")
 	}

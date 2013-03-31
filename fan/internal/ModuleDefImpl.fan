@@ -88,10 +88,10 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.description	= "'$serviceId' : Builder method $method.qname"
 			it.scope 		= scope 
 			
-			serviceId 		:= it.serviceId
+			sId 			:= it.serviceId
 			it.source 		= |InjectionCtx ctx -> Obj| {
-				ctx.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
-					log.info("Creating Service '$serviceId'")
+				ctx.track("Creating Serivce '$sId' via a builder method '$method.qname'") |->Obj| {
+					log.info("Creating Service '$sId'")
 					return InjectionUtils.callMethod(ctx, method, null)
 				}
 			}			

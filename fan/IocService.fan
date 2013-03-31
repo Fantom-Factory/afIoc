@@ -1,9 +1,10 @@
 
 const class IocService : Service {
-	private static const Log 	log 	:= Log.get(IocService#.name)
-	private const LocalStash 	stash	:= LocalStash(typeof)
-	private const Type[]		moduleTypes
-	
+	private static const Log 		log 		:= Log.get(IocService#.name)
+	private const LocalStash 		stash		:= LocalStash(typeof)
+	private const ConcurrentState	conState	:= ConcurrentState(IocServiceState#)
+	private const Type[]			moduleTypes
+
 	private Bool dependencies {
 		get { stash["dependencies"] }
 		set { stash["dependencies"] = it }
@@ -19,15 +20,18 @@ const class IocService : Service {
 		set { stash["indexProps"] = it }
 	}
 
-	Registry registry {
-		get { stash["registry"] }
-		private set { stash["registry"] = it }
+	Registry? registry {
+		// ensure the registry is shared amongst all threads 
+		get { conState.getState |IocServiceState state->Obj| { return state.registry } }
+		private set { }
 	}
 	
 	// ---- Public Builder Methods ---------------------------------------------------------------- 
 
 	new make(Type[] moduleTypes := [,]) {
-		this.moduleTypes = moduleTypes
+		this.moduleTypes 	= moduleTypes
+		this.indexProps		= false
+		this.dependencies	= false
 	}
 	
 	This loadModulesFromDependencies(Pod dependenciesOf) {
@@ -57,7 +61,11 @@ const class IocService : Service {
 			
 			regBuilder.addModules(moduleTypes)
 			
-			registry = regBuilder.build.startup
+			registry := regBuilder.build.startup
+			
+			conState.withState |IocServiceState state| {
+				state.registry = registry
+			}
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)
@@ -74,22 +82,34 @@ const class IocService : Service {
 	
 	** Convenience for `Registry.serviceById`
 	Obj serviceById(Str serviceId) {
-		registry.serviceById(serviceId)
+		checkRegistry
+		return registry.serviceById(serviceId)
 	}
 	
 	** Convenience for `Registry.dependencyByType`
 	Obj dependencyByType(Type serviceType) {
-		registry.dependencyByType(serviceType)
+		checkRegistry
+		return registry.dependencyByType(serviceType)
 	}
 
 	** Convenience for `Registry.autobuild`
 	Obj autobuild(Type type) {
-		registry.autobuild(type)
+		checkRegistry
+		return registry.autobuild(type)
 	}
 	
 	** Convenience for `Registry.injectIntoFields`
 	Obj injectIntoFields(Obj service) {
-		registry.injectIntoFields(service)
+		checkRegistry
+		return registry.injectIntoFields(service)
 	}	
+
+	private Void checkRegistry() {
+		if (registry == null)
+			throw IocErr(IocMessages.registryNotBuild)
+	}
 }
 
+internal class IocServiceState {
+	Registry? registry
+}
