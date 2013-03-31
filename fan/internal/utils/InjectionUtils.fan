@@ -10,11 +10,9 @@ internal const class InjectionUtils {
 			return obj
 		}
 	}
-	
+
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(InjectionCtx ctx, Obj object, Bool insideCtor) {
-		
-		// FIXME: Err if have const fields but not injecting into them
 		
 		ctx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(ctx, object.typeof, Inject#, true)
@@ -74,7 +72,7 @@ internal const class InjectionUtils {
 
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private static Method findAutobuildConstructor(InjectionCtx ctx, Type type) {
+	static Method findAutobuildConstructor(InjectionCtx ctx, Type type) {
 		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
 			ctor := |->Method| {
 				constructors := findConstructors(type)

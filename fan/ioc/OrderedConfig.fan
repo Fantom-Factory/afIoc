@@ -9,12 +9,33 @@
 ** Contributions must be compatible with the type.
 class OrderedConfig {
 	
+	private Type contribType
+	private List config
+	
+	internal new make(Type contribType, Str serviceId) {
+		if (contribType.name != "List")
+			throw WtfErr("Ordered Contrib Type is NOT list???")
+		if (contribType.isGeneric)
+			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceId)) 
+		
+		this.contribType = contribType
+		this.config = contribType.params["V"].emptyList.rw	// TODO: is there a better way?
+	}
+	
+	internal Void contribute(Contribution contribution) {
+		contribution.contributeOrdered(this)
+	}
+	
+	internal List getConfig() {
+		config
+	}
+	
 	** Adds an ordered object to a service's contribution. Each object has an id (which must be unique).
 	**
 	** If no constraints are supplied, then an implicit constraint is supplied: after the previously
 	** contributed id**within the same contribution method*.
 	Void add(Str id, Obj object, Str[] constraints := [,]) {
-		
+		config.add(object)
 	}
 
 	** Overrides a normally contributed object. The original override must exist.

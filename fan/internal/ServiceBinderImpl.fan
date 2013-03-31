@@ -113,7 +113,35 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 					log.info("Creating Service '$sId'")
 					return InjectionUtils.autobuild(ctx, serviceImplType)
 				}
+			}
+			ctx := InjectionCtx(null)
+			ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImpl)
+			
+			method := ctor
+			config := ctx.track("Looking for configuration parameter") |->Type?| {
+				config := |->Obj?| {
+					if (method.params.isEmpty)
+						return null
+					
+					paramType := method.params[0].type
+					Env.cur.err.printLine(paramType.typeof)
+					if (paramType.name == "List")
+//						return OrderedConfig(param.type)
+						return paramType
+					if (paramType.name == "Map")
+//						return MappedConfig(param.type)
+						return paramType
+					return null
+				}()
+				
+				if (config == null)
+					ctx.log("No configuration parameter found")
+				else 
+					ctx.log("Found $config")
+				
+				return config
 			}			
+			it.configType = config
 		}
 
 		addServiceDef(serviceDef)

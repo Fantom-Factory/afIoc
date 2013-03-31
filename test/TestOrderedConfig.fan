@@ -1,85 +1,19 @@
 
 class TestOrderedConfig : IocTest {
 	
-	Void testContributionMethodMustBeStatic() {
-		verifyErrMsg(IocMessages.contributionMethodMustBeStatic(T_MyModule23#contributeWot)) {
-			RegistryBuilder().addModule(T_MyModule23#).build.startup
-		}  
-	}
-
-	Void testContributionMethodMustTakeConfig() {
-		verifyErrMsg(IocMessages.contributionMethodMustTakeConfig(T_MyModule24#contributeWot)) {
-			RegistryBuilder().addModule(T_MyModule24#).build.startup
-		}  
-	}
-
-	Void testContribDoesNotDefineBothServiceIdAndServiceType() {
-		verifyErrMsg(IocMessages.contribitionHasBothIdAndType(T_MyModule25#contributeWot)) {
-			RegistryBuilder().addModule(T_MyModule25#).build.startup
-		}  
-	}
-
-	Void testContribDoesNotDefineServiceId() {
-		verifyErrMsg(IocMessages.contributionMethodDoesNotDefineServiceId(T_MyModule26#cont)) {
-			RegistryBuilder().addModule(T_MyModule26#).build.startup
-		}  
-	}
-
-	Void testErrWhenServiceIdNoExist() {
-		verifyErrMsg(IocMessages.contributionMethodServiceIdDoesNotExist(T_MyModule27#cont, "wotever")) {
-			RegistryBuilder().addModule(T_MyModule27#).build.startup
-		}  
-	}
-
-	Void testErrWhenServiceTypeNoExist() {
-		verifyErrMsg(IocMessages.contributionMethodServiceTypeDoesNotExist(T_MyModule28#cont, Int#)) {
-			RegistryBuilder().addModule(T_MyModule28#).build.startup
-		}  
-	}
-
-	Void testNoErrWhenContibIsOptional() {
-		RegistryBuilder().addModule(T_MyModule29#).build.startup
-	}
-
 	Void testConfig() {
 		Utils.setLoglevelDebug
-		reg := RegistryBuilder().addModule(T_MyModule24#).build.startup
+		reg := RegistryBuilder().addModule(T_MyModule30#).build.startup
+		s19 := reg.serviceById("s19") as T_MyService19
+		verifyEq(s19.config, Str["ever", "wot"])
 	}
-}
 
-internal class T_MyModule23 {
-	@Contribute
-	Void contributeWot(OrderedConfig config) { }
-}
-
-internal class T_MyModule24 {
-	@Contribute
-	static Void contributeWot(Obj config) { }
-}
-
-internal class T_MyModule25 {
-	@Contribute { serviceId="wotever"; serviceType=T_MyModule25# }
-	static Void contributeWot(OrderedConfig config) { }
-}
-
-internal class T_MyModule26 {
-	@Contribute
-	static Void cont(OrderedConfig config) { }
-}
-
-internal class T_MyModule27 {
-	@Contribute{serviceId="wotever"}
-	static Void cont(OrderedConfig config) { }
-}
-
-internal class T_MyModule28 {
-	@Contribute{serviceType=Int#}
-	static Void cont(OrderedConfig config) { }
-}
-
-internal class T_MyModule29 {
-	@Contribute{serviceType=Int#; optional=true}
-	static Void cont(OrderedConfig config) { }
+	Void testErrIfConfigIsGeneric() {
+		reg := RegistryBuilder().addModule(T_MyModule31#).build.startup
+		verifyErrMsg(IocMessages.orderedConfigTypeIsGeneric(List#, "s20")) {
+			reg.serviceById("s20")
+		}
+	}
 }
 
 
@@ -88,10 +22,35 @@ internal class T_MyModule30 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService19#).withId("s19")
 	}
+	
+	@Contribute{ serviceId="s19" }
+	static Void cont(OrderedConfig config) {
+		config.add("wot", "wot")
+	}
+	@Contribute{ serviceId="s19" }
+	static Void cont2(OrderedConfig config) {
+		config.add("ever", "ever", ["AFTER : wot"])
+	}
+}
+
+internal class T_MyModule31 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService20#).withId("s20")
+	}
+	
+	@Contribute{ serviceId="s20" }
+	static Void cont(OrderedConfig config) {
+		config.add("wot", "wot")
+	}
 }
 
 internal class T_MyService19 {
+	Str[] config
 	new make(Str[] config) {
-		
+		this.config = config
 	}
+}
+
+internal class T_MyService20 {
+	new make(List config) { }
 }

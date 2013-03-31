@@ -3,9 +3,9 @@ internal class InjectionCtx {
 	
 	private ServiceDef[]	defStack	:= [,]
 	OpTracker 				tracker		:= OpTracker()
-	ObjLocator 				objLocator
+	ObjLocator? 				objLocator
 	
-	new make(ObjLocator objLocator) {
+	new make(ObjLocator? objLocator) {
 		this.objLocator = objLocator
 //		InjectionCtx#track.params[0].type.
 	}
@@ -34,5 +34,9 @@ internal class InjectionCtx {
 	
 	Void popDef() {
 		defStack.pop
+	}
+	
+	ServiceDef? peekDef() {
+		defStack.peek
 	}
 }

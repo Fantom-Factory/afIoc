@@ -18,8 +18,8 @@ internal const class ContributionImpl : Contribution {
 		throw WtfErr("Both serviceId & serviceType are null!?")
 	}
 	
-	override Void contributeOrdered(Obj moduleInst, OrderedConfig config) {
-		
+	override Void contributeOrdered(OrderedConfig config) {
+		method.call(config)
 	}
 
 	override Void contributeMapped(Obj moduleInst, MappedConfig config) {

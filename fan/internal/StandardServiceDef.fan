@@ -5,6 +5,7 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Str 			serviceId
 	override const Type			serviceType
 	override const ServiceScope	scope
+	override const Type? 		configType
 	
 	const |InjectionCtx->Obj| 	source
 	const Str	description
