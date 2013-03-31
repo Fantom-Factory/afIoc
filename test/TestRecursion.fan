@@ -1,19 +1,25 @@
 
-class TestRecursion : Test {
+class TestRecursion : IocTest {
 	
 	Void testErrOnRecursiveInjection1() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErr(IocErr#) { reg.serviceById("s15") }
+		verifyErrMsg(IocMessages.serviceRecursion(["s15", "s15"])) { 
+			reg.serviceById("s15") 
+		}
 	}
 
 	Void testErrOnRecursiveInjection2() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErr(IocErr#) { reg.serviceById("s16") }
+		verifyErrMsg(IocMessages.serviceRecursion(["s16", "s17", "s16"])) { 
+			reg.serviceById("s16") 
+		}
 	}
 
 	Void testErrOnRecursiveInjection3() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErr(IocErr#) { reg.serviceById("s18") }
+		verifyErrMsg(IocMessages.serviceRecursion(["s18", "s17", "s16", "s17"])) { 
+			reg.serviceById("s18") 
+		}
 	}
 	
 }

@@ -17,10 +17,10 @@ internal const class ModuleImpl : Module {
 		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
 	
 		services.each |service, def| {
-			if (def.scope == ScopeScope.perThread) {
+			if (def.scope == ServiceScope.perThread) {
 				perThreadServices[def.serviceId] = service
 			}
-			if (def.scope == ScopeScope.perApplication) {
+			if (def.scope == ServiceScope.perApplication) {
 				withMyState { 
 					it.perApplicationServices[def.serviceId] = service
 				}
@@ -79,17 +79,17 @@ internal const class ModuleImpl : Module {
 
 		ctx.pushDef(def)	// we're going deeper!
 		try {
-			if (def.scope == ScopeScope.perInjection) {
+			if (def.scope == ServiceScope.perInjection) {
 				return create(ctx, def)			
 			}
 			
-			if (def.scope == ScopeScope.perThread) {
+			if (def.scope == ServiceScope.perThread) {
 				return perThreadServices.getOrAdd(def.serviceId) {
 					create(ctx, def)
 				}
 			}
 	
-			if (def.scope == ScopeScope.perApplication) {
+			if (def.scope == ServiceScope.perApplication) {
 				// I believe there's a slim chance of the service being created twice here, but you'd 
 				// need 2 actors requesting the same service at the same time - slim
 				// I could make the service here, but I don't want to serialise the ctx

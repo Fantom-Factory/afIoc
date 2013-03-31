@@ -21,7 +21,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 	= "ctorFieldInjector"
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
-				it.scope		= ScopeScope.perInjection
+				it.scope		= ServiceScope.perInjection
 				it.description 	= "'$it.serviceId' : Autobuilt. Always."
 				it.source		= |InjectionCtx ctx->Obj| {
 					|Obj service| {
@@ -219,7 +219,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceId = serviceId
 			it.moduleId = builtInModuleId
 			it.serviceType = serviceType
-			it.scope = ScopeScope.perApplication
+			it.scope = ServiceScope.perApplication
 		}
 	}
 }

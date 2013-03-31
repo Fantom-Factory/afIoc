@@ -20,7 +20,7 @@ internal class InjectionCtx {
 	
 	Void pushDef(ServiceDef def) {
 		// check for allowed scope
-		if (defStack.peek?.scope == ScopeScope.perApplication && def.scope == ScopeScope.perThread)
+		if (defStack.peek?.scope == ServiceScope.perApplication && def.scope == ServiceScope.perThread)
 			throw IocErr(IocMessages.threadScopeInAppScope(defStack.peek.serviceId, def.serviceId))
 		
 		defStack.push(def)
@@ -28,7 +28,7 @@ internal class InjectionCtx {
 		// check for recursion
 		defStack[0..<-1].each { 
 			if (it.serviceId == def.serviceId)
-				throw IocErr(IocMessages.serviceRecursion(defStack))
+				throw IocErr(IocMessages.serviceRecursion(defStack.map { it.serviceId }))
 		}
 	}
 	

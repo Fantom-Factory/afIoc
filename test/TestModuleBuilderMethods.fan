@@ -1,5 +1,5 @@
 
-class TestModuleBuilderMethods : Test {
+class TestModuleBuilderMethods : IocTest {
 	
 	Void testBuilderMethod() {
 		reg := RegistryBuilder().addModule(T_MyModule4#).build.startup
@@ -22,17 +22,19 @@ class TestModuleBuilderMethods : Test {
 	}
 	
 	Void testBuilderMethodsMustDefineAnId() {
-		verifyErr(IocErr#) { RegistryBuilder().addModule(T_MyModule7#).build }
+		verifyErrMsg(IocMessages.buildMethodDoesNotDefineServiceId(T_MyModule7#build)) { 
+			RegistryBuilder().addModule(T_MyModule7#).build 
+		}
 	}
 	
 	Void testWrongScope1() {
-		verifyErr(IocErr#) { 
+		verifyErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService1#)) { 
 			RegistryBuilder().addModule(T_MyModule21#).build
 		}
 	}
 
 	Void testWrongScope2() {
-		verifyErr(IocErr#) { 
+		verifyErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService1#)) { 
 			RegistryBuilder().addModule(T_MyModule22#).build
 		}
 	}
@@ -84,12 +86,12 @@ internal class T_MyModule7 {
 
 internal class T_MyModule21 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService1#).withScope(ScopeScope.perApplication)
+		binder.bindImpl(T_MyService1#).withScope(ServiceScope.perApplication)
 	}
 }
 
 internal class T_MyModule22 {
-	@Scope{scope=ScopeScope.perApplication}
+	@Scope{scope=ServiceScope.perApplication}
 	static T_MyService1 buildT1() {
 		return T_MyService1()
 	}

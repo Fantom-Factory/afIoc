@@ -13,7 +13,7 @@ mixin ServiceBindingOptions {
 
 	** Sets the service scope. Note only 'const' classes can be defined as `ScopeDef.perApplication`.
 	** (Tip: 'const' services can subclass `ConcurrentState` for easy access to modifiable state.)
-	abstract This withScope(ScopeScope scope)
+	abstract This withScope(ServiceScope scope)
 
 //	** Turns eager loading on for this service.
 //	abstract This eagerLoad();
