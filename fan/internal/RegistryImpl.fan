@@ -8,8 +8,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Str:Module				modules
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
-		serviceIdToModule := Str:Module[:]
-		modules := [:]
+		serviceIdToModule 	:= Str:Module[:]
+		moduleIdToModule	:= Str:Module[:]
 
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]
@@ -37,23 +37,24 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 			builtInModule := ModuleImpl(this, builtInModuleId, services)
 
-			modules[builtInModuleId] = builtInModule
+			moduleIdToModule[builtInModuleId] = builtInModule
 			services.keys.each {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
 		}
 
 		tracker.track("Consolidating module definitions") |->| {
-			iModules 	:= modules.toImmutable
-			iIdToModule	:= serviceIdToModule.toImmutable
-			modules = getMyState |state| {
-				mModules 	:= iModules.rw
-				mIdToModule	:= iIdToModule.rw
+			iModIdToModule 	:= moduleIdToModule.toImmutable
+			iSerIdToModule	:= serviceIdToModule.toImmutable
+			moduleIdToModule = getMyState |state| {
+				mModules 	:= iModIdToModule.rw
+				mIdToModule	:= iSerIdToModule.rw
 
 				moduleDefs.each |moduleDef| {
 					module := ModuleImpl(this, moduleDef)
 					mModules[moduleDef.moduleId] = module
 
+					// ensure services aren't defined twice
 					moduleDef.serviceDefs.keys.each |serviceId| {
 						if (mIdToModule.containsKey(serviceId)) {
 							existingDef 	:= mIdToModule[serviceId].serviceDef(serviceId)
@@ -68,11 +69,26 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		this.modules = modules
-		// TODO: contributions
-//        validateContributeDefs(moduleDefs);
+		// set before we validate the contributions
+		this.modules = moduleIdToModule
+
+		tracker.track("Validating contribution definitions") |->| {
+			moduleDefs.each {
+				it.contributionDefs.each {
+					if (!it.optional) {	// no warnings / errors for optional contributions
+						if (it.serviceId != null)
+							if (serviceDefById(it.serviceId) == null)
+								throw IocErr(IocMessages.contributionMethodServiceIdDoesNotExist(it.method, it.serviceId))
+						if (it.serviceType != null)
+							if (serviceDefByType(it.serviceType) == null)
+								throw IocErr(IocMessages.contributionMethodServiceTypeDoesNotExist(it.method, it.serviceType))
+					}
+				}
+			}
+		}
 	}
-	
+
+
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	override This startup() {
@@ -124,39 +140,24 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return trackInjectIntoFields(InjectionCtx(this), object)
 	}
 
+
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj trackServiceById(InjectionCtx ctx, Str serviceId) {
-        ServiceDef[] serviceDefs := modules.vals.map |module| {
-			module.serviceDef(serviceId)
-		}.exclude { it == null }
-
-		if (serviceDefs.isEmpty) 
-            throw IocErr(IocMessages.serviceIdNotFound(serviceId))
-		
-		if (serviceDefs.size > 1)
-			throw WtfErr("Multiple services defined for service id $serviceId")
-		
-		serviceDef := serviceDefs[0]
+		serviceDef 
+			:= serviceDefById(serviceId) 
+			?: throw IocErr(IocMessages.serviceIdNotFound(serviceId))
 		return getService(ctx, serviceDef)
 	}
 
 	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
-        ServiceDef[] serviceDefs := modules.vals.map |module| {
-			module.serviceDefsByType(dependencyType)
-		}.flatten
-
+		serviceDef 
+			:= serviceDefByType(dependencyType)
+			?: throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
+		
 		// TODO: if not service found, ask other object locators / injection providers
 
-		if (serviceDefs.isEmpty)
-			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
-		if (serviceDefs.size > 1)
-			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceDefs.map { it.serviceId }))
-
-		serviceDef := serviceDefs[0]
-		serviceId  := serviceDefs[0].serviceId
-		ctx.log("Found Service '$serviceId'")
-
+		ctx.log("Found Service '$serviceDef.serviceId'")
 		return getService(ctx, serviceDef)
 	}
 
@@ -168,7 +169,31 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return InjectionUtils.injectIntoFields(ctx, object, false)
 	}
 
+	override ServiceDef? serviceDefById(Str serviceId) {
+        ServiceDef[] serviceDefs := modules.vals.map |module| {
+			module.serviceDef(serviceId)
+		}.exclude { it == null }
+
+		if (serviceDefs.size > 1)
+			throw WtfErr("Multiple services defined for service id $serviceId")
+		
+		return serviceDefs.isEmpty ? null : serviceDefs[0]
+	}
+
+	override ServiceDef? serviceDefByType(Type serviceType) {
+        ServiceDef[] serviceDefs := modules.vals.map |module| {
+			module.serviceDefsByType(serviceType)
+		}.flatten
+
+		if (serviceDefs.size > 1)
+			throw IocErr(IocMessages.manyServiceMatches(serviceType, serviceDefs.map { it.serviceId }))
+
+		return serviceDefs.isEmpty ? null : serviceDefs[0]
+	}
+
+
 	// ---- Helper Methods ------------------------------------------------------------------------
+
 
 	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {		
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func

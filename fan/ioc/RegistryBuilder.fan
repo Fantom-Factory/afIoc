@@ -32,7 +32,7 @@ class RegistryBuilder {
 		}
 		return this
 	}
-	
+
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
 		lock.check
@@ -41,7 +41,7 @@ class RegistryBuilder {
 		}
 		return this
 	}
-	
+
 	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
 	** which defines the qualified name of a module to load.
 	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {

@@ -5,6 +5,7 @@ internal const class ModuleImpl : Module {
 	private const ConcurrentState 	conState	:= ConcurrentState(StandardModuleState#)
 	private const LocalStash 		stash		:= LocalStash(typeof)
 	private const Str:ServiceDef	serviceDefs
+	private const Contribution[]	contributions
 	private const ObjLocator		objLocator
 	
 	private Str:Obj perThreadServices {
@@ -30,6 +31,7 @@ internal const class ModuleImpl : Module {
 		this.moduleId		= moduleId
 		this.serviceDefs	= serviceDefs
 		this.objLocator 	= objLocator
+		this.contributions	= [,]
 	}
 
 	new make(ObjLocator objLocator, ModuleDef moduleDef) {
@@ -42,6 +44,14 @@ internal const class ModuleImpl : Module {
 		this.moduleId		= moduleDef.moduleId
 		this.serviceDefs	= serviceDefs
 		this.objLocator 	= objLocator
+		this.contributions	= moduleDef.contributionDefs.map |contrib| { 
+			ContributionImpl {
+				it.serviceId 	= contrib.serviceId
+				it.serviceType 	= contrib.serviceType
+				it.method		= contrib.method
+				it.objLocator 	= objLocator
+			}
+		}
 	}
 
 	// ---- Module Methods ----------------------------------------------------
@@ -50,6 +60,18 @@ internal const class ModuleImpl : Module {
 		serviceDefs[serviceId]
 	}
 
+    override ServiceDef[] serviceDefsByType(Type serviceType) {
+        serviceDefs.findAll |serviceDef, serviceId| {
+			serviceDef.serviceType.fits(serviceType)
+        }.vals
+    }
+
+	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
+		contributions.findAll {
+			it.serviceDef.serviceId == serviceDef.serviceId
+		}
+	}
+	
 	override Obj? service(InjectionCtx ctx, Str serviceId) {
         def := serviceDefs[serviceId]
 		if (def == null)
@@ -91,12 +113,6 @@ internal const class ModuleImpl : Module {
 
 		throw WtfErr("What scope is {$def.scope}???")
 	}
-
-    override ServiceDef[] serviceDefsByType(Type serviceType) {
-        serviceDefs.findAll |serviceDef, serviceId| {
-			serviceDef.serviceType.fits(serviceType)
-        }.vals
-    }
 	
 	override Void clear() {
 		perThreadServices.clear

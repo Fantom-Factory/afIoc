@@ -1,5 +1,5 @@
 
-// TODO: rename -> Dependency...?
+// TODO: rename -> Dependency...? -> Internal Registry?
 internal const mixin ObjLocator {
 
 	** Obtains a service via its unique service id. 
@@ -17,4 +17,7 @@ internal const mixin ObjLocator {
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	abstract Obj trackInjectIntoFields(InjectionCtx ctx, Obj service)	
 
+	abstract ServiceDef? serviceDefById(Str serviceId)
+	
+	abstract ServiceDef? serviceDefByType(Type serviceType) 
 }

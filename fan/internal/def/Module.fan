@@ -11,9 +11,10 @@ internal mixin Module {
 	** type is assignable to the provided service type (is a super-class or super-mixin).
     abstract ServiceDef[] serviceDefsByType(Type serviceType)
 
+	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
+	
 	** Locates (and builds if necessary) a service given a service id
 	abstract Obj? service(InjectionCtx ctx, Str serviceId)
-
 	
 	abstract Void clear()
 }
