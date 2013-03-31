@@ -85,6 +85,10 @@ internal const class IocMessages {
 		"Can not set const field '$field.qname'. Either remove the 'const' keyword or the @${Inject#.name} facet."
 	}
 	
+	static Str serviceRecursion(ServiceDef[] defs) {
+		"Service recursion! A service relies on itself in some way: " + defs.map { it.serviceId }.join(" -> ")
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 	
 	static Str registryBuilt() {

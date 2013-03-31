@@ -170,10 +170,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 
-	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
-		if (ctx.defStack.peek?.scope == ScopeDef.perApplication && serviceDef.scope == ScopeDef.perThread)
-			throw IocErr(IocMessages.threadScopeInAppScope(ctx.defStack.peek.serviceId, serviceDef.serviceId))
-		
+	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {		
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
         return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
 	}
