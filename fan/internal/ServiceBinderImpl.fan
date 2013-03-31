@@ -100,7 +100,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			// lock down the service Impl type so it can't change behind our backs
 			// or... I could Func.bind()
 			serviceImplType	:= this.serviceImpl
-			sId 			:= it.serviceId
+			sId 			:= this.serviceId
 
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId

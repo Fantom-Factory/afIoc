@@ -13,7 +13,7 @@ Quick Start [#quickStart]
 pre>
 class Main {
   static Void main(Str[] args) {
-    registry := IocService(false, [MyModule#]).install.start.registry
+    registry := IocService([MyModule#]).start.registry
 
     MyService1 test1 := registry.serviceById("myservice1")
 
@@ -23,7 +23,7 @@ class Main {
 
     MyService1 test4 := registry.injectIntoFields(MyService1())
 
-    Service.find(IocService#).stop.uninstall
+    Service.find(IocService#).uninstall
   }
 }
 
@@ -44,17 +44,19 @@ class MyModule {
 }
 <pre
 
+
 Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is a singleton class of which there is only one instance. Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin.
+A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin.
 
 A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service.
 
 A **module** is a class where services and contributions are defined.
 
-Locating Modules [#locatingModules]
+
+Loading Modules [#locatingModules]
 ***********************************
 
 
@@ -65,23 +67,21 @@ Services are defined in Module classes, where each method has meaning. Module ar
 
   static Void bind(ServiceBinder binder) {
 
-    // has service ID of 'myServiceMixin'
+    // has service ID of 'MyService'
     binder.bind(MyService#, MyServiceImpl#)
 
-    // has service ID of 'myOtherServiceImpl'
-    binder.bindImpl(MyOtherServiceImpl#)
-
-    // has service ID of 'wotever'
-    binder.bindBuilder(EmailService#) { EmailService() }.withId("wotever")
+    // has service ID of 'myServiceImpl'
+    binder.bindImpl(MyServiceImpl#)
   }
 
-(Note all methods in a Module class should be static.) Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
+Note all methods in a Module class should be static. Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
 
   static EmailService buildPenquin(EmailConfig config) {
     EmailServiceImpl(config)
   }
 
 Builder methods may take dependencies as parameters. These dependencies are realised and passed in when the service is built.
+
 
 Dependency Injection [#dependencyInjection]
 *******************************************
@@ -94,11 +94,24 @@ Field injection happens *after* the object has been created and so must be decla
   @Inject
   MyService? myService
 
+The exception to the rule is if you declare a serialisation ctor:
+
+pre>
+class MyService1 {
+  @Inject
+  MyService2 service2
+
+  new make(|This| injectInto) {
+    injectInto(this)
+  }
+}
+<pre
+
 After object construction and field injection you may perform extra setup via methods annotated with the '@PostInjection' facet. These may be of any visibility and all parameters are resolved as dependencies.
 
 
-Auto-Building [#autobuilding]
-*****************************
+Scope [#scope]
+**************
 
 
 
