@@ -4,7 +4,7 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Str 		moduleId
 	override const Str 		serviceId
 	override const Type		serviceType
-	override const ScopeDef	scope
+	override const ScopeScope	scope
 	
 	const |InjectionCtx->Obj| 	source
 	const Str	description
@@ -12,7 +12,7 @@ internal const class StandardServiceDef : ServiceDef {
 	new make(|This|? f := null) { 
 		f?.call(this)
 		
-		if (scope == ScopeDef.perApplication && !serviceType.isConst)
+		if (scope == ScopeScope.perApplication && !serviceType.isConst)
 			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))			
 	}
 	

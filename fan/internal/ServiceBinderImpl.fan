@@ -10,7 +10,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Str? 			serviceId
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
-	private ScopeDef? 		scope
+	private ScopeScope? 	scope
 //	private Bool?			eagerLoadFlag
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
@@ -70,7 +70,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
         withId(serviceImpl.name)		
 	}
 
-	override This withScope(ScopeDef scope) {
+	override This withScope(ScopeScope scope) {
 		this.scope = scope
 		return this
 	}
@@ -133,7 +133,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Void setDefaultScope() {
 		if (scope != null)
 			return
-		scope = serviceImpl.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
+		scope = serviceImpl.isConst ? ScopeScope.perApplication : ScopeScope.perThread 
 	}
 }
 
