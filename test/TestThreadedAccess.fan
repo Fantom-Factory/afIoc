@@ -88,23 +88,23 @@ class TestThreadedAccess : Test {
 
 internal class T_MyModule16 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("app").withScope(ScopeDef.perApplication)
-		binder.bindImpl(T_MyService12#).withId("the").withScope(ScopeDef.perThread)
+		binder.bindImpl(T_MyService12#).withId("app").withScope(ScopeScope.perApplication)
+		binder.bindImpl(T_MyService12#).withId("the").withScope(ScopeScope.perThread)
 	}
 }
 
 internal class T_MyModule17 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("s12").withScope(ScopeDef.perThread)
-		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeDef.perApplication)
-		binder.bindImpl(T_MyService13#).withId("s14").withScope(ScopeDef.perApplication)
+		binder.bindImpl(T_MyService12#).withId("s12").withScope(ScopeScope.perThread)
+		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeScope.perApplication)
+		binder.bindImpl(T_MyService13#).withId("s14").withScope(ScopeScope.perApplication)
 	}
 }
 
 internal class T_MyModule18 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("s12").withScope(ScopeDef.perApplication)
-		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeDef.perThread)
+		binder.bindImpl(T_MyService12#).withId("s12").withScope(ScopeScope.perApplication)
+		binder.bindImpl(T_MyService13#).withId("s13").withScope(ScopeScope.perThread)
 	}
 }
 

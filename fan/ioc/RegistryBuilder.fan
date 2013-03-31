@@ -11,6 +11,8 @@ class RegistryBuilder {
 	
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
+		// FIXME: prevent module recursion
+		// FIXME: prevent the same module from being loaded twice
 		tracker.track("Adding module definition for '$moduleType.qname'") |->| {
 			lock.check
 			logger.info("Adding module definition for $moduleType.qname")

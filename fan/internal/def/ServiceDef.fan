@@ -17,7 +17,7 @@ internal const mixin ServiceDef {
 	** defined.
 	abstract Type serviceType()
 
-	abstract ScopeDef scope()
+	abstract ScopeScope scope()
 	
 //	** Returns true if the service should be eagerly loaded at Registry startup.
 //	abstract Bool isEagerLoad()

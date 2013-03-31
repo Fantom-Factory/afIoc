@@ -1,6 +1,6 @@
 
 ** Scope definitions for Services. 
-enum class ScopeDef {
+enum class ScopeScope {
 	
 	** A new service is created each it is asked for. You probably do **not** want this! Use the `Autobuild` facet instead.
 	perInjection,

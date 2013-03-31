@@ -19,7 +19,7 @@ internal class InjectionCtx {
 	
 	Void pushDef(ServiceDef def) {
 		// check for allowed scope
-		if (defStack.peek?.scope == ScopeDef.perApplication && def.scope == ScopeDef.perThread)
+		if (defStack.peek?.scope == ScopeScope.perApplication && def.scope == ScopeScope.perThread)
 			throw IocErr(IocMessages.threadScopeInAppScope(defStack.peek.serviceId, def.serviceId))
 		
 		defStack.push(def)

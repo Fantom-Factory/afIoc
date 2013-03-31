@@ -80,12 +80,12 @@ internal class T_MyModule7 {
 
 internal class T_MyModule21 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService1#).withScope(ScopeDef.perApplication)
+		binder.bindImpl(T_MyService1#).withScope(ScopeScope.perApplication)
 	}
 }
 
 internal class T_MyModule22 {
-	@Scope{scope=ScopeDef.perApplication}
+	@Scope{scope=ScopeScope.perApplication}
 	static T_MyService1 buildT1() {
 		return T_MyService1()
 	}

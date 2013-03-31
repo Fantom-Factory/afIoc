@@ -82,7 +82,7 @@ internal const class IocMessages {
 	}
 	
 	static Str threadScopeInAppScope(Str owningServiceId, Str injectedServiceId) {
-		"Can not inject ${ScopeDef.perThread.name} scoped service $injectedServiceId into ${ScopeDef.perApplication.name} scoped service $injectedServiceId"
+		"Can not inject ${ScopeScope.perThread.name} scoped service $injectedServiceId into ${ScopeScope.perApplication.name} scoped service $injectedServiceId"
 	}
 	
 	static Str cannotSetConstFields(Field field) {
