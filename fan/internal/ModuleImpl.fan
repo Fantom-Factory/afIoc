@@ -55,33 +55,38 @@ internal const class ModuleImpl : Module {
 		if (def == null)
 			return null
 
-		if (def.scope == ScopeDef.perInjection) {
-			return create(ctx, def)			
-		}
-		
-		if (def.scope == ScopeDef.perThread) {
-			return perThreadServices.getOrAdd(def.serviceId) {
-				create(ctx, def)
-			}
-		}
-
-		if (def.scope == ScopeDef.perApplication) {
-			// TODO: when tested, try putting all in one closure
-
-			// I believe there's a slim chance of the service being created twice here, but you'd 
-			// need 2 actors requesting the same service at the same time 
-			exists := getMyState |state -> Obj?| { 
-				state.perApplicationServices[def.serviceId]
+		ctx.pushDef(def)	// we're going deeper!
+		try {
+			if (def.scope == ScopeDef.perInjection) {
+				return create(ctx, def)			
 			}
 			
-			if (exists != null)
-				return exists
+			if (def.scope == ScopeDef.perThread) {
+				return perThreadServices.getOrAdd(def.serviceId) {
+					create(ctx, def)
+				}
+			}
+	
+			if (def.scope == ScopeDef.perApplication) {
+				// I believe there's a slim chance of the service being created twice here, but you'd 
+				// need 2 actors requesting the same service at the same time - slim
+				// I could make the service here, but I don't want to serialise the ctx
+				exists := getMyState |state -> Obj?| { 
+					state.perApplicationServices[def.serviceId]
+				}
+				
+				if (exists != null)
+					return exists
+				
+				// keep the tracker in the current thread
+				service := create(ctx, def)
+				
+				withMyState |state| { state.perApplicationServices[def.serviceId] = service }
+				return service
+			}
 			
-			// keep the tracker in the current thread
-			service := create(ctx, def)
-			
-			withMyState |state| { state.perApplicationServices[def.serviceId] = service }
-			return service
+		} finally {
+			ctx.popDef
 		}
 
 		throw WtfErr("What scope is {$def.scope}???")
@@ -112,12 +117,8 @@ internal const class ModuleImpl : Module {
 	
     private Obj create(InjectionCtx ctx, ServiceDef def) {
 		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
-			ctx.defStack.push(def)
-			
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
-			
-			ctx.defStack.pop
 			return service
 	    }	
     }
