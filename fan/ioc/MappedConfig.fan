@@ -9,6 +9,10 @@
 ** Contributions must be compatible with the type.
 class MappedConfig {
 	
+	internal new make(Type param) {
+		
+	}
+
 	** Adds a keyed object to the service's contribution.
 	Void add(Obj key, Obj value) {
 		

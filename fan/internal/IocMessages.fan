@@ -40,8 +40,8 @@ internal const class IocMessages {
 		"Error invoking service binder method ${methodId}: ${cause}"
 	}
 
-	static Str noServiceMatchesType(Type serviceType) {
-		"No service implements the mixin ${serviceType}."
+	static Str noDependencyMatchesType(Type type) {
+		"No dependency macthes type ${type}."
 	}
 
 	static Str couldNotFindImplType(Type serviceType) {
@@ -115,6 +115,16 @@ internal const class IocMessages {
 
 	static Str contributionMethodServiceTypeDoesNotExist(Method method, Type serviceType) {
 		"Service does not exist for Type '$serviceType.qname' defined in contribution method ${method.qname}."
+	}
+	
+	static Str orderedConfigTypeIsGeneric(Type contribType, Str serviceId) {
+		"Ordered configuration for service '$serviceId' MUST be parameterised - e.g. Str[]"
+	}
+
+	
+	
+	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
+		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
 	}
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------

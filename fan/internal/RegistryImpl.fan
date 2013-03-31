@@ -151,14 +151,42 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
-		serviceDef 
-			:= serviceDefByType(dependencyType)
-			?: throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
+		serviceDef := serviceDefByType(dependencyType)
+		
+		if (serviceDef != null) {
+			ctx.log("Found Service '$serviceDef.serviceId'")
+			return getService(ctx, serviceDef)			
+		}
 		
 		// TODO: if not service found, ask other object locators / injection providers
 
-		ctx.log("Found Service '$serviceDef.serviceId'")
-		return getService(ctx, serviceDef)
+		dependency := null
+		
+		owner := ctx.peekDef
+		if (owner != null && dependencyType == owner.configType) {
+			// we should really put in a check to make sure we're doing ctor injection
+			Env.cur.err.printLine("DOING CONFIG")
+
+			config := null
+			if (owner.configType.name == "List")
+				config = OrderedConfig(owner.configType, owner.serviceId)
+			if (owner.configType.name == "Map")
+				config = MappedConfig(owner.configType)
+			
+			modules.each {  
+				contribs := it.contributionsByServiceDef(owner)
+				contribs.each {
+					config->contribute(it)
+				}
+			}
+			
+			dependency = config->getConfig
+		}
+		
+		if (dependency != null)
+			return dependency
+		
+		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
 
 	override Obj trackAutobuild(InjectionCtx ctx, Type type) {
@@ -205,6 +233,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			state.shutdownLock.check
 		}		
 	}
+
+	private ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {
+		BuiltInServiceDef() {
+			it.serviceId = serviceId
+			it.moduleId = builtInModuleId
+			it.serviceType = serviceType
+			it.scope = ServiceScope.perApplication
+		}
+	}
 	
 	private Void withMyState(|RegistryState| state) {
 		conState.withState(state)
@@ -212,15 +249,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	private Obj? getMyState(|RegistryState -> Obj| state) {
 		conState.getState(state)
-	}
-	
-	ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {
-		BuiltInServiceDef() {
-			it.serviceId = serviceId
-			it.moduleId = builtInModuleId
-			it.serviceType = serviceType
-			it.scope = ServiceScope.perApplication
-		}
 	}
 }
 

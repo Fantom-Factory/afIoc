@@ -7,7 +7,7 @@ internal mixin Contribution {
 	** Performs the work needed to contribute into the ordered configuration.
 	**
 	** Config is the ordered configuration into which values should be loaded. 
-	abstract Void contributeOrdered(Obj moduleInst, OrderedConfig config)
+	abstract Void contributeOrdered(OrderedConfig config)
 
 	** Performs the work needed to contribute into the mapped configuration.
 	**
