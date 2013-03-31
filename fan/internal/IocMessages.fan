@@ -81,10 +81,9 @@ internal const class IocMessages {
 		"Can not inject ${ScopeDef.perThread.name} scoped service $injectedServiceId into ${ScopeDef.perApplication.name} scoped service $injectedServiceId"
 	}
 	
-//	// recursive-module-constructor=The constructor for module class %s is recursive: it depends on itself in some way. \n The constructor, %s, is in some way is triggering a service builder, decorator or contribution method within the class.
-//	static Str recursiveModuleConstructor(Type moduleType, Method constructor) {
-//		"The constructor for module class ${moduleType} is recursive: it depends on itself in some way. \n The constructor, ${constructor}, is in some way is triggering a service builder, decorator or contribution method within the class."
-//	}
+	static Str cannotSetConstFields(Field field) {
+		"Can not set const field '$field.qname'. Either remove the 'const' keyword or the @${Inject#.name} facet."
+	}
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 	

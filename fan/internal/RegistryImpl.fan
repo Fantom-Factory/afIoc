@@ -27,9 +27,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= |OpTracker trakker, ObjLocator objLoc->Obj| {
 					|Obj service| {
 						trakker.track("Injecting via Ctor Field Injector") {
-							// TODO: Cannot reflectively set const fields, even in the ctor
-							// see http://fantom.org/sidewalk/topic/2119
-							InjectionUtils.injectIntoFields(trakker, objLoc, service, false, owningDef)
+							InjectionUtils.injectIntoFields(trakker, objLoc, service, true, owningDef)
 						}
 					}
 				}
@@ -147,7 +145,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			module.serviceDefsByType(dependencyType)
 		}.flatten
 
-		// TODO: if not service found, ask other object locators
+		// TODO: if not service found, ask other object locators / injection providers
 
 		if (serviceDefs.isEmpty)
 			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
