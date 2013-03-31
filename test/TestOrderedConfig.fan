@@ -25,6 +25,22 @@ class TestOrderedConfig : IocTest {
 		}  
 	}
 
+	Void testErrWhenServiceIdNoExist() {
+		verifyErrMsg(IocMessages.contributionMethodServiceIdDoesNotExist(T_MyModule27#cont, "wotever")) {
+			RegistryBuilder().addModule(T_MyModule27#).build.startup
+		}  
+	}
+
+	Void testErrWhenServiceTypeNoExist() {
+		verifyErrMsg(IocMessages.contributionMethodServiceTypeDoesNotExist(T_MyModule28#cont, Int#)) {
+			RegistryBuilder().addModule(T_MyModule28#).build.startup
+		}  
+	}
+
+	Void testNoErrWhenContibIsOptional() {
+		RegistryBuilder().addModule(T_MyModule29#).build.startup
+	}
+
 	Void testConfig() {
 		Utils.setLoglevelDebug
 		reg := RegistryBuilder().addModule(T_MyModule24#).build.startup
@@ -51,9 +67,24 @@ internal class T_MyModule26 {
 	static Void cont(OrderedConfig config) { }
 }
 
-
-
 internal class T_MyModule27 {
+	@Contribute{serviceId="wotever"}
+	static Void cont(OrderedConfig config) { }
+}
+
+internal class T_MyModule28 {
+	@Contribute{serviceType=Int#}
+	static Void cont(OrderedConfig config) { }
+}
+
+internal class T_MyModule29 {
+	@Contribute{serviceType=Int#; optional=true}
+	static Void cont(OrderedConfig config) { }
+}
+
+
+
+internal class T_MyModule30 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService19#).withId("s19")
 	}

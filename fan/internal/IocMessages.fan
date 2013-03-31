@@ -108,6 +108,14 @@ internal const class IocMessages {
 	static Str contributionMethodDoesNotDefineServiceId(Method method) {
 		"Contribution method $method.qname does not define a service ID."
 	}
+
+	static Str contributionMethodServiceIdDoesNotExist(Method method, Str serviceId) {
+		"Service does not exist for ID '$serviceId' defined in contribution method ${method.qname}."
+	}
+
+	static Str contributionMethodServiceTypeDoesNotExist(Method method, Type serviceType) {
+		"Service does not exist for Type '$serviceType.qname' defined in contribution method ${method.qname}."
+	}
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 	
