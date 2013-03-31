@@ -6,12 +6,12 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Type		serviceType
 	override const ScopeDef	scope
 	
-	const |OpTracker, ObjLocator->Obj| 	source
+	const |InjectionCtx->Obj| 	source
 	const Str	description
 	
 	new make(|This|? f := null) { f?.call(this)	}
 	
-	override |OpTracker, ObjLocator->Obj| createServiceBuilder() {
+	override |InjectionCtx->Obj| createServiceBuilder() {
 		source
 	}
 	

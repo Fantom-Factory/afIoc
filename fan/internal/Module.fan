@@ -12,7 +12,7 @@ internal mixin Module {
     abstract ServiceDef[] serviceDefsByType(Type serviceType)
 
 	** Locates (and builds if necessary) a service given a service id
-	abstract Obj? service(OpTracker tracker, Str serviceId)
+	abstract Obj? service(InjectionCtx ctx, Str serviceId)
 
 	
 	abstract Void clear()

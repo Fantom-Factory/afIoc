@@ -19,11 +19,11 @@ internal class OpTracker {
 		popOp
 	}
 	
-	Obj? track(Str description, |OpTracker->Obj?| operation) {
+	Obj? track(Str description, |->Obj?| operation) {
 		pushOp(description)
 		
 		try {
-			return operation(this)
+			return operation()
 			
 		} catch (Err err) {
 			if (!logged) {

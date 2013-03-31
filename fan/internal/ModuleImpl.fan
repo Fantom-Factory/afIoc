@@ -50,18 +50,18 @@ internal const class ModuleImpl : Module {
 		serviceDefs[serviceId]
 	}
 
-	override Obj? service(OpTracker tracker, Str serviceId) {
+	override Obj? service(InjectionCtx ctx, Str serviceId) {
         def := serviceDefs[serviceId]
 		if (def == null)
 			return null
 
 		if (def.scope == ScopeDef.perInjection) {
-			return create(tracker, def)			
+			return create(ctx, def)			
 		}
 		
 		if (def.scope == ScopeDef.perThread) {
 			return perThreadServices.getOrAdd(def.serviceId) {
-				create(tracker, def)
+				create(ctx, def)
 			}
 		}
 
@@ -78,7 +78,7 @@ internal const class ModuleImpl : Module {
 				return exists
 			
 			// keep the tracker in the current thread
-			service := create(tracker, def)
+			service := create(ctx, def)
 			
 			withMyState |state| { state.perApplicationServices[def.serviceId] = service }
 			return service
@@ -110,10 +110,10 @@ internal const class ModuleImpl : Module {
 		conState.getState(state)
 	}
 	
-    private Obj create(OpTracker tracker, ServiceDef def) {
-		tracker.track("Creating Service '$def.serviceId'") |->Obj| {
+    private Obj create(InjectionCtx ctx, ServiceDef def) {
+		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
-	        service := creator.call(tracker, objLocator)
+	        service := creator.call(ctx)
 			return service
 	    }	
     }

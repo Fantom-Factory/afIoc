@@ -111,10 +111,10 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 //			it.isEagerLoad 	= this.eagerLoadFlag
 			it.scope		= this.scope
 			it.description 	= "'$sId' : Standard Ctor Builder"
-			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {
-				tracker.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
+			it.source 		= |InjectionCtx ctx->Obj| {
+				ctx.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
 					log.info("Creating Service '$sId'")
-					return InjectionUtils.autobuild(tracker, objLocator, serviceImplType, owningDef)
+					return InjectionUtils.autobuild(ctx, serviceImplType, owningDef)
 				}
 			}			
 		}

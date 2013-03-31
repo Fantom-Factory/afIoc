@@ -8,7 +8,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 	
 	new make(|This|? f := null) { f?.call(this)	}
 
-	override |OpTracker, ObjLocator->Obj| createServiceBuilder() {
+	override |InjectionCtx->Obj| createServiceBuilder() {
 		throw IocErr("Can not create built in service '$serviceId'")
 	}
 	

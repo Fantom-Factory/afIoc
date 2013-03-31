@@ -2,22 +2,22 @@
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 	
-	static Obj autobuild(OpTracker tracker, ObjLocator objLocator, Type type, ServiceDef? owningDef) {
-		tracker.track("Autobuilding $type.qname") |->Obj| {
-			ctor := findAutobuildConstructor(tracker, type)
-			obj  := createViaConstructor(tracker, objLocator, ctor, owningDef)
-			injectIntoFields(tracker, objLocator, obj, false, owningDef)
+	static Obj autobuild(InjectionCtx ctx, Type type, ServiceDef? owningDef) {
+		ctx.track("Autobuilding $type.qname") |->Obj| {
+			ctor := findAutobuildConstructor(ctx, type)
+			obj  := createViaConstructor(ctx, ctor, owningDef)
+			injectIntoFields(ctx, obj, false, owningDef)
 			return obj
 		}
 	}
 	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool insideCtor, ServiceDef? owningDef) {
+	static Obj injectIntoFields(InjectionCtx ctx, Obj object, Bool insideCtor, ServiceDef? owningDef) {
 		
 		// FIXME: Err if have const fields but not injecting into them
 		
-		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(tracker, object.typeof, Inject#, true)
+		ctx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
+			if (!findFieldsWithFacet(ctx, object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
 					
 					// TODO: Cannot reflectively set const fields, even in the ctor
@@ -27,11 +27,11 @@ internal const class InjectionUtils {
 							throw IocErr(IocMessages.cannotSetConstFields(field))
 //					}
 					
-					dependency := findDependencyByType(tracker, objLocator, field.type, owningDef)
-	                inject(tracker, object, field, dependency)
+					dependency := findDependencyByType(ctx, field.type, owningDef)
+	                inject(ctx, object, field, dependency)
 	                return true
 	            })
-				tracker.log("No injection fields found")
+				ctx.log("No injection fields found")
 		}
 		
 //		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
@@ -44,38 +44,38 @@ internal const class InjectionUtils {
 //				tracker.log("No autobuild fields found")
 //		}
 		
-		callPostInjectMethods(tracker, objLocator, object, owningDef)
+		callPostInjectMethods(ctx, object, owningDef)
 		return object
     }
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
-	static Obj callPostInjectMethods(OpTracker tracker, ObjLocator objLocator, Obj object, ServiceDef? owningDef) {
-		tracker.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
+	static Obj callPostInjectMethods(InjectionCtx ctx, Obj object, ServiceDef? owningDef) {
+		ctx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
 					method.hasFacet(PostInjection#)
 				}
 				.reduce(false) |bool, method| {
-					tracker.log("Found method $method.signature")
-					callMethod(tracker, objLocator, method, object, owningDef)
+					ctx.log("Found method $method.signature")
+					callMethod(ctx, method, object, owningDef)
 					return true
 				})
-				tracker.log("No post injection methods found")
+				ctx.log("No post injection methods found")
 			return object
 		}
 	}
 	
-	static Obj callMethod(OpTracker tracker, ObjLocator objLocator, Method method, Obj? obj, ServiceDef? owningDef) {
-		args := determineInjectionParams(tracker, objLocator, method, owningDef)
-		return tracker.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
+	static Obj callMethod(InjectionCtx ctx, Method method, Obj? obj, ServiceDef? owningDef) {
+		args := determineInjectionParams(ctx, method, owningDef)
+		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
 	}
 
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private static Method findAutobuildConstructor(OpTracker tracker, Type type) {
-		tracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
+	private static Method findAutobuildConstructor(InjectionCtx ctx, Type type) {
+		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
 			ctor := |->Method| {
 				constructors := findConstructors(type)
 
@@ -103,42 +103,42 @@ internal const class InjectionUtils {
 				return params[0]
 			}()
 			
-			tracker.log("Found $ctor.signature")
+			ctx.log("Found $ctor.signature")
 			return ctor
 		}
 	}
 
-	private static Obj createViaConstructor(OpTracker tracker, ObjLocator objLocator, Method ctor, ServiceDef? owningDef) {
-		args := determineInjectionParams(tracker, objLocator, ctor, owningDef)
-		return tracker.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
+	private static Obj createViaConstructor(InjectionCtx ctx, Method ctor, ServiceDef? owningDef) {
+		args := determineInjectionParams(ctx, ctor, owningDef)
+		return ctx.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}
 
-	private static Obj[] determineInjectionParams(OpTracker tracker, ObjLocator objLocator, Method method, ServiceDef? owningDef) {
-		return tracker.track("Determining injection parameters for $method.signature") |->Obj[]| {
+	private static Obj[] determineInjectionParams(InjectionCtx ctx, Method method, ServiceDef? owningDef) {
+		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			params := method.params.map |param| {
-				tracker.log("Found parameter $param.type")
-				return findDependencyByType(tracker, objLocator, param.type, owningDef)
+				ctx.log("Found parameter $param.type")
+				return findDependencyByType(ctx, param.type, owningDef)
 			}		
 			if (params.isEmpty)
-				tracker.log("No injection parameters found")
+				ctx.log("No injection parameters found")
 			return params
 		}
 	}
 
-	private static Obj findDependencyByType(OpTracker tracker, ObjLocator objLocator, Type dependencyType, ServiceDef? owningDef) {
+	private static Obj findDependencyByType(InjectionCtx ctx, Type dependencyType, ServiceDef? owningDef) {
 		// FUTURE: this could take an FacetProvider to give more hints on dependency finding
 		// e.g. @Autobuild, @ServiceId
-		tracker.track("Looking for dependency of type $dependencyType") |->Obj| {
-			objLocator.trackDependencyByType(tracker, dependencyType, owningDef)			
+		ctx.track("Looking for dependency of type $dependencyType") |->Obj| {
+			ctx.objLocator.trackDependencyByType(ctx, dependencyType, owningDef)			
 		}
 	}
 	
-	private static Void inject(OpTracker tracker, Obj target, Field field, Obj value) {
-		tracker.track("Injecting $value.typeof.qname into field $field.signature") |->| {
+	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj value) {
+		ctx.track("Injecting $value.typeof.qname into field $field.signature") |->| {
 			if (field.get(target) != null) {
-				tracker.log("Field has non null value. Aborting injection.")
+				ctx.log("Field has non null value. Aborting injection.")
 				return
 			}
 			field.set(target, value)
@@ -149,7 +149,7 @@ internal const class InjectionUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
 
-	private static Field[] findFieldsWithFacet(OpTracker tracker, Type type, Type facetType, Bool includeConst) {
+	private static Field[] findFieldsWithFacet(InjectionCtx ctx, Type type, Type facetType, Bool includeConst) {
 		type.fields.findAll |field| {
 			// Ignore all static and final fields.
 	    	if (field.isStatic)
@@ -161,7 +161,7 @@ internal const class InjectionUtils {
 	    	if (!field.hasFacet(facetType)) 
 	    		return false
 			
-    		tracker.log("Found field $field.signature")
+    		ctx.log("Found field $field.signature")
 			return true
 		}
 	}
