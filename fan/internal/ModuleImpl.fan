@@ -112,8 +112,12 @@ internal const class ModuleImpl : Module {
 	
     private Obj create(InjectionCtx ctx, ServiceDef def) {
 		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
+			ctx.defStack.push(def)
+			
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
+			
+			ctx.defStack.pop
 			return service
 	    }	
     }

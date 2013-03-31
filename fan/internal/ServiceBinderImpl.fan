@@ -103,7 +103,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			// or... I could Func.bind()
 			serviceImplType	:= this.serviceImpl
 			sId 			:= it.serviceId
-			owningDef 		:= it
 
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId
@@ -114,7 +113,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.source 		= |InjectionCtx ctx->Obj| {
 				ctx.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
 					log.info("Creating Service '$sId'")
-					return InjectionUtils.autobuild(ctx, serviceImplType, owningDef)
+					return InjectionUtils.autobuild(ctx, serviceImplType)
 				}
 			}			
 		}

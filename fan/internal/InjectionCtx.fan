@@ -1,8 +1,9 @@
 
 internal class InjectionCtx {
 	
-	OpTracker tracker	:= OpTracker()
-	ObjLocator objLocator
+	ServiceDef[]	defStack	:= [,]
+	OpTracker 		tracker		:= OpTracker()
+	ObjLocator 		objLocator
 	
 	new make(ObjLocator objLocator) {
 		this.objLocator = objLocator

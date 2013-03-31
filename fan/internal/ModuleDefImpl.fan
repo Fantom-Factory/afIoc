@@ -87,11 +87,10 @@ internal const class ModuleDefImpl : ModuleDef {
 				it.scope 	= method.returns.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
 			
 			serviceId 		:= it.serviceId
-			owningDef		:= it
 			it.source 		= |InjectionCtx ctx -> Obj| {
 				ctx.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
 					log.info("Creating Service '$serviceId'")
-					return InjectionUtils.callMethod(ctx, method, null, owningDef)
+					return InjectionUtils.callMethod(ctx, method, null)
 				}
 			}			
 		}
