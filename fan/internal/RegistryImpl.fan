@@ -1,12 +1,13 @@
 
-internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
+internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
+	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const static Str 				builtInModuleId		:= "BuiltIn Module"
 	private const RegistryShutdownHubImpl 	registryShutdownHub	:= RegistryShutdownHubImpl()
 	private const Str:Module				modules
 	
-	new make(OpTracker tracker, ModuleDef[] moduleDefs) : super(RegistryState#) {
+	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
 		serviceIdToModule := Str:Module[:]
 		modules := [:]
 
@@ -17,6 +18,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 			services[makeBuiltInServiceDef("registryShutdownHub", RegistryShutdownHub#)] = registryShutdownHub
 			
 			services[StandardServiceDef() {
+				owningDef		:= it
 				it.serviceId 	= "ctorFieldInjector"
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
@@ -27,7 +29,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 						trakker.track("Injecting via Ctor Field Injector") {
 							// TODO: Cannot reflectively set const fields, even in the ctor
 							// see http://fantom.org/sidewalk/topic/2119
-							InjectionUtils.injectIntoFields(trakker, objLoc, service, false, ScopeDef.perInjection)
+							InjectionUtils.injectIntoFields(trakker, objLoc, service, false, owningDef)
 						}
 					}
 				}
@@ -100,14 +102,14 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	override Obj serviceById(Str serviceId) {
 		shutdownLockCheck
 		return OpTracker().track("Locating service by ID '$serviceId'") |tracker| {
-			trackServiceById(tracker, serviceId)
+			trackServiceById(tracker, serviceId, null)
 		}
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
 		shutdownLockCheck
 		return OpTracker().track("Locating dependency by type '$dependencyType.qname'") |tracker| {
-			trackDependencyByType(tracker, dependencyType)
+			trackDependencyByType(tracker, dependencyType, null)
 		}
 	}
 
@@ -125,7 +127,7 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
-	override Obj trackServiceById(OpTracker tracker, Str serviceId) {
+	override Obj trackServiceById(OpTracker tracker, Str serviceId, ServiceDef? owningDef) {
         ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDef(serviceId)
 		}.exclude { it == null }
@@ -136,39 +138,47 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 		if (serviceDefs.size > 1)
 			throw WtfErr("Multiple services defined for service id $serviceId")
 		
-		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-        return modules[serviceDefs[0].moduleId].service(tracker, serviceId)
+		serviceDef := serviceDefs[0]
+		return getService(tracker, serviceDef, owningDef)
 	}
-	
-	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType) {
+
+	override Obj trackDependencyByType(OpTracker tracker, Type dependencyType, ServiceDef? owningDef) {
         ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDefsByType(dependencyType)
 		}.flatten
 
 		// TODO: if not service found, ask other object locators
-		
+
 		if (serviceDefs.isEmpty)
 			throw IocErr(IocMessages.noServiceMatchesType(dependencyType))
 		if (serviceDefs.size > 1)
 			throw IocErr(IocMessages.manyServiceMatches(dependencyType, serviceDefs.map { it.serviceId }))
 
-		serviceId := serviceDefs[0].serviceId
+		serviceDef := serviceDefs[0]
+		serviceId  := serviceDefs[0].serviceId
 		tracker.log("Found Service '$serviceId'")
 
-		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-        return modules[serviceDefs[0].moduleId].service(tracker, serviceId)
+		return getService(tracker, serviceDef, owningDef)
 	}
 
 	override Obj trackAutobuild(OpTracker tracker, Type type) {
 		return InjectionUtils.autobuild(tracker, this, type, null)
 	}
-	
+
 	override Obj trackInjectIntoFields(OpTracker tracker, Obj object) {
 		return InjectionUtils.injectIntoFields(tracker, this, object, false, null)
 	}
-	
+
 	// ---- Helper Methods ------------------------------------------------------------------------
 
+	private Obj getService(OpTracker tracker, ServiceDef serviceDef, ServiceDef? owningDef) {
+		if (owningDef?.scope == ScopeDef.perApplication && serviceDef.scope == ScopeDef.perThread)
+			throw IocErr(IocMessages.threadScopeInAppScope(owningDef.serviceId, serviceDef.serviceId))
+		
+		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
+        return modules[serviceDef.moduleId].service(tracker, serviceDef.serviceId)
+	}
+	
 	private Void shutdownLockCheck() {
 		withMyState |state| {
 			state.shutdownLock.check
@@ -176,11 +186,11 @@ internal const class RegistryImpl : ConcurrentState, Registry, ObjLocator {
 	}
 	
 	private Void withMyState(|RegistryState| state) {
-		super.withState(state)
+		conState.withState(state)
 	}
 
 	private Obj? getMyState(|RegistryState -> Obj| state) {
-		super.getState(state)
+		conState.getState(state)
 	}
 	
 	ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {

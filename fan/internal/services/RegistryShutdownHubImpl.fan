@@ -1,8 +1,7 @@
 
-internal const class RegistryShutdownHubImpl : ConcurrentState, RegistryShutdownHub {
-	private const static Log 	log 				:= Log.get(RegistryShutdownHubImpl#.name)
-	
-	new make() : super(RegistryShutdownHubState#) { }
+internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
+	private const static Log 		log 		:= Log.get(RegistryShutdownHubImpl#.name)
+	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
 	
 	override Void addRegistryShutdownListener(|->| listener) {
 		withMyState |state| {
@@ -55,11 +54,11 @@ internal const class RegistryShutdownHubImpl : ConcurrentState, RegistryShutdown
 	}
 
 	private Void withMyState(|RegistryShutdownHubState| state) {
-		super.withState(state)
+		conState.withState(state)
 	}
 
 	private Obj? getMyState(|RegistryShutdownHubState -> Obj| state) {
-		super.getState(state)
+		conState.getState(state)
 	}
 }
 
