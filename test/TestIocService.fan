@@ -5,7 +5,6 @@ class TestIocService : Test {
 	Void testThreads() {
 		reggy := IocService([T_MyModule16#]).start
 		
-		Utils.setLoglevelDebug
 		app1 := reggy.serviceById("app")
 		the1 := reggy.serviceById("the")
 

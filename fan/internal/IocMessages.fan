@@ -93,6 +93,22 @@ internal const class IocMessages {
 		"Service recursion! A service relies on itself in some way: " + defs.map { it.serviceId }.join(" -> ")
 	}
 	
+	static Str contributionMethodMustBeStatic(Method method) {
+		"Contribution method '$method.qname' must be static"
+	}
+	
+	static Str contributionMethodMustTakeConfig(Method method) {
+		"Contribution method '$method.qname' must take either an ${OrderedConfig#.name} or a ${MappedConfig#.name} as its first parameter"		
+	}
+	
+	static Str contribitionHasBothIdAndType(Method method) {
+		"Contribution method '$method.qname' defines both a serivce id AND a service type. Only 1 is allowed."
+	}
+	
+	static Str contributionMethodDoesNotDefineServiceId(Method method) {
+		"Contribution method $method.qname does not define a service ID."
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 	
 	static Str registryBuilt() {

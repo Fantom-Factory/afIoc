@@ -43,6 +43,7 @@ internal class T_MyModule4 {
 		binder.bindImpl(T_MyService2#)
 	}
 	
+	@Build
 	static T_MyService1 buildPenguin() {
 		ser2 := T_MyService2()
 		ser2.kick = "Penguin"
@@ -57,6 +58,7 @@ internal class T_MyModule5 {
 		binder.bindImpl(T_MyService2#)
 	}
 	
+	@Build
 	static T_MyService1 buildPenguin() {
 		ser2 := T_MyService2()
 		ser2.kick = "Penguin"
@@ -65,6 +67,7 @@ internal class T_MyModule5 {
 		return ser1
 	}
 
+	@Build
 	static T_MyService1 buildGoose(T_MyService2 ser2) {
 		ser1 := T_MyService1()
 		ser1.service = ser2
@@ -73,6 +76,7 @@ internal class T_MyModule5 {
 }
 
 internal class T_MyModule7 {
+	@Build
 	static T_MyService1 build() {
 		return T_MyService1()
 	}

@@ -1,48 +1,48 @@
 
-class TestModule : Test {
+class TestModule : IocTest {
 	
 	Void testUnrecognisedModuleMethods() {
-		verifyErr(IocErr#) {   			
-			reg := RegistryBuilder().addModule(T_MyModule2#).build
+		verifyErrMsg(IocMessages.unrecognisedModuleMethods(T_MyModule2#, [T_MyModule2#doDaa])) {
+			RegistryBuilder().addModule(T_MyModule2#).build
 		}
 	}
 	
 	Void testBindMethodMustBeStatic() {
 		
 		// binder method must be static
-		verifyErr(IocErr#) {   			
-			reg := RegistryBuilder().addModule(T_MyModule8#).build
+		verifyErrMsg(IocMessages.bindMethodMustBeStatic(T_MyModule8#bind)) {
+			RegistryBuilder().addModule(T_MyModule8#).build
 		}		
 
 		// binder method must only have the one param
-		verifyErr(IocErr#) {   			
-			reg := RegistryBuilder().addModule(T_MyModule9#).build
+		verifyErrMsg(IocMessages.bindMethodWrongParams(T_MyModule9#bind)) {
+			RegistryBuilder().addModule(T_MyModule9#).build
 		}		
 
 		// binder method param must be type ServiceBinder
-		verifyErr(IocErr#) {   			
-			reg := RegistryBuilder().addModule(T_MyModule10#).build
+		verifyErrMsg(IocMessages.bindMethodWrongParams(T_MyModule10#bind)) {
+			RegistryBuilder().addModule(T_MyModule10#).build
 		}		
 	}
-	
+
 	Void testSubModule() {
 		reg := RegistryBuilder().addModule(T_MyModule12#).build
 		reg.dependencyByType(T_MyService2#)
 	}
-	
+
 	Void testBindImplFindsImpl() {
 		reg :=  RegistryBuilder().addModule(T_MyModule13#).build.startup
 		reg.serviceById("yo")
 	}
-	
+
 	Void testBindImplFitsMixin() {
-		verifyErr(IocErr#) {   			
+		verifyErrMsg(IocMessages.bindImplNotClass(T_MyService11Impl#)) {   			
 			RegistryBuilder().addModule(T_MyModule14#).build
 		}
 	}
-	
+
 	Void testBindImplFitsMixinErrIfNot() {
-		verifyErr(IocErr#) {   			
+		verifyErrMsg(IocMessages.bindImplDoesNotFit(T_MyService1#, T_MyService2#)) {   			
 			RegistryBuilder().addModule(T_MyModule15#).build
 		}
 	}

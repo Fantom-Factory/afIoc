@@ -2,9 +2,8 @@ Overview [#overview]
 ********************
 IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond other IoC containers, this IoC offers:
  - distributed service configuration between pods and modules
- - judicious use of convention over configurations
- - lazy service loading
  - extensive error reporting
+ - lazy(ish) service loading
  - case insensitivity
 
 Quick Start [#quickStart]
@@ -49,20 +48,22 @@ Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin.
+A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC.
 
-A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service.
+A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service. Non service dependencies may be managed by (future) injection providers.
+
+A **contribution** is a means to configure a service.
 
 A **module** is a class where services and contributions are defined.
 
 
 Loading Modules [#locatingModules]
 ***********************************
-When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules defined by dependant pods. Each pod should declare the following meta:
+When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules defined by dependant pods, in which case, each pod should have declared the following meta:
 
 '"afIoc.module" : "{qname}"'
 
-Where '{qname}' is the qualified type name of the module. Additional modulues can be declared by the [@SubModule]`SubModule` facet.
+Where '{qname}' is a qualified type name of a module. Additional modulues can be declared by the [@SubModule]`SubModule` facet.
 
 Modules can also be loaded from index properties in a similar manner.
 
@@ -93,6 +94,8 @@ Dependency Injection [#dependencyInjection]
 *******************************************
 IoC performs both ctor and field injection.
 
+Note that under the covers, all service injection is resolved via the unique service ids, injection by type is merely a layer on top of that added for convience.
+
 When IoC builds a service it locates a suitable ctor. This is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
 
 Field injection happens *after* the object has been created and so must be declared as nullable:
@@ -113,12 +116,16 @@ class MyService1 {
 }
 <pre
 
+Note that due to [this topic]`http://www.fantom.org/sidewalk/topic/2119` 'const' fields can not be injected.
+
 After object construction and field injection you may perform extra setup via methods annotated with the '@PostInjection' facet. These may be of any visibility and all parameters are resolved as dependencies.
 
 
 Scope [#scope]
 **************
+Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services must be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
+It is illegal to attempt to inject a 'perThread' scoped service into a 'perApplication' scoped service.
 
 
 Tips & Good Practicies
@@ -131,4 +138,4 @@ use 'autobuikd' for other gui objss
 
 most useful when building guis - a panel or content pane isn't a service, but needs access to serives. commands can be auto build on the fly to invoke serive actions
 
-
+Based on T5-IoC but perhaps tries to take out some of the *magic* commonlly associated with it.
