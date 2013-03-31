@@ -132,7 +132,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	
 	private Void addServiceDefFromMethod(OpTracker tracker, Str:ServiceDef serviceDefs, Method method) {
 		
-		scope := method.returns.isConst ? ScopeScope.perApplication : ScopeScope.perThread
+		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		
 		if (method.hasFacet(Scope#))
 			scope = (Utils.getFacetOnSlot(method, Scope#) as Scope).scope
