@@ -73,7 +73,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		}
 	}
 	
-	private Void addServiceDefFromMethod(OpTracker trakker, Str:ServiceDef serviceDefs, Method method) {
+	private Void addServiceDefFromMethod(OpTracker tracker, Str:ServiceDef serviceDefs, Method method) {
 		serviceDef	:= StandardServiceDef {
 			it.serviceId 	= extractServiceId(method)
 			it.moduleId 	= this.moduleId
@@ -88,14 +88,14 @@ internal const class ModuleDefImpl : ModuleDef {
 			
 			serviceId 		:= it.serviceId
 			owningDef		:= it
-			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {
-				tracker.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
+			it.source 		= |InjectionCtx ctx -> Obj| {
+				ctx.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
 					log.info("Creating Service '$serviceId'")
-					return InjectionUtils.callMethod(tracker, objLocator, method, null, owningDef)
+					return InjectionUtils.callMethod(ctx, method, null, owningDef)
 				}
 			}			
 		}
-		addServiceDef(trakker, serviceDefs, serviceDef)
+		addServiceDef(tracker, serviceDefs, serviceDef)
 	}	
 	
     private Void addServiceDef(OpTracker tracker, Str:ServiceDef serviceDefs, ServiceDef serviceDef) {

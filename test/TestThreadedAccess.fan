@@ -116,12 +116,6 @@ internal class T_MyModule19 {
 	}
 }
 
-//internal class T_MyModule19 {
-//	static Void bind(ServiceBinder binder) {
-//		binder.bindImpl(T_MyService14#).withId("s14")
-//	}
-//}
-
 internal const class T_MyService12 {
 	const Str kick	:= "DREDD"
 }
