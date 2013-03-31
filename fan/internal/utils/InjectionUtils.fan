@@ -12,13 +12,21 @@ internal const class InjectionUtils {
 	}
 	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool injectConstFields, ServiceDef? owningDef) {
+	static Obj injectIntoFields(OpTracker tracker, ObjLocator objLocator, Obj object, Bool insideCtor, ServiceDef? owningDef) {
 		
 		// FIXME: Err if have const fields but not injecting into them
 		
 		tracker.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(tracker, object.typeof, Inject#, injectConstFields)
+			if (!findFieldsWithFacet(tracker, object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
+					
+					// TODO: Cannot reflectively set const fields, even in the ctor
+					// see http://fantom.org/sidewalk/topic/2119
+//					if (!insideCtor) {
+						if (field.isConst)
+							throw IocErr(IocMessages.cannotSetConstFields(field))
+//					}
+					
 					dependency := findDependencyByType(tracker, objLocator, field.type, owningDef)
 	                inject(tracker, object, field, dependency)
 	                return true
