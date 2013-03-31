@@ -19,7 +19,7 @@ class RegistryBuilder {
 			addModuleDef(moduleDef)
 			
 			if (moduleType.hasFacet(SubModule#)) {
-				subModule := Utils.getFacet(moduleType, SubModule#) as SubModule
+				subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
 				tracker.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
 					subModule.modules.each { 
 						addModule(it)

@@ -36,10 +36,22 @@ internal class Utils {
 
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
 	** 'hasFacet' is available on Type.
-	static Facet getFacet(Type type, Type annotation) {
-		type.facets.find |fac| { 
+	static Facet getFacetOnType(Type type, Type annotation) {
+		if (!annotation.isFacet)
+			throw Err("$annotation is not a facet!")
+		return type.facets.find |fac| { 
 			fac.typeof == annotation
 		} ?: throw Err("Facet $annotation.qname not found on $type.qname")
+	}
+
+	** Stoopid F4 thinks the 'facet' method is a reserved word!
+	** 'hasFacet' is available on Slot.
+	static Facet getFacetOnSlot(Slot slot, Type annotation) {
+		if (!annotation.isFacet)
+			throw Err("$annotation is not a facet!")
+		return slot.facets.find |fac| { 
+			fac.typeof == annotation
+		} ?: throw Err("Facet $annotation.qname not found on $slot.qname")
 	}
 	
 }

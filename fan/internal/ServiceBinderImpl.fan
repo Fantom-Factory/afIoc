@@ -71,8 +71,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	}
 
 	override This withScope(ScopeDef scope) {
-		if (scope == ScopeDef.perApplication && !serviceImpl.isConst)	// FIXME: test
-			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceImpl))
 		this.scope = scope
 		return this
 	}
