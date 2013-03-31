@@ -49,7 +49,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			modules = getMyState |state| {
 				mModules 	:= iModules.rw
 				mIdToModule	:= iIdToModule.rw
-				
+
 				moduleDefs.each |moduleDef| {
 					module := ModuleImpl(this, moduleDef)
 					mModules[moduleDef.moduleId] = module
@@ -63,7 +63,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 						mIdToModule[serviceId] = module
 					}				
 				}
-				
+
 				return mModules.toImmutable
 			}
 		}

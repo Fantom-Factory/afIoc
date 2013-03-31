@@ -1,14 +1,18 @@
 
-class TestCtorInjection : Test {
+class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyErr(IocErr#) { reg.dependencyByType(T_MyService4#) }
+		verifyErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService4#, 2)) { 
+			reg.dependencyByType(T_MyService4#) 
+		}
 	}
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyErr(IocErr#) { reg.dependencyByType(T_MyService5#) }
+		verifyErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService5#, 1)) { 
+			reg.dependencyByType(T_MyService5#) 
+		}
 	}
 
 	Void testCtorWithMostParamsIsPicked() {
@@ -28,11 +32,9 @@ class TestCtorInjection : Test {
 	}
 
 	Void testFieldsAreNotInjectedTwice() {
-		Utils.debugOperation |->| {   
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
 		T_MyService9 ser9 := reg.dependencyByType(T_MyService9#)
 		verifyEq(ser9.service2.kick, "Can't Touch This!" )
-		}
 	}
 	
 }

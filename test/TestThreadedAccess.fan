@@ -30,7 +30,6 @@ class TestThreadedAccess : Test {
 
 		// can not inject a perThread service into a perApp service
 		verifyErr(IocErr#) {
-			Utils.setLoglevelDebug
 			s12 := reg.serviceById("s12")	// perThread
 			s13 := reg.serviceById("s13")	// perApp
 		}		
