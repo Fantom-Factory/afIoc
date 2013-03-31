@@ -96,18 +96,27 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		if (serviceMixin == null)
 			return
 
-		// sets source and description
 		setDefaultScope
-		createStandardConstructorBuilder
 
 		serviceDef := StandardServiceDef() {
+			// lock down the service Impl type so it can't change behind our backs
+			// or... I could Func.bind()
+			serviceImplType	:= this.serviceImpl
+			sId 			:= it.serviceId
+			owningDef 		:= it
+
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId
 			it.serviceType 	= this.serviceMixin
 //			it.isEagerLoad 	= this.eagerLoadFlag
-			it.source		= this.source
 			it.scope		= this.scope
-			it.description	= this.description
+			it.description 	= "'$sId' : Standard Ctor Builder"
+			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {
+				tracker.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
+					log.info("Creating Service '$sId'")
+					return InjectionUtils.autobuild(tracker, objLocator, serviceImplType, owningDef)
+				}
+			}			
 		}
 
 		addServiceDef(serviceDef)
@@ -129,20 +138,5 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			return
 		scope = serviceImpl.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
 	}
-	
-	private Void createStandardConstructorBuilder() {
-		// lock down the service Impl type so it can't change behind our backs
-		// or... I could Func.bind()
-		serviceImplType	:= this.serviceImpl
-		serviceId		:= this.serviceId
-		scope			:= this.scope
-		description 	= "'$serviceId' : Standard Ctor Builder"
-		source 			 = |OpTracker tracker, ObjLocator objLocator -> Obj| {
-			tracker.track("Creating Serivce '$serviceId' via a standard ctor autobuild") |->Obj| {
-				log.info("Creating Service '$serviceId'")
-				return InjectionUtils.autobuild(tracker, objLocator, serviceImplType, scope)
-			}
-		}
-	}	
 }
 

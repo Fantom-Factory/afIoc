@@ -10,4 +10,5 @@ enum class ScopeDef {
 	
 	** Service is a singleton, only one is ever created. This is the default for const services.
 	perApplication;
+	
 }

@@ -87,10 +87,11 @@ internal const class ModuleDefImpl : ModuleDef {
 				it.scope 	= method.returns.isConst ? ScopeDef.perApplication : ScopeDef.perThread 
 			
 			serviceId 		:= it.serviceId
+			owningDef		:= it
 			it.source 		= |OpTracker tracker, ObjLocator objLocator -> Obj| {
 				tracker.track("Creating Serivce '$serviceId' via a builder method '$method.qname'") |->Obj| {
 					log.info("Creating Service '$serviceId'")
-					return InjectionUtils.callMethod(tracker, objLocator, method, null)
+					return InjectionUtils.callMethod(tracker, objLocator, method, null, owningDef)
 				}
 			}			
 		}

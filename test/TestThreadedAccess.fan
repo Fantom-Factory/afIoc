@@ -27,10 +27,13 @@ class TestThreadedAccess : Test {
 
 	Void testThreadInApp() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule17#).build.startup
-		
-		Utils.setLoglevelDebug
-		s12 := reg.serviceById("s12")	// perThread
-		s13 := reg.serviceById("s13")	// perApp
+
+		// can not inject a perThread service into a perApp service
+		verifyErr(IocErr#) {
+			Utils.setLoglevelDebug
+			s12 := reg.serviceById("s12")	// perThread
+			s13 := reg.serviceById("s13")	// perApp
+		}		
 
 //		Actor(ActorPool()) |->| {
 //			s12i := reg.serviceById("s12")

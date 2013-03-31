@@ -1,8 +1,9 @@
 
-internal const class ModuleImpl : ConcurrentState, Module {
+internal const class ModuleImpl : Module {
 	
 	override const Str				moduleId
-	private const LocalStash 		stash	:= LocalStash(typeof)
+	private const ConcurrentState 	conState	:= ConcurrentState(StandardModuleState#)
+	private const LocalStash 		stash		:= LocalStash(typeof)
 	private const Str:ServiceDef	serviceDefs
 	private const ObjLocator		objLocator
 	
@@ -11,7 +12,7 @@ internal const class ModuleImpl : ConcurrentState, Module {
 		set { }
 	}	
 
-	new makeBuiltIn(ObjLocator objLocator, Str moduleId, ServiceDef:Obj? services) : super.make(StandardModuleState#) {
+	new makeBuiltIn(ObjLocator objLocator, Str moduleId, ServiceDef:Obj? services) {
 		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
 	
 		services.each |service, def| {
@@ -31,7 +32,7 @@ internal const class ModuleImpl : ConcurrentState, Module {
 		this.objLocator 	= objLocator
 	}
 
-	new make(ObjLocator objLocator, ModuleDef moduleDef) : super(StandardModuleState#) {
+	new make(ObjLocator objLocator, ModuleDef moduleDef) {
 		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
 		
 		moduleDef.serviceDefs.each |def| { 
@@ -66,14 +67,19 @@ internal const class ModuleImpl : ConcurrentState, Module {
 
 		if (def.scope == ScopeDef.perApplication) {
 			// TODO: when tested, try putting all in one closure
-			exists := getMyState |state| { 
-				state.perApplicationServices.containsKey(def.serviceId) 
+
+			// I believe there's a slim chance of the service being created twice here, but you'd 
+			// need 2 actors requesting the same service at the same time 
+			exists := getMyState |state -> Obj?| { 
+				state.perApplicationServices[def.serviceId]
 			}
 			
-			if (exists)
-				return getMyState |state| { state.perApplicationServices[def.serviceId] }
+			if (exists != null)
+				return exists
 			
+			// keep the tracker in the current thread
 			service := create(tracker, def)
+			
 			withMyState |state| { state.perApplicationServices[def.serviceId] = service }
 			return service
 		}
@@ -97,11 +103,11 @@ internal const class ModuleImpl : ConcurrentState, Module {
 	// ---- Private Methods ----------------------------------------------------
 
 	private Void withMyState(|StandardModuleState| state) {
-		super.withState(state)
+		conState.withState(state)
 	}
 
 	private Obj? getMyState(|StandardModuleState -> Obj| state) {
-		super.getState(state)
+		conState.getState(state)
 	}
 	
     private Obj create(OpTracker tracker, ServiceDef def) {
