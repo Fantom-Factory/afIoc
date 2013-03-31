@@ -58,7 +58,13 @@ A **module** is a class where services and contributions are defined.
 
 Loading Modules [#locatingModules]
 ***********************************
+When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules defined by dependant pods. Each pod should declare the following meta:
 
+'"afIoc.module" : "{qname}"'
+
+Where '{qname}' is the qualified type name of the module. Additional modulues can be declared by the [@SubModule]`SubModule` facet.
+
+Modules can also be loaded from index properties in a similar manner.
 
 
 Defining Services [#definingServices]

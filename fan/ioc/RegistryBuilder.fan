@@ -75,7 +75,7 @@ class RegistryBuilder {
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 	
-	Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
+	private Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
 		tracker.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
 			lock.check
 			
