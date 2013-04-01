@@ -158,33 +158,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return getService(ctx, serviceDef)			
 		}
 		
-		// TODO: if not service found, ask other object locators / injection providers
-
-		dependency := null
-		
-		owner := ctx.peekDef
-		if (owner != null && dependencyType == owner.configType) {
-			// we should really put in a check to make sure we're doing ctor injection
-			Env.cur.err.printLine("DOING CONFIG")
-
-			config := null
-			if (owner.configType.name == "List")
-				config = OrderedConfig(owner.configType, owner.serviceId)
-			if (owner.configType.name == "Map")
-				config = MappedConfig(owner.configType)
-			
-			modules.each {  
-				contribs := it.contributionsByServiceDef(owner)
-				contribs.each {
-					config->contribute(it)
-				}
-			}
-			
-			dependency = config->getConfig
-		}
-		
+		// look for configuration
+		dependency := ctx.provideDependency(dependencyType)
 		if (dependency != null)
 			return dependency
+		
+		// TODO: if not service found, ask other object locators / injection providers
 		
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
@@ -219,6 +198,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return serviceDefs.isEmpty ? null : serviceDefs[0]
 	}
 
+	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
+		modules.vals.map {
+			it.contributionsByServiceDef(serviceDef)
+		}.flatten
+	}
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 

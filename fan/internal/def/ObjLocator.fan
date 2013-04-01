@@ -20,4 +20,6 @@ internal const mixin ObjLocator {
 	abstract ServiceDef? serviceDefById(Str serviceId)
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType) 
+	
+	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 }

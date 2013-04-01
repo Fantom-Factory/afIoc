@@ -77,8 +77,8 @@ internal const class ModuleImpl : Module {
 		if (def == null)
 			return null
 
-		ctx.pushDef(def)	// we're going deeper!
-		try {
+		// we're going deeper!
+		return ctx.withServiceDef(def) |->Obj?| {
 			if (def.scope == ServiceScope.perInjection) {
 				return create(ctx, def)			
 			}
@@ -106,12 +106,8 @@ internal const class ModuleImpl : Module {
 				withMyState |state| { state.perApplicationServices[def.serviceId] = service }
 				return service
 			}
-			
-		} finally {
-			ctx.popDef
+			throw WtfErr("What scope is {$def.scope}???")
 		}
-
-		throw WtfErr("What scope is {$def.scope}???")
 	}
 	
 	override Void clear() {
