@@ -19,9 +19,10 @@ internal const class ContributionImpl : Contribution {
 	}
 	
 	override Void contributeOrdered(InjectionCtx ctx, OrderedConfig config) {
-		ctx.withConfigProvider(ContribProvider(config)) |->| {
-			InjectionUtils.callMethod(ctx, method, null)
-//			method.call(config)
+		ctx.track("Gathering ordered configuration of type $config.contribType") |->| {			
+			ctx.withConfigProvider(ContribProvider(config)) |->| {
+				InjectionUtils.callMethod(ctx, method, null)
+			}
 		}
 	}
 

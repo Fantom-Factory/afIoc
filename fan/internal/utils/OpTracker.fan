@@ -45,6 +45,12 @@ internal class OpTracker {
 		}
 	}
 	
+	Void logExpensive(|->Str| msg) {
+		if (logger.isDebug) {
+			log(msg())
+		}
+	}
+
 	Void log(Str description) {
 		if (logger.isDebug) {
 			depth 	  := operations.size

@@ -14,6 +14,10 @@ internal class InjectionCtx {
 		tracker.track(description, operation)
 	}
 
+	Void logExpensive(|->Str| msg) {
+		tracker.logExpensive(msg)
+	}
+	
 	Void log(Str description) {
 		tracker.log(description)
 	}

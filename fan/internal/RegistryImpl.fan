@@ -160,8 +160,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		// look for configuration
 		dependency := ctx.provideDependency(dependencyType)
-		if (dependency != null)
+		if (dependency != null) {
+			ctx.logExpensive |->Str| { "Found Dependency '$dependency'" }
 			return dependency
+		}
 		
 		// TODO: if not service found, ask other object locators / injection providers
 		
