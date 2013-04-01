@@ -3,8 +3,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
-	private const static Str 				builtInModuleId		:= "BuiltIn Module"
-	private const RegistryShutdownHubImpl 	registryShutdownHub	:= RegistryShutdownHubImpl()
+	private const static Str 				builtInModuleId		:= "BuiltInModule"
 	private const Str:Module				modules
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
@@ -12,11 +11,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		moduleIdToModule	:= Str:Module[:]
 
 		tracker.track("Defining Built-In services") |->| {
-			services := ServiceDef:Obj?[:]
-			
+			services := ServiceDef:Obj?[:]			
 			services[makeBuiltInServiceDef("registry", Registry#)] = this 
-			services[makeBuiltInServiceDef("registryShutdownHub", RegistryShutdownHub#)] = registryShutdownHub
-			
+
 			services[StandardServiceDef() {
 				it.serviceId 	= "ctorFieldInjector"
 				it.moduleId		= builtInModuleId
@@ -86,16 +83,26 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		withMyState |state| {
 			state.startupLock.lock
 		}
-		// TODO: do service startup loading
+		
+		// Do dat startup!
+		tracker := OpTracker()
+		serviceById(RegistryStartup#.name)->go(tracker)
+
 		return this
 	}
 
 	override This shutdown() {
+		shutdownHub := serviceById(RegistryShutdownHub#.name) as RegistryShutdownHubImpl
+
+		// Registry shutdown is commencing...
+		shutdownHub.registryWillShutdown
+
 		withMyState |state| {
 			state.shutdownLock.lock
 		}
 
-		registryShutdownHub.fireRegistryDidShutdown()
+		// Registry shutdown complete.
+		shutdownHub.registryHasShutdown
 		
 		// destroy all internal refs
 		modules.each { it.clear }
@@ -196,6 +203,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.contributionsByServiceDef(serviceDef)
 		}.flatten
 	}
+
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 

@@ -1,14 +1,17 @@
 
 ** Builds a `Registry` from Modules. Modules may be added manually, defined by 
-** [meta-data]`Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
+** [meta-data]`sys::Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
 class RegistryBuilder {
 	private const static Log 	logger 		:= Utils.getLog(RegistryBuilder#)
 	
 	private OpTracker	tracker 	:= OpTracker("Building IoC Registry")
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
-	
-	
+
+	new make() {
+		addModule(IocModule#)
+	}
+
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
 		// FIXME: prevent module recursion

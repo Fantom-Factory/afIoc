@@ -18,17 +18,24 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	}
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
-	internal Void fireRegistryDidShutdown() {
-		withMyState |state| {
-			state.lock.lock
-		}
-
+	internal Void registryWillShutdown() {
 		preListeners.each | |->| listener| {
 			try {
 				listener()
 			} catch (Err e) {
 				log.err(ServiceMessages.shutdownListenerError(listener, e))
 			}
+		}
+
+		withMyState |state| {
+			state.preListeners.clear
+		}
+	}
+
+	** After the listeners have been invoked, they are discarded to free up any references they may hold.
+	internal Void registryHasShutdown() {
+		withMyState |state| {
+			state.lock.lock
 		}
 
 		listeners.each |listener| {
@@ -40,7 +47,6 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 		}
 		
 		withMyState |state| {
-			state.preListeners.clear
 			state.listeners.clear
 		}
 	}

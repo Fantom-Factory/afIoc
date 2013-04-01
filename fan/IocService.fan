@@ -40,6 +40,7 @@ const class IocService : Service {
 		this.dependencies	= false
 	}
 	
+	** Convenience for `RegistryBuilder.addModulesFromDependencies`
 	This addModulesFromDependencies(Pod dependenciesOf) {
 		checkServiceNotStarted
 		dependencies = true
@@ -47,12 +48,14 @@ const class IocService : Service {
 		return this
 	}
 
+	** Convenience for `RegistryBuilder.addModulesFromIndexProperties`
 	This addModulesFromIndexProperties() {
 		checkServiceNotStarted
 		indexProps = true
 		return this
 	}
 
+	** Convenience for `RegistryBuilder.addModules`
 	This addModules(Type[] moduleTypes) {
 		checkServiceNotStarted
 		this.moduleTypes = this.moduleTypes.addAll(moduleTypes)
@@ -62,6 +65,9 @@ const class IocService : Service {
 
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 
+	** Builds and starts up the registry.
+	** See `RegistryBuilder.build`.
+	** See `Registry.startup`.
 	override Void onStart() {
 		checkServiceNotStarted
 		log.info("Starting IOC...");
@@ -89,6 +95,8 @@ const class IocService : Service {
 		}
 	}
 
+	** Shuts down the registry.
+	** See `Registry.shutdown`.
 	override Void onStop() {
 		if (registry == null) {
 			log.info("Registry already stopped.")

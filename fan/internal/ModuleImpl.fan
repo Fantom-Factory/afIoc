@@ -3,7 +3,7 @@ internal const class ModuleImpl : Module {
 	
 	override const Str				moduleId
 	private const ConcurrentState 	conState	:= ConcurrentState(StandardModuleState#)
-	private const LocalStash 		stash		:= LocalStash(typeof)
+	private const LocalStash 		stash		:= LocalStash(Module#)
 	private const Str:ServiceDef	serviceDefs
 	private const Contribution[]	contributions
 	private const ObjLocator		objLocator
@@ -68,7 +68,8 @@ internal const class ModuleImpl : Module {
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
 		contributions.findAll {
-			it.serviceDef.serviceId == serviceDef.serviceId
+			// service def maybe null if contribution is optional
+			it.serviceDef?.serviceId == serviceDef.serviceId
 		}
 	}
 	

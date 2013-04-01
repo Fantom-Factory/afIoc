@@ -19,7 +19,7 @@ using concurrent
 ** 
 ** pre>
 ** const class Example
-**   private const LocalStash stash := LocalStash()
+**   private const LocalStash stash := LocalStash(typeof)
 **   
 **   MyService wotever {
 **     get { stash["wotever"] }
