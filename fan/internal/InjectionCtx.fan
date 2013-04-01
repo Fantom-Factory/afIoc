@@ -2,22 +2,22 @@
 internal class InjectionCtx {
 	
 	private ServiceDef[]			defStack		:= [,]
-	private DependencyProvider[]	contribStack	:= [,]
+	private DependencyProvider[]	providerStack	:= [,]
 	OpTracker 						tracker			:= OpTracker()
 	ObjLocator? 					objLocator
 	
 	new make(ObjLocator? objLocator) {
 		this.objLocator = objLocator
 	}
-	
+
 	Obj? track(Str description, |->Obj?| operation) {
 		tracker.track(description, operation)
 	}
-	
+
 	Void log(Str description) {
 		tracker.log(description)
 	}
-	
+
 	Obj? withServiceDef(ServiceDef def, |->Obj?| operation) {
 		// check for allowed scope
 		if (defStack.peek?.scope == ServiceScope.perApplication && def.scope == ServiceScope.perThread)
@@ -39,17 +39,17 @@ internal class InjectionCtx {
 		}
 	}
 	
-	Obj? withDependencyProvider(DependencyProvider dependencyProvider, |->Obj?| operation) {
-		contribStack.push(dependencyProvider)
+	Obj? withConfigProvider(DependencyProvider provider, |->Obj?| operation) {
+		providerStack.push(provider)
 		try {
 			return operation()
 		} finally {			
-			contribStack.pop
+			providerStack.pop
 		}
 	}
 	
 	Obj? provideDependency(Type dependencyType) {
 		// jus' passin' thru!
-		contribStack.peek?.provide(dependencyType)
+		providerStack.peek?.provide(this, dependencyType)
 	}
 }
