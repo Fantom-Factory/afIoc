@@ -3,6 +3,7 @@
 ** 
 ** See [Defining Services]`index#definingServices`
 facet class Build {
+	
 	** If not specified, the service id is taken to be the name of the buider method, minus the 
 	** build prefix. Example:
 	** 

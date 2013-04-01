@@ -137,6 +137,11 @@ It is illegal to attempt to inject a 'perThread' scoped service into a 'perAppli
 
 Service Configuration [#serviceConfiguration]
 *********************************************
+Services can solicit configuration from modules simply by declaring a list or a map in their ctor or builder method.
+
+pre>
+
+<pre
 
 
 Tips & Good Practices [#tips]
@@ -150,3 +155,11 @@ use 'autobuikd' for other gui objss
 most useful when building guis - a panel or content pane isn't a service, but needs access to serives. commands can be auto build on the fly to invoke serive actions
 
 Based on T5-IoC but perhaps tries to take out some of the *magic* commonlly associated with it.
+
+
+Release Notes [#releaseNotes]
+*****************************
+
+v0.0.2 [#v0.0.2]
+----------------
+ - Preview release

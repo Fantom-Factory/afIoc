@@ -39,6 +39,12 @@ class TestOrderedConfig : IocTest {
 		verifyEq(s23.config, Str["ASS!"])
 	}
 
+	Void testEmptyListCreatedWhenNoContribsFound() {
+		reg := RegistryBuilder().addModule(T_MyModule38#).build.startup
+		s23 := reg.serviceById("s23") as T_MyService23
+		verifyEq(s23.config, Str[,])
+	}
+
 }
 
 
@@ -165,4 +171,10 @@ internal class T_MyService23 {
 	new make(Str[] config) {
 		this.config = config
 	}
+}
+
+internal class T_MyModule38 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}	
 }

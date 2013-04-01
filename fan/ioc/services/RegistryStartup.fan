@@ -5,6 +5,6 @@
 ** 
 **   
 ** 
-mixin RegistryStartup {
+const mixin RegistryStartup {
 
 }

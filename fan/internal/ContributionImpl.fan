@@ -10,7 +10,7 @@ internal const class ContributionImpl : Contribution {
 		f?.call(this)
 	}	
 
-	override ServiceDef serviceDef() {
+	override ServiceDef? serviceDef() {
 		if (serviceId != null)
 			return objLocator.serviceDefById(serviceId)
 		if (serviceType != null)
