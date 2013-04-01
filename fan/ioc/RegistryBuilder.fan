@@ -4,7 +4,7 @@
 class RegistryBuilder {
 	private const static Log 	logger 		:= Utils.getLog(RegistryBuilder#)
 	
-	private OpTracker	tracker 	:= OpTracker("Building IoC Registry")
+	private BuildCtx	ctx 		:= BuildCtx("Building IoC Registry")
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
 
@@ -14,24 +14,29 @@ class RegistryBuilder {
 
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
-		// FIXME: prevent module recursion
-		// FIXME: prevent the same module from being loaded twice
-		tracker.track("Adding module definition for '$moduleType.qname'") |->| {
+		ctx.track("Adding module definition for '$moduleType.qname'") |->| {
 			lock.check
 			logger.info("Adding module definition for $moduleType.qname")
 			
-			moduleDef := ModuleDefImpl(tracker, moduleType)
-			addModuleDef(moduleDef)
-			
-			if (moduleType.hasFacet(SubModule#)) {
-				subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
-				tracker.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
-					subModule.modules.each { 
-						addModule(it)
-					}
+			ctx.withModule(moduleType) |->| {			
+				if (moduleDefs.find { it.moduleType == moduleType } != null) {
+					logger.warn(IocMessages.moduleAlreadyAdded(moduleType))
+					return
 				}
-			} else
-				tracker.log("No SubModules found")
+				
+				moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
+				addModuleDef(moduleDef)
+				
+				if (moduleType.hasFacet(SubModule#)) {
+					subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
+					ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
+						subModule.modules.each { 
+							addModule(it)
+						}
+					}
+				} else
+					ctx.log("No SubModules found")
+			}
 		}
 		return this
 	}
@@ -57,14 +62,14 @@ class RegistryBuilder {
 	** a module to load.
 	This addModulesFromIndexProperties() {
 		logger.info("Adding modules from index properties")
-		tracker.track("Adding modules from index properties") |->| {
+		ctx.track("Adding modules from index properties") |->| {
 			lock.check
 			moduleNames := Env.cur.index("afIoc.module")
 			moduleNames.each {
-				addModuleFromTypeName(tracker, it)
+				addModuleFromTypeName(it)
 			}
 			if (moduleNames.isEmpty)
-				tracker.log("No modules found")
+				ctx.log("No modules found")
 		}
 		return this
 	}
@@ -73,58 +78,58 @@ class RegistryBuilder {
 	** `Registry.startup`
     Registry build() {
 		lock.lock
-        registry := RegistryImpl(tracker, moduleDefs)
-		tracker.end
+        registry := RegistryImpl(ctx.tracker, moduleDefs)
+		ctx.tracker.end
 		return registry
     }
 	
 	// ---- Private Methods -----------------------------------------------------------------------
-	
+
 	private Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
-		tracker.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
+		ctx.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
 			lock.check
 			
 			Type?[] modTypes := [,]
 			
 			// don't forget me!
-			modType := addModuleFromPod(tracker, pod)
+			modType := addModuleFromPod(pod)
 			modTypes.add(modType)
 			
 			pod.depends.each {
 				dependency := Pod.find(it.name)
-				mod := addModuleFromPod(tracker, dependency)
+				mod := addModuleFromPod(dependency)
 				modTypes.add(mod)
 				
 				if (addTransitiveDependencies) {
-					mods := tracker.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
+					mods := ctx.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
 						deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
 						if (deps.isEmpty)
-							tracker.log("No transitive dependencies found")
+							ctx.log("No transitive dependencies found")
 						return deps
 					} 
 					modTypes.addAll(mods)
 				} else
-					tracker.log("Not looking for transitive dependencies")
+					ctx.log("Not looking for transitive dependencies")
 			}
 			
 			modTypes = modTypes.exclude { it == null }
 			if (modTypes.isEmpty)
-				tracker.log("No modules found")
+				ctx.log("No modules found")
 			
 			return modTypes
 		}
 	}	
 	
-	private Type? addModuleFromPod(OpTracker tracker, Pod pod) {
+	private Type? addModuleFromPod(Pod pod) {
 		qname := pod.meta[IocConstants.podMetaModuleName]
 		if (qname != null) {
-			tracker.log("Pod '$pod.name' defines module of type $qname")
-			return addModuleFromTypeName(tracker, qname)
+			ctx.log("Pod '$pod.name' defines module of type $qname")
+			return addModuleFromTypeName(qname)
 		}
 		return null
 	}
 
-	private Type addModuleFromTypeName(OpTracker tracker, Str moduleTypeName) {
+	private Type addModuleFromTypeName(Str moduleTypeName) {
 		moduleType := Type.find(moduleTypeName)
 		addModule(moduleType)
 		return moduleType
@@ -134,4 +139,35 @@ class RegistryBuilder {
 		this.moduleDefs.add(moduleDef)
 		return this
 	}
+}
+
+internal class BuildCtx {
+	private Type[] 		moduleStack 	:= [,]
+			OpTracker 	tracker
+
+	new make(Str desc) {
+		tracker	= OpTracker(desc)
+	}
+	
+	Obj? track(Str description, |->Obj?| operation) {
+		tracker.track(description, operation)
+	}
+
+	Void log(Str description) {
+		tracker.log(description)
+	}
+
+	Obj? withModule(Type module, |->Obj?| operation) {
+		moduleStack.push(module)
+		try {
+			// check for recursion
+			moduleStack[0..<-1].each { 
+				if (it == module)
+					throw IocErr(IocMessages.moduleRecursion(moduleStack.map { it.qname }))
+			}			
+			return operation()
+		} finally {			
+			moduleStack.pop
+		}
+	}	
 }

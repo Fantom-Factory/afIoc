@@ -1,6 +1,16 @@
 
 class TestRecursion : IocTest {
 	
+	Void testModulesCantBeAddedTwice() {
+		RegistryBuilder().addModules([T_MyModule20#, T_MyModule20#]).build
+	}
+	
+	Void testModuleRecursion() {
+		verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+			RegistryBuilder().addModule(T_MyModule40#).build
+		}
+	}
+
 	Void testErrOnRecursiveInjection1() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
 		verifyErrMsg(IocMessages.serviceRecursion(["s15", "s15"])) { 
@@ -58,3 +68,9 @@ internal class T_MyService18 {
 	new make(|This|in) { in(this) }
 }
 
+
+@SubModule { modules=[T_MyModule41#] }
+internal class T_MyModule40 { }
+
+@SubModule { modules=[T_MyModule40#] }
+internal class T_MyModule41 { }

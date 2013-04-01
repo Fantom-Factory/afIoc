@@ -1,5 +1,4 @@
 
-	guard against module recursion
 	ctor consts
 	mapped contributions
 	
@@ -7,6 +6,6 @@
 	@ServiceId / @AutoBuild	
 	@Startup
 	ordered contributions
-	contribution overrides
+	contribution overrides - more than once? Order them?
 	service disambiguation via facets
 	@Local (local to the module of the serviceDef in ctx stack)
