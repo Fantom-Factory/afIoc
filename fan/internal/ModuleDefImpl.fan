@@ -145,11 +145,14 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.description	= "'$serviceId' : Builder method $method.qname"
 			it.scope 		= scope 
 			
+			sDef			:= it
 			sId 			:= it.serviceId
 			it.source 		= |InjectionCtx ctx -> Obj| {
 				ctx.track("Creating Serivce '$sId' via a builder method '$method.qname'") |->Obj| {
 					log.info("Creating Service '$sId'")
-					return InjectionUtils.callMethod(ctx, method, null)
+					return ctx.withDependencyProvider(ConfigurationProvider(ctx, sDef, method)) |->Obj?| {
+						return InjectionUtils.callMethod(ctx, method, null)
+					}
 				}
 			}			
 		}

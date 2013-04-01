@@ -45,23 +45,6 @@ internal const class InjectionUtils {
 		callPostInjectMethods(ctx, object)
 		return object
     }
-
-	** Calls methods (of all visibilities) that have the @PostInjection facet
-	static Obj callPostInjectMethods(InjectionCtx ctx, Obj object) {
-		ctx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
-			if (!object.typeof.methods
-				.findAll |method| {
-					method.hasFacet(PostInjection#)
-				}
-				.reduce(false) |bool, method| {
-					ctx.log("Found method $method.signature")
-					callMethod(ctx, method, object)
-					return true
-				})
-				ctx.log("No post injection methods found")
-			return object
-		}
-	}
 	
 	static Obj callMethod(InjectionCtx ctx, Method method, Obj? obj) {
 		args := determineInjectionParams(ctx, method)
@@ -69,8 +52,6 @@ internal const class InjectionUtils {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
 	}
-
-	// ---- Private Methods -----------------------------------------------------------------------
 
 	static Method findAutobuildConstructor(InjectionCtx ctx, Type type) {
 		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
@@ -106,12 +87,31 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj createViaConstructor(InjectionCtx ctx, Method ctor) {
+	static Obj createViaConstructor(InjectionCtx ctx, Method ctor) {
 		args := determineInjectionParams(ctx, ctor)
 		return ctx.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}
+	
+	// ---- Private Methods -----------------------------------------------------------------------
+
+	** Calls methods (of all visibilities) that have the @PostInjection facet
+	private static Obj callPostInjectMethods(InjectionCtx ctx, Obj object) {
+		ctx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
+			if (!object.typeof.methods
+				.findAll |method| {
+					method.hasFacet(PostInjection#)
+				}
+				.reduce(false) |bool, method| {
+					ctx.log("Found method $method.signature")
+					callMethod(ctx, method, object)
+					return true
+				})
+				ctx.log("No post injection methods found")
+			return object
+		}
+	}	
 
 	private static Obj[] determineInjectionParams(InjectionCtx ctx, Method method) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
