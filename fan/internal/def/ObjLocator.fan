@@ -7,7 +7,7 @@ internal const mixin ObjLocator {
 
 	** Locates a service or dependency of the given type. If a service, the search takes into 
 	** account inheritance of the service's defined mixin, not its *implementation*.
-    abstract Obj trackDependencyByType(InjectionCtx ctx, Type serviceType)
+    abstract Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType)
 
 	** Autobuilds a class via a ctor marked with '@Inject', failing that, the ctor with the most 
 	** parameters. Services and dependencies will be injected into the ctor parameters, and into 

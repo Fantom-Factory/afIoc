@@ -48,9 +48,9 @@ Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC.
+A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and may gather configuration contributions from other modules.
 
-A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service. Non service dependencies may be managed by (future) injection providers.
+A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service. Non service dependencies may be managed by (future) user defined dependency providers.
 
 A **contribution** is a means to configure a service.
 

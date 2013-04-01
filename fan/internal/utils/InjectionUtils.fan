@@ -1,7 +1,7 @@
 
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
-	
+
 	static Obj autobuild(InjectionCtx ctx, Type type) {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
@@ -45,8 +45,8 @@ internal const class InjectionUtils {
 		callPostInjectMethods(ctx, object)
 		return object
     }
-	
-	static Obj callMethod(InjectionCtx ctx, Method method, Obj? obj) {
+
+	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj) {
 		args := determineInjectionParams(ctx, method)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)

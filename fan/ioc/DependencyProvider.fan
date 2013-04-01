@@ -2,6 +2,7 @@
 @NoDoc
 const mixin DependencyProvider {
 	
-	abstract Obj? provide(Type dependencyType, Facet[] facets := Obj#.emptyList)
+	** ctx is currently undefined. Assume it is 'null'.
+	abstract Obj? provide(Obj ctx, Type dependencyType, Facet[] facets := Obj#.emptyList)
 	
 }

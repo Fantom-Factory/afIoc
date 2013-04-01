@@ -1,55 +1,55 @@
 
-** Obj passed into a module's contributor method to allow the method to, err, contribute!
+** This is passed into module contribution methods to allow the method to, err, contribute!
 **
-** A service can**collect* contributions in three different ways:
-** - As an ordered list of values (where each value has a unique id)
+** A service can *collect* contributions in three different ways:
+** - As an unordered list of values
+** - As an ordered list of values
 ** - As a map of keys and values
 ** 
-** The service defines the *type* of contribution, in terms of a base class or service interface. 
-** Contributions must be compatible with the type.
+** The service defines the *type* of contribution by declaring a parameterised list or map in its 
+** ctor or builder method. Contributions must be compatible with the type.
 class OrderedConfig {
 	
-	private Type contribType
-	private List config
+	private const ServiceDef 	serviceDef
+	private const Type 			contribType
+	private 	  InjectionCtx	ctx
+	private 	  List 			config
 	
-	internal new make(Type contribType, Str serviceId) {
+	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
 			throw WtfErr("Ordered Contrib Type is NOT list???")
 		if (contribType.isGeneric)
-			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceId)) 
+			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
 		
-		this.contribType = contribType
-		this.config = contribType.params["V"].emptyList.rw	// TODO: is there a better way?
+		this.ctx 			= ctx
+		this.serviceDef 	= serviceDef
+		this.contribType	= contribType
+		this.config 		= contribType.params["V"].emptyList.rw	// TODO: is there a better way?
 	}
-	
-	internal Void contribute(Contribution contribution) {
-		contribution.contributeOrdered(this)
+
+	** Instantiates an object and adds it as an override. 
+	Obj autobuild(Type type) {
+		ctx.objLocator.trackAutobuild(ctx, type)
+	}
+
+	Void addUnordered(Obj object) {
+		config.add(object)
+	}	
+
+//	** Adds an ordered object to a service's contribution. Each object has an id, which must be 
+//	** unique, that is used for ordering.
+//	Void addOrdered(Str id, Obj object, Str[] constraints := [,]) {
+//	}
+//
+//	** Overrides a contributed ordered object. The original override must exist.
+//	Void overrideOrdered(Str id, Obj object, Str[] constraints := [,]) {
+//	}
+
+	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
+		contribution.contributeOrdered(ctx, this)
 	}
 	
 	internal List getConfig() {
 		config
-	}
-	
-	** Adds an ordered object to a service's contribution. Each object has an id (which must be unique).
-	**
-	** If no constraints are supplied, then an implicit constraint is supplied: after the previously
-	** contributed id**within the same contribution method*.
-	Void add(Str id, Obj object, Str[] constraints := [,]) {
-		config.add(object)
-	}
-
-	** Overrides a normally contributed object. The original override must exist.
-	Void addOverride(Str id, Obj object, Str[] constraints := [,]) {
-		
-	}
-
-	** Adds an ordered object by instantiating (with dependencies) the indicated class. 
-	Void addType(Str id, Type type, Str[] constraints := [,]) {
-		
-	}
-
-	** Instantiates an object and adds it as an override. 
-	Void addTypeOverride(Str id, Type type, Str[] constraints := [,]) {
-	
-	}
+	}	
 }
