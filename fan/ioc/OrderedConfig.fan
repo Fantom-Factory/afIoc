@@ -10,10 +10,10 @@
 ** ctor or builder method. Contributions must be compatible with the type.
 class OrderedConfig {
 	
-	private const ServiceDef 	serviceDef
-	private const Type 			contribType
-	private 	  InjectionCtx	ctx
-	private 	  List 			config
+	internal const	Type 			contribType
+	private  const 	ServiceDef 		serviceDef
+	private 	  	InjectionCtx	ctx
+	private 	  	List 			config
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
@@ -27,12 +27,15 @@ class OrderedConfig {
 		this.config 		= contribType.params["V"].emptyList.rw	// TODO: is there a better way?
 	}
 
-	** Instantiates an object and adds it as an override. 
+	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type) {
 		ctx.objLocator.trackAutobuild(ctx, type)
 	}
 
+	** Adds an unordered object to a service's contribution.
 	Void addUnordered(Obj object) {
+		if (!object.typeof.fits(listType))
+			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
 		config.add(object)
 	}	
 
@@ -51,5 +54,13 @@ class OrderedConfig {
 	
 	internal List getConfig() {
 		config
-	}	
+	}
+	
+	private once Type listType() {
+		contribType.params["V"]
+	}
+	
+	override Str toStr() {
+		"OrderedConfig of $listType"
+	}
 }
