@@ -48,7 +48,7 @@ Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and may gather configuration contributions from other modules.
+A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and may gather configuration contributed from other modules.
 
 A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service. Non service dependencies may be managed by (future) user defined dependency providers.
 
@@ -57,20 +57,22 @@ A **contribution** is a means to configure a service.
 A **module** is a class where services and contributions are defined.
 
 
-Loading Modules [#locatingModules]
-***********************************
-When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules defined by dependant pods, in which case, each pod should have declared the following meta:
+Loading Modules [#loadingModules]
+*********************************
+When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules in dependant pods, in which case, each pod should have declared the following meta:
 
 '"afIoc.module" : "{qname}"'
 
-Where '{qname}' is a qualified type name of a module. Additional modulues can be declared by the [@SubModule]`SubModule` facet.
+Where '{qname}' is a qualified type name of a module. Additional modules can be declared by the [@SubModule]`SubModule` facet.
 
 Modules can also be loaded from index properties in a similar manner.
 
 
 Defining Services [#definingServices]
 *************************************
-Services are defined in Module classes, where each method has meaning. Module are not defined by a Mixin or inheritance, instead, convention is given to the method names. A common method is 'bind' which must take the following signature:
+Services are defined in Module classes, where each meaningful method is static and annotated with a facet. 
+
+The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define serices, examples below:
 
   static Void bind(ServiceBinder binder) {
 
@@ -79,9 +81,14 @@ Services are defined in Module classes, where each method has meaning. Module ar
 
     // has service ID of 'myServiceImpl'
     binder.bindImpl(MyServiceImpl#)
+    
+    // has service ID of 'elephant'
+    binder.bindImpl(MyServiceImpl#).withId("elephant")    
   }
 
-Note all methods in a Module class should be static. Modules may can also define *builder* methods. These are static methods whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
+Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet.
+
+whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
 
   static EmailService buildPenquin(EmailConfig config) {
     EmailServiceImpl(config)
@@ -94,7 +101,7 @@ Dependency Injection [#dependencyInjection]
 *******************************************
 IoC performs both ctor and field injection.
 
-Note that under the covers, all service injection is resolved via the unique service ids, injection by type is merely a layer on top of that added for convience.
+Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
 
 When IoC builds a service it locates a suitable ctor. This is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
 
@@ -121,17 +128,21 @@ Note that due to [this topic]`http://www.fantom.org/sidewalk/topic/2119` 'const'
 After object construction and field injection you may perform extra setup via methods annotated with the '@PostInjection' facet. These may be of any visibility and all parameters are resolved as dependencies.
 
 
-Scope [#scope]
-**************
+Service Scope [#serviceScope]
+*****************************
 Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services must be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
 It is illegal to attempt to inject a 'perThread' scoped service into a 'perApplication' scoped service.
 
 
-Tips & Good Practicies
-**********************
+Service Configuration [#serviceConfiguration]
+*********************************************
 
-Define both pod meta and index props. Only define one module per pod, use @SubModule for depdendant modules (or defining more than one)
+
+Tips & Good Practices [#tips]
+*****************************
+
+Define both pod meta and index props. Only define one module per pod, use @SubModule for dependant modules (or defining more than one)
 
 use 'injectInto fields of ' Flux objs (as you have no say in how they're created
 use 'autobuikd' for other gui objss

@@ -27,13 +27,6 @@ internal class Utils {
 		}
 	}
 
-//	** Stoopid F4 thinks the 'facet' method is a reserved word!
-//	static Bool hasFacet(Slot slot, Type annotation) {
-//		slot.facets.find |fac| { 
-//			fac.typeof == annotation
-//		} != null		
-//	}
-
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
 	** 'hasFacet' is available on Type.
 	static Facet getFacetOnType(Type type, Type annotation) {

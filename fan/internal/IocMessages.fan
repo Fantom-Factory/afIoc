@@ -4,14 +4,14 @@ internal const class IocMessages {
 
 	// ---- Err Messages --------------------------------------------------------------------------
 
-	static Str registryNotBuild() {
-		"Registry has not been built"		
+	static Str serviceNotStarted() {
+		"IoC Service has not been started."		
 	}
 
-	static Str unrecognisedModuleMethods(Type moduleType, Method[] methods) {
-		"Module class ${moduleType.qname} contains unrecognised public methods: ${methods}"		
+	static Str serviceStarted() {
+		"IoC Service has already started."		
 	}
-	
+
     static Str buildMethodConflict(Str serviceId, Str conflict, Str existing) {
         "Service ${serviceId} (defined by ${conflict}) conflicts with previously defined service defined by ${existing}."
     }
@@ -70,6 +70,10 @@ internal const class IocMessages {
 	
 	static Str ctorsWithSameNoOfParams(Type serviceType, Int noOfParams) {
 		"${serviceType.qname} has too many ctors with ${noOfParams} params - try annotating one with the @${Inject#.name} facet."
+	}
+	
+	static Str builderMethodsMustBeStatic(Method method) {
+		"Builder method $method.qname must be static"
 	}
 	
 	static Str buildMethodDoesNotDefineServiceId(Method method) {

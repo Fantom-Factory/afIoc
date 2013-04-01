@@ -41,7 +41,6 @@ class TestThreadedAccess : Test {
 //			s13i := reg.serviceById("s13")
 //			assertSame(s13, s13i)
 //
-//			// FIXME: should err 
 //			// TODO: Think about having a PerThread wrapper Injection Provider : PerThread.get
 //			assertNotSame(s13->s12, s13i->s12)
 //

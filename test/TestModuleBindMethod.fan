@@ -1,11 +1,5 @@
 
-class TestModule : IocTest {
-	
-	Void testUnrecognisedModuleMethods() {
-		verifyErrMsg(IocMessages.unrecognisedModuleMethods(T_MyModule2#, [T_MyModule2#doDaa])) {
-			RegistryBuilder().addModule(T_MyModule2#).build
-		}
-	}
+class TestModuleBindMethod : IocTest {
 	
 	Void testBindMethodMustBeStatic() {
 		
@@ -23,11 +17,6 @@ class TestModule : IocTest {
 		verifyErrMsg(IocMessages.bindMethodWrongParams(T_MyModule10#bind)) {
 			RegistryBuilder().addModule(T_MyModule10#).build
 		}		
-	}
-
-	Void testSubModule() {
-		reg := RegistryBuilder().addModule(T_MyModule12#).build
-		reg.dependencyByType(T_MyService2#)
 	}
 
 	Void testBindImplFindsImpl() {
@@ -48,16 +37,6 @@ class TestModule : IocTest {
 	}
 }
 
-internal class T_MyModule2 {
-	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService1#)		
-	}
-	
-	static Void doDaa() {
-		// nuffin
-	}
-}
-
 internal class T_MyModule8 {
 	Void bind(ServiceBinder binder) { }
 }
@@ -68,10 +47,6 @@ internal class T_MyModule9 {
 
 internal class T_MyModule10 {
 	static Void bind(Obj wotever) { }
-}
-
-@SubModule{modules=[T_MyModule1#]}
-internal class T_MyModule12 {
 }
 
 internal class T_MyModule13 {

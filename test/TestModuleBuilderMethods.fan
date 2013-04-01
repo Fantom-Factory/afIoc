@@ -1,6 +1,12 @@
 
 class TestModuleBuilderMethods : IocTest {
 	
+	Void testBuilderMethodMustBeStatic() {
+		verifyErrMsg(IocMessages.builderMethodsMustBeStatic(T_MyModule37#buildT1)) {
+			RegistryBuilder().addModule(T_MyModule37#).build
+		}
+	}
+	
 	Void testBuilderMethod() {
 		reg := RegistryBuilder().addModule(T_MyModule4#).build.startup
 		T_MyService1 myService1 := reg.serviceById("penguin")
@@ -91,8 +97,15 @@ internal class T_MyModule21 {
 }
 
 internal class T_MyModule22 {
-	@Scope{scope=ServiceScope.perApplication}
+	@Build{scope=ServiceScope.perApplication}
 	static T_MyService1 buildT1() {
+		return T_MyService1()
+	}
+}
+
+internal class T_MyModule37 {
+	@Build
+	T_MyService1 buildT1() {
 		return T_MyService1()
 	}
 }

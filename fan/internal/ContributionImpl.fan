@@ -33,7 +33,7 @@ internal const class ContributionImpl : Contribution {
 
 internal const class ContribProvider : DependencyProvider {
 	
-	private const LocalStash stash		:= LocalStash(typeof)
+	private const LocalStash stash	:= LocalStash(typeof)
 	private const Type		type
 	
 	private Obj config {

@@ -1,9 +1,14 @@
 
+** Wraps a `Registry` instance as Fantom service. 
 const class IocService : Service {
-	private static const Log 		log 		:= Log.get(IocService#.name)
+	private static const Log 		log 		:= Utils.getLog(IocService#)
 	private const LocalStash 		stash		:= LocalStash(typeof)
 	private const ConcurrentState	conState	:= ConcurrentState(IocServiceState#)
-	private const Type[]			moduleTypes
+
+	private Type[] moduleTypes {
+		get { stash["moduleTypes"] }
+		set { stash["moduleTypes"] = it }
+	}
 
 	private Bool dependencies {
 		get { stash["dependencies"] }
@@ -22,10 +27,11 @@ const class IocService : Service {
 
 	Registry? registry {
 		// ensure the registry is shared amongst all threads 
-		get { conState.getState |IocServiceState state->Obj| { return state.registry } }
-		private set { }
+		get { conState.getState |IocServiceState state->Obj?| { return state.registry } }
+		private set { reg := it; conState.withState |IocServiceState state| { state.registry = reg} }
 	}
-	
+
+
 	// ---- Public Builder Methods ---------------------------------------------------------------- 
 
 	new make(Type[] moduleTypes := [,]) {
@@ -34,20 +40,30 @@ const class IocService : Service {
 		this.dependencies	= false
 	}
 	
-	This loadModulesFromDependencies(Pod dependenciesOf) {
+	This addModulesFromDependencies(Pod dependenciesOf) {
+		checkServiceNotStarted
 		dependencies = true
 		dependencyPod = dependenciesOf
 		return this
 	}
 
-	This loadModulesFromIndexProperties() {
+	This addModulesFromIndexProperties() {
+		checkServiceNotStarted
 		indexProps = true
 		return this
 	}
 
+	This addModules(Type[] moduleTypes) {
+		checkServiceNotStarted
+		this.moduleTypes = this.moduleTypes.addAll(moduleTypes)
+		return this
+	}
+
+
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 
 	override Void onStart() {
+		checkServiceNotStarted
 		log.info("Starting IOC...");
 	
 		try {
@@ -57,7 +73,7 @@ const class IocService : Service {
 				regBuilder.addModulesFromIndexProperties
 			
 			if (dependencies)
-				regBuilder.addModulesFromDependencies(dependencyPod)
+				regBuilder.addModulesFromDependencies(dependencyPod, true)
 			
 			regBuilder.addModules(moduleTypes)
 			
@@ -74,40 +90,55 @@ const class IocService : Service {
 	}
 
 	override Void onStop() {
+		if (registry == null) {
+			log.info("Registry already stopped.")
+			return
+		}
 		log.info("Stopping IOC...");
 		registry.shutdown
+		registry = null
 	}
-	
+
+
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	** Convenience for `Registry.serviceById`
 	Obj serviceById(Str serviceId) {
-		checkRegistry
+		checkServiceStarted
 		return registry.serviceById(serviceId)
 	}
 	
 	** Convenience for `Registry.dependencyByType`
 	Obj dependencyByType(Type serviceType) {
-		checkRegistry
+		checkServiceStarted
 		return registry.dependencyByType(serviceType)
 	}
 
 	** Convenience for `Registry.autobuild`
 	Obj autobuild(Type type) {
-		checkRegistry
+		checkServiceStarted
 		return registry.autobuild(type)
 	}
 	
 	** Convenience for `Registry.injectIntoFields`
 	Obj injectIntoFields(Obj service) {
-		checkRegistry
+		checkServiceStarted
 		return registry.injectIntoFields(service)
 	}	
 
-	private Void checkRegistry() {
+
+	// ---- Private Methods -----------------------------------------------------------------------
+
+	private Void checkServiceStarted() {
 		if (registry == null)
-			throw IocErr(IocMessages.registryNotBuild)
+			throw IocErr(IocMessages.serviceNotStarted)
 	}
+
+	private Void checkServiceNotStarted() {
+		if (registry != null)
+			throw IocErr(IocMessages.serviceStarted)
+	}
+	
 }
 
 internal class IocServiceState {
