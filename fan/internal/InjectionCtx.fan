@@ -3,7 +3,7 @@ internal class InjectionCtx {
 	
 	private ServiceDef[]			defStack		:= [,]
 	private DependencyProvider[]	providerStack	:= [,]
-	OpTracker 						tracker			:= OpTracker()
+	private OpTracker 				tracker			:= OpTracker()
 	ObjLocator? 					objLocator
 	
 	new make(ObjLocator? objLocator) {

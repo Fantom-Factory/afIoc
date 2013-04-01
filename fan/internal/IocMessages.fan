@@ -12,6 +12,14 @@ internal const class IocMessages {
 		"IoC Service has already started."		
 	}
 
+	static Str moduleRecursion(Str[] modNames) {
+		"Module recursion! A module references itself in some way: " + modNames.join(" -> ")
+	}
+	
+	static Str moduleAlreadyAdded(Type module) {
+		"Module $module.qname has already been added - ignoring it this time round."
+	}
+	
     static Str buildMethodConflict(Str serviceId, Str conflict, Str existing) {
         "Service ${serviceId} (defined by ${conflict}) conflicts with previously defined service defined by ${existing}."
     }
@@ -58,10 +66,6 @@ internal const class IocMessages {
 	
 	static Str serviceIdNotFound(Str serviceId) {
 		"Service id '${serviceId}' is not defined by any module."
-	}
-	
-	static Str oneShotLockViolation(Str because) {
-		"Method may no longer be invoked - $because"
 	}
 
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {
@@ -136,7 +140,11 @@ internal const class IocMessages {
 	}
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
-	
+
+	static Str oneShotLockViolation(Str because) {
+		"Method may no longer be invoked - $because"
+	}
+
 	static Str registryBuilt() {
 		"Registry has already been built"
 	}
