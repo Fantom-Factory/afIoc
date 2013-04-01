@@ -44,28 +44,19 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		tracker.track("Consolidating module definitions") |->| {
-			iModIdToModule 	:= moduleIdToModule.toImmutable
-			iSerIdToModule	:= serviceIdToModule.toImmutable
-			moduleIdToModule = getMyState |state| {
-				mModules 	:= iModIdToModule.rw
-				mIdToModule	:= iSerIdToModule.rw
+			moduleDefs.each |moduleDef| {
+				module := ModuleImpl(this, moduleDef)
+				moduleIdToModule[moduleDef.moduleId] = module
 
-				moduleDefs.each |moduleDef| {
-					module := ModuleImpl(this, moduleDef)
-					mModules[moduleDef.moduleId] = module
-
-					// ensure services aren't defined twice
-					moduleDef.serviceDefs.keys.each |serviceId| {
-						if (mIdToModule.containsKey(serviceId)) {
-							existingDef 	:= mIdToModule[serviceId].serviceDef(serviceId)
-							conflictingDef 	:= module.serviceDef(serviceId)
-							throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
-						}
-						mIdToModule[serviceId] = module
-					}				
-				}
-
-				return mModules.toImmutable
+				// ensure services aren't defined twice
+				moduleDef.serviceDefs.keys.each |serviceId| {
+					if (serviceIdToModule.containsKey(serviceId)) {
+						existingDef 	:= serviceIdToModule[serviceId].serviceDef(serviceId)
+						conflictingDef 	:= module.serviceDef(serviceId)
+						throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
+					}
+					serviceIdToModule[serviceId] = module
+				}				
 			}
 		}
 		

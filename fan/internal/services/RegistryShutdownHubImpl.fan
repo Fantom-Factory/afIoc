@@ -2,7 +2,7 @@
 internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 		log 		:= Log.get(RegistryShutdownHubImpl#.name)
 	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
-	
+ 
 	override Void addRegistryShutdownListener(|->| listener) {
 		withMyState |state| {
 			state.lock.check

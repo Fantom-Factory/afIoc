@@ -1,35 +1,106 @@
 using concurrent
 
-class TestIocService : Test {
+class TestIocService : IocTest {
 
-	Void testThreads() {
-		reggy := IocService([T_MyModule16#]).start
+	Void testLocks() {
+		ioc := IocService()
 		
-		app1 := reggy.serviceById("app")
-		the1 := reggy.serviceById("the")
-
-		Actor(ActorPool()) |->| {
-			try {
-			reg := (Service.find(IocService#) as IocService)
-			app2 := reg.serviceById("app")
-			assertSame(app1, app2)
-			
-			the2 := reg.serviceById("the")
-			assertNotSame(the1, the2)
-				
-			} catch (Err r) {
-				r.trace
+		try {
+			verifyErrMsg(IocMessages.serviceNotStarted) {
+				ioc.serviceById("")
 			}
-		}.send(null).get
-
-		Actor(ActorPool()) |->| {
-			reg := (Service.find(IocService#) as IocService)
-			app2 := reg.serviceById("app")
-			assertSame(app1, app2)
+			verifyErrMsg(IocMessages.serviceNotStarted) {
+				ioc.dependencyByType(Obj#)
+			}
+			verifyErrMsg(IocMessages.serviceNotStarted) {
+				ioc.autobuild(Obj#)
+			}
+			verifyErrMsg(IocMessages.serviceNotStarted) {
+				ioc.injectIntoFields(this)
+			}
+		
+			ioc.start
+	
+			// sys::Service doesn't let us start the service twice
+//			verifyErrMsg(IocMessages.serviceStarted) {
+//				ioc.start
+//			}
+			verifyErrMsg(IocMessages.serviceStarted) {
+				ioc.addModules([,])
+			}
+			verifyErrMsg(IocMessages.serviceStarted) {
+				ioc.addModulesFromDependencies(this.typeof.pod)
+			}
+			verifyErrMsg(IocMessages.serviceStarted) {
+				ioc.addModulesFromIndexProperties
+			}
+		} finally {
+			ioc.uninstall
+		}
+	}
+	
+	Void testServicesAreIsolatedToIocInstances() {
+		IocService? ioc1
+		IocService? ioc2
+		IocService? ioc3
+		try {
+			ioc1 = IocService([T_MyModule16#]).start
+			ioc2 = IocService([T_MyModule16#]).start
+			ioc3 = IocService().start
 			
-			the2 := reg.serviceById("the")
+			app1 := ioc1.serviceById("app")
+			the1 := ioc1.serviceById("the")
+
+			app2 := ioc2.serviceById("app")
+			the2 := ioc2.serviceById("the")
+			
+			// neither app not thread scoped services should be the same
+			assertNotSame(app1, app2)
 			assertNotSame(the1, the2)
-		}.send(null).get
+			
+			verifyErr(IocErr#) { ioc3.serviceById("app") }
+			verifyErr(IocErr#) { ioc3.serviceById("the") }
+			
+		} finally {
+			ioc1?.uninstall
+			ioc2?.uninstall
+			ioc3?.uninstall
+		}
+	}
+	
+	Void testThreadedAccessToSameService() {
+		reggy := IocService([T_MyModule16#]).start
+		try {
+	
+			app1 := reggy.serviceById("app")
+			the1 := reggy.serviceById("the")
+	
+			Actor(ActorPool()) |->| {
+				try {
+				reg := (Service.find(IocService#) as IocService)
+				app2 := reg.serviceById("app")
+				assertSame(app1, app2)
+				
+				the2 := reg.serviceById("the")
+				assertNotSame(the1, the2)
+					
+				} catch (Err r) {
+					r.trace
+				}
+			}.send(null).get
+	
+			Actor(ActorPool()) |->| {
+				reg := (Service.find(IocService#) as IocService)
+				app2 := reg.serviceById("app")
+				assertSame(app1, app2)
+				
+				the2 := reg.serviceById("the")
+				assertNotSame(the1, the2)
+			}.send(null).get
+			
+		} finally {
+			reggy.uninstall
+		}
 	}
 
 	

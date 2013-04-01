@@ -8,8 +8,6 @@ internal const class ModuleDefImpl : ModuleDef {
 	** prefix used to identify service contribution methods
 	private static const Str 			CONTRIBUTE_METHOD_NAME_PREFIX 	:= "contribute"
 
-	private static const Method[]		OBJECT_METHODS 					:= Obj#.methods
-	
 	override 	const Type 				moduleType
 	override 	const Str:ServiceDef	serviceDefs
 	override 	const ContributionDef[]	contributionDefs
@@ -22,18 +20,8 @@ internal const class ModuleDefImpl : ModuleDef {
 			serviceDefs := Str:ServiceDef[:] { caseInsensitive = true }
 			contribDefs	:= ContributionDef[,]
 			
-			methods := moduleType.methods.exclude |method| { OBJECT_METHODS.contains(method) || method.isCtor }
-	
-			grind(tracker, serviceDefs, contribDefs, methods)
-			bind(tracker, serviceDefs, methods)
-			
-			contributionDefs=[,]
-	
-			// verify that every public method is meaningful to IoC. Any remaining methods may be 
-			// typos, i.e. "createFoo" instead of "buildFoo"
-			methods = methods.exclude { !it.isPublic }
-			if (!methods.isEmpty)
-				throw IocErr(IocMessages.unrecognisedModuleMethods(moduleType, methods))
+			grind(tracker, serviceDefs, contribDefs)
+			bind(tracker, serviceDefs)
 			
 			this.serviceDefs = serviceDefs
 			this.contributionDefs = contribDefs
@@ -54,24 +42,22 @@ internal const class ModuleDefImpl : ModuleDef {
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private Void grind(OpTracker tracker, Str:ServiceDef serviceDefs, ContributionDef[]	contribDefs, Method[] remainingMethods) {
-		methods := moduleType.methods.dup.sort |Method a, Method b -> Int| { 
+	private Void grind(OpTracker tracker, Str:ServiceDef serviceDefs, ContributionDef[]	contribDefs) {
+		methods := moduleType.methods.rw.sort |Method a, Method b -> Int| { 
 			a.name <=> b.name 
 		}
 
 		methods.each |method| {
-			
-			if (method.name.startsWith(BUILD_METHOD_NAME_PREFIX)) {
+
+			if (method.hasFacet(Build#)) {
 				tracker.track("Found builder method $method.qname") |->| {
 					addServiceDefFromMethod(tracker, serviceDefs, method)
-					remainingMethods.remove(method)
 				}
 			}
-			
+
 			if (method.hasFacet(Contribute#)) {
 				tracker.track("Found contribution method $method.qname") |->| {					
 					addContribDefFromMethod(tracker, contribDefs, method)
-					remainingMethods.remove(method)
 				}
 			}
 
@@ -131,11 +117,14 @@ internal const class ModuleDefImpl : ModuleDef {
 	// ---- Service Builder Methods ---------------------------------------------------------------
 	
 	private Void addServiceDefFromMethod(OpTracker tracker, Str:ServiceDef serviceDefs, Method method) {
-		
+		if (!method.isStatic)
+			throw IocErr(IocMessages.builderMethodsMustBeStatic(method))
+
 		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		
-		if (method.hasFacet(Scope#))
-			scope = (Utils.getFacetOnSlot(method, Scope#) as Scope).scope
+		build := Utils.getFacetOnSlot(method, Build#) as Build
+		if (build.scope != null)
+			scope = build.scope
 		
 		serviceDef	:= StandardServiceDef {
 			it.serviceId 	= extractServiceIdFromBuilderMethod(method)
@@ -182,7 +171,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	
 	// ---- Binder Methods ------------------------------------------------------------------------
 
-	private Void bind(OpTracker tracker, Str:ServiceDef serviceDefs, Method[] remainingMethods) {
+	private Void bind(OpTracker tracker, Str:ServiceDef serviceDefs) {
 		Method? bindMethod := moduleType.method("bind", false)
 
 		if (bindMethod == null)
@@ -209,7 +198,6 @@ internal const class ModuleDefImpl : ModuleDef {
 			}
 
 			binder.finish
-			remainingMethods.remove(bindMethod)
 		}
 	}
 

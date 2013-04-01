@@ -1,8 +1,9 @@
 	
-	@ServiceId / @AutoBuild
-		
+	guard against module recursion
+	@ServiceId / @AutoBuild	
+	ordered contributions
 	mapped contributions
-	
-	contributions overrides
-
-	Add other Object providers
+	contribution overrides
+	dependency providers / dep ctx
+	service disambiguation via facets
+	@Local (local to the module of the serviceDef in ctx stack)

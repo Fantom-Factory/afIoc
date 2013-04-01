@@ -1,11 +1,12 @@
 
+** The registry of IoC services.
 const mixin Registry {
 	
- 	** Invoked to execute all contributions to the Startup service.
+ 	** Invoke to execute all contributions to the `RegistryStartup` service.
 	abstract This startup()
 	
-	** Shuts down a Registry instance. Notifies all listeners that the registry has shutdown. 
-	** Further method invocations on the Registry are no longer allowed, and the Registry instance 
+	** Shuts down the Registry. Notifies all listeners that the registry has shutdown. Further 
+	** method invocations on the Registry are no longer allowed, and the Registry instance 
 	** should be discarded.
 	**
 	** See `RegistryShutdownHub`
@@ -18,9 +19,10 @@ const mixin Registry {
 	** service mixin, not the service *implementation*.
     abstract Obj dependencyByType(Type dependencyType)
 
-	** Autobuilds a class via a ctor marked with '@Inject', failing that, the ctor with the most 
-	** parameters is used. Services and dependencies will be injected into the ctor parameters, and 
-	** into fields (of all visibilities) marked with '@Inject'. 
+	** Autobuilds an instance of the given type, resolving all dependencies: 
+	**  - create instance via ctor marked with '@Inject' or the ctor with the *most* parameters
+	**  - inject dependencies into fields (of all visibilities) marked with '@Inject'
+	**  - call any methods annotated with '@PostInjection'
     abstract Obj autobuild(Type type)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.

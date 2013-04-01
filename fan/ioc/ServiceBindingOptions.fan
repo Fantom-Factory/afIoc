@@ -1,6 +1,6 @@
 
 **
-** Allows additional options for a service to be specified, overriding hard coded defaults.
+** Lets you specify additional options for a service, overriding defaults.
 ** 
 mixin ServiceBindingOptions {
 	

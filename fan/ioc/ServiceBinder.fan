@@ -1,7 +1,7 @@
 
 **
-** Allows a module to bind service facets to service implementation classes. A 'ServiceBinder' is 
-** passed to to module methods with the following signature: 
+** Allows a module to bind service facets to implementations. A 'ServiceBinder' is passed to to 
+** module methods with the following signature: 
 ** 
 **   static Void bind(ServiceBinder binder) { ... } 
 ** 

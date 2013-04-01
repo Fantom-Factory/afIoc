@@ -1,6 +1,6 @@
 
 ** Swiss Army Knife 
-**  - Marks a field to be set by IoC
-**  - Marks a service ctor to be used for autobuilding
+**  - Place on a field to mark it for field injection
+**  - Place on a ctor to mark it for use by autobuilding / service creation
 facet class Inject {
 }

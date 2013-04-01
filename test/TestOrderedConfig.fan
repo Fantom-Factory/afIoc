@@ -26,13 +26,6 @@ class TestOrderedConfig : IocTest {
 		verifyEq(s21.config, Str["wot", "ASS!"])
 	}
 
-	// FIXME: MEGA FANTOM BUG!!! - this should fail!! Locals not keyed off instance. Hmm...
-	Void testAddingWrongContrib() {
-		reg := RegistryBuilder().addModule(T_MyModule34#).build.startup
-		s21 := reg.serviceById("s21") as T_MyService21
-		verifyEq(s21.config, Str["wot", "ASS!"])
-	}
-
 	Void testAddingWrongContribV2() {
 		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
 		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(Int#, Str#)) {
@@ -41,7 +34,6 @@ class TestOrderedConfig : IocTest {
 	}
 
 	Void testOrderedConfigAutobuild() {
-		Utils.setLoglevelDebug
 		reg := RegistryBuilder().addModule(T_MyModule36#).build.startup
 		s23 := reg.serviceById("s23") as T_MyService23
 		verifyEq(s23.config, Str["ASS!"])

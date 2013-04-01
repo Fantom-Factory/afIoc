@@ -14,7 +14,7 @@ const class IocErr : Err {
 //}
 
 **
-** Thrown when an impossible condition occurs. You'll know when - we've all written comments like:
+** Thrown when an impossible condition occurs. You know when - we've all written comments like:
 ** 
 ** '// this should never happen...' 
 ** 
