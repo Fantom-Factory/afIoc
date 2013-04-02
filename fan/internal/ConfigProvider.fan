@@ -12,7 +12,6 @@ const internal class ConfigProvider : DependencyProvider {
 	
 	override Obj? provide(Obj objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
 		ctx := objCtx as InjectionCtx
-//		if (configType != dependencyType) 
 		if (!dependencyType.fits(configType)) 
 			return null
 		
@@ -20,7 +19,7 @@ const internal class ConfigProvider : DependencyProvider {
 		if (configType.name == "List")
 			config = OrderedConfig(ctx, serviceDef, configType)
 		if (configType.name == "Map")
-			config = MappedConfig(configType)
+			config = MappedConfig(ctx, serviceDef, configType)
 		
 		objLocator.contributionsByServiceDef(serviceDef).each {
 			config->contribute(ctx, it)			

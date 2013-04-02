@@ -159,6 +159,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return dependency
 		}
 		
+		// extra info - kill these msgs if they get in the way of refactoring
+		if (dependencyType.fits(MappedConfig#))
+			throw IocErr(IocMessages.configMismatch(dependencyType, OrderedConfig#))
+		if (dependencyType.fits(OrderedConfig#))
+			throw IocErr(IocMessages.configMismatch(MappedConfig#, dependencyType))
+		
 		// TODO: if not service found, ask other object locators / injection providers
 		
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))

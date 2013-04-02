@@ -1,6 +1,4 @@
 
-	mapped contributions
-	
 	dependency providers / dep ctx -> passing object being autobuilt (very powerful!)
 	@ServiceId / @AutoBuild	
 	@Startup

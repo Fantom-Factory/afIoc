@@ -11,7 +11,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 	new make(|->|[] startups) {
 		this.startups = startups
 	}
-	
+
 	internal Void go(OpTracker tracker) {
 		tracker.track("Running Registry Startup contributions") |->| {
 			startups.each { it() }
