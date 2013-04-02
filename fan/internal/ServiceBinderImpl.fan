@@ -106,6 +106,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId
 			it.serviceType 	= this.serviceMixin
+			it.serviceImplType 	= this.serviceImpl
 //			it.isEagerLoad 	= this.eagerLoadFlag
 			it.scope		= this.scope
 			it.description 	= "'$sId' : Standard Ctor Builder"
@@ -117,7 +118,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 					
 					return ctx.withConfigProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
 						obj := InjectionUtils.createViaConstructor(ctx, ctor)
-						InjectionUtils.injectIntoFields(ctx, obj, false)
+						InjectionUtils.injectIntoFields(ctx, obj)
 						return obj
 					}
 				}

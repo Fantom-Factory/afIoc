@@ -15,17 +15,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[makeBuiltInServiceDef("registry", Registry#)] = this 
 
 			services[StandardServiceDef() {
-				it.serviceId 	= "ctorFieldInjector"
+				it.serviceId 	= "CtorFieldInjector"
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
 				it.scope		= ServiceScope.perInjection
 				it.description 	= "'$it.serviceId' : Autobuilt. Always."
 				it.source		= |InjectionCtx ctx->Obj| {
-					|Obj service| {
-						ctx.track("Injecting via Ctor Field Injector") |->| {
-							InjectionUtils.injectIntoFields(ctx, service, true)
-						}
-					}
+					InjectionUtils.makeCtorInjectionPlan(ctx, ctx.building.serviceImplType)
 				}
 			}] = null
 			
@@ -94,7 +90,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override This shutdown() {
 		shutdownHub := serviceById(RegistryShutdownHub#.name) as RegistryShutdownHubImpl
 
-		// Registry shutdown is commencing...
+		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
 
 		withMyState |state| {
@@ -169,11 +165,23 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackAutobuild(InjectionCtx ctx, Type type) {
-		return InjectionUtils.autobuild(ctx, type)
+		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
+		serviceDef := StandardServiceDef() {
+			it.serviceId 	= "${type.name}Autobuild"
+			it.moduleId		= ""
+			it.serviceType 	= type
+			it.serviceImplType 	= type
+			it.scope		= ServiceScope.perInjection
+			it.description 	= "$type.qname Autobuild"
+			it.source		= |InjectionCtx ctxx->Obj?| { return null }
+		}		
+		return ctx.withServiceDef(serviceDef) |->Obj?| {
+			return InjectionUtils.autobuild(ctx, type)
+		}
 	}
 
 	override Obj trackInjectIntoFields(InjectionCtx ctx, Obj object) {
-		return InjectionUtils.injectIntoFields(ctx, object, false)
+		return InjectionUtils.injectIntoFields(ctx, object)
 	}
 
 	override ServiceDef? serviceDefById(Str serviceId) {

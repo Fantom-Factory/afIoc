@@ -20,14 +20,14 @@ class TestRecursion : IocTest {
 
 	Void testErrOnRecursiveInjection2() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s16", "s17", "s16"])) { 
+		verifyErrMsg(IocMessages.serviceRecursion(["s16", "s17", "CtorFieldInjector", "s16"])) { 
 			reg.serviceById("s16") 
 		}
 	}
 
 	Void testErrOnRecursiveInjection3() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s18", "s17", "s16", "s17"])) { 
+		verifyErrMsg(IocMessages.serviceRecursion(["s18", "CtorFieldInjector", "s17", "CtorFieldInjector", "s16", "s17"])) { 
 			reg.serviceById("s18") 
 		}
 	}

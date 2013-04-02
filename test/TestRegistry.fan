@@ -31,7 +31,7 @@ class TestRegistry : Test {
 	
 	Void testServiceIdConflict() {
 		verifyErr(IocErr#) { 
-			RegistryBuilder().addModules([T_MyModule1#, T_MyModule1#]).build
+			RegistryBuilder().addModules([T_MyModule13#, T_MyModule14#]).build
 		}
 	}
 	

@@ -90,11 +90,11 @@ internal const class IocMessages {
 	}
 	
 	static Str threadScopeInAppScope(Str owningServiceId, Str injectedServiceId) {
-		"Can not inject ${ServiceScope.perThread.name} scoped service $injectedServiceId into ${ServiceScope.perApplication.name} scoped service $injectedServiceId"
+		"Can not inject ${ServiceScope.perThread.name} scoped service $injectedServiceId into ${ServiceScope.perApplication.name} scoped service $owningServiceId"
 	}
 	
 	static Str cannotSetConstFields(Field field) {
-		"Can not set const field '$field.qname'. Either remove the 'const' keyword or the @${Inject#.name} facet."
+		"To set const field '$field.qname' use a serialisation ctor: new make(|This|? f := null) { f?.call(this) }"
 	}
 	
 	static Str serviceRecursion(Str[] serviceIds) {

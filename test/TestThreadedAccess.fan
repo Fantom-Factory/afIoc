@@ -1,6 +1,6 @@
 using concurrent
 
-class TestThreadedAccess : Test {
+class TestThreadedAccess : IocTest {
 	
 	Void testAppVsThread() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule16#).build.startup
@@ -29,7 +29,7 @@ class TestThreadedAccess : Test {
 		Registry reg := RegistryBuilder().addModule(T_MyModule17#).build.startup
 
 		// can not inject a perThread service into a perApp service
-		verifyErr(IocErr#) {
+		verifyErrMsg(IocMessages.threadScopeInAppScope("s13", "s12")) {
 			s12 := reg.serviceById("s12")	// perThread
 			s13 := reg.serviceById("s13")	// perApp
 		}		
@@ -47,7 +47,9 @@ class TestThreadedAccess : Test {
 //		}.send(null).get
 		
 		// thread in apps, not allowed
-		verifyErr(IocErr#) { reg.serviceById("s14") }
+		verifyErrMsg(IocMessages.threadScopeInAppScope("s14", "s12")) {
+			reg.serviceById("s14") 			
+		}
 	}
 
 	Void testAppInThread() {
@@ -70,7 +72,9 @@ class TestThreadedAccess : Test {
 
 	Void testErrThrownWhenConstFieldNotSet() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule19#).build.startup
-		verifyErr(IocErr#) { reg.serviceById("s14") }
+		verifyErrMsg(IocMessages.cannotSetConstFields(T_MyService14#s12)) {
+			reg.serviceById("s14")
+		}
 	}
 
 	static Void assertSame(Obj? o1, Obj? o2) {
@@ -108,6 +112,7 @@ internal class T_MyModule18 {
 
 internal class T_MyModule19 {
 	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService12#).withId("s12")
 		binder.bindImpl(T_MyService14#).withId("s14")
 	}
 }

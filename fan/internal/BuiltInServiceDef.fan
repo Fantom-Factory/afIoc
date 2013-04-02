@@ -4,6 +4,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Str 			moduleId
 	override const Str 			serviceId
 	override const Type 		serviceType	
+	override const Type? 		serviceImplType	
 	override const ServiceScope scope
 	override const Type?		configType
 	

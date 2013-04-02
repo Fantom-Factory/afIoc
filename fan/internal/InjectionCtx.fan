@@ -5,7 +5,7 @@ internal class InjectionCtx {
 	private DependencyProvider[]	providerStack	:= [,]
 	private OpTracker 				tracker			:= OpTracker()
 	ObjLocator? 					objLocator
-	
+
 	new make(ObjLocator? objLocator) {
 		this.objLocator = objLocator
 	}
@@ -32,7 +32,8 @@ internal class InjectionCtx {
 		try {
 			// check for recursion
 			defStack[0..<-1].each { 
-				if (it.serviceId == def.serviceId)
+				// the servicedef may be the same, but if the scope is perInjection, the instances will be different
+				if (it.serviceId == def.serviceId && def.scope != ServiceScope.perInjection)
 					throw IocErr(IocMessages.serviceRecursion(defStack.map { it.serviceId }))
 			}
 			
@@ -50,6 +51,13 @@ internal class InjectionCtx {
 		} finally {			
 			providerStack.pop
 		}
+	}
+	
+	ServiceDef? building() {
+		def := defStack.peek
+		if (def?.scope == ServiceScope.perInjection)
+			def = defStack[-2]
+		return def
 	}
 	
 	Obj? provideDependency(Type dependencyType) {

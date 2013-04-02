@@ -37,6 +37,18 @@ class TestCtorInjection : IocTest {
 		verifyEq(ser9.service2.kick, "Can't Touch This!" )
 	}
 	
+	Void testConstCtorInjectionForService() {
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		T_MyService25 s25 := reg.serviceById("s25")
+		verifyEq(s25.s24.judge, "DREDD" )
+	}
+
+	Void testConstCtorInjectionForAutobuild() {
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		T_MyService25 s25 := reg.autobuild(T_MyService25#)
+		verifyEq(s25.s24.judge, "DREDD" )
+	}
+	
 }
 
 internal class T_MyModule6 {
@@ -49,7 +61,7 @@ internal class T_MyModule6 {
 		binder.bindImpl(T_MyService7#)
 		binder.bindImpl(T_MyService8#)
 		binder.bindImpl(T_MyService9#)
-	}	
+	}
 }
 
 internal class T_MyService4 {
@@ -94,4 +106,23 @@ internal class T_MyService9 {
 		service2 = T_MyService2()
 		service2.kick = "Can't Touch This!"
 	}
+}
+
+internal class T_MyModule42 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService24#).withId("s24")
+		binder.bindImpl(T_MyService25#).withId("s25")
+	}
+}
+
+internal const class T_MyService24 {
+	const Str judge	:= "DREDD"
+//	new make(FieldInjector inject) { inject.into()(this) }
+	new make(|This|in) { in(this) }
+}
+
+internal const class T_MyService25 {
+	@Inject
+	const T_MyService24 s24	
+	new make(|This|in) { in(this) }
 }
