@@ -46,37 +46,40 @@ using concurrent
 const class ConcurrentState {
 	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
 	private static const ActorPool	actorPool	:= ActorPool()
-	private const Actor 			state		:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
+	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
 	private const Type				stateType
+	private const LocalStash 		stash
+
+	private Obj? state {
+		get { stash["state"] }
+		set { stash["state"] = it }
+	}
 	
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
 	new make(Type stateType) {
-		this.stateType = stateType
+		this.stateType	= stateType
+		this.stash		= LocalStash(stateType)
 	}
 	
 	** Use to access state
 	virtual Void withState(|Obj| f) {
 		// use 'get' to so any Errs are re-thrown. As we're just setting / getting state the 
 		// messages should be fast anyway (and we don't want a 'get' to happen before a 'set')
-		state.send(f.toImmutable).get
+		stateActor.send(f.toImmutable).get
 	}
 	
 	** Use to return state
 	virtual Obj? getState(|Obj->Obj?| f) {
-		return state.send(f.toImmutable).get
+		return stateActor.send(f.toImmutable).get
 	}	
 	
 	protected Obj? receive(Obj? msg) {
 		func := (msg as |Obj?->Obj?|)
 
 		try {
-			state := Actor.locals[stateType.qname]
-			
 			// lazily create our state
-			if (state == null) {
+			if (state == null) 
 				state = stateType.make
-				Actor.locals[stateType.qname] = state
-			}
 			
 			return func.call(state)
 			
