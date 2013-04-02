@@ -19,18 +19,24 @@ internal const class ContributionImpl : Contribution {
 	}
 	
 	override Void contributeOrdered(InjectionCtx ctx, OrderedConfig config) {
-		ctx.track("Gathering ORDERED configuration of type $config.contribType") |->| {			
+		ctx.track("Gathering ORDERED configuration of type $config.contribType") |->| {
+			sizeBefore := config.getConfig.size
 			ctx.withConfigProvider(ContribProvider(config)) |->| {
 				InjectionUtils.callMethod(ctx, method, null)
 			}
+			sizeAfter := config.getConfig.size
+			ctx.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
 	}
 
 	override Void contributeMapped(InjectionCtx ctx, MappedConfig config) {
 		ctx.track("Gathering MAPPED configuration of type $config.contribType") |->| {			
+			sizeBefore := config.getConfig.size
 			ctx.withConfigProvider(ContribProvider(config)) |->| {
 				InjectionUtils.callMethod(ctx, method, null)
 			}
+			sizeAfter := config.getConfig.size
+			ctx.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
 	}	
 }

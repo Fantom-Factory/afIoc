@@ -2,6 +2,7 @@
 	dependency providers / dep ctx -> passing object being autobuilt (very powerful!)
 	@ServiceId / @AutoBuild	
 	@Startup
+	(@EagerLoad - could it be a service? contrib serviceids!) dunno
 	ordered contributions
 	contribution overrides - more than once? Order them?
 	service disambiguation via facets

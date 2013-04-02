@@ -1,5 +1,4 @@
 
-// TODO: rename to InternalMsgs...?
 internal const class IocMessages {
 
 	// ---- Err Messages --------------------------------------------------------------------------

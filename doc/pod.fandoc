@@ -1,6 +1,6 @@
 Overview [#overview]
 ********************
-IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond other IoC containers, this IoC offers:
+IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond all else, this IoC offers:
  - distributed service configuration between pods and modules
  - extensive error reporting
  - lazy(ish) service loading
@@ -143,7 +143,9 @@ pre>
   }
 <pre
 
-The list and map types are inferred from the ctor definition and all contribution types must fit. If the service declares a map configuration then contribution methods should take a 'MappedConfig' object.
+The list and map types are inferred from the ctor definition and all contribution types must fit. 
+
+If the service declares a map configuration then contribution methods should take a 'MappedConfig' object. If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
 
 
 Tips [#tips]

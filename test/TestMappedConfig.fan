@@ -52,6 +52,19 @@ class TestMappedConfig : IocTest {
 		}
 	}	
 
+	Void testEmptyListMapValueCanBeOfTypeObj() {
+		reg := RegistryBuilder().addModule(T_MyModule51#).build.startup
+		s29 := reg.serviceById("s29") as T_MyService29
+		verifyEq(s29.config["key"], Str[,])
+	}
+
+	Void testStrKeyMapsAreCaseInSensitive() {
+		reg := RegistryBuilder().addModule(T_MyModule44#).build.startup
+		s28 := reg.serviceById("s28") as T_MyService28
+		verifyEq(s28.config.getOrThrow("WOT"), "ever")
+		verifyEq(s28.config.getOrThrow("WOT2"), "ever2")
+	}
+
 }
 
 internal class T_MyModule43 {
@@ -153,5 +166,22 @@ internal class T_MyModule50 {
 	@Contribute{ serviceId="s28" }
 	static Void cont(OrderedConfig config) {
 		config.addUnordered(67)
+	}
+}
+
+internal class T_MyModule51 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService29#).withId("s29")
+	}
+	@Contribute{ serviceId="s29" }
+	static Void cont(MappedConfig config) {
+		config.addMapped("key", [,])
+	}
+}
+
+internal class T_MyService29 {
+	Str:Str[] config
+	new make(Str:Str[] config) {
+		this.config = config
 	}
 }
