@@ -55,18 +55,18 @@ const class ConcurrentState {
 	}
 	
 	** Use to access state
-	virtual protected Void withState(|Obj| f) {
+	virtual Void withState(|Obj| f) {
 		// use 'get' to so any Errs are re-thrown. As we're just setting / getting state the 
 		// messages should be fast anyway (and we don't want a 'get' to happen before a 'set')
 		state.send(f.toImmutable).get
 	}
 	
 	** Use to return state
-	virtual protected Obj? getState(|Obj->Obj?| f) {
+	virtual Obj? getState(|Obj->Obj?| f) {
 		return state.send(f.toImmutable).get
 	}	
 	
-	private Obj? receive(Obj? msg) {
+	protected Obj? receive(Obj? msg) {
 		func := (msg as |Obj?->Obj?|)
 
 		try {
