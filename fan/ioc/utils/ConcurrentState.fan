@@ -6,8 +6,8 @@ using concurrent
 ** 
 ** 'ConcurrentState' wraps a state object in an Actor, and provides access to it via the 
 ** 'withState' and 'getState' methods. Note that by their nature, these methods are immutable 
-** boundaries. Meaning that while all data in the State object can be mutable, data passed in and 
-** out of the methods can not be. 
+** boundaries. Meaning that while all data in the State object can be mutable, but data passed in 
+** and out of the methods can not be. 
 ** 
 ** A full example of a mutable const map class is as follows:
 ** 

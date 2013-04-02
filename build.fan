@@ -5,13 +5,13 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A Dependency Injection (DI) framework"
-		version = Version([0,0,2])
+		version = Version([0,0,3])
 
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
 					"proj.name"		: "AF-IOC",
 					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "true"
+					"repo.private"	: "true"	// Eeek!
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0"]
