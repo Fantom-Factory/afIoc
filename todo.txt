@@ -2,7 +2,7 @@
 	ctor consts
 	mapped contributions
 	
-	dependency providers / dep ctx
+	dependency providers / dep ctx -> passing object being autobuilt (very powerful!)
 	@ServiceId / @AutoBuild	
 	@Startup
 	ordered contributions

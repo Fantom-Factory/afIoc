@@ -6,42 +6,23 @@ internal const class InjectionUtils {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
 			obj  := createViaConstructor(ctx, ctor)
-			injectIntoFields(ctx, obj, false)
+			injectIntoFields(ctx, obj)
 			return obj
 		}
 	}
 
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(InjectionCtx ctx, Obj object, Bool insideCtor) {
-		
+	static Obj injectIntoFields(InjectionCtx ctx, Obj object) {
 		ctx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(ctx, object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					
-					// TODO: Cannot reflectively set const fields, even in the ctor
-					// see http://fantom.org/sidewalk/topic/2119
-//					if (!insideCtor) {
-						if (field.isConst)
-							throw IocErr(IocMessages.cannotSetConstFields(field))
-//					}
-					
 					dependency := findDependencyByType(ctx, field.type)
-	                inject(ctx, object, field, dependency)
+					inject(ctx, object, field, dependency)
 	                return true
 	            })
 				ctx.log("No injection fields found")
 		}
-		
-//		tracker.track("Autobuilding dependencies of fields into $object.typeof.qname") |->| {
-//			if (!findFieldsWithFacet(tracker, object.typeof, Autobuild#, injectConstFields)
-//				.reduce(false) |bool, field| {
-//					dependency := autobuild(tracker, objLocator, field.type)
-//	                inject(tracker, object, field, dependency)
-//	                return true
-//	            })
-//				tracker.log("No autobuild fields found")
-//		}
-		
+
 		callPostInjectMethods(ctx, object)
 		return object
     }
@@ -94,6 +75,19 @@ internal const class InjectionUtils {
 		}
 	}
 	
+	static Func makeCtorInjectionPlan(InjectionCtx ctx, Type building) {
+		ctx.track("Creating injection plan for fields of $building.qname") |->Obj| {
+			plan := Field:Obj?[:]
+			findFieldsWithFacet(ctx, building, Inject#, true).each |field| {
+				dependency := findDependencyByType(ctx, field.type)
+				plan[field] = dependency
+			}
+			if (plan.isEmpty)
+				ctx.log("No injection fields found")
+			return Field.makeSetFunc(plan)
+		}
+	}
+	
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
@@ -139,6 +133,8 @@ internal const class InjectionUtils {
 				ctx.log("Field has non null value. Aborting injection.")
 				return
 			}
+			if (field.isConst)
+				throw IocErr(IocMessages.cannotSetConstFields(field))			
 			field.set(target, value)
 		}
 	}

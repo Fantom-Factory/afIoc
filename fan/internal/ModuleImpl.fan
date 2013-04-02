@@ -132,7 +132,7 @@ internal const class ModuleImpl : Module {
 		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
-			return service
+			return service				
 	    }	
     }
 }
