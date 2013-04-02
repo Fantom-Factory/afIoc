@@ -12,5 +12,5 @@ internal mixin Contribution {
 	** Performs the work needed to contribute into the mapped configuration.
 	**
 	** Config is the mapped configuration into which values should be loaded. 
-	abstract Void contributeMapped(Obj moduleInst, MappedConfig config)
+	abstract Void contributeMapped(InjectionCtx ctx, MappedConfig config)
 }

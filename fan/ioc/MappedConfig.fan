@@ -8,30 +8,58 @@
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
-@NoDoc
 class MappedConfig {
 	
-	internal new make(Type param) {
-		
-	}
-
-	** Adds a keyed object to the service's contribution.
-	Void add(Obj key, Obj value) {
-		
-	}
-
-	** Overrides an existing contribution by its key.
-	Void addOverride(Obj key, Obj value) {
-		
-	}
-
-	** Adds a keyed object by instantiating (with dependencies) the indicated class. 
-	Void addType(Obj key, Type valueType) {
-		
-	}
-
-	** Instantiates an object and adds it as an override. 
-	Void addTypeOverride(Obj key, Type valueType) {
+	internal const	Type 			contribType
+	private  const 	ServiceDef 		serviceDef
+	private 	  	InjectionCtx	ctx
+	private 	  	Map 			config
 	
+	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
+		if (contribType.name != "Map")
+			throw WtfErr("Ordered Contrib Type is NOT map???")
+		if (contribType.isGeneric)
+			throw IocErr(IocMessages.mappedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
+		
+		this.ctx 			= ctx
+		this.serviceDef 	= serviceDef
+		this.contribType	= contribType
+		this.config 		= Map.make(contribType)
+	}
+
+	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
+	Obj autobuild(Type type) {
+		ctx.objLocator.trackAutobuild(ctx, type)
+	}
+	
+	** Adds a keyed object to the service's configuration.
+	Void addMapped(Obj key, Obj val) {
+		keyType := contribType.params["K"]
+		valType := contribType.params["V"]
+		
+		if (!key.typeof.fits(keyType))
+			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
+		if (!val.typeof.fits(valType))
+			throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		
+		config.add(key, val)
+	}
+
+//	** Overrides an existing contribution by its key.
+//	Void addMappedOverride(Obj key, Obj value) {
+//		
+//	}
+	
+	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
+		contribution.contributeMapped(ctx, this)
+	}
+	
+	internal Map getConfig() {
+		config
+	}
+	
+	override Str toStr() {
+		"MappedConfig of $contribType"
 	}	
+
 }

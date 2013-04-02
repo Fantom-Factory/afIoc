@@ -32,7 +32,7 @@ class OrderedConfig {
 		ctx.objLocator.trackAutobuild(ctx, type)
 	}
 
-	** Adds an unordered object to a service's contribution.
+	** Adds an unordered object to a service's configuration.
 	Void addUnordered(Obj object) {
 		if (!object.typeof.fits(listType))
 			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))

@@ -45,6 +45,13 @@ class TestOrderedConfig : IocTest {
 		verifyEq(s23.config, Str[,])
 	}
 
+	Void testWrongConfig() {
+		reg := RegistryBuilder().addModule(T_MyModule34#).build.startup
+		verifyErrMsg(IocMessages.configMismatch(MappedConfig#, OrderedConfig#)) {
+			reg.serviceById("s21")
+		}
+	}
+
 }
 
 
@@ -130,10 +137,9 @@ internal class T_MyModule34 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService21#).withId("s21")
 	}
-	
 	@Contribute{ serviceId="s21" }
-	static Void cont(OrderedConfig config) {
-		config.addUnordered(69)
+	static Void cont(MappedConfig config) {
+		config.addMapped(69 ,69)
 	}
 }
 

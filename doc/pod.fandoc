@@ -72,7 +72,7 @@ Defining Services [#definingServices]
 *************************************
 Services are defined in Module classes, where each meaningful method is static and annotated with a facet. 
 
-The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define serices, examples below:
+The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define services, examples below:
 
   static Void bind(ServiceBinder binder) {
 
@@ -86,15 +86,12 @@ The exception is 'bind()' which does not have a facet but is declared with a sta
     binder.bindImpl(MyServiceImpl#).withId("elephant")    
   }
 
-Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet.
+Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved as such when the method is called. For example, to manually build a service with the Id 'penguin':
 
-whose name start with the prefix 'build', the rest of the method name is taken to be the service ID. To manually build a service with the Id 'penguin':
-
-  static EmailService buildPenquin(EmailConfig config) {
+  @Build { serviceId="penguin" }
+  static EmailService buildStuff(EmailConfig config) {
     EmailServiceImpl(config)
   }
-
-Builder methods may take dependencies as parameters. These dependencies are realised and passed in when the service is built.
 
 
 Dependency Injection [#dependencyInjection]
@@ -103,29 +100,20 @@ IoC performs both ctor and field injection.
 
 Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
 
-When IoC builds a service it locates a suitable ctor. This is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
+When IoC autobuilds a service it locates a suitable ctor. This is either the one donned with the '@Inject' facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
 
-Field injection happens *after* the object has been created and so must be declared as nullable:
+Field injection happens *after* the object has been created and so fields must be declared as nullable:
 
   @Inject
   MyService? myService
 
 The exception to the rule is if you declare a serialisation ctor:
 
-pre>
-class MyService1 {
-  @Inject
-  MyService2 service2
+  new make(|This|? f) { f?.call(this) }
 
-  new make(|This| injectInto) {
-    injectInto(this)
-  }
-}
-<pre
+On calling 'f' all injectable fields will be set, even fields marked as 'const'.
 
-Note that due to [this topic]`http://www.fantom.org/sidewalk/topic/2119` 'const' fields can not be injected.
-
-After object construction and field injection you may perform extra setup via methods annotated with the '@PostInjection' facet. These may be of any visibility and all parameters are resolved as dependencies.
+After object construction and field injection, any extra setup may be performed via methods annotated with '@PostInjection'. These methods may be of any visibility and all parameters are resolved as dependencies.
 
 
 Service Scope [#serviceScope]
@@ -140,21 +128,37 @@ Service Configuration [#serviceConfiguration]
 Services can solicit configuration from modules simply by declaring a list or a map in their ctor or builder method.
 
 pre>
-
+  class Example {
+    new make(Str[] mimeTypes) { ... }
+    ...
+  }
 <pre
 
+Modules may then contribute to the 'Example' service:
 
-Tips & Good Practices [#tips]
-*****************************
+pre>
+  @Contribute
+  static Void contributeExample(OrderedConfig config) {
+    config.addUnordered("text/plain")
+  }
+<pre
 
-Define both pod meta and index props. Only define one module per pod, use @SubModule for dependant modules (or defining more than one)
+The list and map types are inferred from the ctor definition and all contribution types must fit. If the service declares a map configuration then contribution methods should take a 'MappedConfig' object.
 
-use 'injectInto fields of ' Flux objs (as you have no say in how they're created
-use 'autobuikd' for other gui objss
 
-most useful when building guis - a panel or content pane isn't a service, but needs access to serives. commands can be auto build on the fly to invoke serive actions
+Tips [#tips]
+************
+Define one main module and declare it both the pod meta and the pod index props. Use '@SubModule' to reference additional dependant modules in the same pod.
 
-Based on T5-IoC but perhaps tries to take out some of the *magic* commonlly associated with it.
+If you have no say in how your classes are created (say, when you're using flux) then use the following line to inject dependencies when needed:
+
+  (Service.find(IocService#) as IocService).injectIntoFields(this)
+
+When creating GUIs (say, with fwt) then use `Registry.autobuild` to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
+
+IoC gives detailed error reporting should something go wrong, nevertheless should you need more, use `IocHelper.debugOperation` to make IoC give trace level contextual information.
+
+Don't be scared of creating 'const' services! Use `ConcurrentState` to safely store and access mutable state across thread boundaries.
 
 
 Release Notes [#releaseNotes]

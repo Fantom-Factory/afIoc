@@ -133,12 +133,19 @@ internal const class IocMessages {
 		"Contribution of type $objType.qname does not match service configuration list type of $listType.qname"
 	}
 
-	
-	
 	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
 		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
 	}
 	
+	static Str mappedConfigTypeMismatch(Str type, Type objType, Type mapType) {
+		"Contribution of type $objType.qname does not match service configuration $type type of $mapType.qname"
+	}
+	
+	static Str configMismatch(Type notFound, Type tryThis) {
+		"Dependency '$notFound.name' not found, try '$tryThis.name' instead"
+	}
+	
+
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {
