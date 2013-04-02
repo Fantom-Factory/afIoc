@@ -168,6 +168,7 @@ Release Notes [#releaseNotes]
 
 v0.0.4 [#v0.0.4]
 ----------------
+ - MOD: Multiple instances of `ConcurrentState` can be created with the same state class.
  - BUG: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
 
 v0.0.2 [#v0.0.2]
