@@ -24,7 +24,9 @@ class MappedConfig {
 		this.ctx 			= ctx
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
-		this.config 		= Map.make(contribType)
+		this.config 		= (keyType == Str#) 
+							? Map.make(contribType) { caseInsensitive = true }
+							: Map.make(contribType) { ordered = true }
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -39,8 +41,13 @@ class MappedConfig {
 		
 		if (!key.typeof.fits(keyType))
 			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
-		if (!val.typeof.fits(valType))
-			throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		if (!val.typeof.fits(valType)) {
+			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
+			if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
+				val = valType.params["V"].emptyList
+			else
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		}
 		
 		config.add(key, val)
 	}
@@ -58,6 +65,13 @@ class MappedConfig {
 		config
 	}
 	
+	private once Type keyType() {
+		contribType.params["K"]
+	}
+	
+	private once Type valType() {
+		contribType.params["V"]
+	}
 	override Str toStr() {
 		"MappedConfig of $contribType"
 	}	

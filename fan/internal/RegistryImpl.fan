@@ -12,8 +12,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]			
-			services[makeBuiltInServiceDef("registry", Registry#)] = this 
+			services[makeBuiltInServiceDef("Registry", Registry#)] = this 
 
+			// new up Built-In services ourselves to cut down on debug noise
+			services[makeBuiltInServiceDef("RegistryShutdownHub", RegistryShutdownHub#)] = RegistryShutdownHubImpl() 
+			
 			services[StandardServiceDef() {
 				it.serviceId 	= "CtorFieldInjector"
 				it.moduleId		= builtInModuleId
@@ -233,12 +236,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 	}
 
-	private ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType) {
+	private ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType, ServiceScope scope := ServiceScope.perApplication) {
 		BuiltInServiceDef() {
 			it.serviceId = serviceId
 			it.moduleId = builtInModuleId
 			it.serviceType = serviceType
-			it.scope = ServiceScope.perApplication
+			it.scope = scope
 		}
 	}
 	

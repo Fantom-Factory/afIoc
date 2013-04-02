@@ -24,7 +24,7 @@ class OrderedConfig {
 		this.ctx 			= ctx
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
-		this.config 		= List.make(contribType.params["V"], 10)
+		this.config 		= List.make(listType, 10)
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  

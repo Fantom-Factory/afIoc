@@ -1,5 +1,4 @@
 
-// TODO: rename -> Dependency...? -> Internal Registry?
 internal const mixin ObjLocator {
 
 	** Obtains a service via its unique service id. 
