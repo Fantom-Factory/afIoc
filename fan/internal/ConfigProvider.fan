@@ -12,7 +12,8 @@ const internal class ConfigProvider : DependencyProvider {
 	
 	override Obj? provide(Obj objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
 		ctx := objCtx as InjectionCtx
-		if (configType != dependencyType) 
+//		if (configType != dependencyType) 
+		if (!dependencyType.fits(configType)) 
 			return null
 		
 		config := null
