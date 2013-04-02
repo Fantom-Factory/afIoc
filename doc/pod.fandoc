@@ -70,7 +70,7 @@ Modules can also be loaded from index properties in a similar manner.
 
 Defining Services [#definingServices]
 *************************************
-Services are defined in Module classes, where each meaningful method is static and annotated with a facet. 
+Services are defined in Module classes, where each meaningful method is static and annotated with a facet.
 
 The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define services, examples below:
 
@@ -81,9 +81,9 @@ The exception is 'bind()' which does not have a facet but is declared with a sta
 
     // has service ID of 'myServiceImpl'
     binder.bindImpl(MyServiceImpl#)
-    
+
     // has service ID of 'elephant'
-    binder.bindImpl(MyServiceImpl#).withId("elephant")    
+    binder.bindImpl(MyServiceImpl#).withId("elephant")
   }
 
 Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved as such when the method is called. For example, to manually build a service with the Id 'penguin':
@@ -143,7 +143,7 @@ pre>
   }
 <pre
 
-The list and map types are inferred from the ctor definition and all contribution types must fit. 
+The list and map types are inferred from the ctor definition and all contribution types must fit.
 
 If the service declares a map configuration then contribution methods should take a 'MappedConfig' object. If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
 
@@ -166,6 +166,11 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v0.0.4 [#v0.0.4]
+----------------
+ - BUG: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
+
 v0.0.2 [#v0.0.2]
 ----------------
  - Preview release
+
