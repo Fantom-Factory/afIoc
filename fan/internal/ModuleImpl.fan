@@ -62,7 +62,7 @@ internal const class ModuleImpl : Module {
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
         serviceDefs.findAll |serviceDef, serviceId| {
-			serviceDef.serviceType.fits(serviceType)
+			serviceType.fits(serviceDef.serviceType)
         }.vals
     }
 

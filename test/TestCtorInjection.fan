@@ -48,6 +48,12 @@ class TestCtorInjection : IocTest {
 		T_MyService25 s25 := reg.autobuild(T_MyService25#)
 		verifyEq(s25.s24.judge, "DREDD" )
 	}
+
+	Void testConstCtorInjectionForAutobuildNullable() {
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		T_MyService26 s26 := reg.autobuild(T_MyService26#)
+		verifyEq(s26.s24.judge, "DREDD" )
+	}
 	
 }
 
@@ -122,6 +128,12 @@ internal const class T_MyService24 {
 }
 
 internal const class T_MyService25 {
+	@Inject
+	const T_MyService24 s24	
+	new make(|This|in) { in(this) }
+}
+
+internal const class T_MyService26 {
 	@Inject
 	const T_MyService24 s24	
 	new make(|This|in) { in(this) }
