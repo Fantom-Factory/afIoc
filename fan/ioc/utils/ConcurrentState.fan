@@ -65,11 +65,13 @@ const class ConcurrentState {
 	virtual Void withState(|Obj| f) {
 		// use 'get' to so any Errs are re-thrown. As we're just setting / getting state the 
 		// messages should be fast anyway (and we don't want a 'get' to happen before a 'set')
+		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		stateActor.send(f.toImmutable).get
 	}
 	
 	** Use to return state
 	virtual Obj? getState(|Obj->Obj?| f) {
+		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		return stateActor.send(f.toImmutable).get
 	}	
 	

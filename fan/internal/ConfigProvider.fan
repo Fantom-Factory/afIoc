@@ -9,12 +9,16 @@ const internal class ConfigProvider : DependencyProvider {
 		this.objLocator	= ctx.objLocator
 		this.serviceDef	= serviceDef
 	}
-	
+
 	override Obj? provide(Obj objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
-		ctx := objCtx as InjectionCtx
-		if (!dependencyType.fits(configType)) 
+		// BugFix: TestCtorInjection#testCorrectErrThrownWithWrongParams
+		// Type#fits does not allow null
+		if (configType == null)
 			return null
-		
+		if (!dependencyType.fits(configType))
+			return null
+
+		ctx := objCtx as InjectionCtx
 		config := null
 		if (configType.name == "List")
 			config = OrderedConfig(ctx, serviceDef, configType)
@@ -34,6 +38,7 @@ const internal class ConfigProvider : DependencyProvider {
 				if (buildMethod.params.isEmpty)
 					return null
 				
+				// Config HAS to be the first param
 				paramType := buildMethod.params[0].type
 				if (paramType.name == "List")
 					return paramType
