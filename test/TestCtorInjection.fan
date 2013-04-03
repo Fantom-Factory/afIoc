@@ -8,6 +8,13 @@ class TestCtorInjection : IocTest {
 		}
 	}
 
+	Void testCorrectErrThrownWithWrongParams() {
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService3#)) {
+			reg.dependencyByType(T_MyService30#)
+		}
+	}
+
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
 		verifyErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService5#, 1)) { 
@@ -118,6 +125,7 @@ internal class T_MyModule42 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService24#).withId("s24")
 		binder.bindImpl(T_MyService25#).withId("s25")
+		binder.bindImpl(T_MyService30#).withId("s30")
 	}
 }
 
@@ -137,4 +145,8 @@ internal const class T_MyService26 {
 	@Inject
 	const T_MyService24 s24	
 	new make(|This|in) { in(this) }
+}
+
+internal const class T_MyService30 {
+	new make(T_MyService3 ser3) { }
 }
