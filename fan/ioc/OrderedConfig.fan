@@ -37,7 +37,14 @@ class OrderedConfig {
 		if (!object.typeof.fits(listType))
 			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
 		config.add(object)
-	}	
+	}
+
+	** Adds all the unordered objects to a service's configuration.
+	Void addUnorderedAll(Obj[] objects) {
+		objects.each |obj| {
+			addUnordered(obj)
+		}
+	}
 
 //	** Adds an ordered object to a service's contribution. Each object has an id, which must be 
 //	** unique, that is used for ordering.

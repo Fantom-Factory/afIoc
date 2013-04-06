@@ -62,21 +62,37 @@ const class ConcurrentState {
 	}
 	
 	** Use to access state
-	virtual Void withState(|Obj| f) {
+	virtual Void withState(|Obj| f, Bool waitForErr := true) {
+		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
+		func	:= f.toImmutable
+		future 	:= stateActor.send([!waitForErr, func].toImmutable)
+
 		// use 'get' to so any Errs are re-thrown. As we're just setting / getting state the 
 		// messages should be fast anyway (and we don't want a 'get' to happen before a 'set')
-		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
-		stateActor.send(f.toImmutable).get
+		// Turn this off for event listeners when you really don't need it 
+		if (waitForErr)
+			get(future)
 	}
 	
 	** Use to return state
 	virtual Obj? getState(|Obj->Obj?| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
-		return stateActor.send(f.toImmutable).get
-	}	
+		func	:= f.toImmutable
+		future := stateActor.send([false, func].toImmutable)
+		return get(future)
+	}
 	
-	protected Obj? receive(Obj? msg) {
-		func := (msg as |Obj?->Obj?|)
+	private Obj? get(Future future) {
+		try {
+			return future.get
+		} catch (NotImmutableErr err) {
+			throw NotImmutableErr("Return value not immutable", err)
+		}
+	}
+	
+	protected Obj? receive(Obj[] msg) {
+		reportErr	:= msg[0] as Bool
+		func 		:= msg[1] as |Obj?->Obj?|
 
 		try {
 			// lazily create our state
@@ -88,10 +104,8 @@ const class ConcurrentState {
 		} catch (Err e) {
 			// if the func has a return type, then an the Err is rethrown on assignment
 			// else we log the Err so the Thread doesn't fail silently
-
-			// commented out because 'withState' now calls 'get'
-//			if (func.returns == Void#)
-//				log.err("receive()", e)
+			if (reportErr || func.returns == Void#)
+				log.err("receive()", e)
 			throw e
 		}
 	}	

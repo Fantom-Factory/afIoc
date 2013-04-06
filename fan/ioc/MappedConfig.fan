@@ -51,7 +51,14 @@ class MappedConfig {
 		
 		config.add(key, val)
 	}
-
+	
+	** Adds all the mapped objects to a service's configuration.
+	Void addMappedAll(Obj:Obj objects) {
+		objects.each |val, key| {
+			addMapped(key, val)
+		}
+	}
+	
 //	** Overrides an existing contribution by its key.
 //	Void addMappedOverride(Obj key, Obj value) {
 //		
