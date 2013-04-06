@@ -83,11 +83,15 @@ const class IocService : Service {
 			
 			regBuilder.addModules(moduleTypes)
 			
-			registry := regBuilder.build.startup
+			registry := regBuilder.build
 			
+			// TODO: add test
+			// assign registry now, so it may be looked up (via this service) during startup
 			conState.withState |IocServiceState state| {
 				state.registry = registry
 			}
+
+			registry.startup
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)
