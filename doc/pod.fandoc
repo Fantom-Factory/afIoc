@@ -166,9 +166,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
-v0.0.4 [#v0.0.4]
+v1.0.0 [#v1.0.0]
 ----------------
- - MOD: Multiple instances of `ConcurrentState` can be created with the same state class.
+ - NEW: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
+ - CHG: Multiple instances of `ConcurrentState` can be created with the same state class.
  - BUG: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
  - BUG: NPE could be thrown if ctor depdendency not found.
 
