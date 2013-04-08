@@ -11,7 +11,8 @@ mixin ServiceBindingOptions {
 	** Uses the the simple (unqualified) class name of the implementation class as the service id.
 	abstract This withSimpleId()
 
-	** Sets the service scope. Note only 'const' classes can be defined as `ScopeDef.perApplication`.
+	** Sets the service scope. Note only 'const' classes can be defined as 
+	** `ServiceScope.perApplication`.
 	** (Tip: 'const' services can subclass `ConcurrentState` for easy access to modifiable state.)
 	abstract This withScope(ServiceScope scope)
 
