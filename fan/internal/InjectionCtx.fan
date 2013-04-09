@@ -3,6 +3,7 @@ internal class InjectionCtx {
 
 	private ServiceDef[]			defStack		:= [,]
 	private DependencyProvider[]	providerStack	:= [,]
+	private Facet[][]				facetsStack		:= [,]
 	private OpTracker 				tracker
 	ObjLocator? 					objLocator
 
@@ -41,7 +42,7 @@ internal class InjectionCtx {
 			return operation.call()
 
 		} finally {
-			defStack.pop			
+			defStack.pop
 		}
 	}
 
@@ -51,6 +52,15 @@ internal class InjectionCtx {
 			return operation.call()
 		} finally {			
 			providerStack.pop
+		}
+	}
+
+	Obj? withFacets(Facet[] facets, |->Obj?| operation) {
+		facetsStack.push(facets)
+		try {
+			return operation.call()
+		} finally {			
+			facetsStack.pop
 		}
 	}
 
@@ -68,7 +78,8 @@ internal class InjectionCtx {
 	
 	ProviderCtx providerCtx() {
 		ProviderCtx {
-			it.injectionCtx = this
+			it.injectionCtx 	= this
+			it.facets			= facetsStack.peek ?: Obj#.emptyList
 		}
 	}
 }

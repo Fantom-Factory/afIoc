@@ -85,7 +85,7 @@ internal const class IocMessages {
 	
 	// many-service-matches=Service interface %s is matched by %d services: %s. Automatic dependency resolution requires that exactly one service implement the interface.
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
-		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". Automatic dependency resolution requires that exactly one service implement the interface."
+		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". \nAutomatic dependency resolution requires that exactly one service implement the interface. \nConsider using the @ServiceId facet."
 	}
 	
 	static Str threadScopeInAppScope(Str owningServiceId, Str injectedServiceId) {

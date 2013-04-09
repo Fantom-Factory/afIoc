@@ -85,7 +85,6 @@ const class IocService : Service {
 			
 			registry := regBuilder.build
 			
-			// TODO: add test
 			// assign registry now, so it may be looked up (via this service) during startup
 			conState.withState |IocServiceState state| {
 				state.registry = registry

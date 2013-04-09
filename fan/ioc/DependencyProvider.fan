@@ -1,6 +1,11 @@
 
+** 
+** Extend the capabilities of IoC by providing your own dependency resolution.
+** 
+** See `DependencyProviderSource`
 const mixin DependencyProvider {
 	
-	abstract Obj? provide(ProviderCtx ctx, Type dependencyType, Facet[] facets := Obj#.emptyList)
+	** Return the dependency to be injected, or 'null' if not found.
+	abstract Obj? provide(ProviderCtx ctx, Type dependencyType)
 	
 }

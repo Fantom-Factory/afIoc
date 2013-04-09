@@ -57,7 +57,7 @@ internal const class ContribProvider : DependencyProvider {
 		this.config = config
 	}
 	
-	override Obj? provide(ProviderCtx objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
+	override Obj? provide(ProviderCtx proCtx, Type dependencyType) {
 		(dependencyType == type) ? config : null
 	}
 }

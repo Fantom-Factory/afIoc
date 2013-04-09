@@ -103,6 +103,10 @@ class TestIocService : IocTest {
 		}
 	}
 
+	Void testIocServiceMayBeUsedDuringStartup() {
+		iocs := IocService([T_MyModule54#]).install
+		iocs.onStart
+	}
 	
 	static Void assertSame(Obj? o1, Obj? o2) {
 		if (o1 !== o2)
@@ -113,5 +117,18 @@ class TestIocService : IocTest {
 		if (o1 === o2)
 			throw Err("ARE the same - $o1 : $o2")
 	}
+}
+
+internal class T_MyModule54 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService2#).withId("s2")
+	}
+	@Contribute
+	static Void contributeRegistryStartup(OrderedConfig config) {
+		config.addUnordered() |->| {
+			(Service.find(IocService#) as IocService).serviceById("s2")
+		}
+	}
+	
 }
 
