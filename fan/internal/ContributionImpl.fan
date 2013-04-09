@@ -21,7 +21,7 @@ internal const class ContributionImpl : Contribution {
 	override Void contributeOrdered(InjectionCtx ctx, OrderedConfig config) {
 		ctx.track("Gathering ORDERED configuration of type $config.contribType") |->| {
 			sizeBefore := config.getConfig.size
-			ctx.withConfigProvider(ContribProvider(config)) |->| {
+			ctx.withProvider(ContribProvider(config)) |->| {
 				InjectionUtils.callMethod(ctx, method, null)
 			}
 			sizeAfter := config.getConfig.size
@@ -32,7 +32,7 @@ internal const class ContributionImpl : Contribution {
 	override Void contributeMapped(InjectionCtx ctx, MappedConfig config) {
 		ctx.track("Gathering MAPPED configuration of type $config.contribType") |->| {			
 			sizeBefore := config.getConfig.size
-			ctx.withConfigProvider(ContribProvider(config)) |->| {
+			ctx.withProvider(ContribProvider(config)) |->| {
 				InjectionUtils.callMethod(ctx, method, null)
 			}
 			sizeAfter := config.getConfig.size
@@ -41,6 +41,7 @@ internal const class ContributionImpl : Contribution {
 	}	
 }
 
+** Provides either an OrderedConfig or MappedConfig
 internal const class ContribProvider : DependencyProvider {
 	
 	private const LocalStash stash	:= LocalStash(typeof)
@@ -56,7 +57,7 @@ internal const class ContribProvider : DependencyProvider {
 		this.config = config
 	}
 	
-	override Obj? provide(Obj objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
+	override Obj? provide(ProviderCtx objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
 		(dependencyType == type) ? config : null
 	}
 }

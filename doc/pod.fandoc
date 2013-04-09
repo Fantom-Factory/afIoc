@@ -168,10 +168,10 @@ Release Notes [#releaseNotes]
 
 v1.0.0 [#v1.0.0]
 ----------------
- - NEW: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
- - CHG: Multiple instances of `ConcurrentState` can be created with the same state class.
- - BUG: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
- - BUG: NPE could be thrown if ctor depdendency not found.
+ - New: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
+ - Chg: Multiple instances of `ConcurrentState` can be created with the same state class.
+ - Bug: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
+ - Bug: NPE could be thrown if ctor depdendency not found.
 
 v0.0.2 [#v0.0.2]
 ----------------

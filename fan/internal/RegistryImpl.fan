@@ -5,17 +5,18 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const static Str 				builtInModuleId		:= "BuiltInModule"
 	private const Str:Module				modules
+	private const DependencyProviderSource	depProSrc
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
 		serviceIdToModule 	:= Str:Module[:]
 		moduleIdToModule	:= Str:Module[:]
-
+		
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]			
 			services[makeBuiltInServiceDef("Registry", Registry#)] = this 
 
 			// new up Built-In services ourselves to cut down on debug noise
-			services[makeBuiltInServiceDef("RegistryShutdownHub", RegistryShutdownHub#)] = RegistryShutdownHubImpl() 
+			services[makeBuiltInServiceDef("RegistryShutdownHub", RegistryShutdownHub#)] = RegistryShutdownHubImpl()
 			
 			services[StandardServiceDef() {
 				it.serviceId 	= "CtorFieldInjector"
@@ -27,7 +28,25 @@ internal const class RegistryImpl : Registry, ObjLocator {
 					InjectionUtils.makeCtorInjectionPlan(ctx, ctx.building.serviceImplType)
 				}
 			}] = null
-			
+
+			services[StandardServiceDef() {
+				it.serviceId 	= "DependencyProviderSource"
+				it.moduleId		= builtInModuleId
+				it.serviceType 	= DependencyProviderSource#
+				it.scope		= ServiceScope.perApplication
+				it.description 	= "'$it.serviceId' : Built In Service"
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, DependencyProviderSourceImpl#)
+			}] = null
+
+//			injCtx		:= InjectionCtx(null, tracker)
+//			dpSrcDef	:= makeBuiltInServiceDef("DependencyProviderSource", DependencyProviderSource#)
+//			config		:= OrderedConfig(injCtx, dpSrcDef, DependencyProvider[]#)
+//			contributionsByServiceDef(dpSrcDef).each {
+//				config.contribute(injCtx, it)
+//			}
+//			contribs	:= config.getConfig
+//			services[dpSrcDef] = DependencyProviderSourceImpl(contribs)
+
 		// TODO: add some stats - e.g. hits - to the scoreboard
 	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 
@@ -38,6 +57,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
 		}
+		
 
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
@@ -54,11 +74,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 					serviceIdToModule[serviceId] = module
 				}				
 			}
-		}
-		
-		// set before we validate the contributions
-		this.modules = moduleIdToModule
+		}		
 
+		// set before we validate the contributions
+		this.modules = moduleIdToModule		
+		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
 				it.contributionDefs.each {
@@ -73,6 +93,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}
 		}
+		
+		injCtx		:= InjectionCtx(this, tracker)
+		depProSrc	= trackServiceById(injCtx, "DependencyProviderSource")
 	}
 
 
@@ -149,7 +172,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
 		serviceDef := serviceDefByType(dependencyType)
-		
+
 		if (serviceDef != null) {
 			ctx.log("Found Service '$serviceDef.serviceId'")
 			return getService(ctx, serviceDef)			
@@ -167,8 +190,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			throw IocErr(IocMessages.configMismatch(dependencyType, OrderedConfig#))
 		if (dependencyType.fits(OrderedConfig#))
 			throw IocErr(IocMessages.configMismatch(MappedConfig#, dependencyType))
-		
-		// TODO: if not service found, ask other object locators / injection providers
+
+		// ask other dependency providers
+		dependency = depProSrc.provideDependency(ctx.providerCtx)
+		if (dependency != null) {
+			ctx.logExpensive |->Str| { "Found Dependency '$dependency'" }
+			return dependency
+		}
 		
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}

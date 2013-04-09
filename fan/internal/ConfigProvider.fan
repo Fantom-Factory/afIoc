@@ -1,4 +1,5 @@
 
+** Provides either a List or a Map, the result of config contribs
 const internal class ConfigProvider : DependencyProvider {
 	const ObjLocator		objLocator
 	const ServiceDef 		serviceDef
@@ -10,7 +11,7 @@ const internal class ConfigProvider : DependencyProvider {
 		this.serviceDef	= serviceDef
 	}
 
-	override Obj? provide(Obj objCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
+	override Obj? provide(ProviderCtx proCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
 		// BugFix: TestCtorInjection#testCorrectErrThrownWithWrongParams
 		// Type#fits does not allow null
 		if (configType == null)
@@ -18,13 +19,13 @@ const internal class ConfigProvider : DependencyProvider {
 		if (!dependencyType.fits(configType))
 			return null
 
-		ctx := objCtx as InjectionCtx
+		ctx := proCtx.injectionCtx
 		config := null
 		if (configType.name == "List")
 			config = OrderedConfig(ctx, serviceDef, configType)
 		if (configType.name == "Map")
 			config = MappedConfig(ctx, serviceDef, configType)
-		
+
 		objLocator.contributionsByServiceDef(serviceDef).each {
 			config->contribute(ctx, it)			
 		}

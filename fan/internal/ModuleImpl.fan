@@ -20,7 +20,7 @@ internal const class ModuleImpl : Module {
 			if (def.scope == ServiceScope.perThread) {
 				perThreadServices[def.serviceId] = service
 			}
-			if (def.scope == ServiceScope.perApplication) {
+			if (def.scope == ServiceScope.perApplication && service != null) {
 				withMyState { 
 					it.perApplicationServices[def.serviceId] = service
 				}

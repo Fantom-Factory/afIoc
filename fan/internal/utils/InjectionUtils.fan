@@ -120,8 +120,6 @@ internal const class InjectionUtils {
 	}
 
 	private static Obj findDependencyByType(InjectionCtx ctx, Type dependencyType) {
-		// FUTURE: this could take an FacetProvider to give more hints on dependency finding
-		// e.g. @Autobuild, @ServiceId
 		ctx.track("Looking for dependency of type $dependencyType") |->Obj| {
 			ctx.objLocator.trackDependencyByType(ctx, dependencyType)			
 		}

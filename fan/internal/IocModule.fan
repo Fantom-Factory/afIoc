@@ -8,6 +8,9 @@ internal class IocModule {
 		
 		// new up Built-In services ourselves to cut down on debug noise
 //		binder.bindImpl(RegistryShutdownHub#).withScope(ServiceScope.perApplication)
+
+		// TODO: new up - see above
+//		binder.bindImpl(DependencyProviderSource#)
 	}
 		
 }
