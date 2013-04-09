@@ -5,7 +5,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const static Str 				builtInModuleId		:= "BuiltInModule"
 	private const Str:Module				modules
-	private const DependencyProviderSource	depProSrc
+	private const DependencyProviderSource?	depProSrc
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
 		serviceIdToModule 	:= Str:Module[:]
@@ -171,17 +171,24 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
-		serviceDef := serviceDefByType(dependencyType)
 
+		// ask dependency providers first, for they may dictate dependency scope
+		dependency := depProSrc?.provideDependency(ctx.providerCtx, dependencyType)
+		if (dependency != null) {
+			ctx.logExpensive |->Str| { "Found Dependency via Provider : '$dependency.typeof'" }
+			return dependency
+		}
+		
+		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			ctx.log("Found Service '$serviceDef.serviceId'")
 			return getService(ctx, serviceDef)			
 		}
 		
 		// look for configuration
-		dependency := ctx.provideDependency(dependencyType)
+		dependency = ctx.provideDependency(dependencyType)
 		if (dependency != null) {
-			ctx.logExpensive |->Str| { "Found Dependency '$dependency'" }
+			ctx.logExpensive |->Str| { "Found Configuration '$dependency.typeof'" }
 			return dependency
 		}
 		
@@ -190,13 +197,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			throw IocErr(IocMessages.configMismatch(dependencyType, OrderedConfig#))
 		if (dependencyType.fits(OrderedConfig#))
 			throw IocErr(IocMessages.configMismatch(MappedConfig#, dependencyType))
-
-		// ask other dependency providers
-		dependency = depProSrc.provideDependency(ctx.providerCtx)
-		if (dependency != null) {
-			ctx.logExpensive |->Str| { "Found Dependency '$dependency'" }
-			return dependency
-		}
 		
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
@@ -222,7 +222,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefById(Str serviceId) {
-        ServiceDef[] serviceDefs := modules.vals.map |module| {
+		ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDef(serviceId)
 		}.exclude { it == null }
 
@@ -233,7 +233,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
-        ServiceDef[] serviceDefs := modules.vals.map |module| {
+		ServiceDef[] serviceDefs := modules.vals.map |module| {
 			module.serviceDefsByType(serviceType)
 		}.flatten
 
@@ -255,7 +255,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {		
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-        return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
+		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
 	}
 	
 	private Void shutdownLockCheck() {

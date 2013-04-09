@@ -8,9 +8,14 @@ internal class IocModule {
 		
 		// new up Built-In services ourselves to cut down on debug noise
 //		binder.bindImpl(RegistryShutdownHub#).withScope(ServiceScope.perApplication)
-
-		// TODO: new up - see above
-//		binder.bindImpl(DependencyProviderSource#)
-	}
 		
+//		binder.bindImpl(RegistryStartup#).withScope(ServiceScope.perThread)
+//		ServiceIdProvider
+	}
+
+	@Contribute
+	static Void contributeDependencyProviderSource(OrderedConfig config) {
+		serviceIdProvider := config.autobuild(ServiceIdProvider#)
+		config.addUnordered(serviceIdProvider)
+	}
 }

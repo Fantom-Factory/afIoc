@@ -13,6 +13,7 @@
 **   }
 ** <pre
 ** 
+// TODO: make listeners ordered
 const mixin RegistryShutdownHub {
 
 	** Adds a listener that will be notified when the registry shuts down. Note when shutdown 

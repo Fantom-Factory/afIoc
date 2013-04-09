@@ -1,5 +1,5 @@
 
-** This is passed into module contribution methods to allow the method to, err, contribute!
+** Passed into module contribution methods to allow the method to, err, contribute!
 **
 ** A service can *collect* contributions in three different ways:
 ** - As an unordered list of values

@@ -16,16 +16,18 @@ internal const class InjectionUtils {
 		ctx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(ctx, object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					dependency := findDependencyByType(ctx, field.type)
-					inject(ctx, object, field, dependency)
-	                return true
-	            })
+					ctx.withFacets(field.facets) |->Bool| {
+						dependency := findDependencyByType(ctx, field.type)
+						inject(ctx, object, field, dependency)
+						return true
+					}
+				})
 				ctx.log("No injection fields found")
 		}
 
 		callPostInjectMethods(ctx, object)
 		return object
-    }
+	}
 
 	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj) {
 		args := determineInjectionParams(ctx, method)
@@ -62,7 +64,7 @@ internal const class InjectionUtils {
 				
 				return params[0]
 			}()
-			
+
 			ctx.log("Found $ctor.signature")
 			return ctor
 		}
@@ -79,15 +81,17 @@ internal const class InjectionUtils {
 		ctx.track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(ctx, building, Inject#, true).each |field| {
-				dependency := findDependencyByType(ctx, field.type)
-				plan[field] = dependency
+				ctx.withFacets(field.facets) |->| {
+					dependency := findDependencyByType(ctx, field.type)
+					plan[field] = dependency
+				}
 			}
 			if (plan.isEmpty)
 				ctx.log("No injection fields found")
 			return Field.makeSetFunc(plan)
 		}
 	}
-	
+
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
@@ -124,7 +128,7 @@ internal const class InjectionUtils {
 			ctx.objLocator.trackDependencyByType(ctx, dependencyType)			
 		}
 	}
-	
+
 	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj value) {
 		ctx.track("Injecting $value.typeof.qname into field $field.signature") |->| {
 			if (field.get(target) != null) {
@@ -132,7 +136,7 @@ internal const class InjectionUtils {
 				return
 			}
 			if (field.isConst)
-				throw IocErr(IocMessages.cannotSetConstFields(field))			
+				throw IocErr(IocMessages.cannotSetConstFields(field))
 			field.set(target, value)
 		}
 	}

@@ -1,9 +1,11 @@
 
 internal class ServiceMessages {
 	
-	// shutdown-listener-error=Error notifying %s of registry shutdown: %s
 	static Str shutdownListenerError(Obj listener, Err cause) {
 		"Error notifying ${listener} of registry shutdown: ${cause}"
 	}
 	
+	static Str serviceIdDoesNotFitField(Str serviceId, Type serviceType, Type fieldType) {
+		"Service Id '${serviceId} of type ${serviceType.qname} does not fit field type ${fieldType.qname}"
+	}
 }

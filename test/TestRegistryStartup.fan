@@ -2,7 +2,6 @@
 class TestRegistryStartup : Test {
 	
 	Void testRegistryStartup() {
-		Utils.setLoglevelDebug
 		reg := RegistryBuilder().addModule(T_MyModule39#).build.startup
 		T_MyService2 s2 := reg.serviceById("s2")
 		verifyEq(s2.kick, "Started")

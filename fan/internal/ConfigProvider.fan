@@ -11,7 +11,7 @@ const internal class ConfigProvider : DependencyProvider {
 		this.serviceDef	= serviceDef
 	}
 
-	override Obj? provide(ProviderCtx proCtx, Type dependencyType, Facet[] facets := Obj#.emptyList) {
+	override Obj? provide(ProviderCtx proCtx, Type dependencyType) {
 		// BugFix: TestCtorInjection#testCorrectErrThrownWithWrongParams
 		// Type#fits does not allow null
 		if (configType == null)

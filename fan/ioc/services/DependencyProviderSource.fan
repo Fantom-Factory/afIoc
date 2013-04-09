@@ -1,24 +1,34 @@
 
+**
+** Contribute `DependencyProvider`s to provide your own dependencies for fields annotated with the 
+** '@Inject' facet. Typically you would augment '@Inject' with your own facet to provide injection 
+** meta. See [@ServiceId]`ServiceId` and [@Autobuild]`Autobuild` for builtin examples. 
+** 
+** pre>
+** @Contribute
+** static Void contributeDependencyProviderSource(OrderedConfig config) {
+**   serviceIdProvider := config.autobuild(ServiceIdProvider#)
+**   config.addUnordered(serviceIdProvider)
+** }
+** <pre
+** 
 const mixin DependencyProviderSource {
 	
-	abstract Obj? provideDependency(ProviderCtx proCtx)
+	internal abstract Obj? provideDependency(ProviderCtx proCtx, Type dependencyType)
 	
 }
 
 
 internal const class DependencyProviderSourceImpl : DependencyProviderSource {
-	
 	private const DependencyProvider[] dependencyProviders
 	
 	new make(DependencyProvider[] dependencyProviders) {
 		this.dependencyProviders = dependencyProviders.toImmutable
 	}
 	
-	override Obj? provideDependency(ProviderCtx proCtx) {
+	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
 		dependencyProviders.eachWhile |depPro| {
-			// TODO: FIXME:
-			return null
-//			depPro.provide(ctx, dependencyType, facets)
+			depPro.provide(proCtx, dependencyType)
 		}
 	}
 }

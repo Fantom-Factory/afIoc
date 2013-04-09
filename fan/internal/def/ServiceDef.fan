@@ -17,7 +17,7 @@ internal const mixin ServiceDef {
 	** defined.
 	abstract Type serviceType()
 
-	** Will be 'null' if built by a builder service 
+	** Will be 'null' if built by a builder method 
 	abstract Type? serviceImplType()
 
 	abstract ServiceScope scope()
