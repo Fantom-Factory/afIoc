@@ -97,11 +97,11 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		setDefaultScope
 
 		serviceDef := StandardServiceDef() {
-			// lock down the service Impl type so it can't change behind our backs
-			// or... I could Func.bind()
-			serviceImplType	:= this.serviceImpl
-			sId 			:= this.serviceId
-			serviceDef		:= it
+//			// lock down the service Impl type so it can't change behind our backs
+//			// or... I could Func.bind()
+//			serviceImplType	:= this.serviceImpl
+//			sId 			:= this.serviceId
+//			serviceDef		:= it
 
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId
@@ -109,25 +109,44 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.serviceImplType 	= this.serviceImpl
 //			it.isEagerLoad 	= this.eagerLoadFlag
 			it.scope		= this.scope
-			it.description 	= "'$sId' : Standard Ctor Builder"
-			it.source 		= |InjectionCtx ctx->Obj| {
-				ctx.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
-					log.info("Creating Service '$sId'")
-					
-					ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
-					
-					return ctx.withConfigProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
-						obj := InjectionUtils.createViaConstructor(ctx, ctor)
-						InjectionUtils.injectIntoFields(ctx, obj)
-						return obj
-					}
-				}
-			}
+			it.description 	= "'$this.serviceId' : Standard Ctor Builder"
+			it.source 		= ctorAutobuild(it, this.serviceImpl)
+//			it.source 		= |InjectionCtx ctx->Obj| {
+//				ctx.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
+//					log.info("Creating Service '$sId'")
+//					
+//					ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
+//					
+//					return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
+//						obj := InjectionUtils.createViaConstructor(ctx, ctor)
+//						InjectionUtils.injectIntoFields(ctx, obj)
+//						return obj
+//					}
+//				}
+//			}
 		}
 
 		addServiceDef(serviceDef)
 		clear
 	}
+	
+	
+	static |InjectionCtx ctx->Obj| ctorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
+		|InjectionCtx ctx->Obj| {
+			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
+				log.info("Creating Service '$serviceDef.serviceId'")
+				
+				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
+				
+				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
+					obj := InjectionUtils.createViaConstructor(ctx, ctor)
+					InjectionUtils.injectIntoFields(ctx, obj)
+					return obj
+				}
+			}			
+		}
+	}
+	
 	
 	private Void clear() {
 		serviceId 		= null

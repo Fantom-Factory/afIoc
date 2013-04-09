@@ -40,6 +40,12 @@ class TestContribDefs : IocTest {
 	Void testNoErrWhenContibIsOptional() {
 		RegistryBuilder().addModule(T_MyModule29#).build.startup
 	}
+	
+	Void testWhenNoConfigDefined() {
+		reg := RegistryBuilder().addModule(T_MyModule52#).build.startup
+		reg.dependencyByType(T_MyService31#)
+		reg.serviceById("T_MyService31")
+	}
 }
 
 internal class T_MyModule23 {
@@ -75,4 +81,15 @@ internal class T_MyModule28 {
 internal class T_MyModule29 {
 	@Contribute{serviceType=Int#; optional=true}
 	static Void cont(OrderedConfig config) { }
+}
+
+internal class T_MyModule52 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService31#)
+	}
+}
+
+internal mixin T_MyService31 { }
+internal class T_MyService31Impl : T_MyService31 {
+	new make(DependencyProvider[] config) { }
 }
