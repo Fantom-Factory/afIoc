@@ -6,6 +6,8 @@
 ** @Inject @ServiceId { serviceId = "impl2" }
 ** MyService myService
 ** <pre
+** 
+** May not be used with '@Autobuild'.
 facet class ServiceId {
 	const Str serviceId
 }

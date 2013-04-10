@@ -38,15 +38,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
 
-//			injCtx		:= InjectionCtx(null, tracker)
-//			dpSrcDef	:= makeBuiltInServiceDef("DependencyProviderSource", DependencyProviderSource#)
-//			config		:= OrderedConfig(injCtx, dpSrcDef, DependencyProvider[]#)
-//			contributionsByServiceDef(dpSrcDef).each {
-//				config.contribute(injCtx, it)
-//			}
-//			contribs	:= config.getConfig
-//			services[dpSrcDef] = DependencyProviderSourceImpl(contribs)
-
 		// TODO: add some stats - e.g. hits - to the scoreboard
 	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
 

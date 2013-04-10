@@ -48,7 +48,6 @@ internal const class ModuleDefImpl : ModuleDef {
 		}
 
 		methods.each |method| {
-
 			if (method.hasFacet(Build#)) {
 				tracker.track("Found builder method $method.qname") |->| {
 					addServiceDefFromMethod(tracker, serviceDefs, method)
@@ -60,13 +59,6 @@ internal const class ModuleDefImpl : ModuleDef {
 					addContribDefFromMethod(tracker, contribDefs, method)
 				}
 			}
-
-			// TODO: @Startup
-//			if (method.hasFacet(Startup#))) {
-//				addStartupDef(method)
-//				remainingMethods.remove(method)
-//				return
-//			}
 		}
 	}
 	

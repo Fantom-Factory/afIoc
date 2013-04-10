@@ -55,10 +55,6 @@ internal const class IocMessages {
 		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service interface to a specific implementation type."
 	}
 
-	static Str noConstructor(Type implementationClass) {
-		"Type ${implementationClass} does not contain any constructors suitable for autobuilding."
-	}
-	
 	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
 		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
 	}

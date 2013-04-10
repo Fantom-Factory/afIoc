@@ -170,6 +170,8 @@ v1.1.0 [#v1.1.0]
 ----------------
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
+ - New: [@Autobuild]`Autobuild` injects a fresh service on every build.
+ - New: Services can be created even if they don't define any ctors.
 
 v1.0.0 [#v1.0.0]
 ----------------

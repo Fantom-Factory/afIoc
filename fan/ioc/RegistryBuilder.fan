@@ -123,8 +123,9 @@ class RegistryBuilder {
 	private Type? addModuleFromPod(Pod pod) {
 		qname := pod.meta[IocConstants.podMetaModuleName]
 		if (qname != null) {
-			ctx.log("Pod '$pod.name' defines module of type $qname")
-			return addModuleFromTypeName(qname)
+			return ctx.track("Pod '$pod.name' defines module $qname") |->Obj| {
+				return addModuleFromTypeName(qname)
+			}
 		}
 		return null
 	}

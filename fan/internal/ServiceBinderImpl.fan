@@ -139,7 +139,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
 				
 				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctx, ctor)
+					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType)
 					InjectionUtils.injectIntoFields(ctx, obj)
 					return obj
 				}
