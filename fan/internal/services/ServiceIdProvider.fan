@@ -1,7 +1,7 @@
 
 internal const class ServiceIdProvider : DependencyProvider {
 	
-	@Inject @ServiceId { serviceId = "registry" }
+	@Inject
 	private const RegistryImpl registry
 	
 	new make(|This|di) { di(this) }
@@ -10,6 +10,9 @@ internal const class ServiceIdProvider : DependencyProvider {
 		serviceIds := ctx.facets.findType(ServiceId#)
 		if (serviceIds.isEmpty)
 			return null
+		
+		if (serviceIds.size > 1)
+			throw WtfErr("WTF? It's a compile error to facetate(?) a field more than once! ${ServiceId#.name} on $dependencyType.qname")
 		
 		serviceId := (serviceIds[0] as ServiceId).serviceId
 		ctx.log("Found @ServiceId { $serviceId }")

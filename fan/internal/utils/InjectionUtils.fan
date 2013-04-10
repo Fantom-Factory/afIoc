@@ -5,7 +5,7 @@ internal const class InjectionUtils {
 	static Obj autobuild(InjectionCtx ctx, Type type) {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
-			obj  := createViaConstructor(ctx, ctor)
+			obj  := createViaConstructor(ctx, ctor, type)
 			injectIntoFields(ctx, obj)
 			return obj
 		}
@@ -36,13 +36,14 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Method findAutobuildConstructor(InjectionCtx ctx, Type type) {
-		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method| {
-			ctor := |->Method| {
+	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
+	static Method? findAutobuildConstructor(InjectionCtx ctx, Type type) {
+		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
+			ctor := |->Method?| {
 				constructors := findConstructors(type)
 
 				if (constructors.isEmpty)
-					throw IocErr(IocMessages.noConstructor(type))
+					return null
 
 				if (constructors.size == 1)
 					return constructors[0]
@@ -65,14 +66,22 @@ internal const class InjectionUtils {
 				return params[0]
 			}()
 
-			ctx.log("Found $ctor.signature")
+			if (ctor == null)
+				ctx.log("Found ${type.name}()")
+			else
+				ctx.log("Found ${ctor.signature}")
 			return ctor
 		}
 	}
 
-	static Obj createViaConstructor(InjectionCtx ctx, Method ctor) {
+	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building) {
+		if (ctor == null) {
+			return ctx.track("Instantiating $building via ${building.name}()...") |->Obj| {
+				return building.make()
+			}	
+		}
 		args := determineInjectionParams(ctx, ctor)
-		return ctx.track("Instantiating $ctor.parent via ${ctor.signature}...") |->Obj| {
+		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
 	}

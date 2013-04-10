@@ -61,6 +61,11 @@ class TestCtorInjection : IocTest {
 		T_MyService26 s26 := reg.autobuild(T_MyService26#)
 		verifyEq(s26.s24.judge, "DREDD" )
 	}
+
+	Void testTypeCreationWithNoCtor() {
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		reg.serviceById("s38")
+	}
 	
 }
 
@@ -126,12 +131,12 @@ internal class T_MyModule42 {
 		binder.bindImpl(T_MyService24#).withId("s24")
 		binder.bindImpl(T_MyService25#).withId("s25")
 		binder.bindImpl(T_MyService30#).withId("s30")
+		binder.bindImpl(T_MyService38#).withId("s38")
 	}
 }
 
 internal const class T_MyService24 {
 	const Str judge	:= "DREDD"
-//	new make(FieldInjector inject) { inject.into()(this) }
 	new make(|This|in) { in(this) }
 }
 
@@ -150,3 +155,5 @@ internal const class T_MyService26 {
 internal const class T_MyService30 {
 	new make(T_MyService3 ser3) { }
 }
+
+internal const class T_MyService38 { }

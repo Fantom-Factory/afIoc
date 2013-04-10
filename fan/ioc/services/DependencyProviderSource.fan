@@ -18,15 +18,15 @@ const mixin DependencyProviderSource {
 	
 }
 
-
 internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 	private const DependencyProvider[] dependencyProviders
-	
+
 	new make(DependencyProvider[] dependencyProviders) {
 		this.dependencyProviders = dependencyProviders.toImmutable
 	}
-	
+
 	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
+		// TODO: ask dep pro first so we can throw an error if more than one matches 
 		dependencyProviders.eachWhile |depPro| {
 			depPro.provide(proCtx, dependencyType)
 		}
