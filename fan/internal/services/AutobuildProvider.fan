@@ -6,11 +6,11 @@ internal const class AutobuildProvider : DependencyProvider {
 	
 	new make(|This|di) { di(this) }
 	
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) {
-		serviceIds := ctx.facets.findType(Autobuild#)
-		if (serviceIds.isEmpty)
-			return null
-		
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
+		!ctx.facets.findType(Autobuild#).isEmpty
+	}
+	
+	override Obj provide(ProviderCtx ctx, Type dependencyType) {
 		ctx.log("Found @Autobuild")
 		service := registry.trackAutobuild(ctx.injectionCtx, dependencyType)
 		return service

@@ -7,7 +7,7 @@
 ** MyService myService
 ** <pre
 ** 
-** May not be used with '@Autobuild'.
+** May not be used with '@Autobuild' or other [Dependency Providers]`DependencyProvider`.
 facet class ServiceId {
 	const Str serviceId
 }

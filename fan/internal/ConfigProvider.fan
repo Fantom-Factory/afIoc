@@ -1,5 +1,6 @@
 
-** Provides either a List or a Map, the result of config contribs
+** Provides either a List or a Map, the result of config contribs.
+** Not really a DependencyProvider as it's not contributed to DependencyProviderSource.
 const internal class ConfigProvider : DependencyProvider {
 	const ObjLocator		objLocator
 	const ServiceDef 		serviceDef
@@ -11,14 +12,13 @@ const internal class ConfigProvider : DependencyProvider {
 		this.serviceDef	= serviceDef
 	}
 
-	override Obj? provide(ProviderCtx proCtx, Type dependencyType) {
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
 		// BugFix: TestCtorInjection#testCorrectErrThrownWithWrongParams
 		// Type#fits does not allow null
-		if (configType == null)
-			return null
-		if (!dependencyType.fits(configType))
-			return null
+		(configType != null) && dependencyType.fits(configType)
+	}
 
+	override Obj provide(ProviderCtx proCtx, Type dependencyType) {
 		ctx := proCtx.injectionCtx
 		config := null
 		if (configType.name == "List")

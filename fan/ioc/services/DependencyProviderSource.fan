@@ -26,9 +26,14 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 	}
 
 	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
-		// TODO: ask dep pro first so we can throw an error if more than one matches 
-		dependencyProviders.eachWhile |depPro| {
-			depPro.provide(proCtx, dependencyType)
-		}
+		dps := dependencyProviders.findAll { it.canProvide(proCtx, dependencyType) }
+
+		if (dps.isEmpty)
+			return null
+		
+		if (dps.size > 1)
+			throw IocErr(ServiceMessages.onlyOneDependencyProviderAllowed(dependencyType, dps.map { it.typeof }))
+		
+		return dps[0].provide(proCtx, dependencyType)
 	}
 }

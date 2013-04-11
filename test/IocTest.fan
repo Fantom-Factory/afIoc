@@ -5,12 +5,13 @@ abstract class IocTest : Test {
 		errType := IocErr#
 		try {
 			func(4)
-			throw Err("$errType not thrown")
 		} catch (Err e) {
 			if (!e.typeof.fits(errType)) 
 				throw Err("Expected $errType got $e.typeof")
 			if (e.msg != errMsg)
 				throw Err("Expected: \n - $errMsg \nGot: \n - $e.msg")
+			return
 		}
+		throw Err("$errType not thrown")
 	}
 }
