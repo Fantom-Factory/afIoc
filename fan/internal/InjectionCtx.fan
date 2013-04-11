@@ -70,7 +70,7 @@ internal class InjectionCtx {
 			def = defStack[-2]
 		return def
 	}
-	
+
 	Obj? provideConfig(Type dependencyType) {
 		// jus' passin' thru!
 		if (providerStack.peek?.canProvide(providerCtx, dependencyType) ?: false)
@@ -81,7 +81,7 @@ internal class InjectionCtx {
 	ProviderCtx providerCtx() {
 		ProviderCtx {
 			it.injectionCtx 	= this
-			it.facets			= facetsStack.peek ?: Obj#.emptyList
+			it.facets			= facetsStack.peek ?: Facet#.emptyList
 		}
 	}
 }

@@ -34,6 +34,11 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		if (dps.size > 1)
 			throw IocErr(ServiceMessages.onlyOneDependencyProviderAllowed(dependencyType, dps.map { it.typeof }))
 		
-		return dps[0].provide(proCtx, dependencyType)
+		dependency := dps[0].provide(proCtx, dependencyType)
+		
+		if (!dependency.typeof.fits(dependencyType))
+			throw IocErr(ServiceMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+
+		return dependency
 	}
 }

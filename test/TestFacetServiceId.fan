@@ -17,7 +17,7 @@ class TestFacetServiceId : IocTest {
 
 	Void testServiceTypeMustMatch() {
 		reg := RegistryBuilder().addModule(T_MyModule53#).build.startup
-		verifyErrMsg(ServiceMessages.serviceIdDoesNotFitField("impl1", T_MyService32Impl1#, T_MyService33#)) {
+		verifyErrMsg(ServiceMessages.serviceIdDoesNotFit("impl1", T_MyService32Impl1#, T_MyService33#)) {
 			reg.dependencyByType(T_MyService34#) 
 		}
 	}	
