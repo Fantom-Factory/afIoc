@@ -41,7 +41,8 @@ internal const class ContributionImpl : Contribution {
 	}	
 }
 
-** Provides either an OrderedConfig or MappedConfig
+** Provides either an OrderedConfig or MappedConfig. 
+** Not really a DependencyProvider as it's not contributed to DependencyProviderSource
 internal const class ContribProvider : DependencyProvider {
 	
 	private const LocalStash stash	:= LocalStash(typeof)
@@ -57,7 +58,11 @@ internal const class ContribProvider : DependencyProvider {
 		this.config = config
 	}
 	
-	override Obj? provide(ProviderCtx proCtx, Type dependencyType) {
-		(dependencyType == type) ? config : null
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
+		return dependencyType == type
+	}
+
+	override Obj provide(ProviderCtx proCtx, Type dependencyType) {
+		config
 	}
 }

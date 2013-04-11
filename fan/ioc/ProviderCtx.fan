@@ -8,7 +8,7 @@ class ProviderCtx {
 	Facet[] facets
 	
 	internal new make(|This| f) { f(this) }
-	
+
 	** Adds an nested operation description to the 'OpTracker'. This provides contextual 
 	** information in the event of an Err.
 	** 

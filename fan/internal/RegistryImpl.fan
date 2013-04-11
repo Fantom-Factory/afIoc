@@ -177,7 +177,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		// look for configuration
-		dependency = ctx.provideDependency(dependencyType)
+		dependency = ctx.provideConfig(dependencyType)
 		if (dependency != null) {
 			ctx.logExpensive |->Str| { "Found Configuration '$dependency.typeof'" }
 			return dependency

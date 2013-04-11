@@ -71,9 +71,11 @@ internal class InjectionCtx {
 		return def
 	}
 	
-	Obj? provideDependency(Type dependencyType) {
+	Obj? provideConfig(Type dependencyType) {
 		// jus' passin' thru!
-		providerStack.peek?.provide(providerCtx, dependencyType)
+		if (providerStack.peek?.canProvide(providerCtx, dependencyType) ?: false)
+			return providerStack.peek.provide(providerCtx, dependencyType)
+		return null
 	}
 	
 	ProviderCtx providerCtx() {
