@@ -30,7 +30,7 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj) {
-		args := determineInjectionParams(ctx, method)
+		args := findMethodInjectionParams(ctx, method)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
@@ -80,7 +80,7 @@ internal const class InjectionUtils {
 				return building.make()
 			}	
 		}
-		args := determineInjectionParams(ctx, ctor)
+		args := findMethodInjectionParams(ctx, ctor)
 		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
@@ -120,15 +120,17 @@ internal const class InjectionUtils {
 		}
 	}	
 
-	private static Obj[] determineInjectionParams(InjectionCtx ctx, Method method) {
+	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
-			params := method.params.map |param| {
-				ctx.log("Found parameter $param.type")
-				return findDependencyByType(ctx, param.type)
-			}		
-			if (params.isEmpty)
-				ctx.log("No injection parameters found")
-			return params
+			ctx.withFacets(Facet[,]) |->Obj[]| {
+				params := method.params.map |param| {
+					ctx.log("Found parameter $param.type")
+					return findDependencyByType(ctx, param.type)
+				}		
+				if (params.isEmpty)
+					ctx.log("No injection parameters found")
+				return params
+			}
 		}
 	}
 

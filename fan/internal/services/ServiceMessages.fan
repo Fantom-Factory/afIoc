@@ -5,8 +5,12 @@ internal class ServiceMessages {
 		"Error notifying ${listener} of registry shutdown: ${cause}"
 	}
 	
-	static Str serviceIdDoesNotFitField(Str serviceId, Type serviceType, Type fieldType) {
-		"Service Id '${serviceId} of type ${serviceType.qname} does not fit field type ${fieldType.qname}"
+	static Str serviceIdDoesNotFit(Str serviceId, Type serviceType, Type fieldType) {
+		"Service Id '${serviceId} of type ${serviceType.qname} does not fit type ${fieldType.qname}"
+	}
+	
+	static Str dependencyDoesNotFit(Type dependencyType, Type fieldType) {
+		"Dependency of type ${dependencyType.qname} does not fit type ${fieldType.qname}"
 	}
 	
 	static Str onlyOneDependencyProviderAllowed(Type type, Type[] dps) {

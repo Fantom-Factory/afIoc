@@ -166,23 +166,23 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// ask dependency providers first, for they may dictate dependency scope
 		dependency := depProSrc?.provideDependency(ctx.providerCtx, dependencyType)
 		if (dependency != null) {
-			ctx.logExpensive |->Str| { "Found Dependency via Provider : '$dependency.typeof'" }
+			ctx.log("Found Dependency via Provider : '$dependency.typeof'")
 			return dependency
 		}
-		
+
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			ctx.log("Found Service '$serviceDef.serviceId'")
 			return getService(ctx, serviceDef)			
 		}
-		
+
 		// look for configuration
 		dependency = ctx.provideConfig(dependencyType)
 		if (dependency != null) {
 			ctx.logExpensive |->Str| { "Found Configuration '$dependency.typeof'" }
 			return dependency
 		}
-		
+
 		// extra info - kill these msgs if they get in the way of refactoring
 		if (dependencyType.fits(MappedConfig#))
 			throw IocErr(IocMessages.configMismatch(dependencyType, OrderedConfig#))

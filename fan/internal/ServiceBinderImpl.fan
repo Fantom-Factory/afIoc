@@ -11,7 +11,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
 	private ServiceScope? 	scope
-//	private Bool?			eagerLoadFlag
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
@@ -21,7 +20,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		this.moduleDef = moduleDef
 		clear
 	}
-
 
 
 	// ---- ServiceBinder Methods -----------------------------------------------------------------
@@ -74,15 +72,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		this.scope = scope
 		return this
 	}
+	
 
-//	override This eagerLoad() {
-//        lock.check
-//        this.eagerLoadFlag = true
-//		return this		
-//	}
-	
-	
-	
 	// ---- Other Methods -------------------------------------------------------------------------
 	
 	Void finish() {
@@ -97,40 +88,20 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		setDefaultScope
 
 		serviceDef := StandardServiceDef() {
-//			// lock down the service Impl type so it can't change behind our backs
-//			// or... I could Func.bind()
-//			serviceImplType	:= this.serviceImpl
-//			sId 			:= this.serviceId
-//			serviceDef		:= it
-
 			it.serviceId 	= this.serviceId
 			it.moduleId 	= this.moduleDef.moduleId
 			it.serviceType 	= this.serviceMixin
 			it.serviceImplType 	= this.serviceImpl
-//			it.isEagerLoad 	= this.eagerLoadFlag
 			it.scope		= this.scope
 			it.description 	= "'$this.serviceId' : Standard Ctor Builder"
 			it.source 		= ctorAutobuild(it, this.serviceImpl)
-//			it.source 		= |InjectionCtx ctx->Obj| {
-//				ctx.track("Creating Serivce '$sId' via a standard ctor autobuild") |->Obj| {
-//					log.info("Creating Service '$sId'")
-//					
-//					ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
-//					
-//					return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
-//						obj := InjectionUtils.createViaConstructor(ctx, ctor)
-//						InjectionUtils.injectIntoFields(ctx, obj)
-//						return obj
-//					}
-//				}
-//			}
 		}
 
 		addServiceDef(serviceDef)
 		clear
 	}
-	
-	
+
+
 	static |InjectionCtx ctx->Obj| ctorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
 		|InjectionCtx ctx->Obj| {
 			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
@@ -152,7 +123,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		serviceId 		= null
 		serviceMixin	= null
 		serviceImpl		= null
-//		eagerLoadFlag	= null
 		source 			= null
 		scope 			= null
 		description		= null

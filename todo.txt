@@ -1,11 +1,11 @@
 
 	dependency providers / dep ctx -> passing object being autobuilt (very powerful!)
-	@ServiceId / @AutoBuild	
-	@Startup
 	ordered contributions
-	contribution overrides - more than once? Order them?
-	TypeCoercer so can add Contrib of Enum and it's converted to a Str
-	service disambiguation via facets
-	@Local (local to the module of the serviceDef in ctx stack)
-	(@EagerLoad - could it be a service? contrib serviceids!) dunno - it's really nothing but an app startup event. Don't like eagerload
+	scoreboard
+
+scopeByThread
+proxies
 	
+	contribution overrides - more than once? Order them?
+	service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
+	@Local (local to the module of the serviceDef in ctx stack)
