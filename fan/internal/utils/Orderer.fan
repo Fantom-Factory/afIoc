@@ -1,17 +1,4 @@
 
-//L ← Empty list that will contain the sorted nodes
-//while there are unmarked nodes do
-//    select an unmarked node n
-//    visit(n) 
-//function visit(node n)
-//    if n has a temporary mark then stop (not a DAG)
-//    if n is not marked (i.e. has not been visited yet) then
-//        mark n temporarily
-//        for each node m with an edge from n to m do
-//            visit(m)
-//        mark n permanently
-//        add n to L
-** 
 ** See http://en.wikipedia.org/wiki/Topological_sorting	
 internal class Orderer {
 
@@ -85,7 +72,7 @@ internal class Orderer {
 		nodesIn.remove(n.name)
 		nodesOut.add(n)
 	}	
-	
+
 	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
 		node := nodes.getOrAdd(name) {			
 			OrderedNode(name, payload)

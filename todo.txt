@@ -1,13 +1,11 @@
 
-	ordered contributions
-	scoreboard
-
-PerThreadService
 
 bit bucket...?
 
 v1.2
-
+PerThreadService
+	scoreboard
+	
 proxies
 advice
 methods only - or fields

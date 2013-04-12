@@ -27,7 +27,7 @@ const internal class ConfigProvider : DependencyProvider {
 			config = MappedConfig(ctx, serviceDef, configType)
 
 		objLocator.contributionsByServiceDef(serviceDef).each {
-			config->contribute(ctx, it)			
+			config->contribute(ctx, it)
 		}
 		
 		return config->getConfig

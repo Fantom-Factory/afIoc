@@ -38,7 +38,7 @@ internal const class ContributionImpl : Contribution {
 			sizeAfter := config.getConfig.size
 			ctx.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
-	}	
+	}
 }
 
 ** Provides either an OrderedConfig or MappedConfig. 
