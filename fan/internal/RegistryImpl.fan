@@ -7,7 +7,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Str:Module				modules
 	private const DependencyProviderSource?	depProSrc
 	
+	private const Duration					startTime
+	private const Int						noOfServices
+	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
+		startTime			= tracker.startTime
 		serviceIdToModule 	:= Str:Module[:]
 		moduleIdToModule	:= Str:Module[:]
 		
@@ -84,23 +88,35 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}
 		}
-		
+
 		injCtx		:= InjectionCtx(this, tracker)
 		depProSrc	= trackServiceById(injCtx, "DependencyProviderSource")
+		noOfServices= serviceIdToModule.size
 	}
 
 
 	// ---- Registry Methods ----------------------------------------------------------------------
-	
+
 	override This startup() {
 		withMyState |state| {
 			state.startupLock.lock
 		}
-		
+
 		// Do dat startup!
 		tracker := OpTracker()
 		serviceById(RegistryStartup#.name)->go(tracker)
 
+		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+		title	:= "Alien-Factory IoC v" + typeof.pod.version.toStr + " /___/   "
+		title 	= title.padl(60, ' ')
+		title = "   ___    _                 _____        _                  
+		           / _ |  //  _____  _____  / ___/__  ___/ /_________  __ __ 
+		          / _  | //_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
+		         /_/ |_|/__//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
+		title 	 = "\n" + title + "\n\n"
+		title 	+= "IoC defined $noOfServices services and started up in ${millis}ms\n"
+		log.info(title)
+		
 		return this
 	}
 
