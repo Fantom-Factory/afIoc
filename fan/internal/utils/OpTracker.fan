@@ -59,6 +59,10 @@ internal class OpTracker {
 		}
 	}
 	
+	Duration startTime() {
+		operations[0].startTime
+	}
+	
 	private Void pushOp(Str description) {
 		op := OpTrackerOp {
 			it.description 	= description
