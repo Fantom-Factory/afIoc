@@ -13,7 +13,9 @@ class OrderedConfig {
 	internal const	Type 			contribType
 	private  const 	ServiceDef 		serviceDef
 	private 	  	InjectionCtx	ctx
-	private 	  	List 			config
+	private			Orderer			orderer
+	private			Int				impliedCount
+	private			Str[]?			impliedConstraint
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
@@ -24,7 +26,8 @@ class OrderedConfig {
 		this.ctx 			= ctx
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
-		this.config 		= List.make(listType, 10)
+		this.orderer		= Orderer()
+		this.impliedCount	= 1
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -34,9 +37,8 @@ class OrderedConfig {
 
 	** Adds an unordered object to a service's configuration.
 	Void addUnordered(Obj object) {
-		if (!object.typeof.fits(listType))
-			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
-		config.add(object)
+		id := "Unordered${impliedCount}"
+		addOrdered(id, object)
 	}
 
 	** Adds all the unordered objects to a service's configuration.
@@ -46,9 +48,29 @@ class OrderedConfig {
 		}
 	}
 
-	** Adds an ordered object to a service's contribution. Each object has an id, which must be 
-	** unique, that is used for ordering.
+	** Adds an ordered object to a service's contribution. Each object has a unique id (case 
+	** insensitive) that is used by the constraints for ordering. Each constraint must start with 
+	** the prefix 'BEFORE:' or 'AFTER:'.
+	** 
+	** pre>
+	** config.addOrdered("Breakfast", eggs)
+	** config.addOrdered("Lunch", ham, ["AFTER: breakfast", "BEFORE: dinner"])
+	** config.addOrdered("Dinner", pie)
+	** <pre
+	** 
+	** Configuration contributions are ordered across modules. 
 	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
+		if (!object.typeof.fits(listType))
+			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
+
+		if (constraints.isEmpty)
+			constraints = impliedConstraint ?: Str#.emptyList
+		
+		orderer.addOrdered(id, object, constraints)
+
+		// keep an implied list ordering
+		impliedCount++
+		impliedConstraint = ["after: $id"]
 	}
 
 //	** Overrides a contributed ordered object. The original override must exist.
@@ -56,11 +78,16 @@ class OrderedConfig {
 //	}
 
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
+		// implied ordering only per contrib method
+		impliedConstraint = null
 		contribution.contributeOrdered(ctx, this)
 	}
 	
 	internal List getConfig() {
-		config
+		ctx.track("Ordering configuration contributions") |->List| {
+			contribs := orderer.order.map { it.payload }
+			return List.make(listType, 10).addAll(contribs)
+		}
 	}
 	
 	private once Type listType() {

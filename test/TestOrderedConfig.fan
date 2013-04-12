@@ -11,13 +11,13 @@ class TestOrderedConfig : IocTest {
 	Void testBasicConfig() {
 		reg := RegistryBuilder().addModule(T_MyModule30#).build.startup
 		s19 := reg.serviceById("s19") as T_MyService19
-		verifyEq(s19.config, Str["wot", "ever"])
+		verifyEq(s19.config, Str["ever", "wot"])
 	}
 
 	Void testBasicConfigViaBuilder() {
 		reg := RegistryBuilder().addModule(T_MyModule32#).build.startup
 		s21 := reg.serviceById("s21") as T_MyService21
-		verifyEq(s21.config, Str["wot", "ever", "ASS!"])
+		verifyEq(s21.config, Str["ever", "wot", "ASS!"])
 	}
 
 	Void testConfigMethodInjection() {
