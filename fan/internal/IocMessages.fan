@@ -79,7 +79,6 @@ internal const class IocMessages {
 		"Builder method $method.qname does not define a service ID. Rename it to ${method.qname}XXX where XXX is the service ID."
 	}
 	
-	// many-service-matches=Service interface %s is matched by %d services: %s. Automatic dependency resolution requires that exactly one service implement the interface.
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
 		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". \nAutomatic dependency resolution requires that exactly one service implement the interface. \nConsider using the @ServiceId facet."
 	}
@@ -140,7 +139,22 @@ internal const class IocMessages {
 		"Dependency '$notFound.name' not found, try '$tryThis.name' instead"
 	}
 	
+	static Str configRecursion(Str[] nodeNames) {
+		"Configuration ordering recursion! A configuration contribution depends on its self in some way : " + nodeNames.join(" -> ")
+	}
 
+	static Str configKeyAlreadyAdded(Str id) {
+		"Configuration ordering already has a contribution with ID '$id'"
+	}
+	
+	static Str configBadPrefix(Str constraint) {
+		"Configuration constraints must start with either 'BEFORE:' or 'AFTER:' - $constraint"
+	}
+
+	static Str configIsPlaceholder(Str placeholder) {
+		"Configuration Id does not exist - $placeholder"
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {

@@ -118,7 +118,7 @@ internal const class InjectionUtils {
 				ctx.log("No post injection methods found")
 			return object
 		}
-	}	
+	}
 
 	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
