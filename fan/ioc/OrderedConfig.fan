@@ -9,7 +9,7 @@
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
 class OrderedConfig {
-	
+
 	internal const	Type 			contribType
 	private  const 	ServiceDef 		serviceDef
 	private 	  	InjectionCtx	ctx
@@ -20,14 +20,14 @@ class OrderedConfig {
 			throw WtfErr("Ordered Contrib Type is NOT list???")
 		if (contribType.isGeneric)
 			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
-		
+
 		this.ctx 			= ctx
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
 		this.config 		= List.make(listType, 10)
 	}
 
-	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
+	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type) {
 		ctx.objLocator.trackAutobuild(ctx, type)
 	}
@@ -46,11 +46,11 @@ class OrderedConfig {
 		}
 	}
 
-//	** Adds an ordered object to a service's contribution. Each object has an id, which must be 
-//	** unique, that is used for ordering.
-//	Void addOrdered(Str id, Obj object, Str[] constraints := [,]) {
-//	}
-//
+	** Adds an ordered object to a service's contribution. Each object has an id, which must be 
+	** unique, that is used for ordering.
+	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
+	}
+
 //	** Overrides a contributed ordered object. The original override must exist.
 //	Void overrideOrdered(Str id, Obj object, Str[] constraints := [,]) {
 //	}

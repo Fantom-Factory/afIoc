@@ -1,11 +1,20 @@
 
-	dependency providers / dep ctx -> passing object being autobuilt (very powerful!)
 	ordered contributions
 	scoreboard
 
-scopeByThread
+PerThreadService
+
+bit bucket...?
+
+v1.2
+
 proxies
+advice
+methods only - or fields
 	
-	contribution overrides - more than once? Order them?
-	service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
-	@Local (local to the module of the serviceDef in ctx stack)
+contribution overrides - more than once? Order them?
+service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
+@Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
+ - depPro ctx
+OrderedConfig.addOrderedPlaceholder(Str placeholderName)
+OrderConfig wildcards - e.g. before: *
