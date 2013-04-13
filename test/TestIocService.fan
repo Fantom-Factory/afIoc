@@ -108,6 +108,14 @@ class TestIocService : IocTest {
 		iocs.onStart
 	}
 	
+	** see http://fantom.org/sidewalk/topic/2133
+	Void testStartErrsAreRethrown() {
+		iocs := IocService([T_MyModule40#]).start
+		verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+			iocs.registry.serviceById("wotever")
+		}
+	}
+	
 	static Void assertSame(Obj? o1, Obj? o2) {
 		if (o1 !== o2)
 			throw Err("Are NOT the same - $o1 : $o2")
@@ -129,6 +137,5 @@ internal class T_MyModule54 {
 			(Service.find(IocService#) as IocService).serviceById("s2")
 		}
 	}
-	
 }
 

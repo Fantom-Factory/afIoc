@@ -25,9 +25,20 @@ const class IocService : Service {
 		set { stash["indexProps"] = it }
 	}
 
+	private Err? startErr {
+		get { stash["startErr"] }
+		set { stash["startErr"] = it }
+	}
+
 	Registry? registry {
 		// ensure the registry is shared amongst all threads 
-		get { conState.getState |IocServiceState state->Obj?| { return state.registry } }
+		get { 
+			// rethrow any errs that occurred on startup 
+			// see http://fantom.org/sidewalk/topic/2133
+			if (startErr != null)
+				throw startErr
+			return conState.getState |IocServiceState state->Obj?| { return state.registry } 
+		}
 		private set { reg := it; conState.withState |IocServiceState state| { state.registry = reg} }
 	}
 
@@ -94,6 +105,7 @@ const class IocService : Service {
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)
+			startErr = e
 			throw e
 		}
 	}
@@ -109,7 +121,6 @@ const class IocService : Service {
 		registry.shutdown
 		registry = null
 	}
-
 
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
