@@ -92,29 +92,34 @@ class RegistryBuilder {
 			Type?[] modTypes := [,]
 			
 			// don't forget me!
-			modType := addModuleFromPod(pod)
-			modTypes.add(modType)
-			
-			pod.depends.each {
-				dependency := Pod.find(it.name)
-				mod := addModuleFromPod(dependency)
-				modTypes.add(mod)
+			ctx.withPod(pod) |->| {
+				modType := addModuleFromPod(pod)
+				if (modType != null)
+					modTypes.add(modType)
 				
-				if (addTransitiveDependencies) {
-					mods := ctx.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
-						deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
-						if (deps.isEmpty)
-							ctx.log("No transitive dependencies found")
-						return deps
-					} 
-					modTypes.addAll(mods)
-				} else
-					ctx.log("Not looking for transitive dependencies")
+				pod.depends.each {
+					dependency := Pod.find(it.name)
+					ctx.withPod(dependency) |->| {
+						modType = addModuleFromPod(dependency)
+						if (modType != null)
+							modTypes.add(modType)
+						
+						if (addTransitiveDependencies) {
+							mods := ctx.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
+								deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
+								if (deps.isEmpty)
+									ctx.log("No transitive dependencies found")
+								return deps
+							} 
+							modTypes.addAll(mods)
+						} else
+							ctx.log("Not looking for transitive dependencies")
+					}
+				}
+				
+				if (modTypes.isEmpty)
+					ctx.log("No modules found")				
 			}
-			
-			modTypes = modTypes.exclude { it == null }
-			if (modTypes.isEmpty)
-				ctx.log("No modules found")
 			
 			return modTypes
 		}
@@ -143,6 +148,7 @@ class RegistryBuilder {
 }
 
 internal class BuildCtx {
+	private Pod[] 		podStack 		:= [,]
 	private Type[] 		moduleStack 	:= [,]
 			OpTracker 	tracker
 
@@ -166,7 +172,28 @@ internal class BuildCtx {
 				if (it == module)
 					throw IocErr(IocMessages.moduleRecursion(moduleStack.map { it.qname }))
 			}			
-			return operation()
+			return operation.call()
+		} finally {			
+			moduleStack.pop
+		}
+	}	
+
+	Void withPod(Pod pod, |->Obj?| operation) {
+		podStack.push(pod)
+		try {
+			ignore := false
+			
+			// check for recursion
+			podStack[0..<-1].each { 
+				if (it == pod) {
+					this.log("Pod '$pod.name' already inspected...ignoring")
+					ignore = true
+				}
+			}
+			
+			if (!ignore)
+				operation.call()
+			
 		} finally {			
 			moduleStack.pop
 		}
