@@ -166,6 +166,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.1.2 [#v1.1.2]
+----------------
+ - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
+
 v1.1.0 [#v1.1.0]
 ----------------
  - New: Extend IoC by defining your own `DependencyProvider`s.
