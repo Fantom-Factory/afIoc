@@ -1,16 +1,25 @@
 
 v1.2
 bit bucket...?
-PerThreadService
+
 scoreboard
+Service override service
+contribution overrides - more than once? Order them?
 	
 proxies
 advice
 methods only - or fields
-	
-contribution overrides - more than once? Order them?
+
+
+OrderedConfig.addOrderedPlaceholder(Str placeholderName)
+
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
- - depPro ctx
-OrderedConfig.addOrderedPlaceholder(Str placeholderName)
-OrderConfig wildcards - e.g. before: *
+ - depPro ctx (a convienience for serviceById)
+
+
+
+
+Bad ideas:
+OrderConfig wildcards - e.g. before: * NO WILDCARDS, use placeholders instead
+PerThreadService - is just registry.get()!

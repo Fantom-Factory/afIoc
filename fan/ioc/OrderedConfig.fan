@@ -73,8 +73,8 @@ class OrderedConfig {
 		impliedConstraint = ["after: $id"]
 	}
 
-//	** Overrides a contributed ordered object. The original override must exist.
-//	Void overrideOrdered(Str id, Obj object, Str[] constraints := [,]) {
+//	** Overrides a contributed ordered object. The original object must exist.
+//	Void addOverride(Str id, Str idToOverride, Obj object, Str[] constraints := [,]) {
 //	}
 
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
