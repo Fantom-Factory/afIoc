@@ -12,6 +12,7 @@
 ** }
 ** <pre
 ** 
+** @since 1.1 
 const mixin DependencyProviderSource {
 	
 	internal abstract Obj? provideDependency(ProviderCtx proCtx, Type dependencyType)

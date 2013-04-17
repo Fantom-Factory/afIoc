@@ -6,6 +6,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Str 				builtInModuleId		:= "BuiltInModule"
 	private const Str:Module				modules
 	private const DependencyProviderSource?	depProSrc
+	private const ServiceOverride?			serviceOverrides
 	
 	private const Duration					startTime
 	private const Int						noOfServices
@@ -17,13 +18,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]			
-			services[makeBuiltInServiceDef("Registry", Registry#)] = this 
+			services[makeBuiltInServiceDef(ServiceIds.registry, Registry#)] = this 
 
 			// new up Built-In services ourselves to cut down on debug noise
-			services[makeBuiltInServiceDef("RegistryShutdownHub", RegistryShutdownHub#)] = RegistryShutdownHubImpl()
+			services[makeBuiltInServiceDef(ServiceIds.registryShutdownHub, RegistryShutdownHub#)] = RegistryShutdownHubImpl()
 			
 			services[StandardServiceDef() {
-				it.serviceId 	= "CtorFieldInjector"
+				it.serviceId 	= ServiceIds.ctorFieldInjector
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
 				it.scope		= ServiceScope.perInjection
@@ -34,12 +35,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[StandardServiceDef() {
-				it.serviceId 	= "DependencyProviderSource"
+				it.serviceId 	= ServiceIds.dependencyProviderSource
 				it.moduleId		= builtInModuleId
 				it.serviceType 	= DependencyProviderSource#
 				it.scope		= ServiceScope.perApplication
 				it.description 	= "'$it.serviceId' : Built In Service"
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, DependencyProviderSourceImpl#)
+			}] = null
+
+			services[StandardServiceDef() {
+				it.serviceId 	= ServiceIds.serviceOverride
+				it.moduleId		= builtInModuleId
+				it.serviceType 	= ServiceOverride#
+				it.scope		= ServiceScope.perApplication
+				it.description 	= "'$it.serviceId' : Built In Service"
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
 		// TODO: add some stats - e.g. hits - to the scoreboard
@@ -89,9 +99,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
-		injCtx		:= InjectionCtx(this, tracker)
-		depProSrc	= trackServiceById(injCtx, "DependencyProviderSource")
-		noOfServices= serviceIdToModule.size
+		injCtx				:= InjectionCtx(this, tracker)
+		depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
+		noOfServices		= serviceIdToModule.size
+		serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)
 	}
 
 
@@ -259,8 +270,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 
+	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
+		service := serviceOverrides?.getOverride(serviceDef.serviceId)
+		if (service != null) {
+			ctx.log("Found override for service '${serviceDef.serviceId}'")
+			return service
+		}
 
-	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {		
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
 		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
 	}

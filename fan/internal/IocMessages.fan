@@ -155,6 +155,18 @@ internal const class IocMessages {
 		"Configuration Id does not exist - $placeholder"
 	}
 	
+	static Str serviceOverrideNotImmutable(Str serviceId, Type serviceImpl) {
+		"Override for Service '$serviceId (${serviceImpl.qname}) is not immutable"
+	}
+	
+	static Str serviceOverrideDoesNotFitServiceDef(Str serviceId, Type serOverride, Type serDef) {
+		"Override for service '$serviceId (${serOverride.qname}) does not fit the definition of ${serDef.qname}"
+	}
+	
+	static Str serviceOverrideDoesNotExist(Str serviceId, Type serOverride) {
+		"Overriding service '$serviceId' with ${serOverride.qname} maybe difficult, service '$serviceId' doesn't exist!"
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {

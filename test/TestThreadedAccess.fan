@@ -123,8 +123,6 @@ internal const class T_MyService12 {
 
 internal const class T_MyService13 {
 	const T_MyService12 s12
-	
-//	new make(|This|in) { in(this) }
 	new make(T_MyService12 s12) { this.s12 = s12 }
 }
 
