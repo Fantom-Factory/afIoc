@@ -20,7 +20,7 @@ internal const class ServiceIdProvider : DependencyProvider {
 		service := registry.trackServiceById(ctx.injectionCtx, serviceId)
 		
 		if (!service.typeof.fits(dependencyType))
-			throw IocErr(ServiceMessages.serviceIdDoesNotFit(serviceId, service.typeof, dependencyType))
+			throw IocErr(IocMessages.serviceIdDoesNotFit(serviceId, service.typeof, dependencyType))
 		
 		return service
 	}
