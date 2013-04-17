@@ -65,6 +65,8 @@ class TestMappedConfig : IocTest {
 		verifyEq(s28.config.getOrThrow("WOT2"), "ever2")
 	}
 
+//	Void
+	
 }
 
 internal class T_MyModule43 {
