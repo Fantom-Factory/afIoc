@@ -32,7 +32,6 @@ class TestDependencyProvider : IocTest {
 		typ := dp.ls["type"] as Type
 		verifyEq(typ, type)
 		verifyEq(Type[,].addAll(ctx.facets.map{it.typeof}), facets)
-//		verifyEq(ctx.injectingInto, into)
 	}
 }
 
@@ -50,7 +49,7 @@ internal class T_MyService40 {
 	@Inject	Str? oops
 }
 internal const class T_DependencyProvider1 : DependencyProvider {
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { true }
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { dependencyType.fits(Str#) }
 	override Obj provide(ProviderCtx ctx, Type dependencyType) { 69 }
 }
 

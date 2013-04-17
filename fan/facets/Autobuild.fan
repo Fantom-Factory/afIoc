@@ -7,5 +7,7 @@
 ** <pre
 ** 
 ** May not be used with '@ServiceId' or other [Dependency Providers]`DependencyProvider`.
+** 
+** @since 1.1
 facet class Autobuild {
 }

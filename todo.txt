@@ -1,9 +1,6 @@
 
 v1.2
-bit bucket...?
-
 scoreboard
-Service override service
 contribution overrides - more than once? Order them?
 
 proxies
