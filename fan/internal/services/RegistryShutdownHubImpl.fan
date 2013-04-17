@@ -23,7 +23,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 			try {
 				listener()
 			} catch (Err e) {
-				log.err(ServiceMessages.shutdownListenerError(listener, e))
+				log.err(IocMessages.shutdownListenerError(listener, e))
 			}
 		}
 
@@ -42,7 +42,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 			try {
 				listener()
 			} catch (Err e) {
-				log.err(ServiceMessages.shutdownListenerError(listener, e))
+				log.err(IocMessages.shutdownListenerError(listener, e))
 			}
 		}
 		

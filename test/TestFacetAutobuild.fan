@@ -13,7 +13,7 @@ class TestFacetAutobuild : IocTest {
 
 	Void testOnlyOneDependencyProviderAllowed() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
-		verifyErrMsg(ServiceMessages.onlyOneDependencyProviderAllowed(T_MyService2#, [ServiceIdProvider#, AutobuildProvider#])) {
+		verifyErrMsg(IocMessages.onlyOneDependencyProviderAllowed(T_MyService2#, [ServiceIdProvider#, AutobuildProvider#])) {
 			reg.serviceById("s39")
 		}
 	}
