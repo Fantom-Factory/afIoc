@@ -5,10 +5,11 @@ bit bucket...?
 scoreboard
 Service override service
 contribution overrides - more than once? Order them?
-	
+
 proxies
-advice
 methods only - or fields
+ - don't override virtual or normal meths! Only abstract!
+advice
 
 
 OrderedConfig.addOrderedPlaceholder(Str placeholderName)

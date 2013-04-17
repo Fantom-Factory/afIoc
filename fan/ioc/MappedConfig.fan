@@ -60,7 +60,7 @@ class MappedConfig {
 	}
 	
 //	** Overrides an existing contribution by its key. The key must exist.
-//	Void addOverride(Obj key, Obj value) {
+//	Void addOverride(Obj overrideKey, Obj key, Obj value) {
 //	}
 	
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {

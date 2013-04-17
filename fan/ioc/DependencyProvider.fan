@@ -3,6 +3,8 @@
 ** Extend the capabilities of IoC by providing your own dependency resolution.
 ** 
 ** See `DependencyProviderSource`
+** 
+** @since 1.1
 const mixin DependencyProvider {
 
 	** Return 'true' if the provider can provide. (!)
