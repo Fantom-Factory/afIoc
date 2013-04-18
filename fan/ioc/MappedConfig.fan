@@ -13,7 +13,8 @@ class MappedConfig {
 	internal const	Type 			contribType
 	private  const 	ServiceDef 		serviceDef
 	private 	  	InjectionCtx	ctx
-	private 	  	Map 			config
+	private			Obj:Obj			config
+	private			Obj:KeyValuePair	overrides 
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "Map")
@@ -24,9 +25,8 @@ class MappedConfig {
 		this.ctx 			= ctx
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
-		this.config 		= (keyType == Str#) 
-							? Map.make(contribType) { caseInsensitive = true }
-							: Map.make(contribType) { ordered = true }
+		this.config 		= Utils.makeMap(keyType, valType)
+		this.overrides		= Utils.makeMap(keyType, KeyValuePair#)
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -36,20 +36,14 @@ class MappedConfig {
 	
 	** Adds a keyed object to the service's configuration.
 	Void addMapped(Obj key, Obj val) {
-		keyType := contribType.params["K"]
-		valType := contribType.params["V"]
-		
-		if (!key.typeof.fits(keyType))
-			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
-		if (!val.typeof.fits(valType)) {
-			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
-			if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
-				val = valType.params["V"].emptyList
-			else
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
-		}
-		
-		config.add(key, val)
+		key = validateKey(key)
+		val = validateVal(val)
+
+		// FIXME:
+		// if (config.contains(existingKey))
+		// 	thorw Err(key XXX already defined - try overriding instead
+
+		config[key] = val
 	}
 	
 	** Adds all the mapped objects to a service's configuration.
@@ -63,6 +57,15 @@ class MappedConfig {
 	** 
 	** @since 1.2
 	Void addOverride(Obj overrideKey, Obj existingKey, Obj newValue) {
+		overrideKey = validateKey(overrideKey)
+		existingKey = validateKey(existingKey)
+		newValue	= validateVal(newValue)
+		
+		// FIXME:
+		// if (overrides.contains(existingKey))
+		// 	thorw Err(key XXX already overriden by key XXX, try overriding XXX instead
+
+		overrides[overrideKey] = KeyValuePair(existingKey, newValue)
 	}
 	
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
@@ -70,7 +73,54 @@ class MappedConfig {
 	}
 	
 	internal Map getConfig() {
-		config
+		keys := Utils.makeMap(keyType, keyType)
+		config.each |val, key| { keys[key] = key }
+
+		// FIXME: ctxlog calc overriding
+
+		// normalise keys -> map all keys to orig key and apply overrides
+		Obj:KeyValuePair norm := overrides.dup
+		found := true
+		while (!norm.isEmpty && found) {
+			found = false
+			norm = norm.exclude |val, overrideKey| {
+				existingKey := val.key
+				if (keys.containsKey(existingKey)) {
+					keys[overrideKey] = keys[existingKey]
+					found=true
+					
+					// FIXME: ctxlog override
+					// override
+					config[keys[existingKey]] = val.val
+					return true
+				} else {
+					return false
+				}
+			}
+		}
+
+		// FIXME: 
+		if (!norm.isEmpty)
+			throw Err()
+
+		return config
+	}
+
+	Obj validateKey(Obj key) {
+		if (!key.typeof.fits(keyType))
+			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
+		return key
+	}
+	
+	Obj validateVal(Obj val) {
+		if (!val.typeof.fits(valType)) {
+			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
+			if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
+				val = valType.params["V"].emptyList
+			else
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		}
+		return val
 	}
 	
 	private once Type keyType() {
@@ -80,8 +130,19 @@ class MappedConfig {
 	private once Type valType() {
 		contribType.params["V"]
 	}
+	
 	override Str toStr() {
 		"MappedConfig of $contribType"
 	}	
+}
 
+internal class KeyValuePair {
+	Obj key; Obj val
+	new make(Obj key, Obj val) {
+		this.key = key
+		this.val = val
+	}
+	override Str toStr() {
+		"[$key:$val]"
+	}
 }
