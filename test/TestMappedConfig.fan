@@ -65,7 +65,42 @@ class TestMappedConfig : IocTest {
 		verifyEq(s28.config.getOrThrow("WOT2"), "ever2")
 	}
 
-//	Void
+	// ---- test overrides ------------------------------------------------------------------------
+	
+	Void testOverride1() {
+		reg := RegistryBuilder().addModule(T_MyModule62#).build.startup
+		s28 := reg.serviceById("s28") as T_MyService28
+		verifyEq(s28.config.size, 1)
+		verifyEq(s28.config["key"], "value2")
+	}
+
+	Void testOverride2() {
+		reg := RegistryBuilder().addModule(T_MyModule63#).build.startup
+		s28 := reg.serviceById("s28") as T_MyService28
+		verifyEq(s28.config.size, 1)
+		verifyEq(s28.config["key"], "value3")
+	}
+
+//	Void testOverrideMustExist1() {
+//		reg := RegistryBuilder().addModule(T_MyModule64#).build.startup
+//		verifyErrMsg("Duh") {			
+//			reg.serviceById("s28")
+//		}
+//	}
+//
+//	Void testOverrideMustExist2() {
+//		reg := RegistryBuilder().addModule(T_MyModule65#).build.startup
+//		verifyErrMsg("Duh") {			
+//			reg.serviceById("s28")
+//		}
+//	}
+
+	Void testOverrideWithObjKeys() {
+		reg := RegistryBuilder().addModule(T_MyModule66#).build.startup
+		s46 := reg.serviceById("s46") as T_MyService46
+		verifyEq(s46.config.size, 1)
+		verifyEq(s46.config[Str#], "value3")
+	}
 	
 }
 
@@ -184,6 +219,71 @@ internal class T_MyModule51 {
 internal class T_MyService29 {
 	Str:Str[] config
 	new make(Str:Str[] config) {
+		this.config = config
+	}
+}
+
+internal class T_MyModule62 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService28#).withId("s28")
+	}
+	@Contribute
+	static Void contributeS28(MappedConfig config) {
+		config.addMapped("key", "value")
+		config.addOverride("over1", "key", "value2")
+	}
+}
+
+internal class T_MyModule63 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService28#).withId("s28")
+	}
+	@Contribute
+	static Void contributeS28(MappedConfig config) {
+		config.addMapped("key", "value")
+		config.addOverride("over1", "key", "value2")
+		config.addOverride("over2", "over1", "value3")
+	}
+}
+
+internal class T_MyModule64 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService28#).withId("s28")
+	}
+	@Contribute
+	static Void contributeS28(MappedConfig config) {
+		config.addMapped("key", "value")
+		config.addOverride("over1", "non-exist", "value2")
+	}
+}
+
+internal class T_MyModule65 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService28#).withId("s28")
+	}
+	@Contribute
+	static Void contributeS28(MappedConfig config) {
+		config.addMapped("key", "value")
+		config.addOverride("over1", "key", "value2")
+		config.addOverride("over2", "non-exist", "value3")
+	}
+}
+
+internal class T_MyModule66 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService46#).withId("s46")
+	}
+	@Contribute
+	static Void contributeS46(MappedConfig config) {
+		config.addMapped(Str#, "value1")
+		config.addOverride(Uri#, Str#, "value2")
+		config.addOverride(File#, Uri#, "value3")
+	}
+}
+
+internal class T_MyService46 {
+	Type:Str config
+	new make(Type:Str config) {
 		this.config = config
 	}
 }
