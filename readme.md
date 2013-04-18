@@ -1,8 +1,6 @@
 # afIoc
 
-afIoc is an Inversion of Control (IoC) container for the [Fantom](http://fantom.org/) language, based on the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html). 
-
-See the [wiki](https://bitbucket.org/SlimerDude/afioc/wiki/Home) for usage. 
+An Inversion of Control (IoC) container for the [Fantom](http://fantom.org/) language, based on the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html). 
 
 ## Usage
 
@@ -17,8 +15,10 @@ See the [wiki](https://bitbucket.org/SlimerDude/afioc/wiki/Home) for usage.
 
 ## Documentation
 
-Full API fandocs are available at the [status302 repository](http://repo.status302.com/doc/afIoc/).
+Full API & fandocs are available on the [status302 repository](http://repo.status302.com/doc/afIoc/).
 
-## Install:
+A usage overview is available on the [wiki](https://bitbucket.org/SlimerDude/afioc/wiki/Home).. 
+
+## Install
 
     fanr install -r http://repo.status302.com/fanr/ afIoc
