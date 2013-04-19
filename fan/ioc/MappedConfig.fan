@@ -10,11 +10,11 @@
 ** ctor or builder method. Contributions must be compatible with the type.
 class MappedConfig {
 	
-	internal const	Type 			contribType
-	private  const 	ServiceDef 		serviceDef
-	private 	  	InjectionCtx	ctx
-	private			Obj:Obj			config
-	private			Obj:KeyValuePair	overrides 
+	internal const	Type 				contribType
+	private  const 	ServiceDef 			serviceDef
+	private 	  	InjectionCtx		ctx
+	private			Obj:Obj				config
+	private			Obj:MappedOverride	overrides 
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "Map")
@@ -26,7 +26,7 @@ class MappedConfig {
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
 		this.config 		= Utils.makeMap(keyType, valType)
-		this.overrides		= Utils.makeMap(keyType, KeyValuePair#)
+		this.overrides		= Utils.makeMap(keyType, MappedOverride#)
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -39,8 +39,8 @@ class MappedConfig {
 		key = validateKey(key)
 		val = validateVal(val)
 
-		 if (config.containsKey(key))
-		 	throw IocErr(IocMessages.configMappedKeyAlreadyDefined(key.toStr))
+		if (config.containsKey(key))
+			throw IocErr(IocMessages.configMappedKeyAlreadyDefined(key.toStr))
 
 		config[key] = val
 	}
@@ -55,28 +55,34 @@ class MappedConfig {
 	** Overrides an existing contribution by its key. The key must exist.
 	** 
 	** @since 1.2
-	Void addOverride(Obj overrideKey, Obj existingKey, Obj overrideVal) {
+	Void addOverride(Obj existingKey, Obj overrideKey, Obj overrideVal) {
 		overrideKey = validateKey(overrideKey)
 		existingKey = validateKey(existingKey)
 		overrideVal	= validateVal(overrideVal)
-		
+
 		if (overrides.containsKey(existingKey))
 		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
-		overrides[existingKey] = KeyValuePair(overrideKey, overrideVal)
+		if (config.containsKey(overrideKey))
+		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyExists(overrideKey.toStr))
+
+		if (overrides.vals.map { it.key }.contains(overrideKey))
+		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyExists(overrideKey.toStr))
+
+		overrides[existingKey] = MappedOverride(overrideKey, overrideVal)
 	}
-	
+
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		contribution.contributeMapped(ctx, this)
 	}
-	
+
 	internal Map getConfig() {
 		keys := Utils.makeMap(keyType, keyType)
 		config.each |val, key| { keys[key] = key }
 
 		ctx.track("Applying overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
-			Obj:KeyValuePair norm := overrides.dup
+			Obj:MappedOverride norm := overrides.dup
 			found := true
 			while (!norm.isEmpty && found) {
 				found = false
@@ -110,7 +116,7 @@ class MappedConfig {
 			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
 		return key
 	}
-	
+
 	Obj validateVal(Obj val) {
 		if (!val.typeof.fits(valType)) {
 			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
@@ -121,21 +127,21 @@ class MappedConfig {
 		}
 		return val
 	}
-	
+
 	private once Type keyType() {
 		contribType.params["K"]
 	}
-	
+
 	private once Type valType() {
 		contribType.params["V"]
 	}
-	
+
 	override Str toStr() {
 		"MappedConfig of $contribType"
 	}	
 }
 
-internal class KeyValuePair {
+internal class MappedOverride {
 	Obj key; Obj val
 	new make(Obj key, Obj val) {
 		this.key = key

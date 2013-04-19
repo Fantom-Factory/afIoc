@@ -115,6 +115,20 @@ class TestMappedConfig : IocTest {
 			reg.serviceById("s46")
 		}
 	}
+
+	Void testOverrideCannotReuseKey() {
+		reg := RegistryBuilder().addModule(T_MyModule73#).build.startup
+		verifyErrMsg(IocMessages.configMappedOverrideKeyAlreadyExists(Str#.toStr)) {
+			reg.serviceById("s46")
+		}
+	}
+
+	Void testOverrideCannotReuseOverrideKey() {
+		reg := RegistryBuilder().addModule(T_MyModule74#).build.startup
+		verifyErrMsg(IocMessages.configMappedOverrideKeyAlreadyExists(Uri#.toStr)) {
+			reg.serviceById("s46")
+		}
+	}
 }
 
 internal class T_MyModule43 {
@@ -243,7 +257,7 @@ internal class T_MyModule62 {
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
 		config.addMapped("key", "value")
-		config.addOverride("over1", "key", "value2")
+		config.addOverride("key", "over1", "value2")
 	}
 }
 
@@ -254,8 +268,8 @@ internal class T_MyModule63 {
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
 		config.addMapped("key", "value")
-		config.addOverride("over1", "key", "value2")
-		config.addOverride("over2", "over1", "value3")
+		config.addOverride("key", "over1", "value2")
+		config.addOverride("over1", "over2", "value3")
 	}
 }
 
@@ -266,7 +280,7 @@ internal class T_MyModule64 {
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
 		config.addMapped("key", "value")
-		config.addOverride("over1", "non-exist", "value2")
+		config.addOverride("non-exist", "over1", "value2")
 	}
 }
 
@@ -277,8 +291,8 @@ internal class T_MyModule65 {
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
 		config.addMapped("key", "value")
-		config.addOverride("over1", "key", "value2")
-		config.addOverride("over2", "non-exist", "value3")
+		config.addOverride("key", "over1", "value2")
+		config.addOverride("non-exist", "over2", "value3")
 	}
 }
 
@@ -289,8 +303,8 @@ internal class T_MyModule66 {
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
 		config.addMapped(Str#, "value1")
-		config.addOverride(Uri#, Str#, "value2")
-		config.addOverride(File#, Uri#, "value3")
+		config.addOverride(Str#, Uri#, "value2")
+		config.addOverride(Uri#, File#, "value3")
 	}
 }
 
@@ -312,8 +326,32 @@ internal class T_MyModule68 {
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
 		config.addMapped(Str#, "once")
-		config.addOverride(Uri#, Str#, "twice")
-		config.addOverride(File#, Str#, "thrice")
+		config.addOverride(Str#, Uri#, "twice")
+		config.addOverride(Str#, File#, "thrice")
+	}
+}
+
+internal class T_MyModule73 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService46#).withId("s46")
+	}
+	@Contribute
+	static Void contributeS46(MappedConfig config) {
+		config.addMapped(Str#, "once")
+		config.addOverride(Str#, Uri#, "twice")
+		config.addOverride(Uri#, Str#, "thrice")	// attempt to re-use an existing key
+	}
+}
+
+internal class T_MyModule74 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService46#).withId("s46")
+	}
+	@Contribute
+	static Void contributeS46(MappedConfig config) {
+		config.addMapped(Str#, "once")
+		config.addOverride(Str#, Uri#, "twice")
+		config.addOverride(Uri#, Uri#, "thrice")	// attempt to re-use an existing override key
 	}
 }
 
