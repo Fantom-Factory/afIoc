@@ -81,19 +81,19 @@ class TestMappedConfig : IocTest {
 		verifyEq(s28.config["key"], "value3")
 	}
 
-//	Void testOverrideMustExist1() {
-//		reg := RegistryBuilder().addModule(T_MyModule64#).build.startup
-//		verifyErrMsg("Duh") {			
-//			reg.serviceById("s28")
-//		}
-//	}
-//
-//	Void testOverrideMustExist2() {
-//		reg := RegistryBuilder().addModule(T_MyModule65#).build.startup
-//		verifyErrMsg("Duh") {			
-//			reg.serviceById("s28")
-//		}
-//	}
+	Void testOverrideMustExist1() {
+		reg := RegistryBuilder().addModule(T_MyModule64#).build.startup
+		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over1")) {
+			reg.serviceById("s28")
+		}
+	}
+
+	Void testOverrideMustExist2() {
+		reg := RegistryBuilder().addModule(T_MyModule65#).build.startup
+		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over2")) {
+			reg.serviceById("s28")
+		}
+	}
 
 	Void testOverrideWithObjKeys() {
 		reg := RegistryBuilder().addModule(T_MyModule66#).build.startup
@@ -101,7 +101,20 @@ class TestMappedConfig : IocTest {
 		verifyEq(s46.config.size, 1)
 		verifyEq(s46.config[Str#], "value3")
 	}
-	
+
+	Void testCannotAddKeyTwice() {
+		reg := RegistryBuilder().addModule(T_MyModule67#).build.startup
+		verifyErrMsg(IocMessages.configMappedKeyAlreadyDefined(Str#.toStr)) {
+			reg.serviceById("s46")
+		}
+	}
+
+	Void testCannotOverrideTwice() {
+		reg := RegistryBuilder().addModule(T_MyModule68#).build.startup
+		verifyErrMsg(IocMessages.configMappedOverrideKeyAlreadyDefined(Str#.toStr, Uri#.toStr)) {
+			reg.serviceById("s46")
+		}
+	}
 }
 
 internal class T_MyModule43 {
@@ -278,6 +291,29 @@ internal class T_MyModule66 {
 		config.addMapped(Str#, "value1")
 		config.addOverride(Uri#, Str#, "value2")
 		config.addOverride(File#, Uri#, "value3")
+	}
+}
+
+internal class T_MyModule67 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService46#).withId("s46")
+	}
+	@Contribute
+	static Void contributeS46(MappedConfig config) {
+		config.addMapped(Str#, "once")
+		config.addMapped(Str#, "twice")
+	}
+}
+
+internal class T_MyModule68 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService46#).withId("s46")
+	}
+	@Contribute
+	static Void contributeS46(MappedConfig config) {
+		config.addMapped(Str#, "once")
+		config.addOverride(Uri#, Str#, "twice")
+		config.addOverride(File#, Str#, "thrice")
 	}
 }
 

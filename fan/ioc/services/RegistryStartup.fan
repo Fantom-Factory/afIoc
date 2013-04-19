@@ -11,6 +11,7 @@
 **     }
 **   }
 ** 
+** @uses OrderedConfig of |->|
 const mixin RegistryStartup {
 
 }

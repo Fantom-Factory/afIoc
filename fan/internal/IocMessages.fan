@@ -167,6 +167,18 @@ internal const class IocMessages {
 		"Overriding service '$serviceId' with ${serOverride.qname} maybe difficult, service '$serviceId' doesn't exist!"
 	}
 	
+	static Str contribOverrideDoesNotExist(Str existingKeys, Str overrideKeys) {
+		"Can not override mapped contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
+	}
+	
+	static Str configMappedKeyAlreadyDefined(Str existingKey) {
+		"Key '$existingKey' has already been defined - try overriding it instead"
+	}
+
+	static Str configMappedOverrideKeyAlreadyDefined(Str existingKey, Str overrideKey) {
+		"Override for key '$existingKey' has already been defined - try overriding '$overrideKey' instead"
+	}
+	
 	static Str shutdownListenerError(Obj listener, Err cause) {
 		"Error notifying ${listener} of registry shutdown: ${cause}"
 	}
