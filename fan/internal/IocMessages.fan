@@ -178,6 +178,10 @@ internal const class IocMessages {
 	static Str configMappedOverrideKeyAlreadyDefined(Str existingKey, Str overrideKey) {
 		"Override for key '$existingKey' has already been defined - try overriding '$overrideKey' instead"
 	}
+
+	static Str configMappedOverrideKeyAlreadyExists(Str existingKey) {
+		"Override key '$existingKey' has already been defined - use a different override key"
+	}
 	
 	static Str shutdownListenerError(Obj listener, Err cause) {
 		"Error notifying ${listener} of registry shutdown: ${cause}"

@@ -167,8 +167,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
-v1.1.2 [#v1.1.2]
+v1.2.0 [#v1.2.0]
 ----------------
+ - New: Override defined services with your own implementations via the new powerful `ServiceOverride` feature.
+ - New: Override any existing 'MappedConfig' contribution with you own via `MappedConfig.addOverride`.
  - Chg: Improved Registry startup times by only inspecting Pods (for modules) the once.
  - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
 
@@ -176,7 +178,7 @@ v1.1.0 [#v1.1.0]
 ----------------
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
- - New: [@Autobuild]`Autobuild` injects a fresh service on every build.
+ - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
  - New: [Ordered configuration]`OrderedConfig.addOrdered` contributions are ordered across modules.
  - New: Services can be created even if they don't define any ctors.
 
