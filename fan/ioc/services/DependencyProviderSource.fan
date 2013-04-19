@@ -12,7 +12,8 @@
 ** }
 ** <pre
 ** 
-** @since 1.1 
+** @since 1.1
+** @uses OrderedConfig of DependencyProvider
 const mixin DependencyProviderSource {
 	
 	internal abstract Obj? provideDependency(ProviderCtx proCtx, Type dependencyType)

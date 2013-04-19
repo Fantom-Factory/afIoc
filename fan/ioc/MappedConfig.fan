@@ -39,9 +39,8 @@ class MappedConfig {
 		key = validateKey(key)
 		val = validateVal(val)
 
-		// FIXME:
-		// if (config.contains(existingKey))
-		// 	thorw Err(key XXX already defined - try overriding instead
+		 if (config.containsKey(key))
+		 	throw IocErr(IocMessages.configMappedKeyAlreadyDefined(key.toStr))
 
 		config[key] = val
 	}
@@ -56,16 +55,15 @@ class MappedConfig {
 	** Overrides an existing contribution by its key. The key must exist.
 	** 
 	** @since 1.2
-	Void addOverride(Obj overrideKey, Obj existingKey, Obj newValue) {
+	Void addOverride(Obj overrideKey, Obj existingKey, Obj overrideVal) {
 		overrideKey = validateKey(overrideKey)
 		existingKey = validateKey(existingKey)
-		newValue	= validateVal(newValue)
+		overrideVal	= validateVal(overrideVal)
 		
-		// FIXME:
-		// if (overrides.contains(existingKey))
-		// 	thorw Err(key XXX already overriden by key XXX, try overriding XXX instead
+		if (overrides.containsKey(existingKey))
+		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
-		overrides[overrideKey] = KeyValuePair(existingKey, newValue)
+		overrides[existingKey] = KeyValuePair(overrideKey, overrideVal)
 	}
 	
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
@@ -76,32 +74,33 @@ class MappedConfig {
 		keys := Utils.makeMap(keyType, keyType)
 		config.each |val, key| { keys[key] = key }
 
-		// FIXME: ctxlog calc overriding
-
-		// normalise keys -> map all keys to orig key and apply overrides
-		Obj:KeyValuePair norm := overrides.dup
-		found := true
-		while (!norm.isEmpty && found) {
-			found = false
-			norm = norm.exclude |val, overrideKey| {
-				existingKey := val.key
-				if (keys.containsKey(existingKey)) {
-					keys[overrideKey] = keys[existingKey]
-					found=true
-					
-					// FIXME: ctxlog override
-					// override
-					config[keys[existingKey]] = val.val
-					return true
-				} else {
-					return false
+		ctx.track("Applying overrides to '$serviceDef.serviceId'") |->| {
+			// normalise keys -> map all keys to orig key and apply overrides
+			Obj:KeyValuePair norm := overrides.dup
+			found := true
+			while (!norm.isEmpty && found) {
+				found = false
+				norm = norm.exclude |val, existingKey| {
+					overrideKey := val.key
+					if (keys.containsKey(existingKey)) {
+						keys[overrideKey] = keys[existingKey]
+						found=true
+						
+						ctx.log("'${overrideKey}' overrides '${existingKey}'")
+						config[keys[existingKey]] = val.val
+						return true
+					} else {
+						return false
+					}
 				}
 			}
-		}
 
-		// FIXME: 
-		if (!norm.isEmpty)
-			throw Err()
+			if (!norm.isEmpty) {
+				overrideKeys := norm.vals.map { it.key.toStr }.join(", ")
+				existingKeys := norm.keys.map { it.toStr }.join(", ")
+				throw IocErr(IocMessages.contribOverrideDoesNotExist(existingKeys, overrideKeys))
+			}
+		}
 
 		return config
 	}
