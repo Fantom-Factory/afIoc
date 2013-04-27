@@ -26,6 +26,6 @@ internal const class T_MyService3 {
 	}
 	
 	new make(RegistryShutdownHub shutdownHub) {
-		shutdownHub.addRegistryShutdownListener |->| { called = true }
+		shutdownHub.addRegistryShutdownListener("T1", Str#.emptyList) |->| { called = true }
 	}
 }
