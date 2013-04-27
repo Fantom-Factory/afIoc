@@ -41,7 +41,7 @@ internal class Orderer {
 				throw IocErr(IocMessages.configBadPrefix(constraint))
 		}
 	}
-
+	
 	OrderedNode[] order() {
 		nodesIn	 := nodes.dup
 		nodesOut := OrderedNode[,]
@@ -53,6 +53,11 @@ internal class Orderer {
 			}
 		}
 		return nodesOut
+	}
+	
+	Void clear() {
+		nodes.each { it.payload = null }
+		nodes.clear
 	}
 	
 	internal Void eachId(Str prefix, Str constraint, |Str id| op) {

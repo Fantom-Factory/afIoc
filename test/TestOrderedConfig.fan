@@ -52,6 +52,35 @@ class TestOrderedConfig : IocTest {
 		}
 	}
 
+	// ---- test overrides ------------------------------------------------------------------------
+	
+	Void testOverride1() {
+		reg := RegistryBuilder().addModule(T_MyModule69#).build.startup
+		s23 := reg.serviceById("s23") as T_MyService23
+		verifyEq(s23.config.size, 1)
+		verifyEq(s23.config[0], "value2")
+	}
+
+	Void testOverride2() {
+		reg := RegistryBuilder().addModule(T_MyModule70#).build.startup
+		s23 := reg.serviceById("s23") as T_MyService23
+		verifyEq(s23.config.size, 1)
+		verifyEq(s23.config[0], "value3")
+	}
+
+	Void testOverrideMustExist1() {
+		reg := RegistryBuilder().addModule(T_MyModule71#).build.startup
+		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over1")) {
+			reg.serviceById("s23")
+		}
+	}
+
+	Void testOverrideMustExist2() {
+		reg := RegistryBuilder().addModule(T_MyModule72#).build.startup
+		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over2")) {
+			reg.serviceById("s23")
+		}
+	}
 }
 
 
@@ -183,4 +212,50 @@ internal class T_MyModule38 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService23#).withId("s23")
 	}	
+}
+
+internal class T_MyModule69 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}
+	@Contribute
+	static Void contributeS23(OrderedConfig config) {
+		config.addOrdered("key", "value1")
+		config.addOverride("key", "over1", "value2")
+	}
+}
+
+internal class T_MyModule70 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}
+	@Contribute
+	static Void contributeS23(OrderedConfig config) {
+		config.addOrdered("key", "value1")
+		config.addOverride("key", "over1", "value2")
+		config.addOverride("over1", "over2", "value3")
+	}
+}
+
+internal class T_MyModule71 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}
+	@Contribute
+	static Void contributeS23(OrderedConfig config) {
+		config.addOrdered("key", "value")
+		config.addOverride("non-exist", "over1", "value2")
+	}
+}
+
+internal class T_MyModule72 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}
+	@Contribute
+	static Void contributeS23(OrderedConfig config) {
+		config.addOrdered("key", "value")
+		config.addOverride("key", "over1", "value2")
+		config.addOverride("non-exist", "over2", "value3")
+	}
 }
