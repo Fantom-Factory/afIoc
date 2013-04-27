@@ -3,17 +3,17 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 		log 		:= Log.get(RegistryShutdownHubImpl#.name)
 	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
  
-	override Void addRegistryShutdownListener(|->| listener) {
+	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {
 		withMyState |state| {
 			state.lock.check
-			state.listeners.add(listener)
+			state.listeners.addOrdered(id, listener, constraints)
 		}
 	}
 
-	override Void addRegistryWillShutdownListener(|->| listener) {
+	override Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener) {
 		withMyState |state| {
 			state.lock.check
-			state.preListeners.add(listener)
+			state.preListeners.addOrdered(id, listener, constraints)
 		}
 	}
 
@@ -52,11 +52,11 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	}
 	
 	private |->|[] preListeners() {
-		getMyState |state| { state.preListeners.toImmutable }
+		getMyState |state| { state.preListeners.order.map { it.payload }.toImmutable }
 	}
 
 	private |->|[] listeners() {
-		getMyState |state| { state.listeners.toImmutable }
+		getMyState |state| { state.listeners.order.map { it.payload }.toImmutable }
 	}
 
 	private Void withMyState(|RegistryShutdownHubState| state) {
@@ -69,7 +69,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 }
 
 internal class RegistryShutdownHubState {
-	OneShotLock lock	:= OneShotLock(IocMessages.registryShutdown)
-	|->|[] preListeners	:= [,]
-	|->|[] listeners	:= [,]
+	OneShotLock lock		:= OneShotLock(IocMessages.registryShutdown)
+	Orderer preListeners	:= Orderer()
+	Orderer listeners		:= Orderer()
 }

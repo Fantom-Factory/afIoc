@@ -13,7 +13,6 @@
 **   }
 ** <pre
 ** 
-// TODO: make listeners ordered
 const mixin RegistryShutdownHub {
 
 	** Adds a listener that will be notified when the registry shuts down. Note when shutdown 
@@ -21,12 +20,30 @@ const mixin RegistryShutdownHub {
 	** depends on other services use 'addRegistryWillShutdownListener()' 
 	**  
 	** Errs thrown by the listener will be logged and ignored.
-	abstract Void addRegistryShutdownListener(|->| listener)
+	** 
+	** Each listener has a unique id (case insensitive) that is used by the constraints for 
+	** ordering. Each constraint must start with the prefix 'BEFORE:' or 'AFTER:'.
+	** 
+	** pre>
+	**   config.addOrdered("Breakfast", eggs)
+	**   config.addOrdered("Lunch", ["AFTER: breakfast", "BEFORE: dinner"], ham)
+	**   config.addOrdered("Dinner", pie)
+	** <pre
+	abstract Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener)
 
 	** Adds a listener that will be notified when the registry shuts down. RegistryWillShutdown 
 	** listeners are notified before shutdown listeners.
 	** 
 	** Errs thrown by the listener will be logged and ignored.
-	abstract Void addRegistryWillShutdownListener(|->| listener)
+	** 
+	** Each listener has a unique id (case insensitive) that is used by the constraints for 
+	** ordering. Each constraint must start with the prefix 'BEFORE:' or 'AFTER:'.
+	** 
+	** pre>
+	**   config.addOrdered("Breakfast", eggs)
+	**   config.addOrdered("Lunch", ["AFTER: breakfast", "BEFORE: dinner"], ham)
+	**   config.addOrdered("Dinner", pie)
+	** <pre
+	abstract Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener)
 	
 }
