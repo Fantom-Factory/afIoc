@@ -61,13 +61,13 @@ class MappedConfig {
 		overrideVal	= validateVal(overrideVal)
 
 		if (overrides.containsKey(existingKey))
-		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
 		if (config.containsKey(overrideKey))
-		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyExists(overrideKey.toStr))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(overrideKey.toStr))
 
 		if (overrides.vals.map { it.key }.contains(overrideKey))
-		 	throw IocErr(IocMessages.configMappedOverrideKeyAlreadyExists(overrideKey.toStr))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(overrideKey.toStr))
 
 		overrides[existingKey] = MappedOverride(overrideKey, overrideVal)
 	}
@@ -79,8 +79,11 @@ class MappedConfig {
 	internal Map getConfig() {
 		keys := Utils.makeMap(keyType, keyType)
 		config.each |val, key| { keys[key] = key }
+		
+		// don't alter the class state so getConfig() may be called more than once
+		Obj:Obj config := this.config.dup
 
-		ctx.track("Applying overrides to '$serviceDef.serviceId'") |->| {
+		ctx.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
 			Obj:MappedOverride norm := overrides.dup
 			found := true
@@ -90,7 +93,7 @@ class MappedConfig {
 					overrideKey := val.key
 					if (keys.containsKey(existingKey)) {
 						keys[overrideKey] = keys[existingKey]
-						found=true
+						found = true
 						
 						ctx.log("'${overrideKey}' overrides '${existingKey}'")
 						config[keys[existingKey]] = val.val
