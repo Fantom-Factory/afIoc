@@ -18,6 +18,9 @@ mixin ServiceIds {
 	
 	** @see `ServiceOverride`
 	static const Str serviceOverride			:= "ServiceOverride"
+
+	** @see `ServiceStats`
+	static const Str serviceStats				:= "ServiceStats"
 	
 	internal
 	static const Str ctorFieldInjector			:= "CtorFieldInjector"
