@@ -15,8 +15,13 @@
 ** See `http://en.wikipedia.org/wiki/Topological_sorting`	
 internal class Orderer {
 
-	private Str:OrderedNode nodes	:= Str:OrderedNode[:] { caseInsensitive = true }
+	internal static const Str placeholder	:=	"PLACEHOLDER"
+	private Str:OrderedNode nodes			:= Str:OrderedNode[:] { caseInsensitive = true }
 
+	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
+		addOrdered(id, placeholder, constraints)
+	}
+	
 	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
@@ -42,7 +47,16 @@ internal class Orderer {
 		}
 	}
 	
-	OrderedNode[] order() {
+	Obj[] toOrderedList() {
+		order.exclude { it.payload === placeholder }.map { it.payload }
+	}
+	
+	Void clear() {
+		nodes.each { it.payload = null }
+		nodes.clear
+	}
+	
+	internal OrderedNode[] order() {
 		nodesIn	 := nodes.dup
 		nodesOut := OrderedNode[,]
 		
@@ -52,12 +66,8 @@ internal class Orderer {
 				visit(ctx, nodesIn, nodesOut, node)
 			}
 		}
+		
 		return nodesOut
-	}
-	
-	Void clear() {
-		nodes.each { it.payload = null }
-		nodes.clear
 	}
 	
 	internal Void eachId(Str prefix, Str constraint, |Str id| op) {

@@ -42,7 +42,7 @@ class TestOrderedConfigOrdering : IocTest {
 		orderer.addOrdered("2", "2", ["after 1"])
 		orderer.addOrdered("1", "1", ["before 2, 3"])
 		verifyErrMsg(IocMessages.configIsPlaceholder("3")) {
-			orderer.order
+			orderer.toOrderedList
 		}
 	}
 
@@ -51,7 +51,7 @@ class TestOrderedConfigOrdering : IocTest {
 		orderer.addOrdered("2", "2", ["after 1, 3"])
 		orderer.addOrdered("1", "1", ["before 2"])
 		verifyErrMsg(IocMessages.configIsPlaceholder("3")) {
-			orderer.order
+			orderer.toOrderedList
 		}
 	}
 	

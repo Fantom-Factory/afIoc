@@ -52,11 +52,11 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	}
 	
 	private |->|[] preListeners() {
-		getMyState |state| { state.preListeners.order.map { it.payload }.toImmutable }
+		getMyState |state| { state.preListeners.toOrderedList.toImmutable }
 	}
 
 	private |->|[] listeners() {
-		getMyState |state| { state.listeners.order.map { it.payload }.toImmutable }
+		getMyState |state| { state.listeners.toOrderedList.toImmutable }
 	}
 
 	private Void withMyState(|RegistryShutdownHubState| state) {

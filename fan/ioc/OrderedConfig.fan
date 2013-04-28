@@ -58,9 +58,9 @@ class OrderedConfig {
 	** the prefix 'BEFORE:' or 'AFTER:'.
 	** 
 	** pre>
-	** config.addOrdered("Breakfast", eggs)
-	** config.addOrdered("Lunch", ham, ["AFTER: breakfast", "BEFORE: dinner"])
-	** config.addOrdered("Dinner", pie)
+	**   config.addOrdered("Breakfast", eggs)
+	**   config.addOrdered("Lunch", ham, ["AFTER: breakfast", "BEFORE: dinner"])
+	**   config.addOrdered("Dinner", pie)
 	** <pre
 	** 
 	** Configuration contributions are ordered across modules. 
@@ -80,7 +80,24 @@ class OrderedConfig {
 		impliedConstraint = ["after: $id"]
 	}
 
+	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
+	** 
+	** pre>
+	**   config.addPlaceholder("End")
+	**   config.addOrdered("Wot", ever, ["BEFORE: end"])
+	**   config.addOrdered("Last", last, ["AFTER: end"])
+	** <pre
+	** 
+	** Placeholders do not appear in the the resulting ordered list. 
+	** 
+	** @since 1.2
+	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
+		addOrdered(id, Orderer.placeholder, constraints)
+	}
+
 	** Overrides a contributed ordered object. The original object must exist.
+	** 
+	** Note: Unordered configurations can not be overridden.
 	** 
 	** @since 1.2
 	Void addOverride(Str existingId, Str newId, Obj newObject, Str[] newConstraints := [,]) {
@@ -88,12 +105,6 @@ class OrderedConfig {
 
 		if (overrides.containsKey(existingId))
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
-
-//		if (config.containsKey(existingId))
-//		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(existingId.toStr))
-
-//		if (overrides.vals.map { it.key }.contains(existingId))
-//		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(existingId.toStr))
 		
 		overrides[existingId] = OrderedOverride(newId, newObject, newConstraints)
 	}
@@ -144,8 +155,8 @@ class OrderedConfig {
 			}
 		
 			return ctx.track("Ordering configuration contributions") |->List| {
-				contribs := orderer.order.map { it.payload }
-				return List.make(listType, 10).addAll(contribs)
+				contribs := orderer.toOrderedList
+				return List.make(listType, contribs.size).addAll(contribs)
 			}
 		}		
 	}
