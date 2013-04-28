@@ -52,9 +52,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
-		// TODO: add some stats - e.g. hits - to the scoreboard
-	//        addBuiltin(SERVICE_ACTIVITY_SCOREBOARD_SERVICE_ID, ServiceActivityScoreboard#, tracker)
-
+			services[makeBuiltInServiceDef(ServiceIds.serviceStats, ServiceStats#)] = ServiceStatsImpl(this)
+			
 			builtInModule := ModuleImpl(this, builtInModuleId, services)
 
 			moduleIdToModule[builtInModuleId] = builtInModule
@@ -62,7 +61,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
 		}
-		
 
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
@@ -115,19 +113,33 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// Do dat startup!
 		tracker := OpTracker()
-		serviceById(RegistryStartup#.name)->go(tracker)
-
-		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
-		title	:= "Alien-Factory IoC v" + typeof.pod.version.toStr + " /___/   "
-		title 	= title.padl(60, ' ')
-		title = "   ___    _                 _____        _                  
-		           / _ |  //  _____  _____  / ___/__  ___/ /_________  __ __ 
-		          / _  | //_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
-		         /_/ |_|/__//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
-		title 	 = "\n" + title + "\n\n"
-		title 	+= "IoC defined $noOfServices services and started up in ${millis}ms\n"
-		log.info(title)
+		startup := serviceById(ServiceIds.registryStartup) as RegistryStartupImpl
+		startup.go(tracker)
 		
+		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+		
+		stats := this.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
+		srvcs := "\n\n${stats.size} Services:\n\n"
+		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
+		unreal:= 0
+		stats.each {
+			srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle}\n"
+			if (it.lifecycle == ServiceLifecycle.DEFINED)
+				unreal++
+		}
+		perce := (100d * unreal / stats.size).toLocale("0.00")
+		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
+		
+		title	:= "Alien-Factory IoC v" + typeof.pod.version.toStr + " /___/   "
+		title 	= title.padl(61, ' ')
+		title = "   ___    __                 _____        _                  
+		           / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
+		          / _  | / /_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
+		         /_/ |_|/___//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
+		title 	+= "\n\n"
+		title 	+= "IoC started up in ${millis}ms\n"
+
+		log.info(srvcs + title)
 		return this
 	}
 
@@ -270,6 +282,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 
+	internal Str:ServiceStat stats() {
+		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
+		
+		modules.each { stats.addAll(it.serviceStats) }
+		
+		return stats
+	}
+	
 	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {

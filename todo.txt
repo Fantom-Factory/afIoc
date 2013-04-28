@@ -1,11 +1,9 @@
 
-v1.2
-scoreboard
-contribution overrides - more than once? Order them?
+v1.3
 
 proxies
 methods only - or fields
- - don't override virtual or normal meths! Only abstract!
+ - don't override virtual or normal methods! Only abstract!
 advice
 
 
@@ -19,5 +17,5 @@ service disambiguation via facets - is just another dep pro: map of services key
 
 
 Bad ideas:
-OrderConfig wildcards - e.g. before: * NO WILDCARDS, use placeholders instead
+OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
 PerThreadService - is just registry.get()!

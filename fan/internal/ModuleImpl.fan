@@ -25,6 +25,15 @@ internal const class ModuleImpl : Module {
 					it.perApplicationServices[def.serviceId] = service
 				}
 			}
+			withMyState {
+				it.stats[def.serviceId] = ServiceStat {
+					it.serviceId	= def.serviceId
+					it.type			= def.serviceType
+					it.scope		= def.scope
+					it.lifecycle	= ServiceLifecycle.BUILTIN
+					it.noOfImpls	= (service == null) ? 0 : 1
+				}
+			}
 			serviceDefs[def.serviceId] = def
 		}
 		
@@ -39,6 +48,15 @@ internal const class ModuleImpl : Module {
 		
 		moduleDef.serviceDefs.each |def| { 
 			serviceDefs[def.serviceId] = def
+			withMyState {
+				it.stats[def.serviceId] = ServiceStat {
+					it.serviceId	= def.serviceId
+					it.type			= def.serviceType
+					it.scope		= def.scope
+					it.lifecycle	= ServiceLifecycle.DEFINED
+					it.noOfImpls	= 0
+				}
+			}		
 		}
 		
 		this.moduleId		= moduleDef.moduleId
@@ -111,6 +129,10 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
+	override Str:ServiceStat serviceStats() {
+		getMyState { it.stats.toImmutable }
+	}
+	
 	override Void clear() {
 		perThreadServices.clear
 		withMyState { 
@@ -132,11 +154,18 @@ internal const class ModuleImpl : Module {
 		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
+			
+			withMyState {
+				stat := it.stats[def.serviceId]
+				it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.CREATED).withNoOfImpls(stat.noOfImpls + 1)
+			}
+			
 			return service				
 	    }	
     }
 }
 
 internal class StandardModuleState {
-	Str:Obj	perApplicationServices := Str:Obj[:] { caseInsensitive = true }
+	Str:Obj	perApplicationServices	:= Str:Obj[:] 			{ caseInsensitive = true }
+	Str:ServiceStat stats			:= Str:ServiceStat[:]	{ caseInsensitive = true }
 }
