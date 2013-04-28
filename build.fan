@@ -5,14 +5,14 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful 'Inversion Of Control' (IOC) framework"
-		version = Version([1,2,0])
+		version = Version([1,2,1])
 
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
 					"vcs.uri"		: "https://bitbucket.org/SlimerDude/afioc",
 					"proj.name"		: "AF-IOC",
 					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "false"	// EEK!
+					"repo.private"	: "true"
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0"]
