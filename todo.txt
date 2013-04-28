@@ -1,18 +1,14 @@
 
-v1.3
+for v1.3
 
 proxies
 methods only - or fields
  - don't override virtual or normal methods! Only abstract!
 advice
 
-
-OrderedConfig.addOrderedPlaceholder(Str placeholderName)
-
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - depPro ctx (a convienience for serviceById)
-
 
 
 

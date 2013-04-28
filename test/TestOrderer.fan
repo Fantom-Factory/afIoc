@@ -65,7 +65,17 @@ class TestOrderer : IocTest {
 			orderer.order
 		}		
 	}
-	
+
+	Void testPlaceholder() {
+		orderer := Orderer()
+		orderer.addOrdered("s1", "s1", ["after end"])
+		orderer.addOrdered("s2", "s2", ["before end"])
+		orderer.addPlaceholder("end")
+		
+		verifyEq(2, orderer.toOrderedList.size)
+		verifyOrder(orderer.order)
+	}
+
 	Void testMapDup() {
 		map := Str:Str[:] { caseInsensitive=true }
 		map["DEE"] = "sigh"
