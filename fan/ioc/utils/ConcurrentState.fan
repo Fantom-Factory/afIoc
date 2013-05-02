@@ -47,7 +47,7 @@ const class ConcurrentState {
 	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
 	private static const ActorPool	actorPool	:= ActorPool()
 	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
-	private const Type				stateType
+	private const |->Obj| 			stateFactory
 	private const LocalStash 		stash
 
 	private Obj? state {
@@ -56,9 +56,14 @@ const class ConcurrentState {
 	}
 	
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
-	new make(Type stateType) {
-		this.stateType	= stateType
-		this.stash		= LocalStash(stateType)
+	new makeWithStateType(Type stateType) {
+		this.stateFactory	= |->Obj| { stateType.make }
+		this.stash			= LocalStash(stateType)
+	}
+	
+	new makeWithStateFactory(|->Obj| stateFactory) {
+		this.stateFactory	= stateFactory
+		this.stash			= LocalStash(ConcurrentState#)
 	}
 	
 	** Use to access state
@@ -90,14 +95,14 @@ const class ConcurrentState {
 		}
 	}
 	
-	protected Obj? receive(Obj[] msg) {
+	private Obj? receive(Obj[] msg) {
 		reportErr	:= msg[0] as Bool
 		func 		:= msg[1] as |Obj?->Obj?|
 
 		try {
 			// lazily create our state
 			if (state == null) 
-				state = stateType.make
+				state = stateFactory()
 			
 			return func.call(state)
 			

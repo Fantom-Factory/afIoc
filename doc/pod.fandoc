@@ -167,6 +167,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.3.0 [#v1.3.0]
+----------------
+ - New: `ConcurrentState` now accepts a factory method for creating / initialising state.
+
 v1.2.0 [#v1.2.0]
 ----------------
  - New: Browse defined services via `ServiceStats`
