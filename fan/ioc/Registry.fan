@@ -26,5 +26,7 @@ const mixin Registry {
     abstract Obj autobuild(Type type)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
+	** 
+	** Returns the object passed in for method chaining.
 	abstract Obj injectIntoFields(Obj service)	
 }
