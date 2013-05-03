@@ -1,5 +1,12 @@
 
-** Place on module classes to define other modules to be loaded.
+** Place on module classes to define other modules to be loaded. Example
+** 
+** pre>
+**   @SubModule { modules=[AnotherModule#] }
+**   class MainModule {
+**     ...
+**   }
+** <pre
 facet class SubModule {
 	const Type[] modules
 }
