@@ -10,6 +10,7 @@ service disambiguation via facets - is just another dep pro: map of services key
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - depPro ctx (a convienience for serviceById)
 
+See ProviderCtx for depPro
 
 
 Bad ideas:

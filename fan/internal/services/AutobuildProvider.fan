@@ -12,7 +12,7 @@ internal const class AutobuildProvider : DependencyProvider {
 	
 	override Obj provide(ProviderCtx ctx, Type dependencyType) {
 		ctx.log("Found @Autobuild")
-		service := registry.trackAutobuild(ctx.injectionCtx, dependencyType)
+		service := registry.trackAutobuild(ctx.injectionCtx, dependencyType, Obj#.emptyList)
 		return service
 	}
 	

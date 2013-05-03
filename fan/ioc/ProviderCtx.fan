@@ -51,11 +51,13 @@ class ProviderCtx {
 // - dependencyType
 // - injectingInto (no instance - it's not made yet!)
 // - ctorFacets
+// - paramIndex
 // 
 //MethodInjection
 // - dependencyType
 // - injectingInto
 // - methodFacets
+// - paramIndex
 // 
 //abstract Bool canProvide(ProviderCtx ctx, InjectionMode , Type dependencyType, Type injectingInto, Facet[] facets)
 

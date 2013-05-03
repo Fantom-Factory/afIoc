@@ -178,10 +178,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj autobuild(Type type) {
+	override Obj autobuild(Type type,
+		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
+		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null) {
 		shutdownLockCheck
 		log.info("Autobuilding $type.qname")
-		return trackAutobuild(InjectionCtx(this), type)
+		params := Utils.toParamList(a, b, c, d, e, f, g, h)
+		return trackAutobuild(InjectionCtx(this), type, params)
 	}
 
 	override Obj injectIntoFields(Obj object) {
@@ -231,7 +234,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
 
-	override Obj trackAutobuild(InjectionCtx ctx, Type type) {
+	override Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] initParams) {
 		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
 		serviceDef := StandardServiceDef() {
 			it.serviceId 	= "${type.name}Autobuild"
@@ -243,7 +246,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.source		= |InjectionCtx ctxx->Obj?| { return null }
 		}		
 		return ctx.withServiceDef(serviceDef) |->Obj?| {
-			return InjectionUtils.autobuild(ctx, type)
+			return InjectionUtils.autobuild(ctx, type, initParams)
 		}
 	}
 
@@ -281,15 +284,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 
 	// ---- Helper Methods ------------------------------------------------------------------------
-
+	
 	internal Str:ServiceStat stats() {
 		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
-		
 		modules.each { stats.addAll(it.serviceStats) }
-		
 		return stats
 	}
-	
+
 	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {

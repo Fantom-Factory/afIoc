@@ -2,10 +2,10 @@
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 
-	static Obj autobuild(InjectionCtx ctx, Type type) {
+	static Obj autobuild(InjectionCtx ctx, Type type, Obj?[] initParams) {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
-			obj  := createViaConstructor(ctx, ctor, type)
+			obj  := createViaConstructor(ctx, ctor, type, initParams)
 			injectIntoFields(ctx, obj)
 			return obj
 		}
@@ -30,7 +30,7 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj) {
-		args := findMethodInjectionParams(ctx, method)
+		args := findMethodInjectionParams(ctx, method, Obj#.emptyList)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
@@ -74,13 +74,13 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building) {
+	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] initParams) {
 		if (ctor == null) {
 			return ctx.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
-			}	
+			}
 		}
-		args := findMethodInjectionParams(ctx, ctor)
+		args := findMethodInjectionParams(ctx, ctor, initParams)
 		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
@@ -120,11 +120,21 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method) {
+	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] initParams) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			ctx.withFacets(Facet[,]) |->Obj[]| {
-				params := method.params.map |param| {
-					ctx.log("Found parameter $param.type")
+				params := method.params.map |param, index| {
+					
+					ctx.log("Found parameter ${index+1}) $param.type")
+					if (index < initParams.size) {
+						ctx.log("Parameter provided")
+						
+						provided := initParams[index] 
+						if (provided != null && !provided.typeof.fits(param.type))
+							throw IocErr(IocMessages.providerCtorParamDoesNotFit(provided.typeof, param.type))
+						return provided
+					}
+					
 					return findDependencyByType(ctx, param.type)
 				}		
 				if (params.isEmpty)

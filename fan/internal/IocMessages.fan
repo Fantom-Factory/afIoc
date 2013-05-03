@@ -199,6 +199,10 @@ internal const class IocMessages {
 		"Only one Dependency Provider is allowed, but type ${type.qname} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
 	}
 	
+	static Str providerCtorParamDoesNotFit(Type provided, Type param) {
+		"Provided autobuild parameter '$provided.qname' does not fit ctor parameter '$param.qname'"
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {
