@@ -11,7 +11,7 @@ internal const mixin ObjLocator {
 	** Autobuilds a class via a ctor marked with '@Inject', failing that, the ctor with the most 
 	** parameters. Services and dependencies will be injected into the ctor parameters, and into 
 	** fields (of all visibilities) marked with '@Inject'. 
-    abstract Obj trackAutobuild(InjectionCtx ctx, Type type)
+    abstract Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] initParams)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	abstract Obj trackInjectIntoFields(InjectionCtx ctx, Obj service)	

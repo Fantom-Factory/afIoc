@@ -30,8 +30,11 @@ class MappedConfig {
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
-	Obj autobuild(Type type) {
-		ctx.objLocator.trackAutobuild(ctx, type)
+	Obj autobuild(Type type,
+		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
+		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null) {
+		params := Utils.toParamList(a, b, c, d, e, f, g, h)
+		return ctx.objLocator.trackAutobuild(ctx, type, Obj#.emptyList)
 	}
 	
 	** Adds a keyed object to the service's configuration.

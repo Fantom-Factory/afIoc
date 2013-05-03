@@ -23,10 +23,37 @@ const mixin Registry {
 	**  - create instance via ctor marked with '@Inject' or the ctor with the *most* parameters
 	**  - inject dependencies into fields (of all visibilities) marked with '@Inject'
 	**  - call any methods annotated with '@PostInjection'
-    abstract Obj autobuild(Type type)
+	** 
+	** The other parameters (if provided) may be passed to the autobuild ctor. Handy when you wish 
+	** the ctor to take a mixture of objects and services. e.g. for a `fwt::Command`:
+	** 
+	** pre>
+	**   registry.autobuild(MySaveCommand#, entityToSave).invoke(null)
+	**   ..
+	**   class MySaveCommand {
+	**     @Inject
+	**     private EntityDao entityDao
+	**     
+	**     private Entity entity
+	** 
+	**     new make(Entity entity, OtherService service, |This| injectInto) {
+	**       injectInto(this)       // ioc to inject all fields
+	**       service.doSomething    // this service is only used here, so doesn't need to be a field 
+	**       entityDao.save(entity) // use the field service and passed in entity 
+	**     }
+	**   }
+	** <pre
+	** 
+	** Note the passed in parameters **must** be first in the ctor parameter list.
+    abstract Obj autobuild(Type type,
+		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
+		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 
 	** Returns the object passed in for method chaining.
+	** 
+	** *Note usage of this method is discouraged, it is far better practice for the creator to call 
+	** 'autobuild' instead.*  
 	abstract Obj injectIntoFields(Obj service)	
 }
