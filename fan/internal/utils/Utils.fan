@@ -51,14 +51,4 @@ internal class Utils {
 			fac.typeof == annotation
 		} ?: throw Err("Facet $annotation.qname not found on $slot.qname")
 	}
-
-	static Obj?[] toParamList( 
-		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
-		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null) {
-		params := [a, b, c, d, e, f, g, h]
-		// remove nulls from the end of the list
-		while (!params.isEmpty && params.peek == null)
-			params.pop
-		return params
-	}
 }

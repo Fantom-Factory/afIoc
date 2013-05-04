@@ -36,11 +36,8 @@ class OrderedConfig {
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
-	Obj autobuild(Type type,
-		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
-		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null) {
-		params := Utils.toParamList(a, b, c, d, e, f, g, h)
-		return ctx.objLocator.trackAutobuild(ctx, type, params)
+	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
+		return ctx.objLocator.trackAutobuild(ctx, type, ctorArgs)
 	}
 
 	** Adds an unordered object to a service's configuration.

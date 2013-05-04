@@ -28,7 +28,7 @@ const mixin Registry {
 	** the ctor to take a mixture of objects and services. e.g. for a `fwt::Command`:
 	** 
 	** pre>
-	**   registry.autobuild(MySaveCommand#, entityToSave).invoke(null)
+	**   registry.autobuild(MySaveCommand#, [entityToSave]).invoke(null)
 	**   ..
 	**   class MySaveCommand {
 	**     @Inject
@@ -44,10 +44,10 @@ const mixin Registry {
 	**   }
 	** <pre
 	** 
-	** Note the passed in parameters **must** be first in the ctor parameter list.
-    abstract Obj autobuild(Type type,
-		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
-		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null)
+	** Note: the passed in parameters **must** be first in the ctor parameter list.
+	** 
+	** Impl note: A list is used rather than splats so 'nulls' can be passed in. 
+    abstract Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 

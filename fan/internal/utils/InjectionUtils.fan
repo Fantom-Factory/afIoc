@@ -2,10 +2,10 @@
 internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 
-	static Obj autobuild(InjectionCtx ctx, Type type, Obj?[] initParams) {
+	static Obj autobuild(InjectionCtx ctx, Type type, Obj?[] ctorArgs) {
 		ctx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
-			obj  := createViaConstructor(ctx, ctor, type, initParams)
+			obj  := createViaConstructor(ctx, ctor, type, ctorArgs)
 			injectIntoFields(ctx, obj)
 			return obj
 		}
@@ -74,13 +74,13 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] initParams) {
+	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] ctorArgs) {
 		if (ctor == null) {
 			return ctx.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
 			}
 		}
-		args := findMethodInjectionParams(ctx, ctor, initParams)
+		args := findMethodInjectionParams(ctx, ctor, ctorArgs)
 		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			return ctor.callList(args)
 		}
@@ -120,16 +120,16 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] initParams) {
+	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] ctorArgs) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			ctx.withFacets(Facet[,]) |->Obj[]| {
 				params := method.params.map |param, index| {
 					
 					ctx.log("Found parameter ${index+1}) $param.type")
-					if (index < initParams.size) {
+					if (index < ctorArgs.size) {
 						ctx.log("Parameter provided")
 						
-						provided := initParams[index] 
+						provided := ctorArgs[index] 
 						if (provided != null && !provided.typeof.fits(param.type))
 							throw IocErr(IocMessages.providerCtorParamDoesNotFit(provided.typeof, param.type))
 						return provided
