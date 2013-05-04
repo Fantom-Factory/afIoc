@@ -178,13 +178,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj autobuild(Type type,
-		Obj? a := null, Obj? b := null, Obj? c := null, Obj? d := null,
-		Obj? e := null, Obj? f := null, Obj? g := null, Obj? h := null) {
+	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
 		shutdownLockCheck
 		log.info("Autobuilding $type.qname")
-		params := Utils.toParamList(a, b, c, d, e, f, g, h)
-		return trackAutobuild(InjectionCtx(this), type, params)
+		return trackAutobuild(InjectionCtx(this), type, ctorArgs)
 	}
 
 	override Obj injectIntoFields(Obj object) {
@@ -234,7 +231,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
 
-	override Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] initParams) {
+	override Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] ctorArgs) {
 		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
 		serviceDef := StandardServiceDef() {
 			it.serviceId 	= "${type.name}Autobuild"
@@ -246,7 +243,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.source		= |InjectionCtx ctxx->Obj?| { return null }
 		}		
 		return ctx.withServiceDef(serviceDef) |->Obj?| {
-			return InjectionUtils.autobuild(ctx, type, initParams)
+			return InjectionUtils.autobuild(ctx, type, ctorArgs)
 		}
 	}
 

@@ -3,14 +3,14 @@ class TestAutobuild : IocTest {
 	
 	Void testAutobuildWithParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		s47 := reg.autobuild(T_MyService47#, 69, "Beer!") as T_MyService47
+		s47 := reg.autobuild(T_MyService47#, [69, "Beer!"]) as T_MyService47
 		verifyEq(s47.int, 69)
 		verifyEq(s47.str, "Beer!")
 	}
 
 	Void testAutobuildWithParamsAndServices() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		s48 := reg.autobuild(T_MyService48#, 69, "Beer!") as T_MyService48
+		s48 := reg.autobuild(T_MyService48#, [69, "Beer!"]) as T_MyService48
 		verifyEq(s48.s2, reg.serviceById("s2"))
 		verifyEq(s48.int, 69)
 		verifyEq(s48.str, "Beer!")
@@ -19,7 +19,7 @@ class TestAutobuild : IocTest {
 	Void testAutobuildWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
 		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Str#, Int#)) {			
-			reg.autobuild(T_MyService47#, "Oops!")
+			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
 }
