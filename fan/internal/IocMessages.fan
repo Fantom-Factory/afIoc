@@ -36,7 +36,7 @@ internal const class IocMessages {
 	}
 	
 	static Str bindImplNotClass(Type impl) {
-		"Service Implementation ${impl.qname} is not instantiatable"
+		"Service Implementation ${impl.qname} can not be instantiated"
 	}
 	
 	static Str perAppScopeOnlyForConstClasses(Type impl) {
@@ -48,7 +48,7 @@ internal const class IocMessages {
 	}
 
 	static Str noDependencyMatchesType(Type type) {
-		"No dependency macthes type ${type}."
+		"No dependency macthes type ${type.signature}."
 	}
 
 	static Str couldNotFindImplType(Type serviceType) {
@@ -124,7 +124,7 @@ internal const class IocMessages {
 	}
 
 	static Str orderedConfigTypeMismatch(Type objType, Type listType) {
-		"Contribution of type $objType.qname does not match service configuration list type of $listType.qname"
+		"Contribution of type $objType.signature does not match service configuration list type of $listType.signature"
 	}
 
 	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
@@ -132,7 +132,7 @@ internal const class IocMessages {
 	}
 	
 	static Str mappedConfigTypeMismatch(Str type, Type objType, Type mapType) {
-		"Contribution of type $objType.qname does not match service configuration $type type of $mapType.qname"
+		"Contribution of type $objType.signature does not match service configuration $type type of $mapType.signature"
 	}
 	
 	static Str configMismatch(Type notFound, Type tryThis) {
@@ -188,19 +188,19 @@ internal const class IocMessages {
 	}
 	
 	static Str serviceIdDoesNotFit(Str serviceId, Type serviceType, Type fieldType) {
-		"Service Id '${serviceId} of type ${serviceType.qname} does not fit type ${fieldType.qname}"
+		"Service Id '${serviceId} of type ${serviceType.signature} does not fit type ${fieldType.signature}"
 	}
 	
 	static Str dependencyDoesNotFit(Type dependencyType, Type fieldType) {
-		"Dependency of type ${dependencyType.qname} does not fit type ${fieldType.qname}"
+		"Dependency of type ${dependencyType.signature} does not fit type ${fieldType.signature}"
 	}
 	
 	static Str onlyOneDependencyProviderAllowed(Type type, Type[] dps) {
-		"Only one Dependency Provider is allowed, but type ${type.qname} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
+		"Only one Dependency Provider is allowed, but type ${type.signature} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
 	}
 	
 	static Str providerCtorParamDoesNotFit(Type provided, Type param) {
-		"Provided autobuild parameter '$provided.qname' does not fit ctor parameter '$param.qname'"
+		"Provided autobuild parameter '$provided.signature' does not fit ctor parameter '$param.signature'"
 	}
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------

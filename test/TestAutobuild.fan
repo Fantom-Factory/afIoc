@@ -22,12 +22,22 @@ class TestAutobuild : IocTest {
 			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
+
+	Void testAutobuildWithList() {
+		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
+		Int[] ints := [,]
+		// because the list should be passed byRef, I don't want to substitute an empty list of the correct type
+		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Obj?[]#, Int[]#)) {			
+			reg.autobuild(T_MyService49#, [ints])
+		}
+	}
 }
 
 internal class T_MyModule75 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService2#).withId("s2")
 		binder.bindImpl(T_MyService48#)
+		binder.bindImpl(T_MyService49#)
 	}
 }
 
@@ -49,5 +59,12 @@ internal class T_MyService48 {
 		inject(this)
 		this.int = int
 		this.str = str
+	}
+}
+
+internal class T_MyService49 {
+	Int[] ints
+	new make(Int[] ints) {
+		this.ints = ints
 	}
 }
