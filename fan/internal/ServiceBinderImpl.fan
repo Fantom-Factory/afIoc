@@ -105,8 +105,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	static |InjectionCtx ctx->Obj| ctorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
 		|InjectionCtx ctx->Obj| {
 			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
-				log.info("Creating Service '$serviceDef.serviceId'")
-				
+//				log.info("Creating Service '$serviceDef.serviceId'")	// TODO: configure logging
 				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
 				
 				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {

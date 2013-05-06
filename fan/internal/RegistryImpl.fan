@@ -180,13 +180,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
 		shutdownLockCheck
-		log.info("Autobuilding $type.qname")
+//		log.info("Autobuilding $type.qname")	// TODO: configure logging 
 		return trackAutobuild(InjectionCtx(this), type, ctorArgs)
 	}
 
 	override Obj injectIntoFields(Obj object) {
 		shutdownLockCheck
-		log.info("Injecting dependencies into fields of $object.typeof.qname")
+//		log.info("Injecting dependencies into fields of $object.typeof.qname")	// TODO: configure logging
 		return trackInjectIntoFields(InjectionCtx(this), object)
 	}
 

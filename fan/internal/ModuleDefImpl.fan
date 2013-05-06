@@ -129,7 +129,7 @@ internal const class ModuleDefImpl : ModuleDef {
 			sId 			:= it.serviceId
 			it.source 		= |InjectionCtx ctx -> Obj| {
 				ctx.track("Creating Serivce '$sId' via a builder method '$method.qname'") |->Obj| {
-					log.info("Creating Service '$sId'")
+//					log.info("Creating Service '$sId'")	// TODO: configure logging
 					return ctx.withProvider(ConfigProvider(ctx, sDef, method)) |->Obj?| {
 						return InjectionUtils.callMethod(ctx, method, null)
 					}
