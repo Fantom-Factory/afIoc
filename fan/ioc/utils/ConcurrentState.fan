@@ -9,6 +9,10 @@ using concurrent
 ** boundaries. Meaning that while all data in the State object can be mutable, but data passed in 
 ** and out of the methods can not be. 
 ** 
+** 'ConcurrentState' has been designed to be *type safe*, that is you cannot accidently call 
+** methods on your State object. The compiler forces all access to the state object to be made 
+** through the 'withState' and 'getState' methods.
+** 
 ** A full example of a mutable const map class is as follows:
 ** 
 ** pre>
