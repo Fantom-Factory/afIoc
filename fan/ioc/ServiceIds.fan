@@ -22,6 +22,12 @@ mixin ServiceIds {
 	** @see `ServiceStats`
 	static const Str serviceStats				:= "ServiceStats"
 	
+	** @since 1.3
+	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"
+
+	** @since 1.3
+	static const Str plastic					:= "Plastic"
+	
 	internal
 	static const Str ctorFieldInjector			:= "CtorFieldInjector"
 	

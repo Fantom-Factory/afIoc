@@ -52,6 +52,26 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
+			services[StandardServiceDef() {
+				it.serviceId 	= ServiceIds.plastic
+				it.moduleId		= builtInModuleId
+				it.serviceType 	= Plastic#
+				it.serviceImplType 	= Plastic#
+				it.scope		= ServiceScope.perApplication
+				it.description 	= "'$it.serviceId' : Built In Service"
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, Plastic#)
+			}] = null
+
+			services[StandardServiceDef() {
+				it.serviceId 	= ServiceIds.serviceProxyBuilder
+				it.moduleId		= builtInModuleId
+				it.serviceType 	= ServiceProxyBuilder#
+				it.serviceImplType 	= ServiceProxyBuilder#
+				it.scope		= ServiceScope.perApplication
+				it.description 	= "'$it.serviceId' : Built In Service"
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceProxyBuilder#)
+			}] = null
+
 			services[makeBuiltInServiceDef(ServiceIds.serviceStats, ServiceStats#)] = ServiceStatsImpl(this)
 			
 			builtInModule := ModuleImpl(this, builtInModuleId, services)
