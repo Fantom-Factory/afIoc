@@ -2,15 +2,18 @@
 @NoDoc
 const class ServiceProxyBuilder {
 	
-	@Inject
+	@Inject 
 	private const Registry registry
 	
 	@Inject
-	private const Plastic plastic
+	private const PlasticPodCompiler plasticPodCompiler
 	
 	new make(|This|di) { di(this) }
-	
-	Obj buildProxy(Type serviceType) {
+
+	** We need the serviceDef as only *it* knows how to build the serviceImpl
+	internal Obj buildProxy(ServiceDef serviceDef) {
+		serviceId	:= serviceDef.serviceId
+		serviceType	:= serviceDef.serviceType
 		
 		if (!serviceType.isMixin)
 			throw Err("Mixin onlys")	// TODO: better err msg
@@ -20,7 +23,7 @@ const class ServiceProxyBuilder {
 		model.extendMixin(serviceType)
 		model.addField(LazyService#, "lazyService")
 
-		methods := serviceType.methods.rw
+		methods := serviceType.methods.rw.findAll { it.isAbstract || it.isVirtual }
 		Obj#.methods.each { methods.remove(it) }
 
 		methods.each |method| { 
@@ -29,18 +32,14 @@ const class ServiceProxyBuilder {
 			model.overrideMethod(method, body)
 		}
 		
-		code 		:= model.toFantomCode
-		Env.cur.err.printLine(code)
-		
-		pod 		:= plastic.compile(code)
+		code 		:= model.toFantomCode		
+		pod 		:= plasticPodCompiler.compile(code)
 		proxyType 	:= pod.type(model.className)
 		lazyField 	:= proxyType.field("lazyService")
-		plan 		:= Field:Obj?[lazyField : LazyService(registry, serviceType.name)]
+		plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
 		ctorFunc 	:= Field.makeSetFunc(plan)
+		proxy		:= proxyType.make([ctorFunc])
 		
-//		proxy		:= proxyType.make([plan])
-//		return proxy
-		
-		return 69
+		return proxy
 	}
 }

@@ -1,4 +1,5 @@
 
+** An internal mixin used to decouple RegistryImpl 
 internal const mixin ObjLocator {
 
 	** Obtains a service via its unique service id. 
@@ -19,6 +20,8 @@ internal const mixin ObjLocator {
 	abstract ServiceDef? serviceDefById(Str serviceId)
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType) 
+	
+	abstract Obj getService(InjectionCtx ctx, ServiceDef serviceDef)
 	
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 }
