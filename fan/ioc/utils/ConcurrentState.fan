@@ -19,13 +19,17 @@ using concurrent
 ** const class ConstMap {
 **   const ConcurrentState  conState  := ConcurrentState(ConstMapState#)
 **   
-**   Str get(Str key) {
+**   ** Note that both 'key' and 'value' need to be immutable
+**   @Operator
+**   Obj get(Obj key) {
 **     getState {
 **       it.map[key]
 **     }
 **   }
 ** 
-**   Void put(Str key, Str value) {
+**   ** Note that both 'key' and 'value' need to be immutable
+**   @Operator
+**   Void set(Obj key, Obj value) {
 **     withState {
 **       it.map[key] = value
 **     }
@@ -43,9 +47,13 @@ using concurrent
 ** }
 ** 
 ** class ConstMapState {
-**   Str:Str  map := [:]
+**   Obj:Obj  map := [:]
 ** }
 ** <pre
+** 
+** As alternatives to 'ConcurrentState' don't forget you also have 
+** [AtomicBool]`concurrent::AtomicBool`, [AtomicInt]`concurrent::AtomicInt` and 
+** [AtomicRef]`concurrent::AtomicRef`
 ** 
 const class ConcurrentState {
 	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
