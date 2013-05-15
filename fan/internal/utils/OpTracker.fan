@@ -7,7 +7,12 @@ internal class OpTracker {
 	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
 	private OpTrackerOp[]		operations	:= [,]
 	private Bool				logged		:= false
+	private LogLevel			logLevel	:= LogLevel.debug
 
+	new makeWithLoglevel(LogLevel logLevel) {
+		this.logLevel = logLevel
+	}
+	
 	new make(Str? lifetimeMsg := null) {
 		if (lifetimeMsg != null)
 			pushOp(lifetimeMsg)
@@ -46,16 +51,16 @@ internal class OpTracker {
 	}
 	
 	Void logExpensive(|->Str| msg) {
-		if (logger.isDebug) {
+		if (logEnabled) {
 			log(msg())
 		}
 	}
 
 	Void log(Str description) {
-		if (logger.isDebug) {
+		if (logEnabled) {
 			depth 	  := operations.size
 			pad 	  := "".justr(depth)		
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}  > $description")
+			loggy("[${depth.toStr.justr(3)}] ${pad}  > $description")
 		}
 	}
 	
@@ -69,10 +74,10 @@ internal class OpTracker {
 			it.startTime	= Duration.now
 		}
 		
-		if (logger.isDebug) {
+		if (logEnabled) {
 			depth 	:= operations.size + 1
 			pad		:= "".justr(depth)
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}--> $op.description")
+			loggy("[${depth.toStr.justr(3)}] ${pad}--> $op.description")
 		}
 
 		operations.push(op)
@@ -80,12 +85,21 @@ internal class OpTracker {
 
 	private Void popOp() {
 		op := operations.pop
-		if (logger.isDebug) {
+		if (logEnabled) {
 			depth 	:= operations.size + 1
 			pad		:= "".justr(depth)			
 			millis	:= (Duration.now - op.startTime).toMillis.toLocale("#,000")
-			logger.debug("[${depth.toStr.justr(3)}] ${pad}<-- $op.description [${millis}ms]")
+			loggy("[${depth.toStr.justr(3)}] ${pad}<-- $op.description [${millis}ms]")
 		}
+	}
+	
+	private Bool logEnabled() {
+		return logger.isEnabled(logLevel)
+	}
+
+	private Void loggy(Str msg) {
+		rec := LogRec(DateTime.now, logLevel, logger.name, msg)
+		logger.log(rec)
 	}
 }
 
