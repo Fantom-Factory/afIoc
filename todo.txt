@@ -10,7 +10,13 @@ service disambiguation via facets - is just another dep pro: map of services key
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - depPro ctx (a convienience for serviceById)
 
-See ProviderCtx for depPro
+
+Re-do DepdendencyCtx to give more detail 
+ - See ProviderCtx for details
+ 
+Route all service building through a (single) BuildActor to absolutely prevent a race condition from 
+building a service twice. The BuildActor should look up service first, to ensure it's not been build while
+the message waiting to get serviced. Maybe have a BuildActor per App / Thread? 
 
 
 Bad ideas:

@@ -26,7 +26,7 @@ mixin ServiceIds {
 	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"
 
 	** @since 1.3
-	static const Str plastic					:= "Plastic"
+	static const Str plasticPodCompiler			:= "PlasticPodCompiler"
 	
 	internal
 	static const Str ctorFieldInjector			:= "CtorFieldInjector"

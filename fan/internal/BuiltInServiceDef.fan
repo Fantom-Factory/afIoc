@@ -6,7 +6,6 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Type 		serviceType	
 	override const Type? 		serviceImplType	
 	override const ServiceScope scope
-	override const Type?		configType
 	
 	new make(|This|? f := null) { f?.call(this)	}
 

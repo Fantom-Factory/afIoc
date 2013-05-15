@@ -53,13 +53,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[StandardServiceDef() {
-				it.serviceId 	= ServiceIds.plastic
+				it.serviceId 	= ServiceIds.plasticPodCompiler
 				it.moduleId		= builtInModuleId
-				it.serviceType 	= Plastic#
-				it.serviceImplType 	= Plastic#
+				it.serviceType 	= PlasticPodCompiler#
+				it.serviceImplType 	= PlasticPodCompiler#
 				it.scope		= ServiceScope.perApplication
 				it.description 	= "'$it.serviceId' : Built In Service"
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, Plastic#)
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 
 			services[StandardServiceDef() {
@@ -150,6 +150,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		perce := (100d * unreal / stats.size).toLocale("0.00")
 		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
 		
+		// FIXME: move to Utils
 		title	:= "Alien-Factory IoC v" + typeof.pod.version.toStr + " /___/   "
 		title 	= title.padl(61, ' ')
 		title = "   ___    __                 _____        _                  
@@ -299,16 +300,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-
-	// ---- Helper Methods ------------------------------------------------------------------------
-	
-	internal Str:ServiceStat stats() {
-		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
-		modules.each { stats.addAll(it.serviceStats) }
-		return stats
-	}
-
-	private Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
+	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
 			ctx.log("Found override for service '${serviceDef.serviceId}'")
@@ -318,7 +310,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
 		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
 	}
+
+
+	// ---- Helper Methods ------------------------------------------------------------------------
 	
+	internal Str:ServiceStat stats() {
+		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
+		modules.each { stats.addAll(it.serviceStats) }
+		return stats
+	}
+
 	private Void shutdownLockCheck() {
 		withMyState |state| {
 			state.shutdownLock.check
