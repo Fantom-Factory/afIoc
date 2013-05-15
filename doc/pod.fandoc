@@ -1,11 +1,25 @@
 Overview [#overview]
 ********************
 IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond all else, this IoC offers:
- - distributed service configuration between pods and modules
- - extensible with your own `DependencyProvider`s
- - extensive error reporting and detailed Err messages
- - lazy(ish) service loading
- - case insensitivity
+
+- **Distributed service configuration between pods and modules**
+  - config are simple Lists and Maps
+  - configure *any* service *from* any pod / module
+
+- **Override everything**
+  - override real services with test services
+  - set sensible default config and let users override them
+
+- **Extensible with your own `DependencyProvider`s**
+  - inject your own objects, not just services!
+
+- **Extensive error reporting and detailed Err messages**
+  - designed to help *you* the developer!
+  - over 55 bespoke Err messages!
+
+- **Lazy(ish) service loading**
+  - nothing is created until you use it
+
 
 Quick Start [#quickStart]
 *************************
