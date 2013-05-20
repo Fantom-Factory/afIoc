@@ -9,7 +9,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const ServiceOverride?			serviceOverrides
 	
 	private const Duration					startTime
-	private const Int						noOfServices
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
 		startTime			= tracker.startTime
@@ -119,7 +118,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		injCtx				:= InjectionCtx(this, tracker)
 		depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
-		noOfServices		= serviceIdToModule.size
 		serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)
 	}
 
