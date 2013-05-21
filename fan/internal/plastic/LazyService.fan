@@ -2,6 +2,7 @@ using concurrent::AtomicBool
 using concurrent::AtomicRef
 using afIoc::ConcurrentState
 
+** Public because it
 ** Should we add this source to the generated pods? 
 @NoDoc
 const class LazyService {
