@@ -105,15 +105,24 @@ class TestIocService : IocTest {
 
 	Void testIocServiceMayBeUsedDuringStartup() {
 		iocs := IocService([T_MyModule54#]).install
-		iocs.onStart
+		try {
+			iocs.onStart
+		} finally {
+			iocs.uninstall
+		}
 	}
 	
 	** see http://fantom.org/sidewalk/topic/2133
 	Void testStartErrsAreRethrown() {
 		iocs := IocService([T_MyModule40#]).start
-		verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
-			iocs.registry.serviceById("wotever")
-		}
+			try {
+			verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+				iocs.registry.serviceById("wotever")
+			}
+			verifyFalse(iocs.isRunning)
+		} finally {
+			iocs.uninstall
+		}		
 	}
 	
 	static Void assertSame(Obj? o1, Obj? o2) {
