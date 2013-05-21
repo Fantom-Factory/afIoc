@@ -14,73 +14,83 @@ class RegistryBuilder {
 
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
-		ctx.track("Adding module definition for '$moduleType.qname'") |->| {
-			lock.check
-			logger.info("Adding module definition for $moduleType.qname")
-			
-			ctx.withModule(moduleType) |->| {			
-				if (moduleDefs.find { it.moduleType == moduleType } != null) {
-					logger.warn(IocMessages.moduleAlreadyAdded(moduleType))
-					return
-				}
+		Utils.filterOutIocStackTraces |->Obj| {		
+			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
+				lock.check
+				logger.info("Adding module definition for $moduleType.qname")
 				
-				moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
-				addModuleDef(moduleDef)
-				
-				if (moduleType.hasFacet(SubModule#)) {
-					subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
-					ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
-						subModule.modules.each { 
-							addModule(it)
-						}
+				ctx.withModule(moduleType) |->| {			
+					if (moduleDefs.find { it.moduleType == moduleType } != null) {
+						logger.warn(IocMessages.moduleAlreadyAdded(moduleType))
+						return
 					}
-				} else
-					ctx.log("No SubModules found")
+					
+					moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
+					addModuleDef(moduleDef)
+					
+					if (moduleType.hasFacet(SubModule#)) {
+						subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
+						ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
+							subModule.modules.each { 
+								addModule(it)
+							}
+						}
+					} else
+						ctx.log("No SubModules found")
+				}
 			}
-		}
-		return this
+			return this
+		} as RegistryBuilder
 	}
 
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
-		lock.check
-		moduleTypes.each |moduleType| {
-			addModule(moduleType)
-		}
-		return this
+		Utils.filterOutIocStackTraces |->Obj| {		
+			lock.check
+			moduleTypes.each |moduleType| {
+				addModule(moduleType)
+			}
+			return this
+		} as RegistryBuilder
 	}
 
 	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
 	** which defines the qualified name of a module to load.
 	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
-		logger.info("Adding modules from dependencies of '$pod.name'")
-		addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
-		return this
+		Utils.filterOutIocStackTraces |->Obj| {		
+			logger.info("Adding modules from dependencies of '$pod.name'")
+			addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
+			return this
+		} as RegistryBuilder
 	}
 
 	** Looks for all index properties of the key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
 	This addModulesFromIndexProperties() {
-		logger.info("Adding modules from index properties")
-		ctx.track("Adding modules from index properties") |->| {
-			lock.check
-			moduleNames := Env.cur.index("afIoc.module")
-			moduleNames.each {
-				addModuleFromTypeName(it)
+		Utils.filterOutIocStackTraces |->Obj| {		
+			logger.info("Adding modules from index properties")
+			ctx.track("Adding modules from index properties") |->| {
+				lock.check
+				moduleNames := Env.cur.index("afIoc.module")
+				moduleNames.each {
+					addModuleFromTypeName(it)
+				}
+				if (moduleNames.isEmpty)
+					ctx.log("No modules found")
 			}
-			if (moduleNames.isEmpty)
-				ctx.log("No modules found")
-		}
-		return this
+			return this
+		} as RegistryBuilder
 	}
 	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible for invoking
 	** `Registry.startup`
     Registry build() {
-		lock.lock
-        registry := RegistryImpl(ctx.tracker, moduleDefs)
-		ctx.tracker.end
-		return registry
+		Utils.filterOutIocStackTraces |->Obj| {
+			lock.lock
+	        registry := RegistryImpl(ctx.tracker, moduleDefs)
+			ctx.tracker.end
+			return registry
+		}
     }
 	
 	// ---- Private Methods -----------------------------------------------------------------------
