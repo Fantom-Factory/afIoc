@@ -7,7 +7,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Str:Module				modules
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
-	
 	private const Duration					startTime
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
@@ -182,31 +181,39 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj serviceById(Str serviceId) {
-		shutdownLockCheck
-		ctx := InjectionCtx(this)
-		return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
-			trackServiceById(ctx, serviceId)
+		Utils.filterOutIocStackTraces |->Obj| {
+			shutdownLockCheck
+			ctx := InjectionCtx(this)
+			return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
+				trackServiceById(ctx, serviceId)
+			}
 		}
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
-		shutdownLockCheck
-		ctx := InjectionCtx(this)
-		return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-			trackDependencyByType(ctx, dependencyType)
+		Utils.filterOutIocStackTraces |->Obj| {
+			shutdownLockCheck
+			ctx := InjectionCtx(this)
+			return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
+				trackDependencyByType(ctx, dependencyType)
+			}
 		}
 	}
 
 	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		shutdownLockCheck
-//		log.info("Autobuilding $type.qname")	// TODO: configure logging 
-		return trackAutobuild(InjectionCtx(this), type, ctorArgs)
+		Utils.filterOutIocStackTraces |->Obj| {
+			shutdownLockCheck
+//			log.info("Autobuilding $type.qname")	// TODO: configure logging 
+			return trackAutobuild(InjectionCtx(this), type, ctorArgs)
+		}
 	}
 
 	override Obj injectIntoFields(Obj object) {
-		shutdownLockCheck
-//		log.info("Injecting dependencies into fields of $object.typeof.qname")	// TODO: configure logging
-		return trackInjectIntoFields(InjectionCtx(this), object)
+		Utils.filterOutIocStackTraces |->Obj| {
+			shutdownLockCheck
+//			log.info("Injecting dependencies into fields of $object.typeof.qname")	// TODO: configure logging
+			return trackInjectIntoFields(InjectionCtx(this), object)
+		}
 	}
 
 

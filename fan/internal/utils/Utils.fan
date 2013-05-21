@@ -32,6 +32,15 @@ internal class Utils {
 		}
 	}
 
+	** @see http://fantom.org/sidewalk/topic/2147
+	static Obj? filterOutIocStackTraces(|->Obj?| func) {
+		try {
+			return func.call
+		} catch (IocErr iocErr) {
+			throw IocErr(iocErr.msg)
+		}
+	}
+	
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
 	** 'hasFacet' is available on Type.
 	static Facet getFacetOnType(Type type, Type annotation) {
