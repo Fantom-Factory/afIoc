@@ -14,7 +14,7 @@ class RegistryBuilder {
 
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
-		Utils.filterOutIocStackTraces |->Obj| {		
+		Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
 				lock.check
 				logger.info("Adding module definition for $moduleType.qname")
@@ -45,7 +45,7 @@ class RegistryBuilder {
 
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
-		Utils.filterOutIocStackTraces |->Obj| {		
+		Utils.stackTraceFilter |->Obj| {		
 			lock.check
 			moduleTypes.each |moduleType| {
 				addModule(moduleType)
@@ -57,7 +57,7 @@ class RegistryBuilder {
 	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
 	** which defines the qualified name of a module to load.
 	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
-		Utils.filterOutIocStackTraces |->Obj| {		
+		Utils.stackTraceFilter |->Obj| {		
 			logger.info("Adding modules from dependencies of '$pod.name'")
 			addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
 			return this
@@ -67,7 +67,7 @@ class RegistryBuilder {
 	** Looks for all index properties of the key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
 	This addModulesFromIndexProperties() {
-		Utils.filterOutIocStackTraces |->Obj| {		
+		Utils.stackTraceFilter |->Obj| {		
 			logger.info("Adding modules from index properties")
 			ctx.track("Adding modules from index properties") |->| {
 				lock.check
@@ -85,7 +85,7 @@ class RegistryBuilder {
 	** Constructs and returns the registry; this may only be done once. The caller is responsible for invoking
 	** `Registry.startup`
     Registry build() {
-		Utils.filterOutIocStackTraces |->Obj| {
+		Utils.stackTraceFilter |->Obj| {
 			lock.lock
 	        registry := RegistryImpl(ctx.tracker, moduleDefs)
 			ctx.tracker.end
