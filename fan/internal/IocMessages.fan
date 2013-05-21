@@ -203,6 +203,10 @@ internal const class IocMessages {
 		"Provided autobuild parameter '$provided.signature' does not fit ctor parameter '$param.signature'"
 	}
 	
+	static Str fieldNotSetErr(Str fieldDesc, Method ctor) {
+		"Field $fieldDesc was not set by ctor $ctor.signature"
+	}
+	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {

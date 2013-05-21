@@ -181,7 +181,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj serviceById(Str serviceId) {
-		Utils.filterOutIocStackTraces |->Obj| {
+		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			ctx := InjectionCtx(this)
 			return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
@@ -191,7 +191,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj dependencyByType(Type dependencyType) {
-		Utils.filterOutIocStackTraces |->Obj| {
+		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			ctx := InjectionCtx(this)
 			return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
@@ -201,7 +201,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		Utils.filterOutIocStackTraces |->Obj| {
+		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 //			log.info("Autobuilding $type.qname")	// TODO: configure logging 
 			return trackAutobuild(InjectionCtx(this), type, ctorArgs)
@@ -209,7 +209,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj injectIntoFields(Obj object) {
-		Utils.filterOutIocStackTraces |->Obj| {
+		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 //			log.info("Injecting dependencies into fields of $object.typeof.qname")	// TODO: configure logging
 			return trackInjectIntoFields(InjectionCtx(this), object)

@@ -67,6 +67,13 @@ class TestCtorInjection : IocTest {
 		reg.serviceById("s38")
 	}
 	
+	Void testFieldNotSetErrIsConvertedToIocErr() {
+		// this is such a common err we treat it as our own, to remove Ioc stack frames
+		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
+		verifyErrMsg(IocMessages.fieldNotSetErr(T_MyService53#judge.qname, T_MyService53#make)) {			
+			reg.autobuild(T_MyService53#)
+		}
+	}
 }
 
 internal class T_MyModule6 {
@@ -132,6 +139,7 @@ internal class T_MyModule42 {
 		binder.bindImpl(T_MyService25#).withId("s25")
 		binder.bindImpl(T_MyService30#).withId("s30")
 		binder.bindImpl(T_MyService38#).withId("s38")
+		binder.bindImpl(T_MyService53#).withId("s53")
 	}
 }
 
@@ -157,3 +165,8 @@ internal const class T_MyService30 {
 }
 
 internal const class T_MyService38 { }
+
+internal const class T_MyService53 {
+	const Str judge
+	new make(|This|in) { in(this) }
+}

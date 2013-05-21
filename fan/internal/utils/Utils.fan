@@ -33,7 +33,7 @@ internal class Utils {
 	}
 
 	** @see http://fantom.org/sidewalk/topic/2147
-	static Obj? filterOutIocStackTraces(|->Obj?| func) {
+	static Obj? stackTraceFilter(|->Obj?| func) {
 		try {
 			return func.call
 		} catch (IocErr iocErr) {

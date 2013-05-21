@@ -82,7 +82,13 @@ internal const class InjectionUtils {
 		}
 		args := findMethodInjectionParams(ctx, ctor, ctorArgs)
 		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
-			return ctor.callList(args)
+			try {
+				return ctor.callList(args)
+			
+			// this is such a common err, we treat it as our own to remove Ioc stack frames
+			} catch (FieldNotSetErr e) {
+				throw IocErr(IocMessages.fieldNotSetErr(e.msg, ctor))
+			}
 		}
 	}
 	
