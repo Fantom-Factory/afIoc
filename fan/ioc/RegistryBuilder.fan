@@ -14,7 +14,7 @@ class RegistryBuilder {
 
 	** Adds a module to the registry
 	This addModule(Type moduleType) {
-		Utils.stackTraceFilter |->Obj| {		
+		(RegistryBuilder) Utils.stackTraceFilter |->RegistryBuilder| {		
 			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
 				lock.check
 				logger.info("Adding module definition for $moduleType.qname")
@@ -40,34 +40,34 @@ class RegistryBuilder {
 				}
 			}
 			return this
-		} as RegistryBuilder
+		}
 	}
 
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
-		Utils.stackTraceFilter |->Obj| {		
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			lock.check
 			moduleTypes.each |moduleType| {
 				addModule(moduleType)
 			}
 			return this
-		} as RegistryBuilder
+		}
 	}
 
 	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
 	** which defines the qualified name of a module to load.
 	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
-		Utils.stackTraceFilter |->Obj| {		
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			logger.info("Adding modules from dependencies of '$pod.name'")
 			addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
 			return this
-		} as RegistryBuilder
+		}
 	}
 
 	** Looks for all index properties of the key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
 	This addModulesFromIndexProperties() {
-		Utils.stackTraceFilter |->Obj| {		
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			logger.info("Adding modules from index properties")
 			ctx.track("Adding modules from index properties") |->| {
 				lock.check
@@ -79,7 +79,7 @@ class RegistryBuilder {
 					ctx.log("No modules found")
 			}
 			return this
-		} as RegistryBuilder
+		}
 	}
 	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible for invoking
@@ -98,22 +98,22 @@ class RegistryBuilder {
 	private Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
 		ctx.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
 			lock.check
-			
+
 			Type?[] modTypes := [,]
-			
+		
 			// don't forget me!
 			ctx.withPod(pod) |->| {
 				modType := addModuleFromPod(pod)
 				if (modType != null)
 					modTypes.add(modType)
-				
+
 				pod.depends.each {
 					dependency := Pod.find(it.name)
 					ctx.withPod(dependency) |->| {
 						modType = addModuleFromPod(dependency)
 						if (modType != null)
 							modTypes.add(modType)
-						
+
 						if (addTransitiveDependencies) {
 							mods := ctx.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
 								deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
@@ -126,11 +126,11 @@ class RegistryBuilder {
 							ctx.log("Not looking for transitive dependencies")
 					}
 				}
-				
+
 				if (modTypes.isEmpty)
 					ctx.log("No modules found")				
 			}
-			
+
 			return modTypes
 		}
 	}	
