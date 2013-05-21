@@ -1,7 +1,6 @@
 using concurrent::AtomicInt
 using compiler
 
-// TODO: rename to PlasticPodCompiler?? move the podName out to Plastic...?
 @NoDoc
 const class PlasticPodCompiler {
 	
