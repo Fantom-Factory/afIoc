@@ -105,7 +105,13 @@ const class IocService : Service {
 			
 		} catch (Err e) {
 			log.err("Err starting IOC", e)
+			
+			// keep the err so we can rethrow later (as 'Service.start()' swallows it)
+			// see http://fantom.org/sidewalk/topic/2133
 			startErr = e
+			
+			// re throw so Fantom doesn't start the service (since Fantom 1.0.65)
+			// see http://fantom.org/sidewalk/topic/2133
 			throw e
 		}
 	}
