@@ -61,7 +61,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 	= ServiceIds.serviceStats
 				it.serviceType 	= ServiceStats#
 			}] = ServiceStatsImpl(this)
-			
+
 			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.plasticPodCompiler
 				it.serviceType 	= PlasticPodCompiler#

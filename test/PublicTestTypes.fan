@@ -6,8 +6,25 @@ internal const class PublicTestTypes {
 	
 	const Str fantomPodCode := 
 Str<|
+     using afIoc
+
      mixin T_MyService10 { }
      class T_MyService10Impl : T_MyService10 { }
+
+     mixin T_MyService31 { }
+     class T_MyService31Impl : T_MyService31 {
+         new make(DependencyProvider[] config) { }
+     }
+
+     const mixin T_MyService32 {
+          abstract Str wotcha()
+     }
+     const class T_MyService32Impl1 : T_MyService32 {
+         override const Str wotcha := "Go1"
+     }
+     const class T_MyService32Impl2 : T_MyService32 {
+         override const Str wotcha := "Go2"
+     }
 
      const mixin T_MyService50 {
           abstract Str dude()
@@ -53,5 +70,5 @@ Str<|
 
 	|>
 	
-	private const Pod pod := PlasticPodCompiler().compile(fantomPodCode)
+	private const Pod pod := PlasticPodCompiler().compile(OpTracker(), fantomPodCode)
 }
