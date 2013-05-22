@@ -10,47 +10,47 @@ class TestProxyBuilder : IocTest {
 	}
 	
 	Void testProxyMethod() {
-		s50 := spb.buildProxy(reg.serviceDefById("s50"))
+		s50 := spb.buildProxy(OpTracker(), reg.serviceDefById("s50"))
 		verifyEq(s50->dude, "dude")
 		verifyEq(s50->inc(5), 6)
 	}
 	
 	Void testNonVirtualMethodsAreNotOverridden() {
-		s51 := spb.buildProxy(reg.serviceDefById("s51"))
+		s51 := spb.buildProxy(OpTracker(), reg.serviceDefById("s51"))
 		verifyEq(s51->dude, "Don't override me!")
 		verifyEq(s51->inc(6), 9)
 	}
 	
 	Void testCanBuildMultipleServices() {
 		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
-		spb.buildProxy(reg.serviceDefById("s50"))
-		spb.buildProxy(reg.serviceDefById("s50"))
+		spb.buildProxy(OpTracker(), reg.serviceDefById("s50"))
+		spb.buildProxy(OpTracker(), reg.serviceDefById("s50"))
 	}
 
 	Void testVirtualButNotImplementedMethodsAreNotCalled() {
-		s52 := spb.buildProxy(reg.serviceDefById("s52"))
+		s52 := spb.buildProxy(OpTracker(), reg.serviceDefById("s52"))
 		verifyEq(s52->dude, "Virtual Reality")
 		verifyEq(s52->inc(7), 6)
 	}
 	
 	Void testProtectedProxyMethod() {
-		s54 := spb.buildProxy(reg.serviceDefById("s54"))
+		s54 := spb.buildProxy(OpTracker(), reg.serviceDefById("s54"))
 		verifyEq(s54->dude, "dude")
 	}
 
 	Void testCannotProxyInternalMixin() {
 		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
-			spb.buildProxy(reg.serviceDefById("s55"))
+			spb.buildProxy(OpTracker(), reg.serviceDefById("s55"))
 		}
 	}
 	
 	Void testNonConstMixin() {
-		spb.buildProxy(reg.serviceDefById("s56"))
+		spb.buildProxy(OpTracker(), reg.serviceDefById("s56"))
 	}
 	
 	Void testOnlyMixinsAllowed() {
 		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
-			spb.buildProxy(reg.serviceDefById("s57"))
+			spb.buildProxy(OpTracker(), reg.serviceDefById("s57"))
 		}
 	}
 	

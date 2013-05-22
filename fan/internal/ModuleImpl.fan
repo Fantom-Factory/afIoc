@@ -183,9 +183,9 @@ internal const class ModuleImpl : Module {
 		status := (ServiceStat) getMyState { it.stats[def.serviceId] }
 
 		if (!forceCreate && !def.noProxy && def.serviceType.isMixin && status.lifecycle == ServiceLifecycle.DEFINED) {
-			return ctx.track("Creating Proxy for Service '$def.serviceId'") |->Obj| {
+			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
-				service			:= proxyBuilder.buildProxy(def)
+				service			:= proxyBuilder.buildProxy(ctx.tracker, def)
 				
 				withMyState {
 					stat := it.stats[def.serviceId]
@@ -196,7 +196,7 @@ internal const class ModuleImpl : Module {
 			}
 		}
 		
-		return ctx.track("Creating Service '$def.serviceId'") |->Obj| {
+		return ctx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			

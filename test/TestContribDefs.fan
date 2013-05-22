@@ -43,17 +43,10 @@ class TestContribDefs : IocTest {
 	
 	Void testWhenNoConfigDefined() {
 		reg := RegistryBuilder().addModule(T_MyModule52#).build.startup
-//		reg.dependencyByType(PublicTestTypes.type("T_MyService31"))
-		reg.dependencyByType(T_MyService31#)
+		reg.dependencyByType(PublicTestTypes.type("T_MyService31"))
 		reg.serviceById("T_MyService31")
 	}
 }
-
-	// TODO: killme
-     mixin T_MyService31 { }
-     class T_MyService31Impl : T_MyService31 {
-          new make(DependencyProvider[] config) { }
-     }
 
 internal class T_MyModule23 {
 	@Contribute
@@ -92,8 +85,7 @@ internal class T_MyModule29 {
 
 internal class T_MyModule52 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService31#)
-//		binder.bindImpl(PublicTestTypes.type("T_MyService31"))
+		binder.bindImpl(PublicTestTypes.type("T_MyService31"))
 	}
 }
 
