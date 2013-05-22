@@ -21,7 +21,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 	= ServiceIds.registry
 				it.serviceType 	= Registry#
 			}] = this
-			
+
+			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.registryStartup
+				it.serviceType 	= RegistryStartup#
+				it.scope		= ServiceScope.perThread
+				it.source		= ServiceBinderImpl.ctorAutobuild(it, RegistryStartupImpl#)
+			}] = null
+
 			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.registryShutdownHub
 				it.serviceType 	= RegistryShutdownHub#

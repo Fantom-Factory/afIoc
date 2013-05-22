@@ -127,7 +127,7 @@ internal const class ModuleDefImpl : ModuleDef {
 			
 			sDef			:= it
 			sId 			:= it.serviceId
-			it.source 		= |InjectionCtx ctx -> Obj| {
+			it.source 		= |InjectionCtx ctx -> Obj| {	// FIXME: move to StandardServiceDef
 				ctx.track("Creating Serivce '$sId' via a builder method '$method.qname'") |->Obj| {
 					IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$sId'")
 					return ctx.withProvider(ConfigProvider(ctx, sDef, method)) |->Obj?| {

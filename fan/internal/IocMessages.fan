@@ -188,7 +188,7 @@ internal const class IocMessages {
 	}
 	
 	static Str serviceIdDoesNotFit(Str serviceId, Type serviceType, Type fieldType) {
-		"Service Id '${serviceId} of type ${serviceType.signature} does not fit type ${fieldType.signature}"
+		"Service Id '${serviceId}' of type ${serviceType.signature} does not fit type ${fieldType.signature}"
 	}
 	
 	static Str dependencyDoesNotFit(Type dependencyType, Type fieldType) {

@@ -18,12 +18,14 @@ internal const class ModuleImpl : Module {
 	
 		services.each |service, def| {
 			if (def.scope == ServiceScope.perThread) {
-				perThreadServices[def.serviceId] = service
+				if (service != null)
+					perThreadServices[def.serviceId] = service
 			}
-			if (def.scope == ServiceScope.perApplication && service != null) {
-				withMyState { 
-					it.perApplicationServices[def.serviceId] = service
-				}
+			if (def.scope == ServiceScope.perApplication) {
+				if (service != null)
+					withMyState { 
+						it.perApplicationServices[def.serviceId] = service
+					}
 			}
 			withMyState {
 				it.stats[def.serviceId] = ServiceStat {
@@ -94,18 +96,29 @@ internal const class ModuleImpl : Module {
 	override Obj? service(InjectionCtx ctx, Str serviceId, Bool forceCreate) {
         def := serviceDefs[serviceId]
 		if (def == null)
+			// nope, the service is not one of ours
 			return null
 
 		// we're going deeper!
 		return ctx.withServiceDef(def) |->Obj?| {
+			
 			if (def.scope == ServiceScope.perInjection) {
 				return create(ctx, def, forceCreate)
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
-				return perThreadServices.getOrAdd(def.serviceId) {
+				service := perThreadServices.getOrAdd(serviceId) {
 					create(ctx, def, forceCreate)
 				}
+				
+				// if asked, replace the cached VIRTUAL service with a real one
+				status := (ServiceStat) getMyState { it.stats[serviceId] }
+				if (forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL) {
+					service = create(ctx, def, forceCreate)
+					perThreadServices[serviceId] = service
+				}
+				
+				return service
 			}
 
 			if (def.scope == ServiceScope.perApplication) {
@@ -120,7 +133,11 @@ internal const class ModuleImpl : Module {
 					state.perApplicationServices[def.serviceId]
 				}
 				
-				if (exists != null)
+				// if asked, replace the cached VIRTUAL service with a real one
+				status 		:= (ServiceStat) getMyState { it.stats[serviceId] }
+				make4Real	:= forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL
+				
+				if (!make4Real && exists != null)
 					return exists
 				
 				// keep the tracker in the current thread
@@ -163,19 +180,21 @@ internal const class ModuleImpl : Module {
 	}
 	
     private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
-//		if (!forceCreate && def.serviceType.isMixin) {
-//			return ctx.track("Creating Proxy for Service '$def.serviceId'") |->Obj| {
-//				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.serviceById(ServiceIds.serviceProxyBuilder)
-//				service			:= proxyBuilder.buildProxy(def)
-//				
-//				withMyState {
-//					stat := it.stats[def.serviceId]
-//					it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.VIRTUAL)
-//				}
-//				
-//				return service
-//			}
-//		}
+		status := (ServiceStat) getMyState { it.stats[def.serviceId] }
+
+		if (!forceCreate && !def.noProxy && def.serviceType.isMixin && status.lifecycle == ServiceLifecycle.DEFINED) {
+			return ctx.track("Creating Proxy for Service '$def.serviceId'") |->Obj| {
+				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
+				service			:= proxyBuilder.buildProxy(def)
+				
+				withMyState {
+					stat := it.stats[def.serviceId]
+					it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.VIRTUAL)
+				}
+				
+				return service
+			}
+		}
 		
 		return ctx.track("Creating Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder

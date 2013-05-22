@@ -1,11 +1,14 @@
 
 class TestFacetServiceId : IocTest {
-	
+
 	Void testFieldInjection() {
 		reg := RegistryBuilder().addModule(T_MyModule53#).build.startup
-		s33 := reg.dependencyByType(T_MyService33#) as T_MyService33 
+		s33 := reg.dependencyByType(T_MyService33#) as T_MyService33
+		IocHelper.debugOperation |->| { 
+			
 		verifyEq(s33.impl1.wotcha, "Go1")
 		verifyEq(s33.impl2.wotcha, "Go2")
+		}
 	}
 
 	Void testConstCtorInjection() {
@@ -17,10 +20,14 @@ class TestFacetServiceId : IocTest {
 
 	Void testServiceTypeMustMatch() {
 		reg := RegistryBuilder().addModule(T_MyModule53#).build.startup
-		verifyErrMsg(IocMessages.serviceIdDoesNotFit("impl1", T_MyService32Impl1#, T_MyService33?#)) {
-			reg.dependencyByType(T_MyService34#) 
+		try {
+			reg.dependencyByType(T_MyService34#)
+			fail
+		} catch (IocErr iocErr) {
+			msg := Regex<|afPlasticProxy[0-9][0-9][0-9]|>.split(iocErr.msg).join("XXX")
+			verifyEq(msg, "Service Id 'impl1' of type XXX::T_MyService32Impl does not fit type ${T_MyService33?#.signature}")
 		}
-	}	
+	}
 }
 
 internal class T_MyModule53 {
@@ -33,13 +40,16 @@ internal class T_MyModule53 {
 	}
 }
 
-internal const mixin T_MyService32 {
+// FIXME: killme
+const mixin T_MyService32 {
 	abstract Str wotcha()
 }
-internal const class T_MyService32Impl1 : T_MyService32 {
+// FIXME: killme
+const class T_MyService32Impl1 : T_MyService32 {
 	override const Str wotcha := "Go1"
 }
-internal const class T_MyService32Impl2 : T_MyService32 {
+// FIXME: killme
+const class T_MyService32Impl2 : T_MyService32 {
 	override const Str wotcha := "Go2"
 }
 internal class T_MyService33 {

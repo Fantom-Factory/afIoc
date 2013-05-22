@@ -67,7 +67,8 @@ internal class T_MyModule15 {
 	}
 }
 
-internal mixin T_MyService10 { }
+// FIXME: killme
+mixin T_MyService10 { }
 internal class T_MyService10Impl : T_MyService10 { }
 
 internal mixin T_MyService11 { }

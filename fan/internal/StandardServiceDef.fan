@@ -9,11 +9,15 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Bool			noProxy
 	const |InjectionCtx->Obj|	source
 	const Str					description
-	
+
 	new make(|This|? f := null) { 
 		f?.call(this)
 		if (scope == ServiceScope.perApplication && !serviceType.isConst)
-			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))			
+			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
+		
+		// FIXME
+		if (serviceId == ServiceIds.registryStartup)
+		noProxy=true
 	}
 	
 	override |InjectionCtx->Obj| createServiceBuilder() {
