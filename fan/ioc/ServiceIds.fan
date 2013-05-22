@@ -4,6 +4,9 @@
 ** @since 1.2
 mixin ServiceIds {
 
+	internal
+	static const Str builtInModuleId			:= "BuiltInModule"
+
 	** @see `Registry`
 	static const Str registry					:= "Registry"
 	
@@ -22,13 +25,15 @@ mixin ServiceIds {
 	** @see `ServiceStats`
 	static const Str serviceStats				:= "ServiceStats"
 	
-	** @since 1.3
-	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"
-
-	** @since 1.3
-	static const Str plasticPodCompiler			:= "PlasticPodCompiler"
-	
 	internal
 	static const Str ctorFieldInjector			:= "CtorFieldInjector"
 	
+	** @since 1.3
+	internal
+	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"
+
+	** @since 1.3
+	internal
+	static const Str plasticPodCompiler			:= "PlasticPodCompiler"
+
 }
