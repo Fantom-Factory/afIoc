@@ -147,20 +147,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		perce := (100d * unreal / stats.size).toLocale("0.00")
 		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
 		
-		// FIXME: move to Utils
-		title	:= "Alien-Factory IoC v" + typeof.pod.version.toStr + " /___/   "
-		title 	= title.padl(61, ' ')
-		title = "   ___    __                 _____        _                  
-		           / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
-		          / _  | / /_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
-		         /_/ |_|/___//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
-		title 	+= "\n\n"
-		title 	+= "IoC started up in ${millis}ms\n"
-
+		title := Utils.banner("Alien-Factory IoC v$typeof.pod.version.toStr")
+		title += "IoC started up in ${millis}ms\n"
 		log.info(srvcs + title)
 		return this
 	}
-
+	
 	override This shutdown() {
 		shutdownHub := serviceById(RegistryShutdownHub#.name) as RegistryShutdownHubImpl
 
@@ -203,7 +195,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-//			log.info("Autobuilding $type.qname")	// TODO: configure logging 
+			IocHelper.doLogServiceCreation(RegistryImpl#, "Autobuilding $type.qname") 
 			return trackAutobuild(InjectionCtx(this), type, ctorArgs)
 		}
 	}
@@ -211,7 +203,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj injectIntoFields(Obj object) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-//			log.info("Injecting dependencies into fields of $object.typeof.qname")	// TODO: configure logging
+			IocHelper.doLogServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return trackInjectIntoFields(InjectionCtx(this), object)
 		}
 	}
