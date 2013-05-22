@@ -207,6 +207,10 @@ internal const class IocMessages {
 		"Field $fieldDesc was not set by ctor $ctor.signature"
 	}
 	
+	static Str autobuildTypeHasToInstantiable(Type autobuildType) {
+		"Autobuild types must be instantiable! - $autobuildType.qname"
+	}
+	
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
 	

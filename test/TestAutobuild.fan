@@ -27,8 +27,15 @@ class TestAutobuild : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
 		Int[] ints := [,]
 		// because the list should be passed byRef, I don't want to substitute an empty list of the correct type
-		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Obj?[]#, Int[]#)) {			
+		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Obj?[]#, Int[]#)) {
 			reg.autobuild(T_MyService49#, [ints])
+		}
+	}
+	
+	Void testAutobuildTypeHasToInstantiable() {
+		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
+		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService11#)) {
+			reg.autobuild(T_MyService11#)
 		}
 	}
 }
