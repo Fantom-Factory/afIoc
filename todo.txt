@@ -2,6 +2,11 @@
 for v1.3
 
 proxies
+How to turn them off?
+Reg.autobuild should take Bool to make proxes OR have creeateProxy method
+autobuild should NOT build proxt by def, 'cos we don't usually make services, but classes.
+but then again, it's rare to build an interface... hmmm, maybe consistency is better. 
+
 methods only - or fields
  - don't override virtual or normal methods! Only abstract!
 advice
@@ -14,10 +19,6 @@ service disambiguation via facets - is just another dep pro: map of services key
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  
-Route all service building through a (single) BuildActor to absolutely prevent a race condition from 
-building a service twice. The BuildActor should look up service first, to ensure it's not been build while
-the message waiting to get serviced. Maybe have a BuildActor per App / Thread? 
-
 
 Bad ideas:
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
