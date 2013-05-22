@@ -1,4 +1,5 @@
 
+** @since 1.3
 internal const class PlasticMsgs {
 	
 	// ---- Err Messages --------------------------------------------------------------------------
