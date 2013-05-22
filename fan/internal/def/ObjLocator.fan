@@ -21,7 +21,7 @@ internal const mixin ObjLocator {
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType) 
 	
-	abstract Obj getService(InjectionCtx ctx, ServiceDef serviceDef)
-	
+	abstract Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool forceCreate)
+
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 }

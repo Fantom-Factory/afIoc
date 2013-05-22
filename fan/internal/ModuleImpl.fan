@@ -91,7 +91,7 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
-	override Obj? service(InjectionCtx ctx, Str serviceId) {
+	override Obj? service(InjectionCtx ctx, Str serviceId, Bool forceCreate) {
         def := serviceDefs[serviceId]
 		if (def == null)
 			return null
@@ -99,15 +99,15 @@ internal const class ModuleImpl : Module {
 		// we're going deeper!
 		return ctx.withServiceDef(def) |->Obj?| {
 			if (def.scope == ServiceScope.perInjection) {
-				return create(ctx, def)			
+				return create(ctx, def, forceCreate)
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
 				return perThreadServices.getOrAdd(def.serviceId) {
-					create(ctx, def)
+					create(ctx, def, forceCreate)
 				}
 			}
-			
+
 			if (def.scope == ServiceScope.perApplication) {
 				
 				// Because of recursion (service1 creates service2), you can not create the service
@@ -124,7 +124,7 @@ internal const class ModuleImpl : Module {
 					return exists
 				
 				// keep the tracker in the current thread
-				service := create(ctx, def)
+				service := create(ctx, def, forceCreate)
 
 				// in a race condition, the 2nd service created wins
 				withMyState |state -> Obj| {
@@ -162,8 +162,22 @@ internal const class ModuleImpl : Module {
 		conState.getState(state)
 	}
 	
-    private Obj create(InjectionCtx ctx, ServiceDef def) {
-		ctx.track("Creating Service '$def.serviceId'") |->Obj| {
+    private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
+//		if (!forceCreate && def.serviceType.isMixin) {
+//			return ctx.track("Creating Proxy for Service '$def.serviceId'") |->Obj| {
+//				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.serviceById(ServiceIds.serviceProxyBuilder)
+//				service			:= proxyBuilder.buildProxy(def)
+//				
+//				withMyState {
+//					stat := it.stats[def.serviceId]
+//					it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.VIRTUAL)
+//				}
+//				
+//				return service
+//			}
+//		}
+		
+		return ctx.track("Creating Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			
@@ -172,7 +186,7 @@ internal const class ModuleImpl : Module {
 				it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.CREATED).withNoOfImpls(stat.noOfImpls + 1)
 			}
 			
-			return service				
+			return service
 	    }	
     }
 }

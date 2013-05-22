@@ -3,7 +3,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
-	private const static Str 				builtInModuleId		:= "BuiltInModule"
 	private const Str:Module				modules
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
@@ -14,16 +13,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceIdToModule 	:= Str:Module[:]
 		moduleIdToModule	:= Str:Module[:]
 		
+		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
-			services := ServiceDef:Obj?[:]			
-			services[makeBuiltInServiceDef(ServiceIds.registry, Registry#)] = this 
-
-			// new up Built-In services ourselves to cut down on debug noise
-			services[makeBuiltInServiceDef(ServiceIds.registryShutdownHub, RegistryShutdownHub#)] = RegistryShutdownHubImpl()
+			services := ServiceDef:Obj?[:]
 			
-			services[StandardServiceDef() {
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.registry
+				it.serviceType 	= Registry#
+			}] = this
+			
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.registryShutdownHub
+				it.serviceType 	= RegistryShutdownHub#
+			}] = RegistryShutdownHubImpl()
+			
+			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.ctorFieldInjector
-				it.moduleId		= builtInModuleId
 				it.serviceType 	= |This|#
 				it.scope		= ServiceScope.perInjection
 				it.description 	= "'$it.serviceId' : Autobuilt. Always."
@@ -32,49 +37,40 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}] = null
 
-			services[StandardServiceDef() {
+			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.dependencyProviderSource
-				it.moduleId		= builtInModuleId
 				it.serviceType 	= DependencyProviderSource#
-				it.scope		= ServiceScope.perApplication
-				it.description 	= "'$it.serviceId' : Built In Service"
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
 
-			services[StandardServiceDef() {
+			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.serviceOverride
-				it.moduleId		= builtInModuleId
 				it.serviceType 	= ServiceOverride#
-				it.scope		= ServiceScope.perApplication
-				it.description 	= "'$it.serviceId' : Built In Service"
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
-			services[StandardServiceDef() {
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.serviceStats
+				it.serviceType 	= ServiceStats#
+			}] = ServiceStatsImpl(this)
+			
+			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.plasticPodCompiler
-				it.moduleId		= builtInModuleId
 				it.serviceType 	= PlasticPodCompiler#
-				it.serviceImplType 	= PlasticPodCompiler#
-				it.scope		= ServiceScope.perApplication
-				it.description 	= "'$it.serviceId' : Built In Service"
+				it.serviceImplType 	= PlasticPodCompiler#	// TODO: make mixin
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 
-			services[StandardServiceDef() {
+			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.serviceProxyBuilder
-				it.moduleId		= builtInModuleId
 				it.serviceType 	= ServiceProxyBuilder#
-				it.serviceImplType 	= ServiceProxyBuilder#
-				it.scope		= ServiceScope.perApplication
-				it.description 	= "'$it.serviceId' : Built In Service"
+				it.serviceImplType 	= ServiceProxyBuilder#	// TODO: make mixin
 				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceProxyBuilder#)
 			}] = null
 
-			services[makeBuiltInServiceDef(ServiceIds.serviceStats, ServiceStats#)] = ServiceStatsImpl(this)
-			
-			builtInModule := ModuleImpl(this, builtInModuleId, services)
+			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)
 
-			moduleIdToModule[builtInModuleId] = builtInModule
+			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule
 			services.keys.each {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
@@ -216,7 +212,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef 
 			:= serviceDefById(serviceId) 
 			?: throw IocErr(IocMessages.serviceIdNotFound(serviceId))
-		return getService(ctx, serviceDef)
+		return getService(ctx, serviceDef, false)
 	}
 
 	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
@@ -231,7 +227,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			ctx.log("Found Service '$serviceDef.serviceId'")
-			return getService(ctx, serviceDef)			
+			return getService(ctx, serviceDef, false)			
 		}
 
 		// look for configuration
@@ -298,7 +294,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef) {
+	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool forceCreate) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
 			ctx.log("Found override for service '${serviceDef.serviceId}'")
@@ -306,7 +302,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId)
+		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId, forceCreate)
 	}
 
 
@@ -324,15 +320,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 	}
 
-	private ServiceDef makeBuiltInServiceDef(Str serviceId, Type serviceType, ServiceScope scope := ServiceScope.perApplication) {
-		BuiltInServiceDef() {
-			it.serviceId = serviceId
-			it.moduleId = builtInModuleId
-			it.serviceType = serviceType
-			it.scope = scope
-		}
-	}
-	
 	private Void withMyState(|RegistryState| state) {
 		conState.withState(state)
 	}

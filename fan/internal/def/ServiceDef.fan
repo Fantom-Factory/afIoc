@@ -21,5 +21,7 @@ internal const mixin ServiceDef {
 	abstract Type? serviceImplType()
 
 	abstract ServiceScope scope()
+
+	abstract Bool noProxy()
 	
 }

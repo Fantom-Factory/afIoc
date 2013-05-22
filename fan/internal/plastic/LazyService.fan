@@ -36,7 +36,7 @@ internal class LazyServiceState {
 		
 		ctx := InjectionCtx(objLocator)
 		return ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-			objLocator.getService(ctx, serviceDef)
+			objLocator.getService(ctx, serviceDef, true)
 		}
 	}
 }

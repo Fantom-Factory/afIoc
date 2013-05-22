@@ -14,7 +14,7 @@ internal mixin Module {
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 	
 	** Locates (and builds if necessary) a service given a service id
-	abstract Obj? service(InjectionCtx ctx, Str serviceId)
+	abstract Obj? service(InjectionCtx ctx, Str serviceId, Bool forceCreate)
 
 	abstract Str:ServiceStat serviceStats()
 	
