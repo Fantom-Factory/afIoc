@@ -63,17 +63,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = ServiceStatsImpl(this)
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.plasticPodCompiler
-				it.serviceType 	= PlasticPodCompiler#
-				it.serviceImplType 	= PlasticPodCompiler#	// TODO: make mixin
-				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
+				it.serviceId 	= ServiceIds.serviceProxyBuilder
+				it.serviceType 	= ServiceProxyBuilder#
+				it.serviceImplType 	= ServiceProxyBuilderImpl#
+				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.serviceProxyBuilder
-				it.serviceType 	= ServiceProxyBuilder#
-				it.serviceImplType 	= ServiceProxyBuilder#	// TODO: make mixin
-				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilder#)
+				it.serviceId 	= ServiceIds.plasticPodCompiler
+				it.serviceType 	= PlasticPodCompiler#
+				it.serviceImplType 	= PlasticPodCompiler#
+				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 
 			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)

@@ -9,7 +9,7 @@
 ** 
 ** May not be used with '@Autobuild' or other [Dependency Providers]`DependencyProvider`.
 ** 
-** @since 1.1
+** @since 1.1.0
 facet class ServiceId {
 	const Str serviceId
 }

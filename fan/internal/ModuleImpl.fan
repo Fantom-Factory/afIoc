@@ -126,7 +126,7 @@ internal const class ModuleImpl : Module {
 				// Because of recursion (service1 creates service2), you can not create the service
 				// inside an actor ('cos the actor will block when it eventually messages itself). 
 				// So...
-				// FIXME: A const service could be created twice if there's a race condition between
+				// TODO: A const service could be created twice if there's a race condition between
 				// two threads. And who knows what those services do in their ctor or PostInject 
 				// methods!
 				exists := getMyState |state -> Obj?| { 
