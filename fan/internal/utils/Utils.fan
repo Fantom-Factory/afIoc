@@ -1,6 +1,17 @@
 
 internal class Utils {
 
+	static Str banner(Str heading) {
+		title	:= "$heading /___/   "
+		title 	= title.padl(61, ' ')
+		title = "   ___    __                 _____        _                  
+		           / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
+		          / _  | / /_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
+		         /_/ |_|/___//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
+		title 	+= "\n\n"
+		return title
+	}
+	
 	static Obj:Obj makeMap(Type keyType, Type valType) {
 		mapType := Map#.parameterize(["K":keyType, "V":valType])
 		return keyType.fits(Str#) ? Map.make(mapType) { caseInsensitive = true } : Map.make(mapType) { ordered = true }

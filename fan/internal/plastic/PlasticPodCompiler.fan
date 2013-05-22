@@ -14,7 +14,7 @@ const class PlasticPodCompiler {
 		podName			:= "afPlasticProxy" + "$podIndex.getAndIncrement".padl(3, '0')
 		input 		    := CompilerInput()
 		
-		// TODO: log or track the compilation
+		// TODO: track the compilation once a tracker is handed down
 		
 		input.podName 	= podName
  		input.summary 	= "Alien-Factory Transient Pod"

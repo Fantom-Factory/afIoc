@@ -2,8 +2,8 @@ using concurrent::AtomicBool
 using concurrent::AtomicRef
 using afIoc::ConcurrentState
 
-** Public because it
-** Should we add this source to the generated pods? 
+** Should we add this source to the generated proxy pods, and delete it from afIoc?
+** For now, no. It'll speed up the compiler, and no-one discovers @NoDoc classes anyway!
 @NoDoc
 const class LazyService {
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyServiceState#)
