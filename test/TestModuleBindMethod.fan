@@ -51,7 +51,7 @@ internal class T_MyModule10 {
 
 internal class T_MyModule13 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService10#).withId("yo")
+		binder.bindImpl(PublicTestTypes.type("T_MyService10")).withId("yo")
 	}
 }
 
@@ -66,10 +66,6 @@ internal class T_MyModule15 {
 		binder.bind(T_MyService1#, T_MyService2#)
 	}
 }
-
-// FIXME: killme
-mixin T_MyService10 { }
-internal class T_MyService10Impl : T_MyService10 { }
 
 internal mixin T_MyService11 { }
 internal mixin T_MyService11Impl : T_MyService11 { }
