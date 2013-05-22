@@ -108,16 +108,34 @@ internal const class ModuleImpl : Module {
 				}
 			}
 	
+//			if (def.scope == ServiceScope.perApplication) {
+//				// Because 'Ctx' is created on the call stack and passed from method to method (and 
+//				// not held as class state) no other thread can ever access it. Therefore it is  
+//				// safe to pass it into my state thread.
+//				Unsafe safeCtx := Unsafe(ctx)
+//				return getMyState |state -> Obj?| {
+//					state.perApplicationServices.getOrAdd(def.serviceId) {
+//						create(safeCtx.val, def)
+//					}
+//				}
+//			}
+			
 			if (def.scope == ServiceScope.perApplication) {
-				// Because 'Ctx' is created on the call stack and passed from method to method (and 
-				// not held as class state) no other thread can ever access it. Therefore it is  
-				// safe to pass it into my state thread.
-				Unsafe safeCtx := Unsafe(ctx)
-				return getMyState |state -> Obj?| {
-					state.perApplicationServices.getOrAdd(def.serviceId) {
-						create(safeCtx.val, def)
-					}
+				// I believe there's a slim chance of the service being created twice here, but you'd 
+				// need 2 actors requesting the same service at the same time - slim
+				// I could make the service here, but I don't want to serialise the ctx
+				exists := getMyState |state -> Obj?| { 
+					state.perApplicationServices[def.serviceId]
 				}
+				
+				if (exists != null)
+					return exists
+				
+				// keep the tracker in the current thread
+				service := create(ctx, def)
+				
+				withMyState |state| { state.perApplicationServices[def.serviceId] = service }
+				return service
 			}
 			
 			throw WtfErr("What scope is {$def.scope}???")
