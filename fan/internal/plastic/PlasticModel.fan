@@ -25,7 +25,7 @@ internal class PlasticClassModel {
 		if (!mixinType.isMixin)
 			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(className, mixinType))
 		// given all our test types are internal, we'll let this condition slide for now...
-//		if (!mixinType.isInternal)
+//		if (mixinType.isInternal)
 //			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		
 		extends = mixinType
@@ -33,11 +33,11 @@ internal class PlasticClassModel {
 	}
 	
 	** All fields have public scope. Why not!? You're not compiling against it!
-	This addField(Type fieldType, Str fieldName) {
+	This addField(Type fieldType, Str fieldName, Str? getBody := null, Str? setBody := null) {
 		if (isConst && !fieldType.isConst)
 			throw PlasticErr(PlasticMsgs.constTypesMustHaveConstFields(className, fieldType, fieldName))
 		
-		fields.add(PlasticFieldModel(PlasticVisibility.visPublic, fieldType.isConst, fieldType, fieldName))
+		fields.add(PlasticFieldModel(false, PlasticVisibility.visPublic, fieldType.isConst, fieldType, fieldName, getBody, setBody))
 		return this
 	}
 	
@@ -53,13 +53,24 @@ internal class PlasticClassModel {
 		methods.add(PlasticMethodModel(true, PlasticVisibility.visPublic, method.returns, method.name, method.params.join(", "), body))
 		return this
 	}
+
+	** All fields are given public scope. 
+	This overrideField(Field field, Str body, Str? getBody := null, Str? setBody := null) {
+		if (field.parent != extends)
+			throw PlasticErr(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(field, extends))
+		if (field.isPrivate || field.isInternal)
+			throw PlasticErr(PlasticMsgs.overrideFieldHasWrongScope(field))
+		
+		fields.add(PlasticFieldModel(true, PlasticVisibility.visPublic, field.isConst, field.type, field.name, getBody, setBody))
+		return this
+	}
 	
 	Str toFantomCode() {
 		constKeyword 	:= isConst ? "const " : ""
 		extendsKeyword	:= extends == null ? "" : " : ${extends.qname}" 
 		
 		code := "${constKeyword}class ${className}${extendsKeyword} {\n\n"
-		fields.each { code += it.toFantomCode + "\n" }
+		fields.each { code += it.toFantomCode }
 		
 		code += "\n"
 		code += "	new make(|This|? f) {
@@ -67,7 +78,7 @@ internal class PlasticClassModel {
 		         	}\n"
 		code += "\n"
 
-		methods.each { code += it.toFantomCode + "\n" }
+		methods.each { code += it.toFantomCode }
 		code += "}\n"
 		return code
 	}
@@ -75,22 +86,37 @@ internal class PlasticClassModel {
 
 ** @since 1.3
 internal class PlasticFieldModel {
+	Bool			 	isOverride
 	PlasticVisibility 	visibility
 	Bool				isConst
 	Type				type
 	Str					name
+	Str? 				getBody
+	Str? 				setBody
 	
-	new make(PlasticVisibility visibility, Bool isConst, Type type, Str name) {
+	new make(Bool isOverride, PlasticVisibility visibility, Bool isConst, Type type, Str name, Str? getBody, Str? setBody) {
+		this.isOverride	= isOverride
 		this.visibility = visibility
 		this.isConst	= isConst
 		this.type		= type
 		this.name		= name
+		this.getBody	= getBody
+		this.setBody	= setBody
 	}
 
 	Str toFantomCode() {
 		constKeyword	:= isConst ? "const " : "" 
-		return 
+		field :=
 		"	${visibility.keyword}${constKeyword}${type.signature} ${name}"
+		if (getBody != null || setBody != null) {
+			field += " {\n"
+			if (getBody != null)
+				field += "		get { ${getBody} }\n"
+			if (setBody != null)
+				field += "		set { ${setBody} }\n"
+			field += "}\n"
+		}
+		return field
 	}
 }
 
@@ -117,7 +143,7 @@ internal class PlasticMethodModel {
 		return
 		"	${overrideKeyword}${visibility.keyword}${returnType.signature} ${name}(${signature}) {
 		 		${body}
-		 	}"
+		 	}\n"
 	}
 }
 

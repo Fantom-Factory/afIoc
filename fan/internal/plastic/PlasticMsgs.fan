@@ -40,4 +40,12 @@ internal const class PlasticMsgs {
 		"Method ${method.qname} must be virtual (or abstract)"
 	}
 
+	static Str overrideFieldDoesNotBelongToSuperType(Field field, Type superType) {
+		"Field ${field.qname} does not belong to super type ${superType.qname}"
+	}
+
+	static Str overrideFieldHasWrongScope(Field field) {
+		"Field ${field.qname} must have 'public' or 'protected' scope"
+	}
+
 }

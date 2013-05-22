@@ -31,7 +31,7 @@ class TestAutobuild : IocTest {
 			reg.autobuild(T_MyService49#, [ints])
 		}
 	}
-	
+
 	Void testAutobuildTypeHasToInstantiable() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
 		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService11#)) {

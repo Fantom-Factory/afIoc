@@ -68,8 +68,16 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 	}
 }
-//
-//internal const mixin T_MyService54 {
-//	internal virtual Str dude() { "Virtual Reality" }
-//	abstract Int inc(Int i)
-//}
+
+
+     mixin T_MyService58 { 
+			abstract Str dude
+     }
+     class T_MyService58Impl : T_MyService58 { 
+			override Str dude {
+				get { "df" }
+				set { }
+			}
+			
+     }
+		

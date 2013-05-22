@@ -18,9 +18,9 @@ class TestRegistry : Test {
 		reg.dependencyByType(T_MyService1#)
 		reg.autobuild(T_MyService1#)
 		reg.injectIntoFields(T_MyService1())
-		
+
 		reg.shutdown
-		
+
 		verifyErr(IocErr#) { reg.startup }
 		verifyErr(IocErr#) { reg.shutdown }
 		verifyErr(IocErr#) { reg.serviceById("t_myservice1") }
