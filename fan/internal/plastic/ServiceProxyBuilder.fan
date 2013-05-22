@@ -18,7 +18,10 @@ const class ServiceProxyBuilder {
 		if (!serviceType.isMixin)
 			throw Err("Mixin onlys")	// TODO: better err msg
 
-		model := PlasticClassModel(serviceType.isConst, serviceType.name + "Impl")
+		if (!serviceType.isPublic)
+			throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
+		
+		model := PlasticClassModel(serviceType.name + "Impl", serviceType.isConst)
 		
 		model.extendMixin(serviceType)
 		model.addField(LazyService#, "lazyService")
@@ -26,7 +29,7 @@ const class ServiceProxyBuilder {
 		methods := serviceType.methods.rw.findAll { it.isAbstract || it.isVirtual }
 		Obj#.methods.each { methods.remove(it) }
 
-		methods.each |method| { 
+		methods.each |method| {
 			params 	:= method.params.join(", ") |param| { param.name }
 			body 	:= "(lazyService.get as ${serviceType.qname}).${method.name}(${params})"
 			model.overrideMethod(method, body)
