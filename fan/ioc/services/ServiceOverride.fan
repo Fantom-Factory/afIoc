@@ -17,8 +17,7 @@
 **  
 ** @since 1.2
 ** @uses MappedConfig of Str:Obj (serviceId:overrideImpl)
-// Override perThread services should be automatic when proxies are added.
-// TODO: Registry.autobuild should create proxies
+// TODO: Override perThread services should be automatic when proxies are added.
 const mixin ServiceOverride {
 	
 	abstract Obj? getOverride(Str serviceId)
