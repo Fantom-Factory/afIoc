@@ -1,4 +1,5 @@
 
+// TODO: Registry.autobuild should create proxies
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
@@ -75,7 +76,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceImplType 	= PlasticPodCompiler#
 				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
 			}] = null
-
+		
 			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)
 
 			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule

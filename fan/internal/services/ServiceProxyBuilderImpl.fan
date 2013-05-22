@@ -1,4 +1,5 @@
 
+// TODO: Doc - perThread services should be automatic when proxies are added.
 ** @since 1.3.0
 internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	
