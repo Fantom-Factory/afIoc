@@ -48,7 +48,7 @@ internal class Utils {
 		try {
 			return func.call
 		} catch (IocErr iocErr) {
-			throw IocErr(iocErr.msg)
+			throw IocErr(iocErr.msg, iocErr.cause)
 		}
 	}
 	

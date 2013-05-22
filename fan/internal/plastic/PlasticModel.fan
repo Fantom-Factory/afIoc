@@ -55,7 +55,7 @@ internal class PlasticClassModel {
 	}
 
 	** All fields are given public scope. 
-	This overrideField(Field field, Str body, Str? getBody := null, Str? setBody := null) {
+	This overrideField(Field field, Str? getBody := null, Str? setBody := null) {
 		if (field.parent != extends)
 			throw PlasticErr(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(field, extends))
 		if (field.isPrivate || field.isInternal)
@@ -105,17 +105,19 @@ internal class PlasticFieldModel {
 	}
 
 	Str toFantomCode() {
+		overrideKeyword	:= isOverride ? "override " : ""
 		constKeyword	:= isConst ? "const " : "" 
 		field :=
-		"	${visibility.keyword}${constKeyword}${type.signature} ${name}"
+		"	${overrideKeyword}${visibility.keyword}${constKeyword}${type.signature} ${name}"
 		if (getBody != null || setBody != null) {
 			field += " {\n"
 			if (getBody != null)
 				field += "		get { ${getBody} }\n"
 			if (setBody != null)
 				field += "		set { ${setBody} }\n"
-			field += "}\n"
+			field += "	}\n"
 		}
+		field += "\n"
 		return field
 	}
 }

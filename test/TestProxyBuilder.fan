@@ -54,7 +54,19 @@ class TestProxyBuilder : IocTest {
 		}
 	}
 	
-	// FIXME: test fields
+	// Weird shenanigans - const fields aren't allowed. Full stop.
+	// see http://fantom.org/sidewalk/topic/1921
+	// So const mixins can't ever declare fields.
+	
+	Void testPerThreadProxy() {
+		s58 := spb.buildProxy(OpTracker(), reg.serviceDefById("s58"))
+		verifyEq(s58->dude, "Stella!")
+		
+		s58.typeof.field("dude").set(s58, "Pint of Pride")
+		verifyEq(s58->dude, "Pint of Pride")
+
+		verifyEq(s58->judge, 69)
+	}
 }
 
 internal class T_MyModule76 {
@@ -66,18 +78,7 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService55")).withId("s55")
 		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
+		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
 	}
 }
 
-
-     mixin T_MyService58 { 
-			abstract Str dude
-     }
-     class T_MyService58Impl : T_MyService58 { 
-			override Str dude {
-				get { "df" }
-				set { }
-			}
-			
-     }
-		

@@ -28,20 +28,27 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			model.extendMixin(serviceType)
 			model.addField(LazyService#, "lazyService")
 	
-			methods := serviceType.methods.rw.findAll { it.isAbstract || it.isVirtual }
-			Obj#.methods.each { methods.remove(it) }
-	
-			methods.each |method| {
-				params 	:= method.params.join(", ") |param| { param.name }
-				body 	:= "(lazyService.get as ${serviceType.qname}).${method.name}(${params})"
-				model.overrideMethod(method, body)
-			}
+			serviceType.fields.rw
+				.each |field| {
+					getBody	:= "((${serviceType.qname}) lazyService.get).${field.name}"
+					setBody	:= "((${serviceType.qname}) lazyService.get).${field.name} = it"
+					model.overrideField(field, getBody, setBody)
+				}
+
+			serviceType.methods.rw
+				.findAll { it.isAbstract || it.isVirtual }
+				.exclude { Obj#.methods.contains(it) }
+				.each |method| {
+					params 	:= method.params.join(", ") |param| { param.name }
+					body 	:= "((${serviceType.qname}) lazyService.get).${method.name}(${params})"
+					model.overrideMethod(method, body)
+				}
 			
-			code 		:= model.toFantomCode		
+			code 		:= model.toFantomCode
 			pod 		:= plasticPodCompiler.compile(tracker, code)
 			proxyType 	:= pod.type(model.className)
 			lazyField 	:= proxyType.field("lazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
+			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry, serviceType.isConst)]
 			ctorFunc 	:= Field.makeSetFunc(plan)
 			proxy		:= proxyType.make([ctorFunc])
 			

@@ -68,6 +68,15 @@ Str<|
 
      class T_MyService57 { }
 
+     mixin T_MyService58 { 
+         abstract Str dude
+         abstract Int judge()
+     }
+     class T_MyService58Impl : T_MyService58 { 
+         override Str dude := "Stella!"
+         override Int judge := 69
+     }
+
 	|>
 	
 	private const Pod pod := PlasticPodCompiler().compile(OpTracker(), fantomPodCode)

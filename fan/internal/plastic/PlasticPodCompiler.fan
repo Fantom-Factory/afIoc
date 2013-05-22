@@ -17,19 +17,26 @@ const class PlasticPodCompiler {
 		input 		    := CompilerInput()
 		
 		return tracker.track("Compiling Pod '$podName'") |->Obj| {
-			input.podName 	= podName
-	 		input.summary 	= "Alien-Factory Transient Pod"
-			input.version 	= Version.defVal
-			input.log.level = LogLevel.warn
-			input.isScript 	= true
-			input.output 	= CompilerOutputMode.transientPod
-			input.mode 		= CompilerInputMode.str
-			input.srcStrLoc	= Loc(podName)
-			input.srcStr 	= fantomPodCode
-	
-			compiler 		:= Compiler(input)
-			pod 			:= compiler.compile.transientPod
-			return pod
+			try {
+				
+				input.podName 	= podName
+		 		input.summary 	= "Alien-Factory Transient Pod"
+				input.version 	= Version.defVal
+				input.log.level = LogLevel.warn
+				input.isScript 	= true
+				input.output 	= CompilerOutputMode.transientPod
+				input.mode 		= CompilerInputMode.str
+				input.srcStrLoc	= Loc(podName)
+				input.srcStr 	= fantomPodCode
+		
+				compiler 		:= Compiler(input)
+				pod 			:= compiler.compile.transientPod
+				return pod
+				
+			} catch (CompilerErr err) {
+				msg := err.msg + "\n$fantomPodCode"
+				throw CompilerErr(msg, err.loc, err.cause, err.level)
+			}
 		}
 	}
 }
