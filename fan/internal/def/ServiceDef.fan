@@ -28,12 +28,12 @@ internal const mixin ServiceDef {
 	
 	static |InjectionCtx ctx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
 		|InjectionCtx ctx->Obj| {
-				ctx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
-					IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
-					return ctx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
-						return InjectionUtils.callMethod(ctx, method, null)
-					}
+			ctx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
+				IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
+				return ctx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
+					return InjectionUtils.callMethod(ctx, method, null)
 				}
+			}
 		}
 	}
 	

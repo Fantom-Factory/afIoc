@@ -1,5 +1,4 @@
 
-// TODO: Registry.autobuild should create proxies
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 	
@@ -256,12 +255,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] ctorArgs) {
+		if (type.isAbstract)
+			throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
+		
 		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
 		serviceDef := StandardServiceDef() {
 			it.serviceId 	= "${type.name}Autobuild"
 			it.moduleId		= ""
 			it.serviceType 	= type
-			it.serviceImplType 	= type
+			it.serviceImplType 	= type	// the important bit
 			it.scope		= ServiceScope.perInjection
 			it.description 	= "$type.qname Autobuild"
 			it.source		= |InjectionCtx ctxx->Obj?| { return null }
