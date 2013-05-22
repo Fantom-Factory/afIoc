@@ -192,11 +192,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
+	** see http://fantom.org/sidewalk/topic/2149
+	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			IocHelper.doLogServiceCreation(RegistryImpl#, "Autobuilding $type.qname") 
-			return trackAutobuild(InjectionCtx(this), type, ctorArgs)
+			IocHelper.doLogServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
+			return trackAutobuild(InjectionCtx(this), type2, ctorArgs)
 		}
 	}
 
