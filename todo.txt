@@ -3,23 +3,26 @@ for v1.3
 
 proxies
 How to turn them off?
-Reg.autobuild should take Bool to make proxes OR have creeateProxy method
-autobuild should NOT build proxt by def, 'cos we don't usually make services, but classes.
-but then again, it's rare to build an interface... hmmm, maybe consistency is better. 
-
 methods only - or fields
  - don't override virtual or normal methods! Only abstract!
+
+Registry.creeateProxy(mixin, impltype)
+
 advice
 
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
-@Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
- - depPro ctx (a convienience for serviceById)
-
 
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  
 
-Bad ideas:
+Meh... can't be arsed
+---------------------
+@Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
+ - just a convenience for serviceById
+
+
+Bad Ideas:
+----------
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
 PerThreadService - is just registry.get()!
