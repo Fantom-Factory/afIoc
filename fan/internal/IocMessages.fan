@@ -207,6 +207,14 @@ internal const class IocMessages {
 		"Field $fieldDesc was not set by ctor $ctor.signature"
 	}
 	
+	
+	// ---- Proxy Service Messages ----------------------------------------------------------------
+	
+	static Str proxiedMixinsMustBePublic(Type mixinType) {
+		"Proxied mixins must be public - '$mixinType.qname'"
+	}
+	
+
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
 	static Str oneShotLockViolation(Str because) {
