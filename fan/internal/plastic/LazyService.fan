@@ -9,16 +9,23 @@ using afIoc::ConcurrentState
 @NoDoc
 const class LazyService {
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyServiceState#)
+	private const LocalStash		threadState	:= LocalStash(LazyServiceState#)
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
+	private const Bool				isConst
 	
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
+	internal new make(ServiceDef serviceDef, ObjLocator objLocator, Bool isConst) {
 		this.serviceDef = serviceDef
 		this.objLocator = objLocator
+		this.isConst	= isConst
+		if (!isConst)
+			threadState["state"] = LazyServiceState()
 	}
 
-	Obj get() {		
-		getState { getService(objLocator, serviceDef) }
+	Obj get() {
+		isConst
+			? getState { getService(objLocator, serviceDef) }
+			: ((LazyServiceState) threadState["state"]).getService(objLocator, serviceDef)
 	}
 
 	private Obj? getState(|LazyServiceState -> Obj?| state) {
