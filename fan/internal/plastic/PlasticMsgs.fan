@@ -19,6 +19,10 @@ internal const class PlasticMsgs {
 		"Currently, Plastic only supports extending mixins - class ${typeName} : ${superType.qname}"
 	}
 
+	static Str superTypesMustBePublic(Str typeName, Type superType) {
+		"Super types must be 'public' or 'protected' scope - class ${typeName} : ${superType.qname}"
+	}
+
 	static Str constTypesMustHaveConstFields(Str typeName, Type fieldType, Str fieldName) {
 		"Const type ${typeName} must ONLY declare const fields - ${fieldType.qname} ${fieldName}"
 	}

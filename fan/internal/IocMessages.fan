@@ -210,6 +210,10 @@ internal const class IocMessages {
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
 	
+	static Str onlyMixinsCanBeProxied(Type mixinType) {
+		"Only Mixins can be proxied - '$mixinType.qname'"
+	}
+
 	static Str proxiedMixinsMustBePublic(Type mixinType) {
 		"Proxied mixins must be public - '$mixinType.qname'"
 	}

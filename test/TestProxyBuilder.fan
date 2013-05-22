@@ -39,13 +39,19 @@ class TestProxyBuilder : IocTest {
 	}
 
 	Void testCannotProxyInternalMixin() {
-		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.T_MyService55)) {
+		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
 			spb.buildProxy(reg.serviceDefById("s55"))
 		}
 	}
 	
 	Void testNonConstMixin() {
-		fail
+		spb.buildProxy(reg.serviceDefById("s56"))
+	}
+	
+	Void testOnlyMixinsAllowed() {
+		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
+			spb.buildProxy(reg.serviceDefById("s57"))
+		}
 	}
 	
 	// FIXME: test fields
@@ -53,23 +59,20 @@ class TestProxyBuilder : IocTest {
 
 internal class T_MyModule76 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.T_MyService50).withId("s50")
-		binder.bindImpl(PublicTestTypes.T_MyService51).withId("s51")
-		binder.bindImpl(PublicTestTypes.T_MyService52).withId("s52")
-		binder.bindImpl(PublicTestTypes.T_MyService54).withId("s54")
-		binder.bindImpl(PublicTestTypes.T_MyService55).withId("s55")
+		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("s50")
+		binder.bindImpl(PublicTestTypes.type("T_MyService51")).withId("s51")
+		binder.bindImpl(PublicTestTypes.type("T_MyService52")).withId("s52")
+		binder.bindImpl(PublicTestTypes.type("T_MyService54")).withId("s54")
+		binder.bindImpl(PublicTestTypes.type("T_MyService55")).withId("s55")
+		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
+		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 	}
 }
 
 ** Bugger, I've got test classes that need to be public!
 internal const class PublicTestTypes {
 	static const PublicTestTypes instance := PublicTestTypes()
-		
-	static Type T_MyService50() { instance.pod.type("T_MyService50") }
-	static Type T_MyService51() { instance.pod.type("T_MyService51") }
-	static Type T_MyService52() { instance.pod.type("T_MyService52") }
-	static Type T_MyService54() { instance.pod.type("T_MyService54") }
-	static Type T_MyService55() { instance.pod.type("T_MyService55") }
+	static Type type(Str typeName) { instance.pod.type(typeName) }
 	
 	const Str fantomPodCode := 
 Str<|
@@ -109,6 +112,11 @@ Str<|
      internal const class T_MyService55Impl : T_MyService55 {
           override Str dude() { "dude"; }
      }   
+
+     mixin T_MyService56 { }
+     class T_MyService56Impl : T_MyService56 { }
+
+     class T_MyService57 { }
 
 	|>
 	
