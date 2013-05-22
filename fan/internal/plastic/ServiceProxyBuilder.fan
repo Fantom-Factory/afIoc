@@ -16,7 +16,7 @@ const class ServiceProxyBuilder {
 		serviceType	:= serviceDef.serviceType
 		
 		if (!serviceType.isMixin)
-			throw Err("Mixin onlys")	// TODO: better err msg
+			throw IocErr(IocMessages.onlyMixinsCanBeProxied(serviceType))
 
 		if (!serviceType.isPublic)
 			throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))

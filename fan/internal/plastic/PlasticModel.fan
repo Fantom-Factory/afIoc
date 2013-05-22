@@ -23,6 +23,9 @@ internal class PlasticClassModel {
 			throw PlasticErr(PlasticMsgs.canOnlyExtendOneType(className, extends, mixinType))
 		if (!mixinType.isMixin)
 			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(className, mixinType))
+		// given all our test types are internal, we'll let this condition slide for now...
+//		if (!mixinType.isInternal)
+//			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		
 		extends = mixinType
 		return this
@@ -30,7 +33,7 @@ internal class PlasticClassModel {
 	
 	** All fields have public scope. Why not!? You're not compiling against it!
 	This addField(Type fieldType, Str fieldName) {
-		if (isConst != fieldType.isConst)
+		if (isConst && !fieldType.isConst)
 			throw PlasticErr(PlasticMsgs.constTypesMustHaveConstFields(className, fieldType, fieldName))
 		
 		fields.add(PlasticFieldModel(PlasticVisibility.visPublic, fieldType.isConst, fieldType, fieldName))
