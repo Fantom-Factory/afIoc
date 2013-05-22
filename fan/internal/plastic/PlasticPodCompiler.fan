@@ -1,6 +1,7 @@
 using concurrent::AtomicInt
 using compiler
 
+** @since 1.3
 @NoDoc
 const class PlasticPodCompiler {
 	

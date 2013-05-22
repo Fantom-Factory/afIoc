@@ -1,4 +1,4 @@
-
+** @since 1.3
 @NoDoc
 const class ServiceProxyBuilder {
 	

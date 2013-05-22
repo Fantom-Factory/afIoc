@@ -1,4 +1,5 @@
 
+** @since 1.3
 internal class PlasticClassModel {
 	
 	Bool 	isConst
@@ -72,6 +73,7 @@ internal class PlasticClassModel {
 	}
 }
 
+** @since 1.3
 internal class PlasticFieldModel {
 	PlasticVisibility 	visibility
 	Bool				isConst
@@ -92,6 +94,7 @@ internal class PlasticFieldModel {
 	}
 }
 
+** @since 1.3
 internal class PlasticMethodModel {
 	Bool			 	isOverride
 	PlasticVisibility 	visibility
@@ -118,6 +121,7 @@ internal class PlasticMethodModel {
 	}
 }
 
+** @since 1.3
 internal enum class PlasticVisibility {
 	visPrivate	("private "),
 	visInternal	("internal "),
