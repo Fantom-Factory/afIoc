@@ -6,6 +6,8 @@ internal const class PublicTestTypes {
 	
 	const Str fantomPodCode := 
 Str<|
+     mixin T_MyService10 { }
+     class T_MyService10Impl : T_MyService10 { }
 
      const mixin T_MyService50 {
           abstract Str dude()
