@@ -124,17 +124,7 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.serviceType	= method.returns
 			it.description	= "'$serviceId' : Builder method $method.qname"
 			it.scope 		= scope 
-			
-			sDef			:= it
-			sId 			:= it.serviceId
-			it.source 		= |InjectionCtx ctx -> Obj| {	// FIXME: move to StandardServiceDef
-				ctx.track("Creating Serivce '$sId' via a builder method '$method.qname'") |->Obj| {
-					IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$sId'")
-					return ctx.withProvider(ConfigProvider(ctx, sDef, method)) |->Obj?| {
-						return InjectionUtils.callMethod(ctx, method, null)
-					}
-				}
-			}			
+			it.source 		= fromBuildMethod(it, method) 
 		}
 		addServiceDef(tracker, serviceDefs, serviceDef)
 	}	

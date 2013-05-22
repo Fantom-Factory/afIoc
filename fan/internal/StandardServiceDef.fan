@@ -14,10 +14,6 @@ internal const class StandardServiceDef : ServiceDef {
 		f?.call(this)
 		if (scope == ServiceScope.perApplication && !serviceType.isConst)
 			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
-		
-		// FIXME
-		if (serviceId == ServiceIds.registryStartup)
-		noProxy=true
 	}
 	
 	override |InjectionCtx->Obj| createServiceBuilder() {
