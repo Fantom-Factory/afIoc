@@ -27,7 +27,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 	= ServiceIds.registryStartup
 				it.serviceType 	= RegistryStartup#
 				it.scope		= ServiceScope.perThread
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, RegistryStartupImpl#)
+				it.source		= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
@@ -48,13 +48,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.dependencyProviderSource
 				it.serviceType 	= DependencyProviderSource#
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, DependencyProviderSourceImpl#)
+				it.source		= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.serviceOverride
 				it.serviceType 	= ServiceOverride#
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceOverrideImpl#)
+				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
@@ -66,14 +66,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 	= ServiceIds.plasticPodCompiler
 				it.serviceType 	= PlasticPodCompiler#
 				it.serviceImplType 	= PlasticPodCompiler#	// TODO: make mixin
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, PlasticPodCompiler#)
+				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceId 	= ServiceIds.serviceProxyBuilder
 				it.serviceType 	= ServiceProxyBuilder#
 				it.serviceImplType 	= ServiceProxyBuilder#	// TODO: make mixin
-				it.source		= ServiceBinderImpl.ctorAutobuild(it, ServiceProxyBuilder#)
+				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilder#)
 			}] = null
 
 			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)

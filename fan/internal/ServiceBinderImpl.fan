@@ -88,32 +88,17 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		setDefaultScope
 
 		serviceDef := StandardServiceDef() {
-			it.serviceId 	= this.serviceId
-			it.moduleId 	= this.moduleDef.moduleId
-			it.serviceType 	= this.serviceMixin
+			it.serviceId 		= this.serviceId
+			it.moduleId 		= this.moduleDef.moduleId
+			it.serviceType 		= this.serviceMixin
 			it.serviceImplType 	= this.serviceImpl
-			it.scope		= this.scope
-			it.description 	= "'$this.serviceId' : Standard Ctor Builder"
-			it.source 		= ctorAutobuild(it, this.serviceImpl)
+			it.scope			= this.scope
+			it.description 		= "'$this.serviceId' : Standard Ctor Builder"
+			it.source 			= fromCtorAutobuild(it, this.serviceImpl)
 		}
 
 		addServiceDef(serviceDef)
 		clear
-	}
-
-	static |InjectionCtx ctx->Obj| ctorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
-		|InjectionCtx ctx->Obj| {
-			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
-				IocHelper.doLogServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
-				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
-				
-				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType, Obj#.emptyList)
-					InjectionUtils.injectIntoFields(ctx, obj)
-					return obj
-				}
-			}			
-		}
 	}
 	
 	private Void clear() {

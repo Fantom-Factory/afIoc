@@ -24,4 +24,30 @@ internal const mixin ServiceDef {
 
 	abstract Bool noProxy()
 	
+	
+	static |InjectionCtx ctx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
+		|InjectionCtx ctx->Obj| {
+				ctx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
+					IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
+					return ctx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
+						return InjectionUtils.callMethod(ctx, method, null)
+					}
+				}
+		}
+	}
+	
+	static |InjectionCtx ctx->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
+		|InjectionCtx ctx->Obj| {
+			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
+				IocHelper.doLogServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
+				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
+				
+				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
+					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType, Obj#.emptyList)
+					InjectionUtils.injectIntoFields(ctx, obj)
+					return obj
+				}
+			}			
+		}
+	}
 }
