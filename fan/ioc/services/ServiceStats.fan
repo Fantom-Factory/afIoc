@@ -60,13 +60,13 @@ enum class ServiceLifecycle {
 	** The service is defined in a module, but has not yet been referenced.
 	DEFINED,
 
-	// Not yet!
-//	** A proxy has been created for the service, but no methods of the proxy have been invoked.
-//	VIRTUAL,
+	** A proxy has been created for the service, but the implementation itself no methods of the proxy have been invoked.
+	VIRTUAL,
 
-	** A service implementation for the service has been created.
+	** A service implementation for the service has been created. It is real!
 	CREATED,
 
+	// leave this last for compare
 	** Builtin services exist before the `Registry` is constructed.
 	BUILTIN;
 }

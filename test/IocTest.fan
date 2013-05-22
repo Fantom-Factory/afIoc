@@ -8,10 +8,15 @@ abstract class IocTest : Test {
 		} catch (Err e) {
 			if (!e.typeof.fits(errType)) 
 				throw Err("Expected $errType got $e.typeof", e)
-			if (e.msg != errMsg)
-				throw Err("Expected: \n - $errMsg \nGot: \n - $e.msg")
+			// see http://langref.org/fantom/pattern-matching
+//			msg := Regex<|afPlasticProxy[0-9][0-9][0-9]|>.split(e.msg).join("afIoc")
+			msg := e.msg
+			if (msg != errMsg)
+				throw Err("Expected: \n - $errMsg \nGot: \n - $msg")
 			return
 		}
 		throw Err("$errType not thrown")
 	}
+	
+	
 }

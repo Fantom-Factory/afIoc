@@ -10,14 +10,13 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const ServiceScope	scope
 	override const Bool			noProxy
 	const |InjectionCtx->Obj|	source
-	const Str					description
+	const Str?					description
 	
 	new make(|This| f) { 
 		this.moduleId		= ServiceIds.builtInModuleId
 		this.scope			= ServiceScope.perApplication
 		this.noProxy		= true
 		this.source 		= |InjectionCtx ctx->Obj| { throw IocErr("Can not create BuiltIn service '$serviceId'") }
-		this.description	= "'$serviceId' : Built In Service"
 
 		f(this)
 	}
@@ -27,6 +26,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 	}
 	
 	override Str toStr() {
-		description
+		// serviceId is usually set *after* our defaults in the ctor, so we can't set desc above
+		description ?: "'$serviceId' : Built In Service"
 	}	
 }
