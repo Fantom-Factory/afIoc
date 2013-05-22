@@ -1,6 +1,6 @@
-** @since 1.3
-@NoDoc
-const class ServiceProxyBuilder {
+
+** @since 1.3.0
+internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	
 	@Inject 
 	private const Registry registry
@@ -11,7 +11,7 @@ const class ServiceProxyBuilder {
 	new make(|This|di) { di(this) }
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
-	internal Obj buildProxy(OpTracker tracker, ServiceDef serviceDef) {
+	override internal Obj buildProxy(OpTracker tracker, ServiceDef serviceDef) {
 		tracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceId	:= serviceDef.serviceId
 			serviceType	:= serviceDef.serviceType

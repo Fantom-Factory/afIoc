@@ -5,8 +5,9 @@ class TestProxyBuilder : IocTest {
 	private ServiceProxyBuilder? spb
 	
 	override Void setup() {
-		reg = RegistryBuilder().addModule(T_MyModule76#).build.startup as RegistryImpl
-		spb = reg.dependencyByType(ServiceProxyBuilder#) as ServiceProxyBuilder
+		reg = (RegistryImpl) RegistryBuilder().addModule(T_MyModule76#).build.startup
+		spb = (ServiceProxyBuilder) reg.dependencyByType(ServiceProxyBuilder#)
+//		spb = (ServiceProxyBuilder) reg.serviceById("ServiceProxyBuilder")
 	}
 	
 	Void testProxyMethod() {

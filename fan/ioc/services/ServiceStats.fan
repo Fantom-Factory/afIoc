@@ -1,5 +1,7 @@
 
 ** Returns a map of all services defined by this IoC.
+** 
+** @since 1.2.0
 const mixin ServiceStats {
 
 	** Returns service stats, keyed by service id
@@ -7,20 +9,9 @@ const mixin ServiceStats {
 	
 }
 
-internal const class ServiceStatsImpl : ServiceStats {
-	
-	private const RegistryImpl registry
-	
-	new make(RegistryImpl registry) {
-		this.registry = registry
-	}
-	
-	override Str:ServiceStat stats() {
-		registry.stats
-	}
-}
-
 ** Defines some statistics for a service
+** 
+** @since 1.2.0
 const class ServiceStat {
 	const Str 				serviceId
 	const Type				type
@@ -55,6 +46,8 @@ const class ServiceStat {
 }
 
 ** Defines the lifecycle state of a service
+** 
+** @since 1.2.0
 enum class ServiceLifecycle {
 
 	** The service is defined in a module, but has not yet been referenced.
