@@ -107,23 +107,15 @@ internal const class ModuleImpl : Module {
 					create(ctx, def)
 				}
 			}
-	
-//			if (def.scope == ServiceScope.perApplication) {
-//				// Because 'Ctx' is created on the call stack and passed from method to method (and 
-//				// not held as class state) no other thread can ever access it. Therefore it is  
-//				// safe to pass it into my state thread.
-//				Unsafe safeCtx := Unsafe(ctx)
-//				return getMyState |state -> Obj?| {
-//					state.perApplicationServices.getOrAdd(def.serviceId) {
-//						create(safeCtx.val, def)
-//					}
-//				}
-//			}
 			
 			if (def.scope == ServiceScope.perApplication) {
-				// I believe there's a slim chance of the service being created twice here, but you'd 
-				// need 2 actors requesting the same service at the same time - slim
-				// I could make the service here, but I don't want to serialise the ctx
+				
+				// Because of recursion (service1 creates service2), you can not create the service
+				// inside an actor ('cos the actor will block when it eventually messages itself). 
+				// So...
+				// FIXME: A const service could be created twice if there's a race condition between
+				// two threads. And who knows what those services do in their ctor or PostInject 
+				// methods!
 				exists := getMyState |state -> Obj?| { 
 					state.perApplicationServices[def.serviceId]
 				}
@@ -133,8 +125,15 @@ internal const class ModuleImpl : Module {
 				
 				// keep the tracker in the current thread
 				service := create(ctx, def)
+
+				// in a race condition, the 2nd service created wins
+				withMyState |state -> Obj| {
+					// double check service existence
+					state.perApplicationServices.getOrAdd(def.serviceId) {
+						service
+					}
+				}
 				
-				withMyState |state| { state.perApplicationServices[def.serviceId] = service }
 				return service
 			}
 			
