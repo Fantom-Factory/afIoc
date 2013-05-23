@@ -18,7 +18,7 @@ class TestAutobuild : IocTest {
 
 	Void testAutobuildWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Str#, Int#)) {			
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Str#, Int#)) {			
 			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
@@ -27,7 +27,7 @@ class TestAutobuild : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
 		Int[] ints := [,]
 		// because the list should be passed byRef, I don't want to substitute an empty list of the correct type
-		verifyErrMsg(IocMessages.providerCtorParamDoesNotFit(Obj?[]#, Int[]#)) {
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Obj?[]#, Int[]#)) {
 			reg.autobuild(T_MyService49#, [ints])
 		}
 	}

@@ -12,6 +12,8 @@ internal mixin Module {
     abstract ServiceDef[] serviceDefsByType(Type serviceType)
 
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
+
+	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
 	
 	** Locates (and builds if necessary) a service given a service id
 	abstract Obj? service(InjectionCtx ctx, Str serviceId, Bool forceCreate)

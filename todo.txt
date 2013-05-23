@@ -1,22 +1,29 @@
 
 for v1.3
 
-proxies - How to turn them off? via bind AND build method
-
-Registry.creeateProxy(mixin, impltype)
-
 advice
 
+
+
+Maybe...?
+--------- 
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 
-Re-do DepdendencyCtx to give more detail 
- - See ProviderCtx for details
- 
+IocHelper.disableProxies
+
 
 Meh... can't be arsed
 ---------------------
+Re-do DepdendencyCtx to give more detail 
+ - See ProviderCtx for details
+ - it's messy and I don't need it
+
+Registry.createProxy(mixinType, implType)
+ - as impl type is not a service
+
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
+
 
 
 Bad Ideas:

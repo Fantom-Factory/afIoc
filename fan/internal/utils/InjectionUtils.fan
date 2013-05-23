@@ -29,8 +29,8 @@ internal const class InjectionUtils {
 		return object
 	}
 
-	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj) {
-		args := findMethodInjectionParams(ctx, method, Obj#.emptyList)
+	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj, Obj?[] providedMethodArgs) {
+		args := findMethodInjectionParams(ctx, method, providedMethodArgs)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
@@ -74,13 +74,13 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] ctorArgs) {
+	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] providedCtorArgs) {
 		if (ctor == null) {
 			return ctx.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
 			}
 		}
-		args := findMethodInjectionParams(ctx, ctor, ctorArgs)
+		args := findMethodInjectionParams(ctx, ctor, providedCtorArgs)
 		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			try {
 				return ctor.callList(args)
@@ -118,7 +118,7 @@ internal const class InjectionUtils {
 				}
 				.reduce(false) |bool, method| {
 					ctx.log("Found method $method.signature")
-					callMethod(ctx, method, object)
+					callMethod(ctx, method, object, Obj#.emptyList)
 					return true
 				})
 				ctx.log("No post injection methods found")
@@ -126,18 +126,18 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] ctorArgs) {
+	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] providedMethodArgs) {
 		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
 			ctx.withFacets(Facet[,]) |->Obj[]| {
 				params := method.params.map |param, index| {
 					
 					ctx.log("Found parameter ${index+1}) $param.type")
-					if (index < ctorArgs.size) {
+					if (index < providedMethodArgs.size) {
 						ctx.log("Parameter provided")
 						
-						provided := ctorArgs[index] 
+						provided := providedMethodArgs[index] 
 						if (provided != null && !provided.typeof.fits(param.type))
-							throw IocErr(IocMessages.providerCtorParamDoesNotFit(provided.typeof, param.type))
+							throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
 						return provided
 					}
 					
