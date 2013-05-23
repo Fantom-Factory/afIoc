@@ -125,6 +125,7 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.description	= "'$serviceId' : Builder method $method.qname"
 			it.scope 		= scope 
 			it.source 		= fromBuildMethod(it, method) 
+			it.noProxy		= build.disableProxy 
 		}
 		addServiceDef(tracker, serviceDefs, serviceDef)
 	}	

@@ -16,4 +16,6 @@ mixin ServiceBindingOptions {
 	** (Tip: 'const' services can subclass `ConcurrentState` for easy access to modifiable state.)
 	abstract This withScope(ServiceScope scope)
 
+	** Disables the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
+	abstract This withoutProxy()
 }

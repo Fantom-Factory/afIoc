@@ -2,6 +2,11 @@ Overview [#overview]
 ********************
 IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond all else, this IoC offers:
 
+- **Injection - the way *you* want it!**
+  - field injection
+  - standard ctor injection
+  - serialisation ctor injection - 'new make(|This|in) { in(this) }'
+
 - **Distributed service configuration between pods and modules**
   - config are simple Lists and Maps
   - configure *any* service *from* any pod / module
@@ -10,15 +15,16 @@ IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) fra
   - override real services with test services
   - set sensible default config and let users override them
 
-- **Extensible with your own `DependencyProvider`s**
-  - inject your own objects, not just services!
+- **Extensible with your own DependencyProviders**
+  - inject your own objects, not just services
 
 - **Extensive error reporting and detailed Err messages**
+  - over 65 bespoke Err messages!
   - designed to help *you* the developer!
-  - over 55 bespoke Err messages!
 
-- **Lazy(ish) service loading**
-  - nothing is created until you use it
+- ** True lazy service loading**
+  - service proxies ensure nothing is created until you use it
+  - make circular dependencies a thing of the past!
 
 
 Quick Start [#quickStart]
@@ -30,11 +36,8 @@ class Main {
     registry := IocService([MyModule#]).start.registry
 
     MyService1 test1 := registry.serviceById("myservice1")
-
     MyService1 test2 := registry.dependencyByType(MyService1#)
-
     MyService1 test3 := registry.autobuild(MyService1#)
-
     MyService1 test4 := registry.injectIntoFields(MyService1())
 
     Service.find(IocService#).uninstall
@@ -111,7 +114,7 @@ Modules may can also define *builder* methods. These are static methods annotate
 
 Dependency Injection [#dependencyInjection]
 *******************************************
-IoC performs both ctor and field injection.
+IoC performs both ctor and field injection, for normal and const fields.
 
 Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
 
@@ -135,7 +138,7 @@ Service Scope [#serviceScope]
 *****************************
 Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services must be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
-It is illegal to attempt to inject a 'perThread' scoped service into a 'perApplication' scoped service.
+(Using proxies) you can even inject a 'perThread' scoped service into a 'perApplication' scoped service! Think about it... you can inject your [http request]`web::WebReq` into any static service you desire!
 
 
 Service Configuration [#serviceConfiguration]
@@ -161,6 +164,17 @@ pre>
 The list and map types are inferred from the ctor definition and all contribution types must fit.
 
 If the service declares a map configuration then contribution methods should take a 'MappedConfig' object. If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
+
+
+Lazy Loading [#lazyLoading]
+***************************
+Define your service with a mixin and take advantage of true lazy loading!
+
+By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
+
+This means registry startup times are quicker than ever and circular service dependencies are virtually eliminated!
+
+It also allows you to inject 'perThread' scoped services into 'perApplication' scoped services.
 
 
 Tips [#tips]

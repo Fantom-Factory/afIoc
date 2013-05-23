@@ -16,6 +16,7 @@ const class ServiceStat {
 	const Str 				serviceId
 	const Type				type
 	const ServiceScope 		scope
+	const Bool				proxyDisabled
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls
 
@@ -29,6 +30,7 @@ const class ServiceStat {
 			it.serviceId	= this.serviceId
 			it.type			= this.type
 			it.scope		= this.scope
+			it.proxyDisabled= this.proxyDisabled
 			it.lifecycle	= newLifecycle
 			it.noOfImpls	= this.noOfImpls
 		}
@@ -39,6 +41,7 @@ const class ServiceStat {
 			it.serviceId	= this.serviceId
 			it.type			= this.type
 			it.scope		= this.scope
+			it.proxyDisabled= this.proxyDisabled
 			it.lifecycle	= this.lifecycle
 			it.noOfImpls	= newNoOfImpls
 		}
