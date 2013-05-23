@@ -1,5 +1,4 @@
 
-// TODO: add noProxy()
 internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private const static Log log := Utils.getLog(ServiceBinderImpl#)
 	private OneShotLock 	lock := OneShotLock(IocMessages.serviceDefined)
@@ -12,6 +11,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
 	private ServiceScope? 	scope
+	private Bool? 			noProxy
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
@@ -73,6 +73,11 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		this.scope = scope
 		return this
 	}
+
+	override This withoutProxy() {
+		this.noProxy = true
+		return this
+	}
 	
 
 	// ---- Other Methods -------------------------------------------------------------------------
@@ -94,6 +99,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.serviceType 		= this.serviceMixin
 			it.serviceImplType 	= this.serviceImpl
 			it.scope			= this.scope
+			it.noProxy			= this.noProxy
 			it.description 		= "'$this.serviceId' : Standard Ctor Builder"
 			it.source 			= fromCtorAutobuild(it, this.serviceImpl)
 		}
@@ -109,6 +115,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		source 			= null
 		scope 			= null
 		description		= null
+		noProxy			= false
 	}
 	
 	private Void setDefaultScope() {

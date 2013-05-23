@@ -55,6 +55,7 @@ internal const class ModuleImpl : Module {
 					it.serviceId	= def.serviceId
 					it.type			= def.serviceType
 					it.scope		= def.scope
+					it.proxyDisabled= def.noProxy
 					it.lifecycle	= ServiceLifecycle.DEFINED
 					it.noOfImpls	= 0
 				}

@@ -11,9 +11,12 @@ facet class Build {
 	**   static MyService buildPenguin() { ... }
 	** 
 	** defines a service with an id of 'penguin'.
-	const Str? 			serviceId	:= null
+	const Str? serviceId := null
 	
 	** Service scope defaults to 'perApplication' for const classes and 'perThread' for non-const 
 	** classes.
-	const ServiceScope? scope		:= null
+	const ServiceScope? scope := null
+	
+	** Disable the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
+	const Bool disableProxy := false
 }

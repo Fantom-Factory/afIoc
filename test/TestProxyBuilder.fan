@@ -83,6 +83,15 @@ class TestProxyBuilder : IocTest {
 //		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.CREATED)
 //		}
 //	}
+	
+	Void testWithoutProxy() {
+		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
+		s64 	:= reg.serviceById("s64") as T_MyService64
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+		s64.dude
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+	}
 }
 
 internal class T_MyModule76 {
@@ -96,6 +105,7 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
 //		binder.bindImpl(T_MyService59#).withId("s59")
+		binder.bindImpl(T_MyService64#).withId("s64").withoutProxy
 	}
 	
 //	@Build { scope=ServiceScope.perThread}
@@ -117,3 +127,9 @@ internal class T_MyModule76 {
 //		override Int inc(Int i) { i + 1 }
 //	}
 
+	internal const mixin T_MyService64 {
+		abstract Str dude()
+	}
+	internal const class T_MyService64Impl : T_MyService64 {
+		override Str dude() { "dude"; }
+	}
