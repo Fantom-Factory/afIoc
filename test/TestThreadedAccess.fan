@@ -43,11 +43,34 @@ class TestThreadedAccess : IocTest {
 //
 //			assertNotSame(s13->s12, s13i->s12)
 //		}.send(null).get
+	}
+	
+	Void testProxyThreadInApp() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule77#).build.startup
+
+		// CAN inject a PROXY perThread service into a perApp service
+		s61 := reg.serviceById("s61")	// perThread
+		s62 := reg.serviceById("s62")	// perApp
+		s62->s61->kickIn("all-change")
+		kick1 := s62->s61->kickOut
 		
-		// thread in apps, not allowed
-		verifyErrMsg(IocMessages.threadScopeInAppScope("s14", "s12")) {
-			reg.serviceById("s14") 			
-		}
+		Actor(ActorPool()) |->| {
+			s61i := reg.serviceById("s61")
+			assertNotSame(s61, s61i)
+
+			s62i := reg.serviceById("s62")
+			assertSame(s62, s62i)
+			
+			// check this...
+			
+			// ...the same service
+			assertSame(s62->s61, s62i->s61)
+			
+			// ...gives different results!
+			kick2 := s62i->s61->kickOut
+			assertNotEq(kick1, kick2)
+
+		}.send(null).get
 	}
 
 	Void testAppInThread() {
@@ -84,6 +107,11 @@ class TestThreadedAccess : IocTest {
 		if (o1 === o2)
 			throw Err("ARE the same - $o1 : $o2")
 	}
+
+	static Void assertNotEq(Obj? o1, Obj? o2) {
+		if (o1 == o2)
+			throw Err("ARE equal - $o1 : $o2")
+	}
 }
 
 internal class T_MyModule16 {
@@ -97,7 +125,6 @@ internal class T_MyModule17 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService12#).withId("s12").withScope(ServiceScope.perThread)
 		binder.bindImpl(T_MyService13#).withId("s13").withScope(ServiceScope.perApplication)
-		binder.bindImpl(T_MyService13#).withId("s14").withScope(ServiceScope.perApplication)
 	}
 }
 
@@ -126,6 +153,14 @@ internal const class T_MyService13 {
 
 internal class T_MyService14 {
 	@Inject
-	const T_MyService12? s12	
+	const T_MyService12? s12
+}
+
+
+internal class T_MyModule77 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(PublicTestTypes.type("T_MyService61")).withId("s61").withScope(ServiceScope.perThread)
+		binder.bindImpl(PublicTestTypes.type("T_MyService62")).withId("s62").withScope(ServiceScope.perApplication)
+	}
 }
 

@@ -77,7 +77,21 @@ Str<|
          override Int judge := 69
      }
 
-	|>
+     const mixin T_MyService61 {
+         abstract Void kickIn(Str k)
+         abstract Str kickOut()
+     }
+     internal const class T_MyService61Impl : T_MyService61 {
+         const concurrent::AtomicRef kick := concurrent::AtomicRef("dredd") 
+         override Void kickIn(Str k) { kick.val = k}
+         override Str kickOut() { kick.val } 
+     }
+     internal const class T_MyService62 {
+         const T_MyService61 s61
+         new make(T_MyService61 s61) { this.s61 = s61 }
+     }
+
+     |>
 	
 	private const Pod pod := PlasticPodCompiler().compile(OpTracker(), fantomPodCode)
 }

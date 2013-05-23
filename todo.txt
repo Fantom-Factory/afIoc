@@ -1,10 +1,7 @@
 
 for v1.3
 
-proxies
-How to turn them off?
-methods only - or fields
- - don't override virtual or normal methods! Only abstract!
+proxies - How to turn them off? via bind AND build method
 
 Registry.creeateProxy(mixin, impltype)
 
