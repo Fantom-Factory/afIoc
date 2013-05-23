@@ -76,6 +76,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 		
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.adviceSource
+				it.serviceType 	= AdviceSource#
+				it.serviceImplType 	= AdviceSourceImpl#
+				it.source		= ServiceDef.fromCtorAutobuild(it, AdviceSourceImpl#)
+			}] = null
+		
 			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)
 
 			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule
@@ -245,12 +252,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return dependency
 		}
 
-		// extra info - kill these msgs if they get in the way of refactoring
-		if (dependencyType.fits(MappedConfig#))
-			throw IocErr(IocMessages.configMismatch(dependencyType, OrderedConfig#))
-		if (dependencyType.fits(OrderedConfig#))
-			throw IocErr(IocMessages.configMismatch(MappedConfig#, dependencyType))
-		
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
 
@@ -302,6 +303,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
 		modules.vals.map {
 			it.contributionsByServiceDef(serviceDef)
+		}.flatten
+	}
+
+	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
+		modules.vals.map {
+			it.adviceByServiceDef(serviceDef)
 		}.flatten
 	}
 

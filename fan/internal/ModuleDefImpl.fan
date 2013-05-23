@@ -11,6 +11,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	override 	const Type 				moduleType
 	override 	const Str:ServiceDef	serviceDefs
 	override 	const ContributionDef[]	contributionDefs
+	override 	const AdviceDef[]		adviceDefs
 	
 
 	new make(OpTracker tracker, Type moduleType) {
@@ -19,12 +20,14 @@ internal const class ModuleDefImpl : ModuleDef {
 		tracker.track("Inspecting module $moduleType.qname") |->| {
 			serviceDefs := Str:ServiceDef[:] { caseInsensitive = true }
 			contribDefs	:= ContributionDef[,]
+			adviceDefs	:= AdviceDef[,]
 			
-			grind(tracker, serviceDefs, contribDefs)
+			grind(tracker, serviceDefs, contribDefs, adviceDefs)
 			bind(tracker, serviceDefs)
 			
 			this.serviceDefs = serviceDefs
 			this.contributionDefs = contribDefs
+			this.adviceDefs = adviceDefs
 		}
 	}
 
@@ -42,7 +45,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private Void grind(OpTracker tracker, Str:ServiceDef serviceDefs, ContributionDef[]	contribDefs) {
+	private Void grind(OpTracker tracker, Str:ServiceDef serviceDefs, ContributionDef[]	contribDefs, AdviceDef[] adviceDefs) {
 		methods := moduleType.methods.rw.sort |Method a, Method b -> Int| { 
 			a.name <=> b.name 
 		}
@@ -59,9 +62,35 @@ internal const class ModuleDefImpl : ModuleDef {
 					addContribDefFromMethod(tracker, contribDefs, method)
 				}
 			}
+
+			if (method.hasFacet(Advise#)) {
+				tracker.track("Found advice method $method.qname") |->| {					
+					addAdviceDefFromMethod(tracker, adviceDefs, method)
+				}
+			}
 		}
 	}
 	
+	
+	// ---- Service Advice Methods ----------------------------------------------------------------
+
+	private Void addAdviceDefFromMethod(OpTracker tracker, AdviceDef[] adviceDefs, Method method) {
+		if (!method.isStatic)
+			throw IocErr(IocMessages.adviseMethodMustBeStatic(method))
+		if (method.params.isEmpty || !method.params[0].type.fits(MethodAdvisor#.toListOf))
+			throw IocErr(IocMessages.adviseMethodMustTakeMethodAdvisorList(method))
+		
+		advise := Utils.getFacetOnSlot(method, Advise#) as Advise
+
+		adviceDef := StandardAdviceDef {
+			it.serviceIdGlob	= advise.serviceId
+			it.advisorMethod	= method
+		}
+		
+		tracker.log("Adding advice for services $adviceDef.serviceIdGlob")
+		adviceDefs.add(adviceDef)
+	}
+
 	
 	// ---- Service Contribution Methods ----------------------------------------------------------
 

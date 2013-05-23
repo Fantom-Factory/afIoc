@@ -47,7 +47,7 @@ class TestMappedConfig : IocTest {
 	
 	Void testWrongConfig() {
 		reg := RegistryBuilder().addModule(T_MyModule50#).build.startup
-		verifyErrMsg(IocMessages.configMismatch(MappedConfig#, OrderedConfig#)) {
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(MappedConfig#, OrderedConfig#)) {
 			reg.serviceById("s28")
 		}
 	}	

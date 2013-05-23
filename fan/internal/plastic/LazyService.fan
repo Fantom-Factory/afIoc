@@ -20,6 +20,25 @@ const class LazyService {
 		this.appScope	= appScope
 	}
 
+	Obj? call(Method method, Obj?[] args) {
+		ctx := InjectionCtx(objLocator, OpTracker(LogLevel.info))
+		adviceSource 	:= (AdviceSource) objLocator.trackServiceById(ctx, ServiceIds.adviceSource)
+		methodAdvisors	:= adviceSource.getMethodAdvisors(ctx, serviceDef)
+		
+//		TODO: cache advisors
+		
+		methodAdvisors = methodAdvisors.findAll { it.method == method }
+		if (methodAdvisors.size > 1)
+			throw WtfErr("There are $methodAdvisors.size MethodAdvisors for method $method.qname")
+		if (methodAdvisors.isEmpty)
+			throw WtfErr("Wot no MethodAdvisors?? For method $method.qname")
+		methodAdvisor := methodAdvisors.first	// TODO: fuck the WtfErrs, just inline 'first'
+		
+		ret:=methodAdvisor.call(get, args)
+		
+		return ret
+	}
+	
 	Obj get() {
 		appScope ? getViaAppScope : getViaThreadScope
 	}

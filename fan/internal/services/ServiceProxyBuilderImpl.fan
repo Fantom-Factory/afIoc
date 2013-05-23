@@ -39,7 +39,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 				.exclude { Obj#.methods.contains(it) }
 				.each |method| {
 					params 	:= method.params.join(", ") |param| { param.name }
-					body 	:= "((${serviceType.qname}) afLazyService.get).${method.name}(${params})"
+					paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
+					body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
 					model.overrideMethod(method, body)
 				}
 			

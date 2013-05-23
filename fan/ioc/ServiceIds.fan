@@ -2,7 +2,7 @@
 ** A list of public service IDs as defined by IoC
 ** 
 ** @since 1.2
-mixin ServiceIds {
+const mixin ServiceIds {
 
 	internal
 	static const Str builtInModuleId			:= "BuiltInModule"
@@ -35,5 +35,9 @@ mixin ServiceIds {
 	** @since 1.3
 	internal
 	static const Str plasticPodCompiler			:= "PlasticPodCompiler"
+
+	** @since 1.3
+	internal
+	static const Str adviceSource				:= "AdviceSource"
 
 }

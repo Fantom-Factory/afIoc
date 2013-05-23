@@ -35,8 +35,11 @@ internal const mixin ServiceDef {
 		|InjectionCtx ctx->Obj| {
 			ctx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
 				IocHelper.doLogServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
+				
+				// config is a very special method argument, as it's optional and if required, we 
+				// use the param to generate the value
 				return ctx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
-					return InjectionUtils.callMethod(ctx, method, null)
+					return InjectionUtils.callMethod(ctx, method, null, Obj#.emptyList)
 				}
 			}
 		}
@@ -48,6 +51,8 @@ internal const mixin ServiceDef {
 				IocHelper.doLogServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
 				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
 				
+				// config is a very special method argument, as it's optional and if required, we 
+				// use the param to generate the value
 				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
 					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType, Obj#.emptyList)
 					InjectionUtils.injectIntoFields(ctx, obj)

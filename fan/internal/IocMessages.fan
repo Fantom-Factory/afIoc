@@ -135,10 +135,6 @@ internal const class IocMessages {
 		"Contribution of type $objType.signature does not match service configuration $type type of $mapType.signature"
 	}
 	
-	static Str configMismatch(Type notFound, Type tryThis) {
-		"Dependency '$notFound.name' not found, try '$tryThis.name' instead"
-	}
-	
 	static Str configRecursion(Str[] nodeNames) {
 		"Configuration ordering recursion! A configuration contribution depends on its self in some way : " + nodeNames.join(" -> ")
 	}
@@ -199,8 +195,8 @@ internal const class IocMessages {
 		"Only one Dependency Provider is allowed, but type ${type.signature} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
 	}
 	
-	static Str providerCtorParamDoesNotFit(Type provided, Type param) {
-		"Provided autobuild parameter '$provided.signature' does not fit ctor parameter '$param.signature'"
+	static Str providerMethodArgDoesNotFit(Type providedArg, Type paramArg) {
+		"Provided autobuild parameter '$providedArg.signature' does not fit parameter '$paramArg.signature'"
 	}
 	
 	static Str fieldNotSetErr(Str fieldDesc, Method ctor) {
@@ -211,6 +207,13 @@ internal const class IocMessages {
 		"Autobuild types must be instantiable! - $autobuildType.qname"
 	}
 	
+	static Str adviseMethodMustBeStatic(Method method) {
+		"Advise method '$method.qname' must be static"
+	}
+	
+	static Str adviseMethodMustTakeMethodAdvisorList(Method method) {
+		"Advise method '$method.qname' must take a list of ${MethodAdvisor#.name}s as its first parameter. e.g. static Void ${method.name}(${MethodAdvisor#.name}[] methodAdvisors, ...) { ... }"
+	}
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
 	

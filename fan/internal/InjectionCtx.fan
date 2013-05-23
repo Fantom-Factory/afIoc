@@ -1,11 +1,11 @@
 
 internal class InjectionCtx {
 
-	private ServiceDef[]			defStack		:= [,]
-	private DependencyProvider[]	providerStack	:= [,]
-	private Facet[][]				facetsStack		:= [,]
-	OpTracker 						tracker
-	ObjLocator? 					objLocator
+	private ServiceDef[]		defStack	:= [,]
+	private ConfigProvider[]	configStack	:= [,]
+	private Facet[][]			facetsStack	:= [,]
+	OpTracker 					tracker
+	ObjLocator? 				objLocator
 
 	new make(ObjLocator? objLocator, OpTracker tracker := OpTracker()) {
 		this.objLocator = objLocator
@@ -47,12 +47,12 @@ internal class InjectionCtx {
 		}
 	}
 
-	Obj? withProvider(DependencyProvider provider, |->Obj?| operation) {
-		providerStack.push(provider)
+	Obj? withProvider(ConfigProvider provider, |->Obj?| operation) {
+		configStack.push(provider)
 		try {
 			return operation.call()
 		} finally {			
-			providerStack.pop
+			configStack.pop
 		}
 	}
 
@@ -74,8 +74,8 @@ internal class InjectionCtx {
 
 	Obj? provideConfig(Type dependencyType) {
 		// jus' passin' thru!
-		if (providerStack.peek?.canProvide(providerCtx, dependencyType) ?: false)
-			return providerStack.peek.provide(providerCtx, dependencyType)
+		if (configStack.peek?.canProvide(providerCtx, dependencyType) ?: false)
+			return configStack.peek.provide(providerCtx, dependencyType)
 		return null
 	}
 	

@@ -6,6 +6,7 @@ internal const class ModuleImpl : Module {
 	private const LocalStash 		stash		:= LocalStash(Module#)
 	private const Str:ServiceDef	serviceDefs
 	private const Contribution[]	contributions
+	private const AdviceDef[]		adviceDefs
 	private const ObjLocator		objLocator
 
 	private Str:Obj perThreadServices {
@@ -43,6 +44,7 @@ internal const class ModuleImpl : Module {
 		this.serviceDefs	= serviceDefs
 		this.objLocator 	= objLocator
 		this.contributions	= [,]
+		this.adviceDefs		= [,]
 	}
 
 	new make(ObjLocator objLocator, ModuleDef moduleDef) {
@@ -73,6 +75,7 @@ internal const class ModuleImpl : Module {
 				it.objLocator 	= objLocator
 			}
 		}
+		this.adviceDefs		= moduleDef.adviceDefs
 	}
 
 	// ---- Module Methods ----------------------------------------------------
@@ -91,6 +94,12 @@ internal const class ModuleImpl : Module {
 		contributions.findAll {
 			// service def maybe null if contribution is optional
 			it.serviceDef?.serviceId == serviceDef.serviceId
+		}
+	}
+	
+	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
+		adviceDefs.findAll {
+			it.matchesServiceId(serviceDef.serviceId)
 		}
 	}
 	
