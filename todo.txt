@@ -9,7 +9,10 @@ Maybe...?
 --------- 
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 
-IocHelper.disableProxies
+IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
+
+IocHelper.eagerLoadBuiltInServices
+
 
 
 Meh... can't be arsed

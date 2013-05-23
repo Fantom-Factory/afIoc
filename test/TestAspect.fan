@@ -24,6 +24,17 @@ class TestAspect : IocTest {
 		verifyEq(s67.meth3, "death")
 	}
 
+	Void testNestedAdvice() {
+		reg := RegistryBuilder().addModule(T_MyModule81#).build.startup
+		s65 := reg.dependencyByType(T_MyService65Aspect#) as T_MyService65Aspect
+		s66 := reg.dependencyByType(T_MyService66Aspect#) as T_MyService66Aspect
+		s67 := reg.dependencyByType(T_MyService67NoMatch#) as T_MyService67NoMatch
+		
+		verifyEq(s65.meth1, "dredd add1 add 2 add3")
+		verifyEq(s66.meth2, "anderson add1 add 2 add3")
+		verifyEq(s67.meth3, "death")
+	}
+	
 	Void testGlobMatching() {
 		def := StandardAdviceDef {
 			it.serviceIdGlob	= "*Aspect"
@@ -44,9 +55,8 @@ internal class T_MyModule78 {
 	@Advise { serviceId="*Aspect" }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) {
 		methodAdvisors.each |advisor| {
-			advisor.addAdvice |target, args -> Obj?| {
-				Env.cur.err.printLine("ADISNLKSNDL")
-				ret := (Str) advisor.method.callOn(target, args)
+			advisor.addAdvice |invocation -> Obj?| {
+				ret := (Str) invocation.invoke
 				return ret + " MUTHA FUKIN ADVISED!"
 			}
 		}
@@ -63,7 +73,43 @@ internal class T_MyModule80 {
 	static Void adviseStuff(Int wotever, MethodAdvisor[] methodAdvisors) { }
 }
 
+internal class T_MyModule81 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService65Aspect#).withId("s65Aspect")
+		binder.bindImpl(T_MyService66Aspect#).withId("s66Aspect")
+		binder.bindImpl(T_MyService67NoMatch#).withId("s67NoMatch")
+	}
+	
+	@Advise { serviceId="s??*As*" }
+	static Void advise1(MethodAdvisor[] methodAdvisors) {
+		methodAdvisors.each |advisor| {
+			advisor.addAdvice |invocation -> Obj?| {
+				ret := (Str) invocation.invoke
+				return ret + " add1"
+			}
+		}
+	}
 
+	@Advise { serviceId="s??*As*" }
+	static Void advise2(MethodAdvisor[] methodAdvisors) {
+		methodAdvisors.each |advisor| {
+			advisor.addAdvice |invocation -> Obj?| {
+				ret := (Str) invocation.invoke
+				return ret + " add2"
+			}
+		}
+	}
+
+	@Advise { serviceId="s??*As*" }
+	static Void advise3(MethodAdvisor[] methodAdvisors) {
+		methodAdvisors.each |advisor| {
+			advisor.addAdvice |invocation -> Obj?| {
+				ret := (Str) invocation.invoke
+				return ret + " add3"
+			}
+		}
+	}
+}
 
 mixin T_MyService65Aspect {
 	abstract Str meth1()

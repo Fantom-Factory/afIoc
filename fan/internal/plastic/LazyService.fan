@@ -27,16 +27,9 @@ const class LazyService {
 		
 //		TODO: cache advisors
 		
-		methodAdvisors = methodAdvisors.findAll { it.method == method }
-		if (methodAdvisors.size > 1)
-			throw WtfErr("There are $methodAdvisors.size MethodAdvisors for method $method.qname")
-		if (methodAdvisors.isEmpty)
-			throw WtfErr("Wot no MethodAdvisors?? For method $method.qname")
-		methodAdvisor := methodAdvisors.first	// TODO: fuck the WtfErrs, just inline 'first'
+		methodAdvisor := methodAdvisors.findAll { it.method == method }.first
 		
-		ret:=methodAdvisor.call(get, args)
-		
-		return ret
+		return methodAdvisor.callOn(get, args)
 	}
 	
 	Obj get() {
