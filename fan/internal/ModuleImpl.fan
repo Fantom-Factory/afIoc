@@ -7,7 +7,7 @@ internal const class ModuleImpl : Module {
 	private const Str:ServiceDef	serviceDefs
 	private const Contribution[]	contributions
 	private const ObjLocator		objLocator
-	
+
 	private Str:Obj perThreadServices {
 		get { stash.get("perThreadServices") |->Obj| {[:]} }
 		set { }
@@ -182,7 +182,7 @@ internal const class ModuleImpl : Module {
     private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
 		status := (ServiceStat) getMyState { it.stats[def.serviceId] }
 
-		if (!forceCreate && !def.noProxy && def.serviceType.isMixin && status.lifecycle == ServiceLifecycle.DEFINED) {
+		if (!forceCreate && def.proxiable && status.lifecycle == ServiceLifecycle.DEFINED) {
 			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
 				service			:= proxyBuilder.buildProxy(ctx.tracker, def)

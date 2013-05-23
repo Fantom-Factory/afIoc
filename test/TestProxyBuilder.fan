@@ -67,6 +67,22 @@ class TestProxyBuilder : IocTest {
 
 		verifyEq(s58->judge, 69)
 	}
+
+	// this test can't be done with out a public test class, but as it's a pretty obvious test
+	// we can do without it
+//	Void testBuilderMethodsAreProxied() {
+//		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.DEFINED)
+//
+//		IocHelper.debugOperation |->| {
+//			
+//		s59 	:= reg.serviceById("s59") as T_MyService59
+//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.VIRTUAL)
+//
+//		verifyEq(s59.wotever->dude, "dude") 
+//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.CREATED)
+//		}
+//	}
 }
 
 internal class T_MyModule76 {
@@ -79,6 +95,25 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
+//		binder.bindImpl(T_MyService59#).withId("s59")
 	}
+	
+//	@Build { scope=ServiceScope.perThread}
+//	static T_MyService60 buildWickedMc() {
+//		return T_MyService60Impl() 
+//	}
 }
+
+//	internal class T_MyService59 {
+//		@Inject @ServiceId { serviceId="wickedMC" }
+//		T_MyService60? wotever
+//	}
+//	mixin T_MyService60 {
+//		abstract Str dude()
+//		abstract Int inc(Int i)
+//	}
+//	class T_MyService60Impl : T_MyService60 {
+//		override Str dude() { "dude"; }
+//		override Int inc(Int i) { i + 1 }
+//	}
 

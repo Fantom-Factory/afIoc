@@ -12,20 +12,24 @@ const class LazyService {
 	private const LocalStash		threadState	:= LocalStash(LazyServiceState#)
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
-	private const Bool				isConst
+	private const Bool				appScope
 	
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator, Bool isConst) {
+	internal new make(ServiceDef serviceDef, ObjLocator objLocator, Bool appScope) {
 		this.serviceDef = serviceDef
 		this.objLocator = objLocator
-		this.isConst	= isConst
-		if (!isConst)
-			threadState["state"] = LazyServiceState()
+		this.appScope	= appScope
 	}
 
 	Obj get() {
-		isConst
-			? getState { getService(objLocator, serviceDef) }
-			: ((LazyServiceState) threadState["state"]).getService(objLocator, serviceDef)
+		appScope ? getViaAppScope : getViaThreadScope
+	}
+
+	private Obj getViaAppScope() {
+		return getState { getService(objLocator, serviceDef) }
+	}
+
+	private Obj getViaThreadScope() {
+		return ((LazyServiceState) threadState.get("state", |->Obj| { LazyServiceState() })).getService(objLocator, serviceDef)
 	}
 
 	private Obj? getState(|LazyServiceState -> Obj?| state) {

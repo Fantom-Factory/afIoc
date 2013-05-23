@@ -25,6 +25,11 @@ internal const mixin ServiceDef {
 
 	abstract Bool noProxy()
 	
+	Bool proxiable() {
+		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
+		// Yeah, exactly! Just don't allow it.
+		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
+	}
 	
 	static |InjectionCtx ctx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
 		|InjectionCtx ctx->Obj| {
