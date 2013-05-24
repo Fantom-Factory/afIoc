@@ -91,20 +91,20 @@ class RegistryBuilder {
 	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
 	**  -  'disableProxies': Bool specifies if proxy generation for mixin fronted services should 
 	** 		be disabled. Default is 'false'.
-	** -   'eagerLoadBuiltInServices': Bool specifies if the built in services should be eagerly 
-	** 		loaded on registry startup. Default is 'true'.
     Registry build([Str:Obj]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
 
+			options = options?.rw ?: Utils.makeMap(Str#, Obj#)
+			
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
-				"eagerLoadBuiltInServices"	: true
 			])
 
-			invalid := options.dup.rw
+			invalid := Utils.makeMap(Str#, Obj#).addAll(options)
 			defaults.keys.each { invalid.remove(it) }
+			
 			if (!invalid.isEmpty)
 				throw IocErr(IocMessages.invalidRegistryOptions(invalid.keys, defaults.keys))
 

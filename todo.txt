@@ -1,10 +1,7 @@
 
 for v1.3
 
-Options on reg.make
-
 IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
-IocHelper.eagerLoadBuiltInServices
 
 
 Maybe...?
@@ -33,3 +30,5 @@ PerThreadService - is just registry.get()!
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
 
+IocHelper.eagerLoadBuiltInServices
+ - I mean, why?
