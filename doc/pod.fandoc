@@ -115,7 +115,7 @@ The exception is 'bind()' which does not have a facet but is declared with a sta
     binder.bindImpl(MyServiceImpl#).withId("elephant")
   }
 
-Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved as such when the method is called. For example, to manually build a service with the Id 'penguin':
+Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved and injected as such when the method is called. For example, to manually build a service with the Id 'penguin':
 
   @Build { serviceId="penguin" }
   static EmailService buildStuff(EmailConfig config) {

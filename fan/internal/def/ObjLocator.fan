@@ -26,4 +26,8 @@ internal const mixin ObjLocator {
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 
 	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
+	
+	abstract Str:Obj options()
+	
+	abstract Void logServiceCreation(Type log, Str msg)
 }
