@@ -91,6 +91,25 @@ Str<|
          new make(T_MyService61 s61) { this.s61 = s61 }
      }
 
+     mixin T_MyService65Aspect {
+         abstract Str meth1()
+     }
+     class T_MyService65AspectImpl : T_MyService65Aspect {
+         override Str meth1() { "dredd" }
+     }
+     mixin T_MyService66Aspect {
+         abstract Str meth2()
+     }
+     class T_MyService66AspectImpl : T_MyService66Aspect {
+         override Str meth2() { "anderson" }
+     }
+     mixin T_MyService67NoMatch {
+         abstract Str meth3()
+     }
+     class T_MyService67NoMatchImpl : T_MyService67NoMatch {
+         override Str meth3() { "death" }
+     }
+
      |>
 	
 	private const Pod pod := PlasticPodCompiler().compile(OpTracker(), fantomPodCode)
