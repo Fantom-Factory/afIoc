@@ -1,5 +1,5 @@
 
-class TestAutobuild : IocTest {
+internal class TestAutobuild : IocTest {
 	
 	Void testAutobuildWithParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup

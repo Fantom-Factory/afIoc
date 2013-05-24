@@ -1,5 +1,5 @@
 
-class TestFacetServiceId : IocTest {
+internal class TestFacetServiceId : IocTest {
 
 	Void testFieldInjection() {
 		reg := RegistryBuilder().addModule(T_MyModule53#).build.startup

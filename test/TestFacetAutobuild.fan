@@ -1,5 +1,5 @@
 
-class TestFacetAutobuild : IocTest {
+internal class TestFacetAutobuild : IocTest {
 	
 	Void testFieldInjection() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup

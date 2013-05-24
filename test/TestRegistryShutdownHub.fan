@@ -1,5 +1,5 @@
 
-class TestRegistryShutdownHub : Test {
+internal class TestRegistryShutdownHub : IocTest {
 	
 	Void testRegistryShutdownHub() {
 		reg := RegistryBuilder().addModule(T_MyModule3#).build.startup

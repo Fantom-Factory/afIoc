@@ -1,5 +1,5 @@
 
-class TestOrderedConfigOrdering : IocTest {
+internal class TestOrderedConfigOrdering : IocTest {
 	
 	Void testIdMustBeUnique() {
 		orderer := Orderer()

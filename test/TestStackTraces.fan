@@ -1,5 +1,5 @@
 
-class TestStackTraces : Test {
+internal class TestStackTraces : IocTest {
 
 	Void testRegistryBuild() {
 		verifyReducedStack {

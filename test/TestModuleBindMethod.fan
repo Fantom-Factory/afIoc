@@ -1,5 +1,5 @@
 
-class TestModuleBindMethod : IocTest {
+internal class TestModuleBindMethod : IocTest {
 	
 	Void testBindMethodMustBeStatic() {
 		

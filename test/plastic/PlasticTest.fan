@@ -1,5 +1,5 @@
 
-abstract class PlasticTest : Test {
+abstract internal class PlasticTest : Test {
 	
 	Void verifyErrMsg(Str errMsg, |Obj| func) {
 		errType := PlasticErr#

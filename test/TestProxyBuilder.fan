@@ -1,5 +1,5 @@
 
-class TestProxyBuilder : IocTest {
+internal class TestProxyBuilder : IocTest {
 	
 	private RegistryImpl? reg
 	private ServiceProxyBuilder? spb

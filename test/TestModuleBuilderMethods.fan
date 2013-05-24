@@ -1,5 +1,5 @@
 
-class TestModuleBuilderMethods : IocTest {
+internal class TestModuleBuilderMethods : IocTest {
 	
 	Void testBuilderMethodMustBeStatic() {
 		verifyErrMsg(IocMessages.builderMethodsMustBeStatic(T_MyModule37#buildT1)) {

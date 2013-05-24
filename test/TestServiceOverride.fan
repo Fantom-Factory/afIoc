@@ -1,5 +1,5 @@
 
-class TestServiceOverride : IocTest {
+internal class TestServiceOverride : IocTest {
 
 	Void testAppOverrideById() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
