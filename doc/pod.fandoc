@@ -1,6 +1,6 @@
 Overview [#overview]
 ********************
-IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Above and beyond all else, this IoC offers:
+IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Based on Google Guice, better than Spring! Above and beyond all else, this IoC offers:
 
 - **Injection - the way *you* want it!**
   - field injection
@@ -8,23 +8,28 @@ IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) fra
   - serialisation ctor injection - 'new make(|This|in) { in(this) }'
 
 - **Distributed service configuration between pods and modules**
-  - config are simple Lists and Maps
   - configure *any* service *from* any pod / module
+  - configure via simple Lists and Maps
 
 - **Override everything**
-  - override real services with test services
-  - set sensible default config and let users override them
+  - override services and configuration, even override your overrides!
+  - replace real services with test services
+  - set sensible application defaults and let your users override them
 
-- **Extensible with your own DependencyProviders**
-  - inject your own objects, not just services
+- **True lazy loading**
+  - services are proxied ro ensure nothing is created until you actually use it
+  - make circular dependencies a thing of the past!
 
-- **Extensive error reporting and detailed Err messages**
+- **Advise services with aspects**
+  - Advise method calls to your services
+  - Easily apply cross cutting concerns such as transactions and logging
+
+- **Extensible**
+  - define Dependency Providers and inject your own objects, not just services
+
+- **Exhaustive error reporting**
   - over 65 bespoke Err messages!
   - designed to help *you* the developer!
-
-- ** True lazy service loading**
-  - service proxies ensure nothing is created until you use it
-  - make circular dependencies a thing of the past!
 
 
 Quick Start [#quickStart]
@@ -34,6 +39,7 @@ Quick Start [#quickStart]
 2. Use the '@Inject' facet to mark fields as dependencies
 2. Define and configure your services in a 'Module' class
 3. Build and start the registry
+2. Go, go, go!
 
 pre>
 class Main {
@@ -77,9 +83,9 @@ Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is a singleton class of which there is only one instance (or one per thread). Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
+A **service** is just a Plain Old Fantom Object where there is only one instance (singleton) or one per thread. Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
 
-A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service. Non service dependencies may be managed by user defined [dependency providers]`DependencyProvider`.
+A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service, it's just a number. Non service dependencies are be managed by user defined [dependency providers]`DependencyProvider`.
 
 A **contribution** is a means to configure a service.
 
@@ -88,6 +94,8 @@ A **module** is a class where services and contributions are defined.
 
 Loading Modules [#loadingModules]
 *********************************
+Use the `RegistryBuilder` or `IocService` to build and start your `Registry` of services.
+
 When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules in dependant pods, in which case, each pod should have declared the following meta:
 
 '"afIoc.module" : "{qname}"'
@@ -188,9 +196,16 @@ This means registry startup times are quicker than ever and circular service dep
 It also allows you to inject 'perThread' scoped services into 'perApplication' scoped services.
 
 
+Advise Your Services [#adviseYourServices]
+******************************************
+Services aXXX
+
+XXX
+
+
 Tips [#tips]
 ************
-Define one main module and declare it both the pod meta and the pod index props. Use '@SubModule' to reference additional dependant modules in the same pod.
+Define one main module and declare it in both the pod meta and the pod index props. Use '@SubModule' to reference additional dependant modules in the same pod.
 
 If you have no say in how your classes are created (say, when you're using flux) then use the following line to inject dependencies when needed:
 
@@ -206,11 +221,13 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
-v1.2.4 [#v1.2.4]
+v1.3.0 [#v1.3.0]
 ----------------
+ - New: Simple Aspect API for advising proxied servies.
+ - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
  - Chg: Removed Ioc frames from stack traces (no more 150+ line stacktraces!)
  - Chg: Reducded INFO logging.
- - Bug: Autobuild checks the type is instantiable
+ - Bug: Autobuild checks the type is instantiable.
 
 v1.2.2 [#v1.2.2]
 ----------------

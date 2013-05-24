@@ -1,11 +1,7 @@
 
-for v1.3
 
-IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
-
-
-Maybe...?
---------- 
+v1.3.2 Maybe...?
+---------------- 
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 
 
@@ -21,8 +17,8 @@ Re-do DepdendencyCtx to give more detail
 
 
 
-Bad Ideas:
-----------
+Just Plain Bad Ideas:
+---------------------
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
 
 PerThreadService - is just registry.get()!
@@ -32,3 +28,4 @@ Registry.createProxy(mixinType, implType)
 
 IocHelper.eagerLoadBuiltInServices
  - I mean, why?
+ 
