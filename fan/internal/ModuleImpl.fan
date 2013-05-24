@@ -192,6 +192,9 @@ internal const class ModuleImpl : Module {
     private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
 		status := (ServiceStat) getMyState { it.stats[def.serviceId] }
 
+		if (ctx.objLocator.options["disableProxies"] == true)
+			forceCreate = true
+		
 		if (!forceCreate && def.proxiable && status.lifecycle == ServiceLifecycle.DEFINED) {
 			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
