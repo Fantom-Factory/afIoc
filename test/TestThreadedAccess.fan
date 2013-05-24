@@ -1,6 +1,6 @@
 using concurrent
 
-class TestThreadedAccess : IocTest {
+internal class TestThreadedAccess : IocTest {
 	
 	Void testAppVsThread() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule16#).build.startup

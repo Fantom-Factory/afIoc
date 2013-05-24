@@ -1,5 +1,5 @@
 
-class TestMappedConfig : IocTest {
+internal class TestMappedConfig : IocTest {
 	
 	Void testErrIfConfigIsGeneric() {
 		reg := RegistryBuilder().addModule(T_MyModule43#).build.startup

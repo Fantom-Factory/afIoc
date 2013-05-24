@@ -1,5 +1,5 @@
 
-class TestContribDefs : IocTest {
+internal class TestContribDefs : IocTest {
 	
 	Void testContributionMethodMustBeStatic() {
 		verifyErrMsg(IocMessages.contributionMethodMustBeStatic(T_MyModule23#contributeWot)) {

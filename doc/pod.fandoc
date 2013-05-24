@@ -30,17 +30,34 @@ IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) fra
 Quick Start [#quickStart]
 *************************
 
+1. Create services as Plain Old Fantom Objects
+2. Use the '@Inject' facet to mark fields as dependencies
+2. Define and configure your services in a 'Module' class
+3. Build and start the registry
+
 pre>
 class Main {
   static Void main(Str[] args) {
     registry := IocService([MyModule#]).start.registry
 
-    MyService1 test1 := (MyService1) registry.serviceById("myservice1")
-    MyService1 test2 := (MyService1) registry.dependencyByType(MyService1#)
-    MyService1 test3 := (MyService1) registry.autobuild(MyService1#)
-    MyService1 test4 := (MyService1) registry.injectIntoFields(MyService1())
+    test1 := (MyService1) registry.serviceById("myservice1")
+    test2 := (MyService1) registry.dependencyByType(MyService1#)
+    test3 := (MyService1) registry.autobuild(MyService1#)
+    test4 := (MyService1) registry.injectIntoFields(MyService1())
+
+    test1.service2.kick	// --> Ass!
+    test2.service2.kick	// --> Ass!
+    test3.service2.kick	// --> Ass!
+    test4.service2.kick	// --> Ass!
 
     Service.find(IocService#).uninstall
+  }
+}
+
+class MyModule {
+  static Void bind(ServiceBinder binder) {
+    binder.bindImpl(MyService1#)
+    binder.bindImpl(MyService2#)
   }
 }
 
@@ -53,12 +70,6 @@ class MyService2 {
   Str kick := "Ass!"
 }
 
-class MyModule {
-  static Void bind(ServiceBinder binder) {
-    binder.bindImpl(MyService1#)
-    binder.bindImpl(MyService2#)
-  }
-}
 <pre
 
 

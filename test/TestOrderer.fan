@@ -1,5 +1,5 @@
 
-class TestOrderer : IocTest {
+internal class TestOrderer : IocTest {
 	
 	** See http://en.wikipedia.org/wiki/Directed_acyclic_graph
 	Void testDag() {

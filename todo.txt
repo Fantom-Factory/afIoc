@@ -3,15 +3,14 @@ for v1.3
 
 advice
 
+IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
+
+IocHelper.eagerLoadBuiltInServices
 
 
 Maybe...?
 --------- 
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
-
-IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
-
-IocHelper.eagerLoadBuiltInServices
 
 
 
@@ -21,9 +20,6 @@ Re-do DepdendencyCtx to give more detail
  - See ProviderCtx for details
  - it's messy and I don't need it
 
-Registry.createProxy(mixinType, implType)
- - as impl type is not a service
-
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
 
@@ -32,4 +28,9 @@ Registry.createProxy(mixinType, implType)
 Bad Ideas:
 ----------
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
+
 PerThreadService - is just registry.get()!
+
+Registry.createProxy(mixinType, implType)
+ - as impl type is not a service, it's quite useless.
+

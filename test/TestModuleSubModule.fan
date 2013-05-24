@@ -1,5 +1,5 @@
 
-class TestModuleSubModule : IocTest {
+internal class TestModuleSubModule : IocTest {
 	
 	Void testSubModule() {
 		reg := RegistryBuilder().addModule(T_MyModule12#).build

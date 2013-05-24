@@ -1,5 +1,5 @@
 
-class TestPlasticModel : PlasticTest {
+internal class TestPlasticModel : PlasticTest {
 	
 	Void testNonConstProxyCannotOverrideConst() {
 		plasticModel := PlasticClassModel("TestImpl", false)

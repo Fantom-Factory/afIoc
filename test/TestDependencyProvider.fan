@@ -1,5 +1,5 @@
 
-class TestDependencyProvider : IocTest {
+internal class TestDependencyProvider : IocTest {
 	
 	Void testDependencyMustMatchType() {
 		reg := RegistryBuilder().addModule(T_MyModule56#).build

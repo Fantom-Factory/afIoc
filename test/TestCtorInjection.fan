@@ -1,5 +1,5 @@
 
-class TestCtorInjection : IocTest {
+internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
 		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup

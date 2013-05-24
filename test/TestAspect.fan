@@ -1,5 +1,5 @@
 
-class TestAspect : IocTest {
+internal class TestAspect : IocTest {
 	
 	Void testContributionMethodMustBeStatic() {
 		verifyErrMsg(IocMessages.adviseMethodMustBeStatic(T_MyModule79#adviseStuff)) {
@@ -30,8 +30,8 @@ class TestAspect : IocTest {
 		s66 := reg.dependencyByType(T_MyService66Aspect#) as T_MyService66Aspect
 		s67 := reg.dependencyByType(T_MyService67NoMatch#) as T_MyService67NoMatch
 		
-		verifyEq(s65.meth1, "dredd add1 add 2 add3")
-		verifyEq(s66.meth2, "anderson add1 add 2 add3")
+		verifyEq(s65.meth1, "dredd add1 add2 add3")
+		verifyEq(s66.meth2, "anderson add1 add2 add3")
 		verifyEq(s67.meth3, "death")
 	}
 	
@@ -129,5 +129,3 @@ mixin T_MyService67NoMatch {
 class T_MyService67NoMatchImpl : T_MyService67NoMatch {
 	override Str meth3() { "death" }
 }
-
-

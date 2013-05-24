@@ -1,5 +1,5 @@
 
-class TestRecursion : IocTest {
+internal class TestRecursion : IocTest {
 	
 	Void testModulesCantBeAddedTwice() {
 		RegistryBuilder().addModules([T_MyModule20#, T_MyModule20#]).build

@@ -1,5 +1,5 @@
 
-abstract class IocTest : Test {
+abstract internal class IocTest : Test {
 	
 	Void verifyErrMsg(Str errMsg, |Obj| func) {
 		errType := IocErr#

@@ -1,6 +1,6 @@
 using concurrent
 
-class TestIocService : IocTest {
+internal class TestIocService : IocTest {
 
 	Void testLocks() {
 		ioc := IocService()

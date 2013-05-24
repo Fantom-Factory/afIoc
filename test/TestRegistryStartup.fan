@@ -1,5 +1,5 @@
 
-class TestRegistryStartup : Test {
+internal class TestRegistryStartup : IocTest {
 	
 	Void testRegistryStartup() {
 		reg := RegistryBuilder().addModule(T_MyModule39#).build.startup
