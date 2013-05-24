@@ -38,6 +38,6 @@ const mixin ServiceIds {
 
 	** @since 1.3
 	internal
-	static const Str adviceSource				:= "AdviceSource"
+	static const Str aspectInvokerSource		:= "AspectInvokerSource"
 
 }

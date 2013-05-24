@@ -1,10 +1,9 @@
 
 for v1.3
 
-advice
+Options on reg.make
 
 IocHelper.disableProxies	-> don't like them in IocHelper, want them local to Registry
-
 IocHelper.eagerLoadBuiltInServices
 
 

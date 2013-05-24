@@ -6,29 +6,18 @@
 ** 
 ** @since 1.3.0
 class MethodAdvisor {
-
-	** The method to advise
-	Method	method
+	internal |MethodInvocation invocation -> Obj?|[] aspects	:= [,]
 	
-	private |MethodInvocation invocation -> Obj?|[] aspects	:= [,]
+	** The method to advise
+	const Method	method
 	
 	internal new make(Method method) {
 		this.method = method
 	}
 	
-	** Add an aspect to callback method advice
+	** Add an aspect that will be called when the method is invoked
 	Void addAdvice(|MethodInvocation invocation -> Obj?| aspect) {
 		aspects.add(aspect)
-	}
-
-	internal Obj? callOn(Obj service, Obj[] args) {
-		MethodInvocation {
-			it.service	= service
-			it.args		= args
-			it.method	= this.method
-			it.index	= 0
-			it.aspects	= this.aspects
-		}.invoke
 	}
 
 	// given I've never need to override method advice (and realistically I'm the only one using 
@@ -37,6 +26,8 @@ class MethodAdvisor {
 //	abstract Void overrideOrderedMethodAdvice(Str idToOverride, Str id, Str[] orderingConstraints, |Obj target, Obj[] args| aspect)
 }
 
+** As used by aspects to call the method they wrap.
+** 
 ** The real method is hidden behind this class so multiple Method Advisors can be chained
 ** 
 ** @since 1.3.0
