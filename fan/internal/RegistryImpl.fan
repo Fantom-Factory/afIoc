@@ -7,11 +7,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
 	private const Duration					startTime
+	override const Str:Obj					options
 	
-	new make(OpTracker tracker, ModuleDef[] moduleDefs) {
-		startTime			= tracker.startTime
-		serviceIdToModule 	:= Str:Module[:]
-		moduleIdToModule	:= Str:Module[:]
+	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj] options) {
+		this.startTime					= tracker.startTime
+		this.options					= options
+		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
+		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -207,7 +209,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			IocHelper.doLogServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
+			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
 			return trackAutobuild(InjectionCtx(this), type2, ctorArgs)
 		}
 	}
@@ -215,7 +217,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj injectIntoFields(Obj object) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			IocHelper.doLogServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
+			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return trackInjectIntoFields(InjectionCtx(this), object)
 		}
 	}
@@ -323,6 +325,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId, forceCreate)
 	}
 
+	override Void logServiceCreation(Type log, Str msg) {
+		 // Option defaults to 'false' as Ioc ideally should run quietly in the background and not 
+		// interfere with the running of your app.
+		if (options["logServiceCreation"] == true)
+			// e could have set afIoc log level to WARN but then we wouldn't get the banner at startup.
+			Utils.getLog(log).info(msg)
+	}
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 	

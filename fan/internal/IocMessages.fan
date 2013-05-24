@@ -3,6 +3,16 @@ internal const class IocMessages {
 
 	// ---- Err Messages --------------------------------------------------------------------------
 
+	static Str invalidRegistryOptions(Str[] invalidKeys, Str[] validKeys) {
+		invalidStr	:= invalidKeys.join(", ") 
+		validStr	:= validKeys.join(", ") 
+		return "The following are invalid registry options: $invalidStr - valid keys are $validStr"
+	}
+	
+	static Str invalidRegistryValue(Str key, Type wrongType, Type rightType) {
+		"Registry option '$key' is a $wrongType.qname, it should be a $rightType.qname"
+	}
+
 	static Str serviceNotStarted() {
 		"IoC Service has not been started."		
 	}

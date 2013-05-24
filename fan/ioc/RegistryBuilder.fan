@@ -82,12 +82,39 @@ class RegistryBuilder {
 		}
 	}
 	
-	** Constructs and returns the registry; this may only be done once. The caller is responsible for invoking
-	** `Registry.startup`
-    Registry build() {
+	** Constructs and returns the registry; this may only be done once. The caller is responsible 
+	** for invoking `Registry.startup`
+	** 
+	** Options are passed to the registry to specify some behaviour:
+	**  -  'logServiceCreation': Bool specifies if each service creation should be logged to INFO. 
+	** 		Default is 'false'. For extensive debug info, use 
+	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
+	**  -  'disableProxies': Bool specifies if proxy generation for mixin fronted services should 
+	** 		be disabled. Default is 'false'.
+	** -   'eagerLoadBuiltInServices': Bool specifies if the built in services should be eagerly 
+	** 		loaded on registry startup. Default is 'true'.
+    Registry build([Str:Obj]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
-	        registry := RegistryImpl(ctx.tracker, moduleDefs)
+
+			defaults := Utils.makeMap(Str#, Obj#).addAll([
+				"logServiceCreation"		: false,
+				"disableProxies"			: false,
+				"eagerLoadBuiltInServices"	: true
+			])
+
+			invalid := options.dup.rw
+			defaults.keys.each { invalid.remove(it) }
+			if (!invalid.isEmpty)
+				throw IocErr(IocMessages.invalidRegistryOptions(invalid.keys, defaults.keys))
+
+			defaults.each |val, key| {
+				optType := options[key]?.typeof
+				if (optType != null && optType != val.typeof)
+					throw IocErr(IocMessages.invalidRegistryValue(key, optType, val.typeof))
+			}
+
+	        registry := RegistryImpl(ctx.tracker, moduleDefs, defaults.setAll(options))
 			ctx.tracker.end
 			return registry
 		}
