@@ -3,6 +3,7 @@ using concurrent
 ** Little methods to help ease your IoC development.
 const class IocHelper {
 
+	// FIXME: turn into option
 	private static const AtomicBool logServiceCreationValue	:= AtomicBool(false)
 	
 	** We could have set afIoc log level to WARN but then we wouldn't get the banner at startup.

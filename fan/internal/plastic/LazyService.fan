@@ -12,36 +12,30 @@ const class LazyService {
 	private const LocalStash		threadState	:= LocalStash(LazyServiceState#)
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
-	private const Bool				appScope
 	
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator, Bool appScope) {
+	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
 		this.serviceDef = serviceDef
 		this.objLocator = objLocator
-		this.appScope	= appScope
 	}
 
 	Obj? call(Method method, Obj?[] args) {
-		ctx := InjectionCtx(objLocator, OpTracker(LogLevel.info))
-		adviceSource 	:= (AdviceSource) objLocator.trackServiceById(ctx, ServiceIds.adviceSource)
-		methodAdvisors	:= adviceSource.getMethodAdvisors(ctx, serviceDef)
-		
-//		TODO: cache advisors
-		
-		methodAdvisor := methodAdvisors.findAll { it.method == method }.first
-		
-		return methodAdvisor.callOn(get, args)
+		serviceInvoker.invokeMethod(method, args)
 	}
 	
-	Obj get() {
-		appScope ? getViaAppScope : getViaThreadScope
+	Obj service() {
+		serviceInvoker.service
+	}
+	
+	internal ServiceMethodInvoker serviceInvoker() {
+		(serviceDef.scope == ServiceScope.perApplication) ? getViaAppScope : getViaThreadScope
 	}
 
-	private Obj getViaAppScope() {
-		return getState { getService(objLocator, serviceDef) }
+	private ServiceMethodInvoker getViaAppScope() {
+		return getState { getCaller(objLocator, serviceDef).toConst }
 	}
 
-	private Obj getViaThreadScope() {
-		return ((LazyServiceState) threadState.get("state", |->Obj| { LazyServiceState() })).getService(objLocator, serviceDef)
+	private ServiceMethodInvoker getViaThreadScope() {
+		return ((LazyServiceState) threadState.get("state", |->Obj| { LazyServiceState() })).getCaller(objLocator, serviceDef)
 	}
 
 	private Obj? getState(|LazyServiceState -> Obj?| state) {
@@ -49,17 +43,20 @@ const class LazyService {
 	}
 }
 
-** @since 1.3
-internal class LazyServiceState {
-	private Obj? service
+** @since 1.3.0
+internal class LazyServiceState {	
+	private ServiceMethodInvokerThread? caller
 	
-	Obj getService(ObjLocator objLocator, ServiceDef serviceDef) {
-		if (service != null)
-			return service
+	ServiceMethodInvokerThread getCaller(ObjLocator objLocator, ServiceDef serviceDef) {
+		if (caller != null)
+			return caller
 		
 		ctx := InjectionCtx(objLocator)
 		return ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-			objLocator.getService(ctx, serviceDef, true)
+			invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
+			invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
+			return invoker
 		}
 	}
 }
+

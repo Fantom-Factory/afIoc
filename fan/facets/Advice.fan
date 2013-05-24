@@ -22,18 +22,20 @@
 ** e.g. the following module method adds transaction commit / rollback code to all 'saveXXX()' 
 ** methods on *all* DAO services. 
 ** 
+** pre>
 ** @Advise { serviceId="*DAO" }
-** static Void addTransations(MethodAdvisor[] methodAdvisors, MyTransactionManager transManager) {        
+** static Void addTransations(MethodAdvisor[] methodAdvisors, MyTransactionManager transManager) {
 **     methodAdvisors
 **         .findAll { it.method.name.startsWith("save") }
 **         .each |advisor| { 
-**             advisor.addAdvice |target, args| { 
+**             advisor.addAdvice |invocation -> Obj?| { 
 **                 
 **                 // my advice code
 **                 transManager.startTransaction()
 **                 try {
-**                     advisor.method.callOn(target, args) 
+**                     retValue := invocation.invoke
 **                     transManager.commit()
+**                     return retValue
 **                 } catch (Err e) {
 **                     transManager.rollback()
 **                     throw e
@@ -41,6 +43,7 @@
 **             } 
 **         }
 ** }
+** <pre
 ** 
 ** Note you can only advise services that are defined by a mixin, as the advice mechanism makes use 
 ** of proxies.
@@ -48,7 +51,7 @@
 ** @since 1.3.0
 facet class Advise {
 	
-	** The glob pattern to match against all service ids.
+	** The [glob pattern]`sys::Regex.glob` to match against all service ids.
 	** 
 	** Default value is '"*"', that is, match ALL services.
 	const Str serviceId := "*"

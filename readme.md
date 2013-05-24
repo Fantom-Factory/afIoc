@@ -6,12 +6,17 @@ An Inversion of Control (IoC) container for the [Fantom](http://fantom.org/) lan
 
     registry := IocService([MyModule#]).start.registry
 
-    MyService1 test1 := (MyService1) registry.serviceById("myservice1")
-    MyService1 test2 := (MyService1) registry.dependencyByType(MyService1#)
-    MyService1 test3 := (MyService1) registry.autobuild(MyService1#)
-    MyService1 test4 := (MyService1) registry.injectIntoFields(MyService1())
+    test1 := (MyService1) registry.serviceById("myservice1")
+    test2 := (MyService1) registry.dependencyByType(MyService1#)
+    test3 := (MyService1) registry.autobuild(MyService1#)
+    test4 := (MyService1) registry.injectIntoFields(MyService1())
 
-    Service.find(IocService#).uninstall    
+    test1.service2.kick	// --> Ass!
+    test2.service2.kick	// --> Ass!
+    test3.service2.kick	// --> Ass!
+    test4.service2.kick	// --> Ass!
+    
+    Service.find(IocService#).uninstall
 
 ## Documentation
 

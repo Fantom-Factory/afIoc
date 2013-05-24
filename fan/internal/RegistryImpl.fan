@@ -77,10 +77,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.adviceSource
-				it.serviceType 	= AdviceSource#
-				it.serviceImplType 	= AdviceSourceImpl#
-				it.source		= ServiceDef.fromCtorAutobuild(it, AdviceSourceImpl#)
+				it.serviceId 	= ServiceIds.aspectInvokerSource
+				it.serviceType 	= AspectInvokerSource#
+				it.serviceImplType 	= AspectInvokerSourceImpl#
+				it.source		= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 		
 			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)

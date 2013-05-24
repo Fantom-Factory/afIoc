@@ -29,8 +29,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	
 			serviceType.fields.rw
 				.each |field| {
-					getBody	:= "((${serviceType.qname}) afLazyService.get).${field.name}"
-					setBody	:= "((${serviceType.qname}) afLazyService.get).${field.name} = it"
+					getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
+					setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
 					model.overrideField(field, getBody, setBody)
 				}
 
@@ -48,7 +48,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			pod 		:= plasticPodCompiler.compile(tracker, code)
 			proxyType 	:= pod.type(model.className)
 			lazyField 	:= proxyType.field("afLazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry, serviceDef.scope == ServiceScope.perApplication)]
+			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
 			ctorFunc 	:= Field.makeSetFunc(plan)
 			proxy		:= proxyType.make([ctorFunc])
 			
