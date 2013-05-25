@@ -46,6 +46,7 @@ const class LocalStash {
 		this.prefix = createPrefix(type)
 	}
 	
+	** Get the value for the specified name.
 	@Operator
 	Obj? get(Str name, |->Obj|? defFunc := null) {
 		val := Actor.locals[key(name)]
@@ -58,6 +59,8 @@ const class LocalStash {
 		return val
 	}
 
+	** Set the value for the specified name. If the name was already mapped, this overwrites the old 
+	** value.
 	@Operator
 	Void set(Str name, Obj? value) {
 		Actor.locals[key(name)] = value
@@ -70,6 +73,21 @@ const class LocalStash {
 			.map |key->Str| { stripPrefix(key) }
 	}
 
+	** Remove the name/value pair from the stash and returns the value that was. If the key was not 
+	** mapped then return null.
+	** 
+	** @since 1.3.0
+	Obj? remove(Str name) {
+		Actor.locals.remove(key(name))
+	}
+	
+	** Removes all key/value pairs from this stash
+	** 
+	** @since 1.3.0
+	Void clear() {
+		keys.each { Actor.locals.remove(it) }
+	}
+	
 	override Str toStr() {
 		"LocalStash with prefix - $prefix"
 	}

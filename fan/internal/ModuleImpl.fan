@@ -85,6 +85,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
+		// TODO: use a cached adapter pattern
         serviceDefs.findAll |serviceDef, serviceId| {
 			serviceType.fits(serviceDef.serviceType)
         }.vals
