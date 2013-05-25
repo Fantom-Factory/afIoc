@@ -48,7 +48,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			pod 		:= plasticPodCompiler.compile(tracker, code)
 			proxyType 	:= pod.type(model.className)
 			lazyField 	:= proxyType.field("afLazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
+			plan 		:= Field:Obj?[lazyField : LazyService(tracker, serviceDef, (ObjLocator) registry)]
 			ctorFunc 	:= Field.makeSetFunc(plan)
 			proxy		:= proxyType.make([ctorFunc])
 			

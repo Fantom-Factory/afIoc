@@ -9,13 +9,15 @@ using afIoc::ConcurrentState
 @NoDoc
 const class LazyService {
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyServiceState#)
-	private const LocalStash		threadState	:= LocalStash(LazyServiceState#)
+	private const ThreadStash		threadStash
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
 	
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
-		this.serviceDef = serviceDef
-		this.objLocator = objLocator
+	internal new make(OpTracker tracker, ServiceDef serviceDef, ObjLocator objLocator) {
+		stashManager 		:= (ThreadStashManager) objLocator.serviceDefById(ServiceIds.threadStashManager)
+		this.serviceDef 	= serviceDef
+		this.objLocator 	= objLocator
+		this.threadStash	= stashManager.createStash("lazy-" + serviceDef.serviceId)
 	}
 
 	Obj? call(Method method, Obj?[] args) {
@@ -35,7 +37,7 @@ const class LazyService {
 	}
 
 	private ServiceMethodInvoker getViaThreadScope() {
-		return ((LazyServiceState) threadState.get("state", |->Obj| { LazyServiceState() })).getCaller(objLocator, serviceDef)
+		return ((LazyServiceState) threadStash.get("state", |->Obj| { LazyServiceState() })).getCaller(objLocator, serviceDef)
 	}
 
 	private Obj? getState(|LazyServiceState -> Obj?| state) {

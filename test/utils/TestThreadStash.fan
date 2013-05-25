@@ -1,11 +1,11 @@
 
-class TestLocalStash : Test {
+class TestThreadStash : Test {
 	
 	Void testDocumentation() {
-		stash1 := LocalStash()
+		stash1 := ThreadStash("def")
 		stash1["wot"] = "ever"
 	 
-		stash2 := LocalStash()
+		stash2 := ThreadStash("def")
 		stash2["wot"] = "banana"
 
 		verifyEq(stash1["wot"], "ever")

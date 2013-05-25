@@ -60,7 +60,7 @@ const class ConcurrentState {
 	private static const ActorPool	actorPool	:= ActorPool()
 	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
 	private const |->Obj| 			stateFactory
-	private const LocalStash 		stash
+	private const ThreadStash 		stash
 
 	private Obj? state {
 		get { stash["state"] }
@@ -70,12 +70,12 @@ const class ConcurrentState {
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
 	new makeWithStateType(Type stateType) {
 		this.stateFactory	= |->Obj| { stateType.make }
-		this.stash			= LocalStash(stateType)
+		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
 	}
 	
 	new makeWithStateFactory(|->Obj| stateFactory) {
 		this.stateFactory	= stateFactory
-		this.stash			= LocalStash(ConcurrentState#)
+		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 	}
 	
 	** Use to access state
