@@ -18,7 +18,7 @@ internal class T_MyModule3 {
 }
 
 internal const class T_MyService3 {
-	private const LocalStash 	stash	:= LocalStash(typeof)
+	private const ThreadStash 	stash	:= ThreadStash(typeof.name)
 	
 	Bool called {
 		get { stash["called"] }

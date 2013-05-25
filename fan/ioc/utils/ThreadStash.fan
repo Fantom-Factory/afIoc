@@ -1,4 +1,4 @@
-using concurrent
+using concurrent::Actor
 
 ** A wrapper around [Actor.locals]`concurrent::Actor.locals` ensuring a unique namespace per 
 ** instance. this means you don't have to worry about name clashes. 
@@ -6,10 +6,10 @@ using concurrent
 ** Example usage:
 ** 
 ** pre>
-**   stash1 := LocalStash()
+**   stash1 := ThreadStash("prefix")
 **   stash1["wot"] = "ever"
 ** 
-**   stash2 := LocalStash()
+**   stash2 := ThreadStash("prefix")
 **   stash2["wot"] = "banana"
 ** 
 **   Obj.echo(stash1["wot"])  // --> ever
@@ -19,7 +19,7 @@ using concurrent
 ** 
 ** pre>
 ** const class Example
-**   private const LocalStash stash := LocalStash(typeof)
+**   private const ThreadStash stash := LocalStash(typeof.name)
 **   
 **   MyService wotever {
 **     get { stash["wotever"] }
@@ -27,23 +27,19 @@ using concurrent
 **   }
 ** }
 ** <pre
-**  
-const class LocalStash {
+**
+** @since 1.3.0 (a replacement for 'LocalStash')
+const class ThreadStash {
+
 	private const Str prefix
 	
 	private Int? counter {
 		get { Actor.locals["${typeof.qname}.counter"] }
 		set { Actor.locals["${typeof.qname}.counter"] = it }
 	}
-
-	new make() {
-		this.prefix = createPrefix(typeof)
-	}
-
-	** Adds the type name to the 'locals' key - handy for debugging.
-	** See `IocHelper.locals`
-	new makeFromType(Type type) {
-		this.prefix = createPrefix(type)
+	
+	new make(Str prefix) {
+		this.prefix = createPrefix(prefix)
 	}
 	
 	** Get the value for the specified name.
@@ -66,48 +62,35 @@ const class LocalStash {
 		Actor.locals[key(name)] = value
 	}
 	
-	** Returns all keys associated / used with this stash 
+	** Returns all (fully qualified) keys associated / used with this stash 
 	Str[] keys() {
 		Actor.locals.keys
 			.findAll { it.startsWith(prefix) }
-			.map |key->Str| { stripPrefix(key) }
+			.sort
 	}
 
-	** Remove the name/value pair from the stash and returns the value that was. If the key was not 
-	** mapped then return null.
-	** 
-	** @since 1.3.0
+	** Remove the name/value pair from the stash and returns the value that was. If the name was 
+	** not mapped then return null.
 	Obj? remove(Str name) {
 		Actor.locals.remove(key(name))
 	}
 	
 	** Removes all key/value pairs from this stash
-	** 
-	** @since 1.3.0
 	Void clear() {
 		keys.each { Actor.locals.remove(it) }
 	}
-	
-	override Str toStr() {
-		"LocalStash with prefix - $prefix"
-	}
-	
-	private Str createPrefix(Type type) {
+
+	// ---- Helper Methods ------------------------------------------------------------------------
+
+	private Str createPrefix(Str strPrefix) {
 		count 	:= counter ?: 1
 		padded	:= count.toStr.padl(4, '0')
-		prefix 	:= "${type.name}.${padded}."
+		prefix 	:= "${strPrefix}.${padded}."
 		counter = count + 1
 		return prefix
 	}
-	
+
 	private Str key(Str name) {
 		return "${prefix}${name}"
 	}
-	
-	private Str stripPrefix(Str name) {
-		if (name.startsWith(prefix))
-			return name[prefix.size..-1]
-		else
-			return name
-	}	
 }

@@ -18,8 +18,8 @@ const class IocHelper {
 		}
 	}
 	
-	** A read only copy of the 'Actor.locals' map with the keys sorted. Handy for debugging. 
-	** Example:
+	** A read only copy of the 'Actor.locals' map with the keys sorted alphabetically. Handy for 
+	** debugging. Example:
 	** 
 	**   IocHelper.locals.each |value, key| {
 	**     echo("$key = $value")

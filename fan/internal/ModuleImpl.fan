@@ -3,7 +3,7 @@ internal const class ModuleImpl : Module {
 	
 	override const Str				moduleId
 	private const ConcurrentState 	conState	:= ConcurrentState(StandardModuleState#)
-	private const LocalStash 		stash		:= LocalStash(Module#)
+	private const ThreadStash 		stash
 	private const Str:ServiceDef	serviceDefs
 	private const Contribution[]	contributions
 	private const AdviceDef[]		adviceDefs
@@ -14,8 +14,9 @@ internal const class ModuleImpl : Module {
 		set { }
 	}	
 
-	new makeBuiltIn(ObjLocator objLocator, Str moduleId, ServiceDef:Obj? services) {
-		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
+	new makeBuiltIn(ObjLocator objLocator, ThreadStashManager stashManager, Str moduleId, ServiceDef:Obj? services) {
+		stash = stashManager.createStash(ServiceIds.builtInModuleId)
+		serviceDefs	:= Str:ServiceDef[:] { caseInsensitive = true }
 	
 		services.each |service, def| {
 			if (def.scope == ServiceScope.perThread) {
@@ -47,8 +48,9 @@ internal const class ModuleImpl : Module {
 		this.adviceDefs		= [,]
 	}
 
-	new make(ObjLocator objLocator, ModuleDef moduleDef) {
-		serviceDefs	:= Str:ServiceDef[:] 	{ caseInsensitive = true }
+	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
+		stash = stashManager.createStash(moduleDef.moduleId)
+		serviceDefs	:= Str:ServiceDef[:] { caseInsensitive = true }
 		
 		moduleDef.serviceDefs.each |def| { 
 			serviceDefs[def.serviceId] = def

@@ -28,6 +28,11 @@ const mixin ServiceIds {
 	internal
 	static const Str ctorFieldInjector			:= "CtorFieldInjector"
 	
+	** @see `ThreadStashManager`
+	** 
+	** @since 1.3
+	static const Str threadStashManager			:= "ThreadStashManager"
+	
 	** @since 1.3
 	internal
 	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"

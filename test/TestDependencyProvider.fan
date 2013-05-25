@@ -78,7 +78,7 @@ internal class T_MyService43 {
 
 
 internal const class T_DependencyProvider2 : DependencyProvider {
-	const LocalStash ls := LocalStash(T_DependencyProvider2#)
+	const ThreadStash ls := ThreadStash(T_DependencyProvider2#.name)
 	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
 		ls["ctx"] = ctx
 		ls["type"] = dependencyType

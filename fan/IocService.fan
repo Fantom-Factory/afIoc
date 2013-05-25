@@ -2,7 +2,7 @@
 ** Wraps a `Registry` instance as Fantom service. 
 const class IocService : Service {
 	private static const Log 		log 		:= Utils.getLog(IocService#)
-	private const LocalStash 		stash		:= LocalStash(typeof)
+	private const ThreadStash 		stash		:= ThreadStash(IocService#.name)
 	private const ConcurrentState	conState	:= ConcurrentState(IocServiceState#)
 
 	private Type[] moduleTypes {

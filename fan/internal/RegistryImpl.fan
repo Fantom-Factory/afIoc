@@ -13,7 +13,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		this.startTime					= tracker.startTime
 		this.options					= options
 		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
-		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)
+		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)		
+		stashManager 					:=  ThreadStashManagerImpl()
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -85,7 +86,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source		= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 		
-			builtInModule := ModuleImpl(this, ServiceIds.builtInModuleId, services)
+			services[BuiltInServiceDef() {
+				it.serviceId 	= ServiceIds.threadStashManager
+				it.serviceType 	= ThreadStashManager#
+			}] = stashManager
+
+			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 
 			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule
 			services.keys.each {
@@ -95,7 +101,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
-				module := ModuleImpl(this, moduleDef)
+				module := ModuleImpl(this, stashManager, moduleDef)
 				moduleIdToModule[moduleDef.moduleId] = module
 
 				// ensure services aren't defined twice
