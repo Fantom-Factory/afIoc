@@ -13,8 +13,8 @@ const class LazyService {
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
 	
-	internal new make(OpTracker tracker, ServiceDef serviceDef, ObjLocator objLocator) {
-		stashManager 		:= (ThreadStashManager) objLocator.serviceDefById(ServiceIds.threadStashManager)
+	internal new make(InjectionCtx ctx, ServiceDef serviceDef, ObjLocator objLocator) {
+		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ctx, ServiceIds.threadStashManager)
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
 		this.threadStash	= stashManager.createStash("lazy-" + serviceDef.serviceId)

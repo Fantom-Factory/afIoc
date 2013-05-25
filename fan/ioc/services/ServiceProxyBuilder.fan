@@ -3,6 +3,6 @@
 @NoDoc
 const mixin ServiceProxyBuilder {
 
-	internal abstract Obj buildProxy(OpTracker tracker, ServiceDef serviceDef)
+	internal abstract Obj buildProxy(InjectionCtx ctx, ServiceDef serviceDef)
 
 }
