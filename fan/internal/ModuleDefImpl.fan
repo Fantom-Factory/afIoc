@@ -148,7 +148,7 @@ internal const class ModuleDefImpl : ModuleDef {
 			scope = build.scope
 		
 		serviceDef	:= StandardServiceDef {
-			it.serviceId 	= extractServiceIdFromBuilderMethod(method)
+			it.serviceId 	= build.serviceId ?: extractServiceIdFromBuilderMethod(method)
 			it.moduleId 	= this.moduleId
 			it.serviceType	= method.returns
 			it.description	= "'$serviceId' : Builder method $method.qname"
