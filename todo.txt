@@ -2,6 +2,9 @@
 
 v1.3.2 Maybe...?
 ---------------- 
+
+thread manager - cleanup (kill thread services)
+
 service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
 
 
@@ -11,6 +14,9 @@ Meh... can't be arsed
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  - it's messy and I don't need it
+
+Move all tests out into a dedicated pod
+ - v1.3 is 369 Kb!
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById

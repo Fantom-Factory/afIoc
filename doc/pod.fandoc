@@ -225,9 +225,11 @@ v1.3.0 [#v1.3.0]
 ----------------
  - New: Simple Aspect API for advising proxied servies.
  - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
+ - New: Added 'remove()' and 'clear()' to `LocalStash`
  - Chg: Removed Ioc frames from stack traces (no more 150+ line stacktraces!)
  - Chg: Reducded INFO logging.
- - Bug: Autobuild checks the type is instantiable.
+ - Bug: '@Build.serivceId' was not overriding the build method name.
+ - Bug: Autobuild now checks if the type is instantiable.
 
 v1.2.2 [#v1.2.2]
 ----------------
@@ -262,5 +264,5 @@ v1.0.0 [#v1.0.0]
 
 v0.0.2 [#v0.0.2]
 ----------------
- - Preview release
+ - New: A fully loaded preview release.
 
