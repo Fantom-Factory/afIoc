@@ -201,7 +201,7 @@ internal const class ModuleImpl : Module {
 		if (!forceCreate && def.proxiable && status.lifecycle == ServiceLifecycle.DEFINED) {
 			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
-				service			:= proxyBuilder.buildProxy(ctx.tracker, def)
+				service			:= proxyBuilder.buildProxy(ctx, def)
 				
 				withMyState {
 					stat := it.stats[def.serviceId]

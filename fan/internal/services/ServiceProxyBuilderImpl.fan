@@ -11,8 +11,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	new make(|This|di) { di(this) }
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
-	override internal Obj buildProxy(OpTracker tracker, ServiceDef serviceDef) {
-		tracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
+	override internal Obj buildProxy(InjectionCtx ctx, ServiceDef serviceDef) {
+		ctx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceId	:= serviceDef.serviceId
 			serviceType	:= serviceDef.serviceType
 			
@@ -45,10 +45,10 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 				}
 			
 			code 		:= model.toFantomCode
-			pod 		:= plasticPodCompiler.compile(tracker, code)
+			pod 		:= plasticPodCompiler.compile(ctx.tracker, code)
 			proxyType 	:= pod.type(model.className)
 			lazyField 	:= proxyType.field("afLazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(tracker, serviceDef, (ObjLocator) registry)]
+			plan 		:= Field:Obj?[lazyField : LazyService(ctx, serviceDef, (ObjLocator) registry)]
 			ctorFunc 	:= Field.makeSetFunc(plan)
 			proxy		:= proxyType.make([ctorFunc])
 			

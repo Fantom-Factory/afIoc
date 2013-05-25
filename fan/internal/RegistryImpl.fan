@@ -14,7 +14,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		this.options					= options
 		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
 		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)		
-		stashManager 					:=  ThreadStashManagerImpl()
+		stashManager 					:= ThreadStashManagerImpl()
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
