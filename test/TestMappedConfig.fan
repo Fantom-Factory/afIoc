@@ -33,7 +33,7 @@ internal class TestMappedConfig : IocTest {
 		}
 	}
 
-	Void testOrderedConfigAutobuild() {
+	Void testMappedConfigAutobuild() {
 		reg := RegistryBuilder().addModule(T_MyModule48#).build.startup
 		s28 := reg.serviceById("s28") as T_MyService28
 		verifyEq(s28.config, Str:Str["judge":"ASS!"])
@@ -75,7 +75,7 @@ internal class TestMappedConfig : IocTest {
 	}
 
 	Void testOverride2() {
-		reg := RegistryBuilder().addModule(T_MyModule63#).build.startup
+		reg := RegistryBuilder().addModule(T_MyModule62#).addModule(T_MyModule63#).build.startup
 		s28 := reg.serviceById("s28") as T_MyService28
 		verifyEq(s28.config.size, 1)
 		verifyEq(s28.config["key"], "value3")
@@ -262,13 +262,8 @@ internal class T_MyModule62 {
 }
 
 internal class T_MyModule63 {
-	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
-	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
-		config.addMapped("key", "value")
-		config.addOverride("key", "over1", "value2")
 		config.addOverride("over1", "over2", "value3")
 	}
 }

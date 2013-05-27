@@ -161,6 +161,10 @@ class OrderedConfig {
 		}		
 	}
 
+	internal Int size() {
+		config.size
+	}
+
 	private once Type listType() {
 		contribType.params["V"]
 	}

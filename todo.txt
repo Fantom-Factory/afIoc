@@ -1,13 +1,6 @@
 
-Not found Err - extend IocErr or not? have serviceById throw it
-
-Adapter pattern
-
-
 v1.3.2 Maybe...?
 ---------------- 
-
-Mapped Overrides... shite. You can't change the KEY!
 
 Optracker should not err.out but append to an OpTrackerErr (extend IocErr???)
 

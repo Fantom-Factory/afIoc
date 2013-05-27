@@ -28,7 +28,7 @@ class ProviderCtx {
 //	Type? injectingInto
 
 	// notes on possible injection ctx
-	
+	// useful to have field name also - check if enabled with sys:debug=false
 //	building type
 // - autobuild
 // - serviceDef

@@ -114,6 +114,10 @@ class MappedConfig {
 		return config
 	}
 
+	internal Int size() {
+		config.size
+	}
+	
 	Obj validateKey(Obj key) {
 		if (!key.typeof.fits(keyType))
 			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
