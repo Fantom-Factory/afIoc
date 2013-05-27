@@ -166,7 +166,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		perce := (100d * unreal / stats.size).toLocale("0.00")
 		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
 		
-		title := Utils.banner("Alien-Factory IoC v$typeof.pod.version.toStr")
+		title := Utils.banner(options["bannerText"])
 		title += "IoC started up in ${millis}ms\n"
 		log.info(srvcs + title)
 		return this
@@ -187,6 +187,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		// destroy all internal refs
 		modules.each { it.clear }
+		
+		log.info("\"Goodbye!\" from afIoc!")
 		
 		return this
 	}
