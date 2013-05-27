@@ -8,7 +8,7 @@ internal const class ModuleImpl : Module {
 	private const Contribution[]	contributions
 	private const AdviceDef[]		adviceDefs
 	private const ObjLocator		objLocator
-	private const AdapterPattern	typeToServiceDefs
+	private const StrategyRegistry	typeToServiceDefs
 
 	private Str:Obj perThreadServices {
 		get { stash.get("perThreadServices") |->Obj| {[:]} }
@@ -52,7 +52,7 @@ internal const class ModuleImpl : Module {
 		serviceDefs.each |def, id| {
 			map.getOrAdd(def.serviceType) { ServiceDef[,] }.add(def)
 		}
-		this.typeToServiceDefs = AdapterPattern(map)
+		this.typeToServiceDefs = StrategyRegistry(map)
 	}
 
 	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
@@ -90,7 +90,7 @@ internal const class ModuleImpl : Module {
 		serviceDefs.each |def, id| {
 			map.getOrAdd(def.serviceType) { ServiceDef[,] }.add(def)
 		}
-		this.typeToServiceDefs = AdapterPattern(map)		
+		this.typeToServiceDefs = StrategyRegistry(map)		
 	}
 
 	// ---- Module Methods ----------------------------------------------------

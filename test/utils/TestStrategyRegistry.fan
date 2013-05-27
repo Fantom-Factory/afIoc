@@ -1,5 +1,5 @@
 
-internal class TestAdapterPattern : IocTest {
+internal class TestStrategyRegistry : IocTest {
 	
 	Void testDupsError() {
 		// need to get the ordering correct
@@ -9,7 +9,7 @@ internal class TestAdapterPattern : IocTest {
 		map[Err?#] 		= 3
 		
 		verifyErrMsgAndType(Err#, "Type sys::Err is already mapped to value 1") {
-			ap := AdapterPattern(map)
+			ap := StrategyRegistry(map)
 		}
 	}
 	
@@ -17,7 +17,7 @@ internal class TestAdapterPattern : IocTest {
 		map := Utils.makeMap(Type#, Obj?#)
 		map[IocErr#] 	= 2
 		map[Err#] 		= 1
-		ap := AdapterPattern(map)
+		ap := StrategyRegistry(map)
 		
 		verifyEq(ap.findExactMatch(Obj#, false), null)
 		verifyEq(ap.findExactMatch(Obj?#, false), null)
@@ -27,10 +27,10 @@ internal class TestAdapterPattern : IocTest {
 		verifyEq(ap.findExactMatch(IocErr?#, false), 2)
 		verifyEq(ap.findExactMatch(T_InnerIocErr#, false), null)
 		verifyEq(ap.findExactMatch(T_InnerIocErr?#, false), null)
-		verifyEq(ap.findExactMatch(TestAdapterPattern?#, false), null)
+		verifyEq(ap.findExactMatch(TestStrategyRegistry?#, false), null)
 		
 		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestAdapterPattern. Available values = afIoc::IocErr, sys::Err") {   
-			verifyEq(ap.findExactMatch(TestAdapterPattern#), null)
+			verifyEq(ap.findExactMatch(TestStrategyRegistry#), null)
 		}
 
 		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::T_InnerIocErr. Available values = afIoc::IocErr, sys::Err") {   
@@ -42,7 +42,7 @@ internal class TestAdapterPattern : IocTest {
 		map := Utils.makeMap(Type#, Obj?#)
 		map[IocErr#] 	= 2
 		map[Err#] 		= 1
-		ap := AdapterPattern(map)
+		ap := StrategyRegistry(map)
 		
 		verifyEq(ap.findBestFit(Obj#, false), null)
 		verifyEq(ap.findBestFit(Obj?#, false), null)
@@ -52,10 +52,10 @@ internal class TestAdapterPattern : IocTest {
 		verifyEq(ap.findBestFit(IocErr?#, false), 2)
 		verifyEq(ap.findBestFit(T_InnerIocErr#, false), 2)
 		verifyEq(ap.findBestFit(T_InnerIocErr?#, false), 2)
-		verifyEq(ap.findBestFit(TestAdapterPattern?#, false), null)
+		verifyEq(ap.findBestFit(TestStrategyRegistry?#, false), null)
 		
 		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestAdapterPattern. Available values = afIoc::IocErr, sys::Err") {   
-			verifyEq(ap.findExactMatch(TestAdapterPattern#), null)
+			verifyEq(ap.findExactMatch(TestStrategyRegistry#), null)
 		}
 	}
 
