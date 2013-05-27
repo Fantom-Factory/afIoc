@@ -12,8 +12,12 @@ class TestThreadStash : Test {
 		
 		stash1["ever"] = "apple"
 
-		verifyEq(stash1.keys.sort, Str["wot", "ever"].sort)
-		verifyEq(stash2.keys, Str["wot"])
+		verify(stash1.keys.sort[0].endsWith("ever"))
+		verify(stash1.keys.sort[1].endsWith("wot"))
+		verifyEq(stash1.keys.size, 2)
+		
+		verify(stash2.keys[0].endsWith("wot"))
+		verifyEq(stash2.keys.size, 1)
 	}
 	
 }

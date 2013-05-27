@@ -1,11 +1,21 @@
 
+Not found Err - extend IocErr or not? have serviceById throw it
+
+Adapter pattern
+
 
 v1.3.2 Maybe...?
 ---------------- 
 
-thread manager - cleanup (kill thread services)
+Mapped Overrides... shite. You can't change the KEY!
 
-service disambiguation via facets - is just another dep pro: map of services keyed by type&facet
+Optracker should not err.out but append to an OpTrackerErr (extend IocErr???)
+
+@Advise to Err when no match...possible?
+ - yeah, do check on reg startup
+ - add 'optional' like with @controibute
+
+recustion err with builder methods injection scope 1->2->1
 
 
 
@@ -14,6 +24,9 @@ Meh... can't be arsed
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  - it's messy and I don't need it
+
+service disambiguation via facets 
+ - is just another dep pro: map of services keyed by type&facet
 
 Move all tests out into a dedicated pod
  - v1.3 is 369 Kb!
@@ -31,6 +44,7 @@ PerThreadService - is just registry.get()!
 
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
+ - better to enhance plastic
 
 IocHelper.eagerLoadBuiltInServices
  - I mean, why?

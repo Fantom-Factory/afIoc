@@ -57,7 +57,6 @@ internal class TestProxyBuilder : IocTest {
 	// Weird shenanigans - const fields aren't allowed. Full stop.
 	// see http://fantom.org/sidewalk/topic/1921
 	// So const mixins can't ever declare fields.
-	
 	Void testPerThreadProxy() {
 		s58 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s58"))
 		verifyEq(s58->dude, "Stella!")
