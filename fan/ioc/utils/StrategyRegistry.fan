@@ -24,16 +24,15 @@ const class StrategyRegistry {
 
 	Obj? findBestFit(Type exact, Bool checked := true) {		
 		nonNullable := exact.toNonNullable
+		// chill, I got tests for all this!
 		return getState |state->Obj?| {
-			return state.cache.getOrAdd(nonNullable) |->Obj?| {
+			state.cache.getOrAdd(nonNullable) |->Obj?| {
 				deltas := values
 					.findAll |val, type| { nonNullable.fits(type) }
 					.map |val, type->Int| {
-						inher 	:= nonNullable.inheritance
-						min 	:= inher.index(nonNullable)	// should always be zero
-						max 	:= inher.index(type)
-						delta	:= max - min
-						return delta
+						nonNullable.inheritance.eachWhile |sup, i| {
+							(sup == type || sup.mixins.contains(type)) ? i : null
+						}
 					}
 				
 				if (deltas.isEmpty)
