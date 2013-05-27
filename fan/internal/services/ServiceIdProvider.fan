@@ -2,7 +2,7 @@
 internal const class ServiceIdProvider : DependencyProvider {
 	
 	@Inject
-	private const RegistryImpl registry
+	private const Registry registry
 	
 	new make(|This|di) { di(this) }
 	
@@ -17,7 +17,7 @@ internal const class ServiceIdProvider : DependencyProvider {
 		
 		serviceId := (serviceIds[0] as ServiceId).serviceId
 		ctx.log("Found @ServiceId { $serviceId }")
-		service := registry.trackServiceById(ctx.injectionCtx, serviceId)
+		service := ((ObjLocator) registry).trackServiceById(ctx.injectionCtx, serviceId)
 		
 		if (!service.typeof.fits(dependencyType))
 			throw IocErr(IocMessages.serviceIdDoesNotFit(serviceId, service.typeof, dependencyType))

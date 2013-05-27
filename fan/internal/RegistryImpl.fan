@@ -339,13 +339,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			Utils.getLog(log).info(msg)
 	}
 
-	// ---- Helper Methods ------------------------------------------------------------------------
-	
-	internal Str:ServiceStat stats() {
+	override Str:ServiceStat stats() {
 		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
 		modules.each { stats.addAll(it.serviceStats) }
 		return stats
 	}
+	
+	// ---- Helper Methods ------------------------------------------------------------------------	
 
 	private Void shutdownLockCheck() {
 		withMyState |state| {

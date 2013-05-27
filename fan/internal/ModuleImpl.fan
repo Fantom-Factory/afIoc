@@ -8,6 +8,7 @@ internal const class ModuleImpl : Module {
 	private const Contribution[]	contributions
 	private const AdviceDef[]		adviceDefs
 	private const ObjLocator		objLocator
+	private const AdapterPattern	typeToServiceDefs
 
 	private Str:Obj perThreadServices {
 		get { stash.get("perThreadServices") |->Obj| {[:]} }
@@ -25,11 +26,11 @@ internal const class ModuleImpl : Module {
 			}
 			if (def.scope == ServiceScope.perApplication) {
 				if (service != null)
-					withMyState { 
+					withState { 
 						it.perApplicationServices[def.serviceId] = service
 					}
 			}
-			withMyState {
+			withState {
 				it.stats[def.serviceId] = ServiceStat {
 					it.serviceId	= def.serviceId
 					it.type			= def.serviceType
@@ -46,6 +47,12 @@ internal const class ModuleImpl : Module {
 		this.objLocator 	= objLocator
 		this.contributions	= [,]
 		this.adviceDefs		= [,]
+		
+		map := Type:ServiceDef[][:]
+		serviceDefs.each |def, id| {
+			map.getOrAdd(def.serviceType) { ServiceDef[,] }.add(def)
+		}
+		this.typeToServiceDefs = AdapterPattern(map)
 	}
 
 	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
@@ -54,7 +61,7 @@ internal const class ModuleImpl : Module {
 		
 		moduleDef.serviceDefs.each |def| { 
 			serviceDefs[def.serviceId] = def
-			withMyState {
+			withState {
 				it.stats[def.serviceId] = ServiceStat {
 					it.serviceId	= def.serviceId
 					it.type			= def.serviceType
@@ -78,6 +85,12 @@ internal const class ModuleImpl : Module {
 			}
 		}
 		this.adviceDefs		= moduleDef.adviceDefs
+		
+		map := Type:ServiceDef[][:]
+		serviceDefs.each |def, id| {
+			map.getOrAdd(def.serviceType) { ServiceDef[,] }.add(def)
+		}
+		this.typeToServiceDefs = AdapterPattern(map)		
 	}
 
 	// ---- Module Methods ----------------------------------------------------
@@ -87,10 +100,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-		// TODO: use a cached adapter pattern
-        serviceDefs.findAll |serviceDef, serviceId| {
-			serviceType.fits(serviceDef.serviceType)
-        }.vals
+		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
@@ -125,7 +135,7 @@ internal const class ModuleImpl : Module {
 				}
 				
 				// if asked, replace the cached VIRTUAL service with a real one
-				status := (ServiceStat) getMyState { it.stats[serviceId] }
+				status := (ServiceStat) getState { it.stats[serviceId] }
 				if (forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL) {
 					service = create(ctx, def, forceCreate)
 					perThreadServices[serviceId] = service
@@ -142,12 +152,12 @@ internal const class ModuleImpl : Module {
 				// TODO: A const service could be created twice if there's a race condition between
 				// two threads. And who knows what those services do in their ctor or PostInject 
 				// methods!
-				exists := getMyState |state -> Obj?| { 
+				exists := getState |state -> Obj?| { 
 					state.perApplicationServices[def.serviceId]
 				}
 				
 				// if asked, replace the cached VIRTUAL service with a real one
-				status 		:= (ServiceStat) getMyState { it.stats[serviceId] }
+				status 		:= (ServiceStat) getState { it.stats[serviceId] }
 				make4Real	:= forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL
 				
 				if (!make4Real && exists != null)
@@ -157,7 +167,7 @@ internal const class ModuleImpl : Module {
 				service := create(ctx, def, forceCreate)
 
 				// in a race condition, the 2nd service created wins
-				withMyState |state -> Obj| {
+				withState |state -> Obj| {
 					// double check service existence
 					state.perApplicationServices.getOrAdd(def.serviceId) {
 						service
@@ -172,28 +182,28 @@ internal const class ModuleImpl : Module {
 	}
 	
 	override Str:ServiceStat serviceStats() {
-		getMyState { it.stats.toImmutable }
+		getState { it.stats.toImmutable }
 	}
 	
 	override Void clear() {
 		perThreadServices.clear
-		withMyState { 
+		withState { 
 			it.perApplicationServices.clear
 		}
 	}
 
 	// ---- Private Methods ----------------------------------------------------
 
-	private Void withMyState(|StandardModuleState| state) {
+	private Void withState(|StandardModuleState| state) {
 		conState.withState(state)
 	}
 
-	private Obj? getMyState(|StandardModuleState -> Obj| state) {
+	private Obj? getState(|StandardModuleState -> Obj| state) {
 		conState.getState(state)
 	}
 	
     private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
-		status := (ServiceStat) getMyState { it.stats[def.serviceId] }
+		status := (ServiceStat) getState { it.stats[def.serviceId] }
 
 		if (ctx.objLocator.options["disableProxies"] == true)
 			forceCreate = true
@@ -203,7 +213,7 @@ internal const class ModuleImpl : Module {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
 				service			:= proxyBuilder.buildProxy(ctx, def)
 				
-				withMyState {
+				withState {
 					stat := it.stats[def.serviceId]
 					it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.VIRTUAL)
 				}
@@ -216,7 +226,7 @@ internal const class ModuleImpl : Module {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			
-			withMyState {
+			withState {
 				stat := it.stats[def.serviceId]
 				it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.CREATED).withNoOfImpls(stat.noOfImpls + 1)
 			}

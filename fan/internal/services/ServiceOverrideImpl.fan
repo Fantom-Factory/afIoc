@@ -4,9 +4,9 @@ internal const class ServiceOverrideImpl : ServiceOverride {
 	
 	private const Str:Obj overrides
 	
-	new make(Str:Obj overrides, RegistryImpl registry) {
+	new make(Str:Obj overrides, Registry registry) {
 		overrides.each |service, id| {			
-			existingDef := registry.serviceDefById(id)
+			existingDef := ((ObjLocator) registry).serviceDefById(id)
 			if (existingDef == null)
 				throw IocErr(IocMessages.serviceOverrideDoesNotExist(id, service.typeof))
 
