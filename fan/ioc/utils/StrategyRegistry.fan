@@ -1,6 +1,6 @@
 
-const class AdapterPattern {	
-	private const ConcurrentState 	conState	:= ConcurrentState(AdapterPatternBestFitCache#)
+const class StrategyRegistry {	
+	private const ConcurrentState 	conState	:= ConcurrentState(StrategyRegistryBestFitCache#)
 	private const Type:Obj? 		values
 	
 	** Creates an AdapterPattern with the given list. All types are coerced to non-nullable types.
@@ -50,11 +50,11 @@ const class AdapterPattern {
 		checked ? throw NotFoundErr("Could not find match for Type ${nonNullable}.", values.keys) : null
 	}
 	
-	private Obj? getState(|AdapterPatternBestFitCache -> Obj| state) {
+	private Obj? getState(|StrategyRegistryBestFitCache -> Obj| state) {
 		conState.getState(state)
 	}
 }
 
-internal class AdapterPatternBestFitCache {
+internal class StrategyRegistryBestFitCache {
 	Type:Obj? cache	:= [:]
 }
