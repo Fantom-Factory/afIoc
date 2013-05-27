@@ -100,6 +100,7 @@ class RegistryBuilder {
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
+				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
 			])
 
 			invalid := Utils.makeMap(Str#, Obj#).addAll(options)
