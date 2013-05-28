@@ -48,4 +48,8 @@ internal const class PlasticMsgs {
 		"Field ${field.qname} must have 'public' or 'protected' scope"
 	}
 
+	static Str overrideMethodsCanNotHaveDefaultValues(Method method) {
+		"Can not override methods with default parameter values : ${method.qname}"
+	}
+
 }

@@ -77,6 +77,15 @@ internal class TestPlasticModel : PlasticTest {
 			plasticModel.overrideField(T_PlasticService07#oops, "wotever")
 		}
 	}
+
+	Void testOverrideMethodsCanNotHaveDefParams() {
+		plasticModel := PlasticClassModel("TestImpl", false)
+		plasticModel.extendMixin(T_PlasticService08#)
+		verifyErrMsg(PlasticMsgs.overrideMethodsCanNotHaveDefaultValues(T_PlasticService08#redirect)) {
+			plasticModel.overrideMethod(T_PlasticService08#redirect, "wotever")
+		}
+	}
+
 }
 
 internal const mixin T_PlasticService01 { }
@@ -98,3 +107,8 @@ internal mixin T_PlasticService06 {
 internal mixin T_PlasticService07 { 
 	internal abstract Str oops
 }
+
+internal mixin T_PlasticService08 { 
+	abstract Void redirect(Uri uri, Int statusCode := 303)
+}
+

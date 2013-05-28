@@ -49,6 +49,8 @@ internal class PlasticClassModel {
 			throw PlasticErr(PlasticMsgs.overrideMethodHasWrongScope(method))
 		if (!method.isVirtual)
 			throw PlasticErr(PlasticMsgs.overrideMethodsMustBeVirtual(method))
+		if (method.params.any { it.hasDefault })
+			throw PlasticErr(PlasticMsgs.overrideMethodsCanNotHaveDefaultValues(method))
 		
 		methods.add(PlasticMethodModel(true, PlasticVisibility.visPublic, method.returns, method.name, method.params.join(", "), body))
 		return this
