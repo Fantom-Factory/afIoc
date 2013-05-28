@@ -5,12 +5,12 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 	private const Str prefix
 	
 	private Int? counter {
-		get { Actor.locals["${typeof.qname}.counter"] }
-		set { Actor.locals["${typeof.qname}.counter"] = it }
+		get { Actor.locals["${ThreadStashManager#.name}.counter"] }
+		set { Actor.locals["${ThreadStashManager#.name}.counter"] = it }
 	}
 
 	new make() {
-		this.prefix = createPrefix(typeof)
+		this.prefix = createPrefix(ThreadStashManager#)
 	}
 
 	override ThreadStash createStash(Str owner) {
@@ -32,7 +32,7 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 	private Str createPrefix(Type type) {
 		count 	:= counter ?: 1
 		padded	:= count.toStr.padl(4, '0')
-		prefix 	:= "${type.name}.${padded}."
+		prefix 	:= "${type.name}.${padded}"
 		counter = count + 1
 		return prefix
 	}

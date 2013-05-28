@@ -17,7 +17,7 @@ const class LazyService {
 		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ctx, ServiceIds.threadStashManager)
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
-		this.threadStash	= stashManager.createStash("lazy-" + serviceDef.serviceId)
+		this.threadStash	= stashManager.createStash(serviceDef.serviceId + "-proxy")
 	}
 
 	Obj? call(Method method, Obj?[] args) {
