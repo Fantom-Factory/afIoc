@@ -1,4 +1,5 @@
 
+** A map Types to Objs that can be looked up via an inheritance search.
 const class StrategyRegistry {	
 	private const ConcurrentState 	conState	:= ConcurrentState(StrategyRegistryBestFitCache#)
 	private const Type:Obj? 		values
@@ -16,14 +17,16 @@ const class StrategyRegistry {
 		this.values = nonDups.toImmutable
 	}
 
+	** Standard Map behaviour - looks up an Obj via the type. 
 	Obj? findExactMatch(Type exact, Bool checked := true) {
 		nonNullable := exact.toNonNullable
 		return values.get(nonNullable)
 			?: check(nonNullable, checked)
 	}
 
-	Obj? findBestFit(Type exact, Bool checked := true) {		
-		nonNullable := exact.toNonNullable
+	** Returns the Obj whose mapped Type most closely fits the given param.  
+	Obj? findBestFit(Type bestFit, Bool checked := true) {		
+		nonNullable := bestFit.toNonNullable
 		// chill, I got tests for all this!
 		return getState |state->Obj?| {
 			state.cache.getOrAdd(nonNullable) |->Obj?| {
