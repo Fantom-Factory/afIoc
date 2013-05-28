@@ -1,5 +1,9 @@
 
-** Wraps a `Registry` instance as Fantom service. 
+**
+** Wraps an afIoc `Registry` instance as Fantom service.
+** 
+** A Service for all Services!
+** 
 const class IocService : Service {
 	private static const Log 		log 		:= Utils.getLog(IocService#)
 	private const ThreadStash 		stash		:= ThreadStash(IocService#.name)
