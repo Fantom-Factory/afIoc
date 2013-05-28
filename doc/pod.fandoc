@@ -1,6 +1,8 @@
 Overview [#overview]
 ********************
-IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) framework, based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java. Based on Google Guice, better than Spring! Above and beyond all else, this IoC offers:
+**afIoC** is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
+
+Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
 
 - **Injection - the way *you* want it!**
   - field injection
@@ -17,19 +19,20 @@ IoC is an Inversion of Control (IoC) container, or Dependency Injection (DI) fra
   - set sensible application defaults and let your users override them
 
 - **True lazy loading**
-  - services are proxied ro ensure nothing is created until you actually use it
-  - make circular dependencies a thing of the past!
+  - services are proxied to ensure nothing is created until you actually use it
+  - make circular service dependencies a thing of the past!
 
 - **Advise services with aspects**
-  - Advise method calls to your services
-  - Easily apply cross cutting concerns such as transactions and logging
+  - intercept method calls to your services
+  - apply cross cutting concerns such as authorisation, transactions and logging
 
 - **Extensible**
-  - define Dependency Providers and inject your own objects, not just services
+  - inject your own objects, not just services
 
-- **Exhaustive error reporting**
-  - over 65 bespoke Err messages!
-  - designed to help *you* the developer!
+- **Designed to help YOU the developer!**
+  - simple API - 1 facet and 4 registry methods and you're away!
+  - over 75 bespoke and informative Err messages!
+  - Extensively tested: - 'All tests passed! [29 tests, 159 methods, 234 verifies]'
 
 
 Quick Start [#quickStart]
@@ -46,10 +49,10 @@ class Main {
   static Void main(Str[] args) {
     registry := IocService([MyModule#]).start.registry
 
-    test1 := (MyService1) registry.serviceById("myservice1")
-    test2 := (MyService1) registry.dependencyByType(MyService1#)
-    test3 := (MyService1) registry.autobuild(MyService1#)
-    test4 := (MyService1) registry.injectIntoFields(MyService1())
+    test1 := (MyService1) registry.serviceById("myservice1")        // return a singleton
+    test2 := (MyService1) registry.dependencyByType(MyService1#)    // same instance as test1
+    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new service
+    test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
 
     test1.service2.kick	// --> Ass!
     test2.service2.kick	// --> Ass!
@@ -60,20 +63,20 @@ class Main {
   }
 }
 
-class MyModule {
+class MyModule {                    // every application needs a module class
   static Void bind(ServiceBinder binder) {
-    binder.bindImpl(MyService1#)
+    binder.bindImpl(MyService1#)    // define your singletons here
     binder.bindImpl(MyService2#)
   }
 }
 
 class MyService1 {
-  @Inject
-  MyService2? service2
+  @Inject               // you'll use @Inject all the time
+  MyService2? service2  // inject services into services!
 }
 
 class MyService2 {
-  Str kick := "Ass!"
+  Str kick() { "Ass!" }
 }
 
 <pre
@@ -198,9 +201,9 @@ It also allows you to inject 'perThread' scoped services into 'perApplication' s
 
 Advise Your Services [#adviseYourServices]
 ******************************************
-Services aXXX
+Intercept all calls to services defined by a mixin and wrap them in your own code.
 
-XXX
+See [@Advise]`advise` for details
 
 
 Tips [#tips]
@@ -209,7 +212,7 @@ Define one main module and declare it in both the pod meta and the pod index pro
 
 If you have no say in how your classes are created (say, when you're using flux) then use the following line to inject dependencies when needed:
 
-  (Service.find(IocService#) as IocService).injectIntoFields(this)
+  ((IocService) Service.find(IocService#)).injectIntoFields(this)
 
 When creating GUIs (say, with fwt) then use `Registry.autobuild` to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
 
@@ -225,7 +228,9 @@ v1.3.0 [#v1.3.0]
 ----------------
  - New: Simple Aspect API for advising proxied servies.
  - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
- - New: Added 'remove()' and 'clear()' to `LocalStash`
+ - New: `ThreadStashManager` now keeps tabs on your `ThreadStash`s so they may be cleanup at the end of, um... say a web request!
+ - Chg: Revamped 'LocalStash' into `ThreadStash`
+ - Chg: Mapped override keys can always be a Str
  - Chg: Removed Ioc frames from stack traces (no more 150+ line stacktraces!)
  - Chg: Reducded INFO logging.
  - Bug: '@Build.serivceId' was not overriding the build method name.

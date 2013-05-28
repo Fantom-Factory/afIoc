@@ -12,7 +12,7 @@ class Build : BuildPod {
 					"vcs.uri"		: "https://bitbucket.org/SlimerDude/afioc",
 					"proj.name"		: "AF-IOC",
 					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "true"
+					"repo.private"	: "false"	// Eeek!
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0"]

@@ -129,6 +129,14 @@ internal class TestMappedConfig : IocTest {
 			reg.serviceById("s46")
 		}
 	}
+	
+	Void testOverrideKeysCanBeStrs() {
+		reg := RegistryBuilder().addModule(T_MyModule82#).build.startup
+		s68 := reg.serviceById("s68") as T_MyService68
+		verifyEq(s68.config.size, 1)
+		verifyEq(s68.config[69], "crowd")
+	}
+
 }
 
 internal class T_MyModule43 {
@@ -353,6 +361,25 @@ internal class T_MyModule74 {
 internal class T_MyService46 {
 	Type:Str config
 	new make(Type:Str config) {
+		this.config = config
+	}
+}
+
+internal class T_MyModule82 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService68#).withId("s68")
+	}
+	@Contribute
+	static Void contributeS68(MappedConfig config) {
+		config.addMapped(69, "dude")	// use Str override keys
+		config.addOverride(69, "+1", "dude dude")
+		config.addOverride("+1", "+2", "crowd")
+	}
+}
+
+internal class T_MyService68 {
+	Int:Str config
+	new make(Int:Str config) {
 		this.config = config
 	}
 }

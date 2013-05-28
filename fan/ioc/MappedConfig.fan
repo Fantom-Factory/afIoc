@@ -36,7 +36,7 @@ class MappedConfig {
 	
 	** Adds a keyed object to the service's configuration.
 	Void addMapped(Obj key, Obj val) {
-		key = validateKey(key)
+		key = validateKey(key, false)
 		val = validateVal(val)
 
 		if (config.containsKey(key))
@@ -56,8 +56,8 @@ class MappedConfig {
 	** 
 	** @since 1.2
 	Void addOverride(Obj existingKey, Obj overrideKey, Obj overrideVal) {
-		overrideKey = validateKey(overrideKey)
-		existingKey = validateKey(existingKey)
+		overrideKey = validateKey(overrideKey, true)
+		existingKey = validateKey(existingKey, true)
 		overrideVal	= validateVal(overrideVal)
 
 		if (overrides.containsKey(existingKey))
@@ -118,9 +118,13 @@ class MappedConfig {
 		config.size
 	}
 	
-	Obj validateKey(Obj key) {
-		if (!key.typeof.fits(keyType))
-			throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
+	Obj validateKey(Obj key, Bool isOverrideKey) {
+		if (!key.typeof.fits(keyType)) {
+			if (!isOverrideKey)
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
+			if (!key.typeof.fits(Str#))	// implicit isOverrideKey == true
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))			
+		}
 		return key
 	}
 

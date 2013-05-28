@@ -2,13 +2,13 @@
 v1.3.2 Maybe...?
 ---------------- 
 
-Optracker should not err.out but append to an OpTrackerErr (extend IocErr???)
+OpTracker should not err.out but append to an OpTrackerErr (extend IocErr???)
 
 @Advise to Err when no match...possible?
  - yeah, do check on reg startup
- - add 'optional' like with @controibute
+ - add 'optional' like with @contribute
 
-recustion err with builder methods injection scope 1->2->1
+recursion err with builder methods injection scope 1->2->1
 
 
 
@@ -22,7 +22,7 @@ service disambiguation via facets
  - is just another dep pro: map of services keyed by type&facet
 
 Move all tests out into a dedicated pod
- - v1.3 is 369 Kb!
+ - v1.3.0 is 386 Kb!
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
@@ -33,7 +33,7 @@ Just Plain Bad Ideas:
 ---------------------
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS, use placeholders instead
 
-PerThreadService - is just registry.get()!
+PerThreadService - is just a registry.get()!
 
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
