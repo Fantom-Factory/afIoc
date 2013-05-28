@@ -203,7 +203,7 @@ Advise Your Services [#adviseYourServices]
 ******************************************
 Intercept all calls to services defined by a mixin and wrap them in your own code.
 
-See [@Advise]`advise` for details
+See [@Advise]`Advise` for details
 
 
 Tips [#tips]
