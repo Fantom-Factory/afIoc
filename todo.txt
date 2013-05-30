@@ -1,6 +1,7 @@
 
 v1.3.2 Maybe...?
 ---------------- 
+Wot happens when you adivse a non-proxied service?
 
 OpTracker should not err.out but append to an OpTrackerErr (extend IocErr???)
 
@@ -10,6 +11,11 @@ OpTracker should not err.out but append to an OpTrackerErr (extend IocErr???)
 
 recursion err with builder methods injection scope 1->2->1
 
+ThreadManager - add ThreadCleanup handlers
+
+expose ConcurrentState static ActorPool.
+ - have on shutdown kill the actor pool 
+ - have on shutdown clean up ALL threads
 
 
 Meh... can't be arsed
