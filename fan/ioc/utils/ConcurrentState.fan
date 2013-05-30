@@ -66,18 +66,18 @@ const class ConcurrentState {
 		get { stash["state"] }
 		set { stash["state"] = it }
 	}
-	
+
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
 	new makeWithStateType(Type stateType) {
 		this.stateFactory	= |->Obj| { stateType.make }
 		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
 	}
-	
+
 	new makeWithStateFactory(|->Obj| stateFactory) {
 		this.stateFactory	= stateFactory
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 	}
-	
+
 	** Use to access state
 	virtual Void withState(|Obj| f, Bool waitForErr := true) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
@@ -90,7 +90,7 @@ const class ConcurrentState {
 		if (waitForErr)
 			get(future)
 	}
-	
+
 	** Use to return state
 	virtual Obj? getState(|Obj->Obj?| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
@@ -98,7 +98,7 @@ const class ConcurrentState {
 		future := stateActor.send([false, func].toImmutable)
 		return get(future)
 	}
-	
+
 	private Obj? get(Future future) {
 		try {
 			return future.get
@@ -106,7 +106,7 @@ const class ConcurrentState {
 			throw NotImmutableErr("Return value not immutable", err)
 		}
 	}
-	
+
 	private Obj? receive(Obj[] msg) {
 		reportErr	:= msg[0] as Bool
 		func 		:= msg[1] as |Obj?->Obj?|
@@ -115,9 +115,9 @@ const class ConcurrentState {
 			// lazily create our state
 			if (state == null) 
 				state = stateFactory()
-			
+
 			return func.call(state)
-			
+
 		} catch (Err e) {
 			// if the func has a return type, then an the Err is rethrown on assignment
 			// else we log the Err so the Thread doesn't fail silently
