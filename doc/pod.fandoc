@@ -224,6 +224,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.3.2 [#v1.3.2]
+----------------
+ - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
+
 v1.3.0 [#v1.3.0]
 ----------------
  - New: Simple Aspect API for advising proxied servies.

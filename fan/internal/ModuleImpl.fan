@@ -2,43 +2,41 @@
 internal const class ModuleImpl : Module {
 	
 	override const Str				moduleId
-	private const ConcurrentState 	conState	:= ConcurrentState(StandardModuleState#)
-	private const ThreadStash 		stash
+	
+	private const ConcurrentState 	appServices		:= ConcurrentState(ModuleServices#)
+	private const ConcurrentState 	serviceStat		:= ConcurrentState(ModuleStats#)
+	
+	private const ThreadStash 		threadStash
 	private const Str:ServiceDef	serviceDefs
 	private const Contribution[]	contributions
 	private const AdviceDef[]		adviceDefs
 	private const ObjLocator		objLocator
 	private const StrategyRegistry	typeToServiceDefs
 
-	private Str:Obj perThreadServices {
-		get { stash.get("perThreadServices") |->Obj| {[:]} }
+	private ModuleServices threadServices {
+		get { threadStash.get("perThreadState") |->ModuleServices| {ModuleServices()} }
 		set { }
-	}	
+	}
 
 	new makeBuiltIn(ObjLocator objLocator, ThreadStashManager stashManager, Str moduleId, ServiceDef:Obj? services) {
-		stash = stashManager.createStash(ServiceIds.builtInModuleId)
+		threadStash = stashManager.createStash(ServiceIds.builtInModuleId)
 		serviceDefs	:= Str:ServiceDef[:] { caseInsensitive = true }
 	
 		services.each |service, def| {
-			if (def.scope == ServiceScope.perThread) {
-				if (service != null)
-					perThreadServices[def.serviceId] = service
+			
+			if (service != null)
+				setService(def, service)
+
+			stat := ServiceStat {
+				it.serviceId	= def.serviceId
+				it.type			= def.serviceType
+				it.scope		= def.scope
+				it.lifecycle	= ServiceLifecycle.BUILTIN
+				it.noOfImpls	= (service == null) ? 0 : 1
 			}
-			if (def.scope == ServiceScope.perApplication) {
-				if (service != null)
-					withState { 
-						it.perApplicationServices[def.serviceId] = service
-					}
-			}
-			withState {
-				it.stats[def.serviceId] = ServiceStat {
-					it.serviceId	= def.serviceId
-					it.type			= def.serviceType
-					it.scope		= def.scope
-					it.lifecycle	= ServiceLifecycle.BUILTIN
-					it.noOfImpls	= (service == null) ? 0 : 1
-				}
-			}
+			
+			setStat(def, stat)
+
 			serviceDefs[def.serviceId] = def
 		}
 		
@@ -56,21 +54,20 @@ internal const class ModuleImpl : Module {
 	}
 
 	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
-		stash = stashManager.createStash(moduleDef.moduleId)
+		threadStash = stashManager.createStash(moduleDef.moduleId)
 		serviceDefs	:= Str:ServiceDef[:] { caseInsensitive = true }
 		
 		moduleDef.serviceDefs.each |def| { 
 			serviceDefs[def.serviceId] = def
-			withState {
-				it.stats[def.serviceId] = ServiceStat {
-					it.serviceId	= def.serviceId
-					it.type			= def.serviceType
-					it.scope		= def.scope
-					it.proxyDisabled= def.noProxy
-					it.lifecycle	= ServiceLifecycle.DEFINED
-					it.noOfImpls	= 0
-				}
+			stat := ServiceStat {
+				it.serviceId	= def.serviceId
+				it.type			= def.serviceType
+				it.scope		= def.scope
+				it.proxyDisabled= def.noProxy
+				it.lifecycle	= ServiceLifecycle.DEFINED
+				it.noOfImpls	= 0
 			}		
+			setStat(def, stat)
 		}
 		
 		this.moduleId		= moduleDef.moduleId
@@ -130,49 +127,40 @@ internal const class ModuleImpl : Module {
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
-				service := perThreadServices.getOrAdd(serviceId) {
-					create(ctx, def, forceCreate)
+				service := getOrAddService(def) {
+					create(ctx, def, forceCreate)					
 				}
 				
 				// if asked, replace the cached VIRTUAL service with a real one
-				status := (ServiceStat) getState { it.stats[serviceId] }
-				if (forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL) {
+				if (forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL) {
 					service = create(ctx, def, forceCreate)
-					perThreadServices[serviceId] = service
+					setService(def, service)
 				}
 				
 				return service
 			}
 
 			if (def.scope == ServiceScope.perApplication) {
-				
 				// Because of recursion (service1 creates service2), you can not create the service
 				// inside an actor ('cos the actor will block when it eventually messages itself). 
 				// So...
 				// TODO: A const service could be created twice if there's a race condition between
-				// two threads. And who knows what those services do in their ctor or PostInject 
-				// methods!
-				exists := getState |state -> Obj?| { 
-					state.perApplicationServices[def.serviceId]
-				}
+				// two threads. This is only dangerous because Gawd knows what those services do in 
+				// their ctor or PostInject methods!
+				existing 	:= getService(def)
 				
 				// if asked, replace the cached VIRTUAL service with a real one
-				status 		:= (ServiceStat) getState { it.stats[serviceId] }
-				make4Real	:= forceCreate && status.lifecycle == ServiceLifecycle.VIRTUAL
+				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
 				
-				if (!make4Real && exists != null)
-					return exists
+				if (!make4Real && existing != null)
+					return existing
 				
 				// keep the tracker in the current thread
 				service := create(ctx, def, forceCreate)
 
-				// in a race condition, the 2nd service created wins
-				withState |state -> Obj| {
-					// double check service existence
-					state.perApplicationServices.getOrAdd(def.serviceId) {
-						service
-					}
-				}
+				// double check service existence
+				// in a race condition, the 1st service created wins
+				getOrAddService(def) { service }
 				
 				return service
 			}
@@ -182,42 +170,38 @@ internal const class ModuleImpl : Module {
 	}
 	
 	override Str:ServiceStat serviceStats() {
-		getState { it.stats.toImmutable }
+		stats := ((Str:ServiceStat) getStatState |state->Str:ServiceStat| { 
+			state.stats.toImmutable
+		}).rw
+		
+		stats = stats.map |ServiceStat stat->ServiceStat| {
+			if (stat.scope != ServiceScope.perThread)
+				return stat
+			// override with threaded lifecycle
+			lifecycle := getServiceState(stat.scope) |state->ServiceLifecycle| { return state.life.get(stat.serviceId, ServiceLifecycle.DEFINED) }
+			return stat.withLifecyle(lifecycle)
+		}
+		
+		return stats
 	}
 	
 	override Void clear() {
-		perThreadServices.clear
-		withState { 
-			it.perApplicationServices.clear
-		}
+		withServiceState(ServiceScope.perApplication) |state| { state.services.clear }
+		withServiceState(ServiceScope.perThread) 	  |state| { state.services.clear }
 	}
 
 	// ---- Private Methods ----------------------------------------------------
-
-	private Void withState(|StandardModuleState| state) {
-		conState.withState(state)
-	}
-
-	private Obj? getState(|StandardModuleState -> Obj| state) {
-		conState.getState(state)
-	}
 	
     private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
-		status := (ServiceStat) getState { it.stats[def.serviceId] }
-
 		if (ctx.objLocator.options["disableProxies"] == true)
 			forceCreate = true
 		
-		if (!forceCreate && def.proxiable && status.lifecycle == ServiceLifecycle.DEFINED) {
+		if (!forceCreate && def.proxiable && getLifecycle(def) == ServiceLifecycle.DEFINED) {
 			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
 				service			:= proxyBuilder.buildProxy(ctx, def)
 				
-				withState {
-					stat := it.stats[def.serviceId]
-					it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.VIRTUAL)
-				}
-				
+				setLifecycle(def, ServiceLifecycle.VIRTUAL)
 				return service
 			}
 		}
@@ -226,17 +210,86 @@ internal const class ModuleImpl : Module {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			
-			withState {
-				stat := it.stats[def.serviceId]
-				it.stats[def.serviceId] = stat.withLifecyle(ServiceLifecycle.CREATED).withNoOfImpls(stat.noOfImpls + 1)
-			}
-			
+			setLifecycle(def, ServiceLifecycle.CREATED)
 			return service
 	    }	
     }
+
+	private Obj? getService(ServiceDef def) {
+		getServiceState(def.scope) |state->Obj?| { state.services[def.serviceId] }
+	}
+
+	private Obj? getOrAddService(ServiceDef def, |Obj key->Obj| creator) {
+		getServiceState(def.scope) |state->Obj?| { state.services.getOrAdd(def.serviceId, creator) }
+	}
+
+	private Void setService(ServiceDef def, Obj service) {
+		withServiceState(def.scope) |state| { state.services[def.serviceId] = service }
+	}
+
+	private Void setStat(ServiceDef def, ServiceStat stat) {
+		withStatState |state| { state.stats[def.serviceId] = stat }
+		if (def.scope != ServiceScope.perInjection)
+			withServiceState(def.scope) |state| { state.life[def.serviceId] = stat.lifecycle }
+	}
+
+	private ServiceLifecycle getLifecycle(ServiceDef def) {
+		// threaded services will return null on first call, so default to DEFINED
+		getServiceState(def.scope) |state->ServiceLifecycle?| { state.life.get(def.serviceId, ServiceLifecycle.DEFINED) }
+	}
+
+	private Void setLifecycle(ServiceDef def, ServiceLifecycle lifecycle) {
+		if (def.scope != ServiceScope.perInjection)
+			withServiceState(def.scope) |state| { state.life[def.serviceId] = lifecycle }
+		
+		withStatState|state| { 
+			status := state.stats[def.serviceId].withIncImpls
+			if (lifecycle > status.lifecycle)
+				status = status.withLifecyle(lifecycle)
+			state.stats[def.serviceId] = status
+		}
+	}
+
+	private Void withServiceState(ServiceScope scope, |ModuleServices| state) {
+		switch (scope) {
+			case ServiceScope.perApplication:
+				appServices.withState(state)
+		    
+			case ServiceScope.perThread:
+				state(threadServices)
+		
+			default:
+				throw IocErr("WFT! (With) Wot scope is ${scope}?")
+		}
+	}
+
+	private Obj? getServiceState(ServiceScope scope, |ModuleServices->Obj?| state) {
+		switch (scope) {
+			case ServiceScope.perApplication:
+				return appServices.getState(state)
+		    
+			case ServiceScope.perThread:
+				return state(threadServices)
+		
+			default:
+				throw IocErr("WFT! (Get) Wot scope is ${scope}?")
+		}
+	}
+	
+	private Void withStatState(|ModuleStats| state) {
+		serviceStat.withState(state)
+	}
+
+	private Obj getStatState(|ModuleStats->Obj| state) {
+		serviceStat.getState(state)
+	}
 }
 
-internal class StandardModuleState {
-	Str:Obj	perApplicationServices	:= Str:Obj[:] 			{ caseInsensitive = true }
-	Str:ServiceStat stats			:= Str:ServiceStat[:]	{ caseInsensitive = true }
+internal class ModuleServices {
+	Str:Obj	services			:= Utils.makeMap(Str#, Obj#)
+	Str:ServiceLifecycle life	:= Utils.makeMap(Str#, ServiceLifecycle#)
+}
+
+internal class ModuleStats {
+	Str:ServiceStat stats		:= Utils.makeMap(Str#, ServiceStat#)
 }
