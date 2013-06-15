@@ -57,7 +57,8 @@ using concurrent
 ** 
 const class ConcurrentState {
 	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
-	private static const ActorPool	actorPool	:= ActorPool()
+	internal static const ActorPool	actorPool	:= ActorPool()
+
 	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
 	private const |->Obj| 			stateFactory
 	private const ThreadStash 		stash
@@ -78,7 +79,7 @@ const class ConcurrentState {
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 	}
 
-	** Use to access state
+	** Use to access state.
 	virtual Future withState(|Obj| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable

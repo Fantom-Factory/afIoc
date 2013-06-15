@@ -11,17 +11,6 @@ OpTracker should not err.out but append to an OpTrackerErr (extend IocErr???)
 
 recursion err with builder methods injection scope 1->2->1
 
-ThreadManager - add ThreadCleanup handlers
-
-RegShutdown
- - kill the ConcurrentState actor pool 
- - clean up ALL threads
-
-ConcurrentState
- - expose ActorPool
- - change crappy withState() behaviour
- - add getFuture() instead
- 
 
 
 Meh... can't be arsed
@@ -55,3 +44,8 @@ Registry.createProxy(mixinType, implType)
 IocHelper.eagerLoadBuiltInServices
  - I mean, why?
  
+RegShutdown
+ - kill the ConcurrentState actor pool 
+   - can't, it's static. t'would affect ALL ConcurrentStates in other IoCs 
+ - clean up ALL threads
+   - can't, can only clean up up current thread

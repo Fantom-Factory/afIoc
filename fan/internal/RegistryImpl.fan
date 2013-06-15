@@ -173,7 +173,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
-		shutdownHub := serviceById(RegistryShutdownHub#.name) as RegistryShutdownHubImpl
+		shutdownHub := (RegistryShutdownHubImpl) serviceById(RegistryShutdownHub#.name)
+		threadMan 	:= (ThreadStashManager) serviceById(ThreadStashManager#.name)
 
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
@@ -186,6 +187,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		shutdownHub.registryHasShutdown
 		
 		// destroy all internal refs
+		threadMan.cleanUpThread
 		modules.each { it.clear }
 		
 		log.info("\"Goodbye!\" from afIoc!")
