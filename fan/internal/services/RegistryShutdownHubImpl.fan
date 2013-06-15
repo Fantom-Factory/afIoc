@@ -1,6 +1,6 @@
 
 internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
-	private const static Log 		log 		:= Log.get(RegistryShutdownHubImpl#.name)
+	private const static Log 		log 		:= Utils.getLog(RegistryShutdownHub#)
 	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
  
 	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {

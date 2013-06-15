@@ -9,6 +9,11 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 		set { Actor.locals["${ThreadStashManager#.name}.counter"] = it }
 	}
 
+	private |->|[] cleanupHandlers {
+		get { Actor.locals.getOrAdd("${prefix}.cleanupHandlers") { |->|[,] } }
+		set { }
+	}
+
 	new make() {
 		this.prefix = createPrefix(ThreadStashManager#)
 	}
@@ -23,7 +28,12 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 			.sort
 	}
 	
-	override Void cleanUp() {
+	override Void addCleanUpHandler(|->| handler) {
+		cleanupHandlers.add(handler)
+	}
+	
+	override Void cleanUpThread() {
+		cleanupHandlers.each |handler| { handler.call }
 		keys.each { Actor.locals.remove(it) }
 	}
 

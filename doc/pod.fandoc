@@ -226,6 +226,7 @@ Release Notes [#releaseNotes]
 
 v1.3.2 [#v1.3.2]
 ----------------
+ - New: Add thread clean up handlers to `ThreadStashManager`.
  - Chg: 'ConcurrentState.withState()' now returns a 'Future'.
  - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
 
