@@ -29,7 +29,7 @@ Meh... can't be arsed
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  - it's messy and I don't need it
- - but I could then inject Loggers...? Hmm.
+ - but then I could inject Loggers... Hmm...?
 
 service disambiguation via facets 
  - is just another dep pro: map of services keyed by type&facet

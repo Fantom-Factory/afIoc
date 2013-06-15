@@ -41,7 +41,7 @@ using concurrent
 **   }
 ** 
 **   ** helper method used to narrow the state type
-**   private Obj? getState(|ConstMapState -> Obj| state) {
+**   private Obj? getState(|ConstMapState -> Obj?| state) {
 **     conState.getState(state)
 **   }
 ** }
@@ -79,16 +79,11 @@ const class ConcurrentState {
 	}
 
 	** Use to access state
-	virtual Void withState(|Obj| f, Bool waitForErr := true) {
+	virtual Future withState(|Obj| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable
-		future 	:= stateActor.send([!waitForErr, func].toImmutable)
-
-		// use 'get' to so any Errs are re-thrown. As we're just setting / getting state the 
-		// messages should be fast anyway (and we don't want a 'get' to happen before a 'set')
-		// Turn this off for event listeners when you really don't need it 
-		if (waitForErr)
-			get(future)
+		future 	:= stateActor.send([true, func].toImmutable)
+		return future
 	}
 
 	** Use to return state
@@ -108,8 +103,8 @@ const class ConcurrentState {
 	}
 
 	private Obj? receive(Obj[] msg) {
-		reportErr	:= msg[0] as Bool
-		func 		:= msg[1] as |Obj?->Obj?|
+		logErr	:= msg[0] as Bool
+		func 	:= msg[1] as |Obj?->Obj?|
 
 		try {
 			// lazily create our state
@@ -121,7 +116,7 @@ const class ConcurrentState {
 		} catch (Err e) {
 			// if the func has a return type, then an the Err is rethrown on assignment
 			// else we log the Err so the Thread doesn't fail silently
-			if (reportErr || func.returns == Void#)
+			if (logErr || func.returns == Void#)
 				log.err("receive()", e)
 			throw e
 		}
