@@ -19,16 +19,18 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 		
 		// find all module @Advise methods
 		adviceDefs := (AdviceDef[]) ctx.track("Gathering advisors for service '$serviceDef.serviceId'") |->AdviceDef[]| {
-			objLocator.adviceByServiceDef(serviceDef)
+			ads := objLocator.adviceByServiceDef(serviceDef)
+			ctx.log("Found $ads.size method(s)")
+			return ads
 		}
-		ctx.log("Found $adviceDefs.size method(s)")
 		
 		// call the module @Advise methods, filling up the MethodAdvisors
-		ctx.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
-			adviceDefs.each { 
-				InjectionUtils.callMethod(ctx, it.advisorMethod, null, [methodAdvisors])
+		if (!adviceDefs.isEmpty)
+			ctx.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
+				adviceDefs.each { 
+					InjectionUtils.callMethod(ctx, it.advisorMethod, null, [methodAdvisors])
+				}
 			}
-		}
 		
 		service 	:= objLocator.getService(ctx, serviceDef, true)
 		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]][:]

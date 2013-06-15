@@ -23,10 +23,7 @@ const class ServiceStat {
 	internal new make(|This|? f) { f?.call(this) }
 
 	internal This withLifecyle(ServiceLifecycle newLifecycle) {
-		if (newLifecycle.ordinal <= lifecycle.ordinal) 
-			return this
-		
-		return ServiceStat {
+		ServiceStat {
 			it.serviceId	= this.serviceId
 			it.type			= this.type
 			it.scope		= this.scope
@@ -36,14 +33,14 @@ const class ServiceStat {
 		}
 	}
 
-	internal This withNoOfImpls(Int newNoOfImpls) {
+	internal This withIncImpls() {
 		ServiceStat {
 			it.serviceId	= this.serviceId
 			it.type			= this.type
 			it.scope		= this.scope
 			it.proxyDisabled= this.proxyDisabled
 			it.lifecycle	= this.lifecycle
-			it.noOfImpls	= newNoOfImpls
+			it.noOfImpls	= this.noOfImpls + 1
 		}
 	}
 }
