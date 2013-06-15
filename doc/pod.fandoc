@@ -226,6 +226,7 @@ Release Notes [#releaseNotes]
 
 v1.3.2 [#v1.3.2]
 ----------------
+ - Chg: 'ConcurrentState.withState()' now returns a 'Future'.
  - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
 
 v1.3.0 [#v1.3.0]
