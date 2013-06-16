@@ -1,13 +1,6 @@
 
-v1.3.2 Maybe...?
+v1.3.4 Maybe...?
 ---------------- 
-Wot happens when you adivse a non-proxied service?
-
-@Advise to Err when no match...possible?
- - yeah, do check on reg startup
- - add 'optional' like with @contribute
-
-recursion err with builder methods injection scope 1->2->1
 
 
 
@@ -47,3 +40,7 @@ RegShutdown
    - can't, it's static. t'would affect ALL ConcurrentStates in other IoCs 
  - clean up ALL threads
    - can't, can only clean up up current thread
+
+recursion err with builder methods injection scope 1->2->1
+ - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion 
+ - what people do in their builder methods is up to them!

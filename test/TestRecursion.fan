@@ -31,7 +31,6 @@ internal class TestRecursion : IocTest {
 			reg.serviceById("s18") 
 		}
 	}
-	
 }
 
 

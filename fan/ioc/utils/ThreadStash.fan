@@ -31,13 +31,15 @@ using concurrent::Actor
 ** @since 1.3.0 (a replacement for 'LocalStash')
 const class ThreadStash {
 
-	private const Str prefix
+	** The prefix used to identify all keys used with this stash
+	const Str prefix
 	
 	private Int? counter {
 		get { Actor.locals["${typeof.qname}.counter"] }
 		set { Actor.locals["${typeof.qname}.counter"] = it }
 	}
 	
+	** A thread-local count is added to the given prefix to make it truly unique.
 	new make(Str prefix) {
 		this.prefix = createPrefix(prefix)
 	}
@@ -62,13 +64,20 @@ const class ThreadStash {
 		Actor.locals[key(name)] = value
 	}
 	
-	** Returns all (fully qualified) keys associated / used with this stash 
+	** Returns all (fully qualified) keys associated / used with this stash. Note the returns 
 	Str[] keys() {
 		Actor.locals.keys
 			.findAll { it.startsWith(prefix) }
 			.sort
 	}
 
+	** Returns 'true' if this stash contains the given name
+	** 
+	** @since 1.3.2
+	Bool contains(Str name) {
+		keys.contains(key(name))
+	}
+	
 	** Remove the name/value pair from the stash and returns the value that was. If the name was 
 	** not mapped then return null.
 	Obj? remove(Str name) {
