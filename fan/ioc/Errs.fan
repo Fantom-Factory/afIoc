@@ -1,7 +1,7 @@
 
 ** As thrown by IoC
 const class IocErr : Err {
-	new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
+	internal new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
 }
 
 ** A generic helper Err thrown when a value is not found in an expected list of values.

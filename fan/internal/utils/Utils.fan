@@ -47,6 +47,8 @@ internal class Utils {
 	static Obj? stackTraceFilter(|->Obj?| func) {
 		try {
 			return func.call
+		} catch (OpTrackerErr opErr) {
+			throw IocErr(opErr.msg, opErr.cause.cause)
 		} catch (IocErr iocErr) {
 			throw IocErr(iocErr.msg, iocErr.cause)
 		}

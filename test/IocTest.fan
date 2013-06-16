@@ -12,7 +12,8 @@ abstract internal class IocTest : Test {
 		} catch (Err e) {
 			if (!e.typeof.fits(errType)) 
 				throw Err("Expected $errType got $e.typeof", e)
-			verifyEq(e.msg, errMsg)
+			msg := e.msg.split('\n')[0]
+			verifyEq(errMsg, msg)
 		}
 	}
 	

@@ -21,8 +21,9 @@ internal class TestFacetServiceId : IocTest {
 			reg.dependencyByType(T_MyService34#)
 			fail
 		} catch (IocErr iocErr) {
-			msg := Regex<|afPlasticProxy[0-9][0-9][0-9]|>.split(iocErr.msg).join("XXX")
-			verifyEq(msg, "Service Id 'impl1' of type XXX::T_MyService32Impl does not fit type ${T_MyService33?#.signature}")
+			lin := iocErr.msg.split('\n')[0]
+			msg := Regex<|afPlasticProxy[0-9][0-9][0-9]|>.split(lin).join("XXX")
+			verifyEq("Service Id 'impl1' of type XXX::T_MyService32Impl does not fit type ${T_MyService33?#.signature}", msg)
 		}
 	}
 }
