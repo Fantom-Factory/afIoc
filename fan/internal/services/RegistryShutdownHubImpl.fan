@@ -4,14 +4,14 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
  
 	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {
-		withMyState |state| {
+		withState |state| {
 			state.lock.check
 			state.listeners.addOrdered(id, listener, constraints)
 		}
 	}
 
 	override Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener) {
-		withMyState |state| {
+		withState |state| {
 			state.lock.check
 			state.preListeners.addOrdered(id, listener, constraints)
 		}
@@ -27,14 +27,14 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 			}
 		}
 
-		withMyState |state| {
+		withState |state| {
 			state.preListeners.clear
 		}
 	}
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
 	internal Void registryHasShutdown() {
-		withMyState |state| {
+		withState |state| {
 			state.lock.lock
 		}
 
@@ -46,24 +46,24 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 			}
 		}
 		
-		withMyState |state| {
+		withState |state| {
 			state.listeners.clear
 		}
 	}
 	
 	private |->|[] preListeners() {
-		getMyState |state| { state.preListeners.toOrderedList.toImmutable }
+		getState |state| { state.preListeners.toOrderedList.toImmutable }
 	}
 
 	private |->|[] listeners() {
-		getMyState |state| { state.listeners.toOrderedList.toImmutable }
+		getState |state| { state.listeners.toOrderedList.toImmutable }
 	}
 
-	private Void withMyState(|RegistryShutdownHubState| state) {
+	private Void withState(|RegistryShutdownHubState| state) {
 		conState.withState(state)
 	}
 
-	private Obj? getMyState(|RegistryShutdownHubState -> Obj| state) {
+	private Obj? getState(|RegistryShutdownHubState -> Obj| state) {
 		conState.getState(state)
 	}
 }
