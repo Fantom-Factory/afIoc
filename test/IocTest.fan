@@ -13,7 +13,7 @@ abstract internal class IocTest : Test {
 			if (!e.typeof.fits(errType)) 
 				throw Err("Expected $errType got $e.typeof", e)
 			msg := e.msg.split('\n')[0]
-			verifyEq(errMsg, msg)
+			verifyEq(errMsg.trim, msg.trim)
 		}
 	}
 	

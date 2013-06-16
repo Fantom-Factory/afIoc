@@ -16,5 +16,6 @@ facet class Contribute {
 	** Marks the contribution as optional; no Err is thrown if the service is not found. 
 	** 
 	** This allows you to contribute to services that may or may not be defined in the registry.
+	** (e.g. contributing to optional 3rd party library)
 	const Bool	optional	:= false
 }

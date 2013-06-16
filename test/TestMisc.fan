@@ -6,5 +6,4 @@ class TestMisc : Test {
 		verifyEq([4, [,], [[4]], 5].flatten, [,].addAll([4, 4, 5]))
 	}
 	
-	
 }

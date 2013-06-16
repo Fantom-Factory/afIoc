@@ -235,6 +235,10 @@ internal const class IocMessages {
 		"Proxied mixins must be public - '$mixinType.qname'"
 	}
 	
+	static Str adviceDoesNotMatchAnyServices(AdviceDef adviceDef, Str[] advisableServiceIds) {
+		"Advisor method '${adviceDef.advisorMethod.qname} with serviceId glob '${adviceDef.serviceIdGlob}' does NOT match any proxy services. Advisable services: " + advisableServiceIds.join(", ")
+	}
+	
 
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 
