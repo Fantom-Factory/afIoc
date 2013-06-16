@@ -135,6 +135,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
+		tracker.track("Validating advice definitions") |->| {
+			advisableServices := serviceIdToModule.keys.findAll { serviceDefById(it).proxiable }
+			moduleDefs.each {
+				it.adviceDefs.each |adviceDef| {
+					if (adviceDef.optional)
+						return
+					matches := advisableServices.any |serviceId| { 
+						adviceDef.matchesServiceId(serviceId)  
+					}
+					if (!matches)
+						throw IocErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef, advisableServices))
+				}
+			}
+		}
+		
 		injCtx				:= InjectionCtx(this, tracker)
 		depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
 		serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)

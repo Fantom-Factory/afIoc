@@ -85,6 +85,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		adviceDef := StandardAdviceDef {
 			it.serviceIdGlob	= advise.serviceId
 			it.advisorMethod	= method
+			it.optional			= advise.optional
 		}
 		
 		tracker.log("Adding advice for services $adviceDef.serviceIdGlob")

@@ -1,3 +1,4 @@
+using concurrent::Future
 
 internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 		log 		:= Utils.getLog(RegistryShutdownHub#)
@@ -7,14 +8,14 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 		withState |state| {
 			state.lock.check
 			state.listeners.addOrdered(id, listener, constraints)
-		}
+		}.get
 	}
 
 	override Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener) {
 		withState |state| {
 			state.lock.check
 			state.preListeners.addOrdered(id, listener, constraints)
-		}
+		}.get
 	}
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
@@ -36,7 +37,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	internal Void registryHasShutdown() {
 		withState |state| {
 			state.lock.lock
-		}
+		}.get
 
 		listeners.each |listener| {
 			try {
@@ -59,7 +60,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 		getState |state| { state.listeners.toOrderedList.toImmutable }
 	}
 
-	private Void withState(|RegistryShutdownHubState| state) {
+	private Future withState(|RegistryShutdownHubState| state) {
 		conState.withState(state)
 	}
 

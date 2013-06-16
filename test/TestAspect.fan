@@ -43,6 +43,21 @@ internal class TestAspect : IocTest {
 		verify(def.matchesServiceId("T_MyService65Aspect"))
 		verifyFalse(def.matchesServiceId("T_MyService67NoMatch"))
 	}
+	
+	Void testAdvisingNonProxy() {
+		verifyErrMsg(IocMessages.adviceDoesNotMatchAnyServices(StandardAdviceDef {
+			it.advisorMethod = T_MyModule11#addTransactions
+			it.serviceIdGlob = "s69"
+		}, Str[,])) {
+			reg := RegistryBuilder().addModule(T_MyModule11#).build.startup
+		}
+	}
+
+	Void testAdvisingOptionalNonProxy() {
+		reg := RegistryBuilder().addModule(T_MyModule84#).build.startup
+		s69 := (T_MyService69) reg.serviceById("s69")
+		verifyEq(s69.judge, "tell it to the")
+	}
 }
 
 internal class T_MyModule78 {
@@ -108,5 +123,27 @@ internal class T_MyModule81 {
 				return ret + " add3"
 			}
 		}
+	}
+}
+
+internal class T_MyModule11 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService69#).withId("s69")
+	}	
+	@Advise { serviceId="s69" }
+	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }
+}
+
+internal class T_MyModule84 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService69#).withId("s69")
+	}	
+	@Advise { serviceId="s69"; optional=true }
+	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }
+}
+
+internal class T_MyService69 {
+	Str judge() {
+		"tell it to the"
 	}
 }

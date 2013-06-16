@@ -35,14 +35,9 @@ internal class BugFixes : IocTest {
 
 internal class T_MyModule83 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService69#).withId("the")
 		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50").withScope(ServiceScope.perThread)
 	}
 }
 
-internal class T_MyService69 {
-	@Inject @ServiceId { serviceId="t50" } 
-	Obj? t50
-}
 
 

@@ -3,6 +3,7 @@ internal const class StandardAdviceDef : AdviceDef {
 	
 	override const Str		serviceIdGlob
 	override const Method 	advisorMethod
+	override const Bool 	optional
 
 	private const Regex 	globMatcher
 	

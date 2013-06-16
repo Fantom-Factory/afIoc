@@ -34,11 +34,4 @@ internal class TestRegistry : IocTest {
 			RegistryBuilder().addModules([T_MyModule13#, T_MyModule14#]).build
 		}
 	}
-	
-}
-
-internal class T_MyModule11 {
-	static Void bind(ServiceBinder binder) {
-		
-	}
 }
