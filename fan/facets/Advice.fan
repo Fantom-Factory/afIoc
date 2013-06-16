@@ -59,5 +59,7 @@ facet class Advise {
 	** Marks the advice as optional; no Err is thrown if the glob does not match any proxyable services.
 	** 
 	** This allows you to advise services that may or may not be defined in the registry. (e.g. advising an optional 3rd party library)
+	** 
+	** @since 1.3.2
 	const Bool	optional	:= false
 }
