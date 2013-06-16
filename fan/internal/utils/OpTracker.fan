@@ -32,12 +32,15 @@ internal class OpTracker {
 			
 		} catch (Err err) {
 			if (!logged) {
-		        logger.err(err.msg.isEmpty ? err.typeof.qname : err.msg)
-		        logger.err("Operations trace:")
-		        operations.each |op, i| {   
-		        	logger.err("[${(i+1).toStr.justr(2)}] $op.description")
+				opTrace := err is IocErr ? "" : err.typeof.qname + ": " 
+				opTrace += (err.msg.isEmpty ? "" : err.msg) + "\n"
+				opTrace += "Operations trace:\n"
+		        operations.each |op, i| {
+		        	opTrace += "  [${(i+1).toStr.justr(2)}] $op.description\n"
 		        }
+				
 				logged = true
+				throw OpTrackerErr(opTrace, err)
 			}
 			throw err
 
@@ -108,4 +111,8 @@ internal const class OpTrackerOp {
 	const Duration 	startTime
 	
 	new make(|This|? f := null) { f?.call(this)	}
+}
+
+const class OpTrackerErr : IocErr {
+	internal new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
 }

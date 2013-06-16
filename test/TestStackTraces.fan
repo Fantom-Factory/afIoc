@@ -13,7 +13,7 @@ internal class TestStackTraces : IocTest {
 			reg.serviceById("s1")
 		}
 	}
-
+	
 	Void testDependencyByType() {
 		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
 		verifyReducedStack {
@@ -27,20 +27,26 @@ internal class TestStackTraces : IocTest {
 			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
-	
+
 	Void testInjectIntoFields() {
 		reg := RegistryBuilder().addModule(T_MyModule3#).build.startup
 		verifyReducedStack {
 			reg.injectIntoFields(T_MyService1())
 		}
 	}
-	
+
 	Void verifyReducedStack(|Obj| func) {
 		try {
 			func.call(69)
 			fail
 		} catch (IocErr e) {
-			stack  := (Str[]) e.traceToStr.split('\n').exclude { it.contains(TestStackTraces#.name) }.exclude { it.contains("fanx.tools.Fant") }.exclude { it.contains("fan.sys.Method") }
+			stack  := (Str[]) e.traceToStr.split('\n')
+				.exclude { it.contains(TestStackTraces#.name) }
+				.exclude { it.contains("fanx.tools.Fant") }
+				.exclude { it.contains("fan.sys.Method") }
+				.exclude { it.contains("Operations trace") }
+				.exclude { it.contains("[ ") }
+				.exclude { it.contains(Utils#stackTraceFilter.name) }
 			verify(stack.size <= 5, stack.join("\n"))
 		}
 	}

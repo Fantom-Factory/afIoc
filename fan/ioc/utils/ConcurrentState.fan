@@ -79,7 +79,7 @@ const class ConcurrentState {
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 	}
 
-	** Use to access state.
+	** Use to access state. Call 'get()' on the returned 'Future' to ensure any Errs are rethrown. 
 	virtual Future withState(|Obj| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable

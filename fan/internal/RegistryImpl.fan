@@ -1,3 +1,4 @@
+using concurrent::Future
 
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
@@ -145,7 +146,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override This startup() {
 		withMyState |state| {
 			state.startupLock.lock
-		}
+		}.get
 
 		// Do dat startup!
 		tracker := OpTracker()
@@ -181,7 +182,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		withMyState |state| {
 			state.shutdownLock.lock
-		}
+		}.get
 
 		// Registry shutdown complete.
 		shutdownHub.registryHasShutdown
@@ -354,10 +355,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private Void shutdownLockCheck() {
 		withMyState |state| {
 			state.shutdownLock.check
-		}		
+		}.get
 	}
 
-	private Void withMyState(|RegistryState| state) {
+	private Future withMyState(|RegistryState| state) {
 		conState.withState(state)
 	}
 

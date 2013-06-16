@@ -259,7 +259,7 @@ internal const class ModuleImpl : Module {
 				state(threadServices)
 		
 			default:
-				throw IocErr("WFT! (With) Wot scope is ${scope}?")
+				throw WtfErr("(With) Wot scope is ${scope}?")
 		}
 	}
 
@@ -272,7 +272,7 @@ internal const class ModuleImpl : Module {
 				return state(threadServices)
 		
 			default:
-				throw IocErr("WFT! (Get) Wot scope is ${scope}?")
+				throw WtfErr("(Get) Wot scope is ${scope}?")
 		}
 	}
 	
