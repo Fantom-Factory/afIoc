@@ -144,7 +144,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- Registry Methods ----------------------------------------------------------------------
 
 	override This startup() {
-		withMyState |state| {
+		withState |state| {
 			state.startupLock.lock
 		}.get
 
@@ -180,7 +180,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
 
-		withMyState |state| {
+		withState |state| {
 			state.shutdownLock.lock
 		}.get
 
@@ -353,16 +353,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- Helper Methods ------------------------------------------------------------------------	
 
 	private Void shutdownLockCheck() {
-		withMyState |state| {
+		withState |state| {
 			state.shutdownLock.check
 		}.get
 	}
 
-	private Future withMyState(|RegistryState| state) {
+	private Future withState(|RegistryState| state) {
 		conState.withState(state)
 	}
 
-	private Obj? getMyState(|RegistryState -> Obj| state) {
+	private Obj? getState(|RegistryState -> Obj| state) {
 		conState.getState(state)
 	}
 }

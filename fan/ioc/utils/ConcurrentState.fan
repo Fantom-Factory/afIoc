@@ -80,7 +80,7 @@ const class ConcurrentState {
 	}
 
 	** Use to access state. Call 'get()' on the returned 'Future' to ensure any Errs are rethrown. 
-	virtual Future withState(|Obj| f) {
+	virtual Future withState(|Obj->Obj?| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable
 		future 	:= stateActor.send([true, func].toImmutable)
@@ -105,7 +105,7 @@ const class ConcurrentState {
 
 	private Obj? receive(Obj[] msg) {
 		logErr	:= msg[0] as Bool
-		func 	:= msg[1] as |Obj?->Obj?|
+		func 	:= msg[1] as |Obj->Obj?|
 
 		try {
 			// lazily create our state
