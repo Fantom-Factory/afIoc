@@ -27,6 +27,12 @@ internal class BugFixes : IocTest {
 		}.send(null).get
 	}
 
+	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
+		Registry reg 		:= RegistryBuilder().addModule(T_MyModule85#).build.startup
+		T_MyService70 t70	:= reg.serviceById("t70")
+		verifyNotNull(t70)
+	}
+	
 	static Void assertEqual(Obj? o1, Obj? o2) {
 		if (o1 != o2)
 			throw Err("Are NOT equal - $o1 : $o2")
@@ -39,5 +45,17 @@ internal class T_MyModule83 {
 	}
 }
 
+internal class T_MyModule85 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService70#).withId("t70")
+	}
+	
+	@Contribute
+	static Void contributeT70(OrderedConfig config) {
+		config.addOrderedPlaceholder("Filters")
+	}
+}
 
-
+internal class T_MyService70 {
+	new make(T_MyService70[] config) { }
+}
