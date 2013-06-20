@@ -92,7 +92,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2
 	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		addOrdered(id, Orderer.placeholder, constraints)
+		orderer.addPlaceholder(id, constraints)
 	}
 
 	** Overrides a contributed ordered object. The original object must exist.

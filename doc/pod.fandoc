@@ -223,6 +223,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.3.4 [#v1.3.4]
+----------------
+ - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.
+
 v1.3.2 [#v1.3.2]
 ----------------
  - New: IocErr is thrown on startup if module advisor methods don't match any proxyable serivces.
