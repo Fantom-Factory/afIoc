@@ -12,7 +12,7 @@
 //        mark n permanently
 //        add n to L
 ** 
-** See `http://en.wikipedia.org/wiki/Topological_sorting`	
+** @see `http://en.wikipedia.org/wiki/Topological_sorting`	
 internal class Orderer {
 
 	internal static const Str placeholder	:=	"PLACEHOLDER"
@@ -141,7 +141,7 @@ internal class OrderingCtx {
 			if (it == node)
 				throw IocErr(IocMessages.configRecursion(stackNames))
 		}
-		
+
 		if (node.isPlaceholder)
 			throw IocErr(IocMessages.configIsPlaceholder(node.name))
 

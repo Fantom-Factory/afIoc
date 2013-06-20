@@ -65,7 +65,8 @@ class OrderedConfig {
 	** 
 	** Configuration contributions are ordered across modules. 
 	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
-		object = validateVal(object)
+		if (object !== Orderer.placeholder)
+			object = validateVal(object)
 		
 		if (constraints.isEmpty)
 			constraints = impliedConstraint ?: Str#.emptyList
@@ -92,7 +93,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2
 	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		orderer.addPlaceholder(id, constraints)
+		addOrdered(id, Orderer.placeholder, constraints)
 	}
 
 	** Overrides a contributed ordered object. The original object must exist.

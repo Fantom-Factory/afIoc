@@ -54,6 +54,14 @@ internal class TestOrderedConfigOrdering : IocTest {
 			orderer.toOrderedList
 		}
 	}
+
+	Void testPlaceholdersAllowed() {
+		orderer := Orderer()
+		orderer.addPlaceholder("filters")
+		orderer.addOrdered("69", 69, ["before: filters"])
+		list := orderer.toOrderedList
+		verifyEq(list, Obj?[69])
+	}
 	
 	Void assertList(Str prefix, Str constraint, Str[] ids) {
 		orderer := Orderer()
