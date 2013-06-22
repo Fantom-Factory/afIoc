@@ -52,6 +52,17 @@ internal class TestOrderedConfig : IocTest {
 		}
 	}
 
+	Void testPlaceholderOrder() {
+		reg := RegistryBuilder().addModule(T_MyModule86#).build.startup
+		s23 := reg.serviceById("s23") as T_MyService23
+		
+		verifyEq(s23.config[0], "simple")
+		verifyEq(s23.config[1], "preflight")
+		verifyEq(s23.config[2], "essays1")
+		verifyEq(s23.config[3], "essays2")
+		verifyEq(s23.config[4], "index")
+	}
+
 	// ---- test overrides ------------------------------------------------------------------------
 	
 	Void testOverride1() {
@@ -257,5 +268,24 @@ internal class T_MyModule72 {
 		config.addOrdered("key", "value")
 		config.addOverride("key", "over1", "value2")
 		config.addOverride("non-exist", "over2", "value3")
+	}
+}
+
+internal class T_MyModule86 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService23#).withId("s23")
+	}
+	@Contribute
+	static Void contributeS23(OrderedConfig config) {		
+		config.addOrderedPlaceholder("filters")
+		config.addOrderedPlaceholder("routes")
+		
+		config.addOrdered("corsFilter", "simple", 	  ["before: routes"])
+		config.addOrdered("corsFilter2", "preflight", ["before: routes"])
+
+		// we would expect these to appear *after* the 2 filters above
+		config.addUnordered("essays1")
+		config.addUnordered("essays2")
+		config.addUnordered("index")
 	}
 }
