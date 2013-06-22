@@ -8,14 +8,14 @@ internal class TestStackTraces : IocTest {
 	}
 
 	Void testServiceById() {
-		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
+		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup
 		verifyReducedStack {
 			reg.serviceById("s1")
 		}
 	}
 	
 	Void testDependencyByType() {
-		reg := RegistryBuilder().addModule(T_MyModule1#).build.startup
+		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup
 		verifyReducedStack {
 			reg.dependencyByType(Int#)
 		}
@@ -29,9 +29,9 @@ internal class TestStackTraces : IocTest {
 	}
 
 	Void testInjectIntoFields() {
-		reg := RegistryBuilder().addModule(T_MyModule3#).build.startup
+		reg := RegistryBuilder().addModule(T_MyModule03#).build.startup
 		verifyReducedStack {
-			reg.injectIntoFields(T_MyService1())
+			reg.injectIntoFields(T_MyService01())
 		}
 	}
 

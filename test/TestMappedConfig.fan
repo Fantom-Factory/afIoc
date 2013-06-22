@@ -177,10 +177,10 @@ internal class T_MyService28 {
 
 internal class T_MyModule45 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 	}
 	@Build
-	static T_MyService28 buildS28(Str:Str str, T_MyService2 s2) {
+	static T_MyService28 buildS28(Str:Str str, T_MyService02 s2) {
 		str[s2.kick] = s2.kick
 		return T_MyService28(str)
 	}
@@ -196,11 +196,11 @@ internal class T_MyModule45 {
 
 internal class T_MyModule46 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 		binder.bindImpl(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config, T_MyService2 s2) {
+	static Void cont(MappedConfig config, T_MyService02 s2) {
 		config.addMapped("wot", s2.kick)
 	}
 }
@@ -221,7 +221,7 @@ internal class T_MyModule48 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("judge", config.autobuild(T_MyService2#)->kick)
+		config.addMapped("judge", config.autobuild(T_MyService02#)->kick)
 	}
 }
 

@@ -2,45 +2,45 @@
 internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService4#, 2)) { 
-			reg.dependencyByType(T_MyService4#) 
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		verifyErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
+			reg.dependencyByType(T_MyService04#)
 		}
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService3#)) {
+		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService03#)) {
 			reg.dependencyByType(T_MyService30#)
 		}
 	}
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService5#, 1)) { 
-			reg.dependencyByType(T_MyService5#) 
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		verifyErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) { 
+			reg.dependencyByType(T_MyService05#) 
 		}
 	}
 
 	Void testCtorWithMostParamsIsPicked() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyEq(reg.dependencyByType(T_MyService6#)->picked, "2 params" )
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		verifyEq(reg.dependencyByType(T_MyService06#)->picked, "2 params" )
 	}
 
 	Void testCtorWithInjectFacetIsPicked() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		verifyEq(reg.dependencyByType(T_MyService7#)->picked, "1 param" )
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		verifyEq(reg.dependencyByType(T_MyService07#)->picked, "1 param" )
 	}
 
 	Void testCtorWithFieldInjector() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		T_MyService8 ser8 := reg.dependencyByType(T_MyService8#)
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		T_MyService08 ser8 := reg.dependencyByType(T_MyService08#)
 		verifyEq(ser8.service2.kick, "ASS!" )
 	}
 
 	Void testFieldsAreNotInjectedTwice() {
-		reg := RegistryBuilder().addModule(T_MyModule6#).build.startup
-		T_MyService9 ser9 := reg.dependencyByType(T_MyService9#)
+		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
+		T_MyService09 ser9 := reg.dependencyByType(T_MyService09#)
 		verifyEq(ser9.service2.kick, "Can't Touch This!" )
 	}
 	
@@ -76,59 +76,59 @@ internal class TestCtorInjection : IocTest {
 	}
 }
 
-internal class T_MyModule6 {
+internal class T_MyModule06 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService1#)
-		binder.bindImpl(T_MyService2#)
-		binder.bindImpl(T_MyService4#)
-		binder.bindImpl(T_MyService5#)
-		binder.bindImpl(T_MyService6#)
-		binder.bindImpl(T_MyService7#)
-		binder.bindImpl(T_MyService8#)
-		binder.bindImpl(T_MyService9#)
+		binder.bindImpl(T_MyService01#)
+		binder.bindImpl(T_MyService02#)
+		binder.bindImpl(T_MyService04#)
+		binder.bindImpl(T_MyService05#)
+		binder.bindImpl(T_MyService06#)
+		binder.bindImpl(T_MyService07#)
+		binder.bindImpl(T_MyService08#)
+		binder.bindImpl(T_MyService09#)
 	}
 }
 
-internal class T_MyService4 {
+internal class T_MyService04 {
 	@Inject
 	new make1() { }
 	@Inject
 	new make2() { }
 }
 
-internal class T_MyService5 {
-	new make1(T_MyService1 ser) { }
-	new make2(T_MyService1 ser) { }
+internal class T_MyService05 {
+	new make1(T_MyService01 ser) { }
+	new make2(T_MyService01 ser) { }
 }
 
-internal class T_MyService6 {
+internal class T_MyService06 {
 	Str picked
 	new make0() { picked = "0 params" }
-	new make1(T_MyService1 ser) { picked = "1 param" }
-	new make2(T_MyService1 ser, T_MyService1 ser2) { picked = "2 params" }
+	new make1(T_MyService01 ser) { picked = "1 param" }
+	new make2(T_MyService01 ser, T_MyService01 ser2) { picked = "2 params" }
 }
 
-internal class T_MyService7 {
+internal class T_MyService07 {
 	Str picked
 	new make0() { picked = "0 params" }
 	@Inject
-	new make1(T_MyService1 ser) { picked = "1 param" }
-	new make2(T_MyService1 ser, T_MyService1 ser2) { picked = "2 params" }
+	new make1(T_MyService01 ser) { picked = "1 param" }
+	new make2(T_MyService01 ser, T_MyService01 ser2) { picked = "2 params" }
 }
 
-internal class T_MyService8 {
+internal class T_MyService08 {
 	@Inject
-	T_MyService2 service2
+	T_MyService02 service2
 	new make(|This| injectInto) { injectInto(this) }
 }
 
-internal class T_MyService9 {
+internal class T_MyService09 {
 	@Inject
-	T_MyService2 service2
+	T_MyService02 service2
 	new make(|This| injectInto) { 
 		injectInto(this)
 		// override the injector
-		service2 = T_MyService2()
+		service2 = T_MyService02()
 		service2.kick = "Can't Touch This!"
 	}
 }
@@ -161,7 +161,7 @@ internal const class T_MyService26 {
 }
 
 internal const class T_MyService30 {
-	new make(T_MyService3 ser3) { }
+	new make(T_MyService03 ser3) { }
 }
 
 internal const class T_MyService38 { }

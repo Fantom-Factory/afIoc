@@ -135,11 +135,11 @@ internal class T_MyService20 {
 
 internal class T_MyModule32 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 	}
 	
 	@Build
-	static T_MyService21 buildS21(Str[] str, T_MyService2 s2) {
+	static T_MyService21 buildS21(Str[] str, T_MyService02 s2) {
 		T_MyService21(str.add(s2.kick))
 	}
 	
@@ -162,12 +162,12 @@ internal class T_MyService21 {
 
 internal class T_MyModule33 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 		binder.bindImpl(T_MyService21#).withId("s21")
 	}
 	
 	@Contribute{ serviceId="s21" }
-	static Void cont(OrderedConfig config, T_MyService2 s2) {
+	static Void cont(OrderedConfig config, T_MyService02 s2) {
 		config.addUnordered("wot")
 		config.addUnordered(s2.kick)
 	}
@@ -208,7 +208,7 @@ internal class T_MyModule36 {
 	
 	@Contribute{ serviceId="s23" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered(config.autobuild(T_MyService2#)->kick)
+		config.addUnordered(config.autobuild(T_MyService02#)->kick)
 	}
 }
 

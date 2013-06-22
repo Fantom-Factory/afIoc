@@ -138,7 +138,7 @@ internal class TestIocService : IocTest {
 
 internal class T_MyModule54 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 	}
 	@Contribute
 	static Void contributeRegistryStartup(OrderedConfig config) {
