@@ -42,7 +42,7 @@ internal class TestAutobuild : IocTest {
 
 internal class T_MyModule75 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 		binder.bindImpl(T_MyService48#)
 		binder.bindImpl(T_MyService49#)
 	}
@@ -59,7 +59,7 @@ internal class T_MyService47 {
 
 internal class T_MyService48 {
 	@Inject
-	T_MyService2 s2
+	T_MyService02 s2
 	Int int
 	Str str
 	new make(Int int, Str str, |This| inject) {

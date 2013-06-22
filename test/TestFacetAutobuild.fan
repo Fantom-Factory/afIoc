@@ -13,7 +13,7 @@ internal class TestFacetAutobuild : IocTest {
 
 	Void testOnlyOneDependencyProviderAllowed() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
-		verifyErrMsg(IocMessages.onlyOneDependencyProviderAllowed(T_MyService2?#, [ServiceIdProvider#, AutobuildProvider#])) {
+		verifyErrMsg(IocMessages.onlyOneDependencyProviderAllowed(T_MyService02?#, [ServiceIdProvider#, AutobuildProvider#])) {
 			reg.serviceById("s39")
 		}
 	}
@@ -21,7 +21,7 @@ internal class TestFacetAutobuild : IocTest {
 
 internal class T_MyModule55 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService2#).withId("s2")
+		binder.bindImpl(T_MyService02#).withId("s2")
 		binder.bindImpl(T_MyService36#).withId("s36")
 		binder.bindImpl(T_MyService37#).withId("s37")
 		binder.bindImpl(T_MyService39#).withId("s39")
@@ -30,18 +30,18 @@ internal class T_MyModule55 {
 
 internal class T_MyService36 {
 	@Inject @Autobuild
-	T_MyService2? auto2
+	T_MyService02? auto2
 	@Inject
-	T_MyService2? ser2
+	T_MyService02? ser2
 }
 internal class T_MyService37 {
 	@Inject @Autobuild
-	T_MyService2? auto2
+	T_MyService02? auto2
 	@Inject
-	T_MyService2? ser2
+	T_MyService02? ser2
 }
 
 internal class T_MyService39 {
 	@Inject @ServiceId { serviceId="s2" } @Autobuild
-	T_MyService2? ser2	
+	T_MyService02? ser2	
 }
