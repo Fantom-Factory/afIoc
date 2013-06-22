@@ -3,29 +3,29 @@ using concurrent::ActorPool
 
 internal class BugFixes : IocTest {
 	
-//	Void testProxiedServicesAreStillThreadScoped() {
-//		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
-//		
-//		stats1	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
-//		
-//		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
-//		t50_1 := reg.serviceById("t50")
-//		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
-//		t50_1->dude
-//		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
-//
-//		Actor(ActorPool()) |->| {
-//			stats2	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats			
-//
-//			// as we're in a new thread, ensure the service has it's own lifecycle
-//			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
-//			t50_2 := reg.serviceById("t50")
-//			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
-//			t50_2->dude
-//			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
-//			
-//		}.send(null).get
-//	}
+	Void testProxiedServicesAreStillThreadScoped() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
+		
+		stats1	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+		
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
+		t50_1 := reg.serviceById("t50")
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
+		t50_1->dude
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
+
+		Actor(ActorPool()) |->| {
+			stats2	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats			
+
+			// as we're in a new thread, ensure the service has it's own lifecycle
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
+			t50_2 := reg.serviceById("t50")
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
+			t50_2->dude
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
+			
+		}.send(null).get
+	}
 
 	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
 		Registry reg 		:= RegistryBuilder().addModule(T_MyModule85#).build.startup
