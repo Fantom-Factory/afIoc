@@ -68,17 +68,19 @@ class OrderedConfig {
 		if (object !== Orderer.placeholder)
 			object = validateVal(object)
 		
-		if (constraints.isEmpty)
-			constraints = impliedConstraint ?: Str#.emptyList
+		if (constraints.isEmpty) {
+			constraints = impliedConstraint ?: constraints
+			
+			// keep an implied ordering for anything that doesn't have its own constraints
+			impliedCount++
+			impliedConstraint = ["after: $id"]
+		}
 		
 		config[id] = OrderedOverride(id, object, constraints)
 		
 		// this orderer is throwaway, we just use to fail fast on dup key errs
 		orderer.addOrdered(id, object, constraints)
 
-		// keep an implied list ordering
-		impliedCount++
-		impliedConstraint = ["after: $id"]
 	}
 
 	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
