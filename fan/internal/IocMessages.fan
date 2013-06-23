@@ -141,8 +141,8 @@ internal const class IocMessages {
 		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
 	}
 	
-	static Str mappedConfigTypeMismatch(Str type, Type objType, Type mapType) {
-		"Contribution of type $objType.signature does not match service configuration $type type of $mapType.signature"
+	static Str mappedConfigTypeMismatch(Str type, Type? objType, Type mapType) {
+		"Contribution of type ${objType?.signature} does not match service configuration $type type of $mapType.signature"
 	}
 	
 	static Str configRecursion(Str[] nodeNames) {
