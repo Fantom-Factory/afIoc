@@ -226,6 +226,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLockCheck
 			ctx := InjectionCtx(this)
 			return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
+				// as ctx is brand new, this won't return null
 				trackDependencyByType(ctx, dependencyType)
 			}
 		}
@@ -258,12 +259,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return getService(ctx, serviceDef, false)
 	}
 
-	override Obj trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
+	override Obj? trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
 
 		// ask dependency providers first, for they may dictate dependency scope
-		dependency := depProSrc?.provideDependency(ctx.providerCtx, dependencyType)
-		if (dependency != null) {
-			ctx.log("Found Dependency via Provider : '$dependency.typeof'")
+		if (depProSrc?.canProvideDependency(ctx.providerCtx, dependencyType) ?: false) {
+			dependency := depProSrc.provideDependency(ctx.providerCtx, dependencyType)
+			ctx.log("Found Dependency via Provider : '$dependency?.typeof'")
 			return dependency
 		}
 
@@ -273,11 +274,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return getService(ctx, serviceDef, false)			
 		}
 
-		// look for configuration
-		dependency = ctx.provideConfig(dependencyType)
-		if (dependency != null) {
-			ctx.logExpensive |->Str| { "Found Configuration '$dependency.typeof'" }
-			return dependency
+		config := ctx.provideConfig(dependencyType)
+		if (config != null) {
+			ctx.logExpensive |->Str| { "Found Configuration '$config.typeof'" }
+			return config
 		}
 
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))

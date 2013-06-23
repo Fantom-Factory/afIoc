@@ -50,7 +50,7 @@ internal class T_MyService40 {
 }
 internal const class T_DependencyProvider1 : DependencyProvider {
 	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { dependencyType.fits(Str#) }
-	override Obj provide(ProviderCtx ctx, Type dependencyType) { 69 }
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) { 69 }
 }
 
 internal class T_MyModule57 {
@@ -76,7 +76,6 @@ internal class T_MyService43 {
 	@Inject	T_MyService41? oops
 }
 
-
 internal const class T_DependencyProvider2 : DependencyProvider {
 	const ThreadStash ls := ThreadStash(T_DependencyProvider2#.name)
 	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
@@ -84,5 +83,5 @@ internal const class T_DependencyProvider2 : DependencyProvider {
 		ls["type"] = dependencyType
 		return dependencyType.fits(Uri#)
 	}
-	override Obj provide(ProviderCtx ctx, Type dependencyType) { `ass` }
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) { `ass` }
 }

@@ -10,7 +10,7 @@ internal const class AutobuildProvider : DependencyProvider {
 		!ctx.facets.findType(Autobuild#).isEmpty
 	}
 	
-	override Obj provide(ProviderCtx ctx, Type dependencyType) {
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) {
 		ctx.log("Found @Autobuild")
 		service := ((ObjLocator) registry).trackAutobuild(ctx.injectionCtx, dependencyType, Obj#.emptyList)
 		return service

@@ -10,7 +10,7 @@ internal const class ServiceIdProvider : DependencyProvider {
 		!ctx.facets.findType(ServiceId#).isEmpty
 	}
 	
-	override Obj provide(ProviderCtx ctx, Type dependencyType) {
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) {
 		serviceIds := ctx.facets.findType(ServiceId#)
 		if (serviceIds.size > 1)
 			throw WtfErr("WTF? It's a compile error to facetate(?) a field more than once! ${ServiceId#.name} on $dependencyType.qname")
