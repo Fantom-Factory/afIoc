@@ -45,13 +45,13 @@ internal class Utils {
 
 	** @see http://fantom.org/sidewalk/topic/2147
 	static Obj? stackTraceFilter(|->Obj?| func) {
-//		try {
+		try {
 			return func.call
-//		} catch (OpTrackerErr opErr) {
-//			throw IocErr(opErr.msg, opErr.cause.cause)
-//		} catch (IocErr iocErr) {
-//			throw IocErr(iocErr.msg, iocErr.cause)
-//		}
+		} catch (OpTrackerErr opErr) {
+			throw IocErr(opErr.msg, opErr.cause.cause)
+		} catch (IocErr iocErr) {
+			throw IocErr(iocErr.msg, iocErr.cause)
+		}
 	}
 	
 	** Stoopid F4 thinks the 'facet' method is a reserved word!
