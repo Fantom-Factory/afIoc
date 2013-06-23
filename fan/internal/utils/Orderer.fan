@@ -15,17 +15,18 @@
 ** @see `http://en.wikipedia.org/wiki/Topological_sorting`	
 internal class Orderer {
 
-	internal static const Str placeholder	:=	"PLACEHOLDER"
+	internal static const Str placeholder	:=	"AFIOC-PLACEHOLDER"
+	internal static const Str NULL			:=	"AFIOC-NULL"
 	private Str:OrderedNode nodes			:= Str:OrderedNode[:] { caseInsensitive = true }
 
 	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, placeholder, constraints)
 	}
 	
-	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
+	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
-		getOrAdd(id, object)
+		getOrAdd(id, object ?: NULL)
 		
 		constraints.each |constraint| {
 			valid := false
@@ -47,8 +48,8 @@ internal class Orderer {
 		}
 	}
 	
-	Obj[] toOrderedList() {
-		order.exclude { it.payload === placeholder }.map { it.payload }
+	Obj?[] toOrderedList() {
+		order.exclude { it.payload === placeholder }.map { it.payload === NULL ? null : it.payload }
 	}
 	
 	Void clear() {

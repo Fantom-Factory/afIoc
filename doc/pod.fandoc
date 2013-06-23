@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [30 tests, 168 methods, 248 verifies]'
+  - Extensively tested: - 'All tests passed! [30 tests, 171 methods, 253 verifies]'
 
 
 Quick Start [#quickStart]
@@ -225,6 +225,7 @@ Release Notes [#releaseNotes]
 
 v1.3.4 [#v1.3.4]
 ----------------
+ - Chg: `OrderedConfig` values may be null.
  - Chg: `MappedConfig` values may be null.
  - Chg: Tweaked `OrderedConfig` placeholder default ordering logic.
  - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.

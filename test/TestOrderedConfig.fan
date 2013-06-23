@@ -92,15 +92,64 @@ internal class TestOrderedConfig : IocTest {
 			reg.serviceById("s23")
 		}
 	}
+	
+	// ---- test null values ----------------------------------------------------------------------
+
+	Void testNullValue() {
+		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+		s71 := (T_MyService71) reg.serviceById("s71")
+		verifyEq(s71.config.size, 1)
+		verifyEq(s71.config[0], null)		
+	}
+
+	Void testNullValueNotAllowed() {
+		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(null, Str#)) {
+			s19 := (T_MyService28) reg.serviceById("s19")
+		}
+	}
+
+	Void testCanOverrideWithNull() {
+		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+		s71 := (T_MyService71) reg.serviceById("s71")
+		verifyEq(s71.config.size, 1)
+		verifyEq(s71.config[0], null)		
+	}	
 }
 
 
+internal class T_MyService71 {
+	Str?[] config
+	new make(Str?[] config) {
+		this.config = config
+	}
+}
+
+internal class T_MyModule87 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService71#).withId("s71")
+		binder.bindImpl(T_MyService19#).withId("s19")
+		binder.bindImpl(T_MyService71#).withId("s71b")
+	}
+	@Contribute{ serviceId="s71" }
+	static Void cont10(OrderedConfig config) {
+		config.addOrdered("wot", null)
+	}	
+	@Contribute{ serviceId="s19" }
+	static Void cont28(OrderedConfig config) {
+		config.addOrdered("wot", null)
+	}	
+	@Contribute{ serviceId="s71b" }
+	static Void cont10b(OrderedConfig config) {
+		config.addOrdered("wot", "ever")
+		config.addOverride("wot", "wot-null", null)
+	}	
+}
 
 internal class T_MyModule30 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService19#).withId("s19")
 	}
-	
 	@Contribute{ serviceId="s19" }
 	static Void cont(OrderedConfig config) {
 		config.addUnordered("wot")

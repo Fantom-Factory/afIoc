@@ -133,8 +133,8 @@ internal const class IocMessages {
 		"Ordered configuration for service '$serviceId' MUST be parameterised - e.g. Str[]"
 	}
 
-	static Str orderedConfigTypeMismatch(Type objType, Type listType) {
-		"Contribution of type $objType.signature does not match service configuration list type of $listType.signature"
+	static Str orderedConfigTypeMismatch(Type? objType, Type listType) {
+		"Contribution of type ${objType?.signature} does not match service configuration list type of $listType.signature"
 	}
 
 	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
