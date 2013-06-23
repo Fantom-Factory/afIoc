@@ -64,7 +64,7 @@ class OrderedConfig {
 	** <pre
 	** 
 	** Configuration contributions are ordered across modules. 
-	Void addOrdered(Str id, Obj object, Str[] constraints := Str#.emptyList) {
+	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
 		if (object !== Orderer.placeholder)
 			object = validateVal(object)
 		
@@ -103,7 +103,7 @@ class OrderedConfig {
 	** Note: Unordered configurations can not be overridden.
 	** 
 	** @since 1.2
-	Void addOverride(Str existingId, Str newId, Obj newObject, Str[] newConstraints := [,]) {
+	Void addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := [,]) {
 		newObject	= validateVal(newObject)
 
 		if (overrides.containsKey(existingId))
@@ -172,7 +172,12 @@ class OrderedConfig {
 		contribType.params["V"]
 	}
 	
-	private Obj validateVal(Obj object) {
+	private Obj? validateVal(Obj? object) {
+		if (object == null) {
+			if (!listType.isNullable)
+				throw IocErr(IocMessages.orderedConfigTypeMismatch(null, listType))
+			return object
+		}
 		if (!object.typeof.fits(listType))
 			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
 		return object
@@ -184,8 +189,8 @@ class OrderedConfig {
 }
 
 internal class OrderedOverride {
-	Str key; Obj val; Str[] con
-	new make(Str key, Obj val, Str[] con) {
+	Str key; Obj? val; Str[] con
+	new make(Str key, Obj? val, Str[] con) {
 		this.key = key
 		this.val = val
 		this.con = con
