@@ -17,7 +17,7 @@ const internal class ConfigProvider {
 		(configType != null) && dependencyType.fits(configType)
 	}
 
-	Obj provide(ProviderCtx proCtx, Type dependencyType) {
+	Obj? provide(ProviderCtx proCtx, Type dependencyType) {
 		ctx := proCtx.injectionCtx
 		config := null
 		if (configType.name == "List")

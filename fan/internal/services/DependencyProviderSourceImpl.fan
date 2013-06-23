@@ -7,6 +7,10 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		this.dependencyProviders = dependencyProviders.toImmutable
 	}
 
+	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {
+		dependencyProviders.any { it.canProvide(proCtx, dependencyType) }		
+	}
+	
 	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
 		dps := dependencyProviders.findAll { it.canProvide(proCtx, dependencyType) }
 
@@ -18,8 +22,13 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		
 		dependency := dps[0].provide(proCtx, dependencyType)
 		
-		if (!dependency.typeof.fits(dependencyType))
-			throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+		if (dependency == null) {
+			if (!dependencyType.isNullable )
+				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+		} else {
+			if (!dependency.typeof.fits(dependencyType))
+				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+		}
 
 		return dependency
 	}

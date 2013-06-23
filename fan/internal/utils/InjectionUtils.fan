@@ -126,9 +126,9 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] providedMethodArgs) {
-		return ctx.track("Determining injection parameters for $method.signature") |->Obj[]| {
-			ctx.withFacets(Facet[,]) |->Obj[]| {
+	private static Obj?[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] providedMethodArgs) {
+		return ctx.track("Determining injection parameters for $method.signature") |->Obj?[]| {
+			ctx.withFacets(Facet[,]) |->Obj?[]| {
 				params := method.params.map |param, index| {
 					
 					ctx.log("Found parameter ${index+1}) $param.type")
@@ -150,14 +150,14 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj findDependencyByType(InjectionCtx ctx, Type dependencyType) {
-		ctx.track("Looking for dependency of type $dependencyType") |->Obj| {
+	private static Obj? findDependencyByType(InjectionCtx ctx, Type dependencyType) {
+		ctx.track("Looking for dependency of type $dependencyType") |->Obj?| {
 			ctx.objLocator.trackDependencyByType(ctx, dependencyType)			
 		}
 	}
 
-	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj value) {
-		ctx.track("Injecting $value.typeof.qname into field $field.signature") |->| {
+	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj? value) {
+		ctx.track("Injecting $value?.typeof?.qname into field $field.signature") |->| {
 			if (field.get(target) != null) {
 				ctx.log("Field has non null value. Aborting injection.")
 				return

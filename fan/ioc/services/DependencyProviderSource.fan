@@ -16,6 +16,8 @@
 ** @uses OrderedConfig of DependencyProvider
 const mixin DependencyProviderSource {
 	
+	internal abstract Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType)
+
 	internal abstract Obj? provideDependency(ProviderCtx proCtx, Type dependencyType)
 	
 }

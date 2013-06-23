@@ -1,5 +1,5 @@
 
-v1.3.4 Maybe...?
+v1.3.6 Maybe...?
 ---------------- 
 
 
@@ -15,7 +15,7 @@ service disambiguation via facets
  - is just another dep pro: map of services keyed by type&facet
 
 Move all tests out into a dedicated pod
- - v1.3.0 is 386 Kb!
+ - v1.3.4 is 403 Kb!
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
