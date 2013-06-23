@@ -137,6 +137,56 @@ internal class TestMappedConfig : IocTest {
 		verifyEq(s68.config[69], "crowd")
 	}
 
+	// ---- test null values ----------------------------------------------------------------------
+
+	Void testNullValue() {
+		reg := RegistryBuilder().addModule(T_MyModule02#).build.startup
+		s10 := (T_MyService10) reg.serviceById("s10")
+		verifyEq(s10.config.size, 1)
+		verifyEq(s10.config["wot"], null)		
+	}
+
+	Void testNullValueNotAllowed() {
+		reg := RegistryBuilder().addModule(T_MyModule02#).build.startup
+		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("value", null, Str#)) {
+			s28 := (T_MyService28) reg.serviceById("s28")
+		}
+	}
+
+	Void testCanOverrideWithNull() {
+		reg := RegistryBuilder().addModule(T_MyModule02#).build.startup
+		s10 := (T_MyService10) reg.serviceById("s10b")
+		verifyEq(s10.config.size, 1)
+		verifyEq(s10.config["wot"], null)		
+	}	
+}
+
+internal class T_MyModule02 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService10#).withId("s10")
+		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bindImpl(T_MyService10#).withId("s10b")
+	}
+	@Contribute{ serviceId="s10" }
+	static Void cont10(MappedConfig config) {
+		config.addMapped("wot", null)
+	}	
+	@Contribute{ serviceId="s28" }
+	static Void cont28(MappedConfig config) {
+		config.addMapped("wot", null)
+	}	
+	@Contribute{ serviceId="s10b" }
+	static Void cont10b(MappedConfig config) {
+		config.addMapped("wot", "ever")
+		config.addOverride("wot", "wot-null", null)
+	}	
+}
+
+internal class T_MyService10 {
+	Str:Str? config
+	new make(Str:Str? config) {
+		this.config = config
+	}
 }
 
 internal class T_MyModule43 {

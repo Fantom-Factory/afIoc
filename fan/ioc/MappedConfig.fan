@@ -13,7 +13,7 @@ class MappedConfig {
 	internal const	Type 				contribType
 	private  const 	ServiceDef 			serviceDef
 	private 	  	InjectionCtx		ctx
-	private			Obj:Obj				config
+	private			Obj:Obj?			config
 	private			Obj:MappedOverride	overrides 
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
@@ -35,7 +35,7 @@ class MappedConfig {
 	}
 	
 	** Adds a keyed object to the service's configuration.
-	Void addMapped(Obj key, Obj val) {
+	Void addMapped(Obj key, Obj? val) {
 		key = validateKey(key, false)
 		val = validateVal(val)
 
@@ -44,9 +44,9 @@ class MappedConfig {
 
 		config[key] = val
 	}
-	
+
 	** Adds all the mapped objects to a service's configuration.
-	Void addMappedAll(Obj:Obj objects) {
+	Void addMappedAll(Obj:Obj? objects) {
 		objects.each |val, key| {
 			addMapped(key, val)
 		}
@@ -55,7 +55,7 @@ class MappedConfig {
 	** Overrides an existing contribution by its key. The key must exist.
 	** 
 	** @since 1.2
-	Void addOverride(Obj existingKey, Obj overrideKey, Obj overrideVal) {
+	Void addOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
 		overrideKey = validateKey(overrideKey, true)
 		existingKey = validateKey(existingKey, true)
 		overrideVal	= validateVal(overrideVal)
@@ -81,7 +81,7 @@ class MappedConfig {
 		config.each |val, key| { keys[key] = key }
 		
 		// don't alter the class state so getConfig() may be called more than once
-		Obj:Obj config := this.config.dup
+		Obj:Obj? config := this.config.dup
 
 		ctx.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
@@ -128,7 +128,13 @@ class MappedConfig {
 		return key
 	}
 
-	Obj validateVal(Obj val) {
+	Obj? validateVal(Obj? val) {
+		if (val == null) {
+			if (!valType.isNullable)
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", null, valType))
+			return val			
+		}
+		
 		if (!val.typeof.fits(valType)) {
 			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
 			if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
@@ -153,8 +159,8 @@ class MappedConfig {
 }
 
 internal class MappedOverride {
-	Obj key; Obj val
-	new make(Obj key, Obj val) {
+	Obj key; Obj? val
+	new make(Obj key, Obj? val) {
 		this.key = key
 		this.val = val
 	}
