@@ -14,7 +14,7 @@ internal class TestRegistry : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup
 		
 		// assert methods are okay before shutdown
-		reg.serviceById("t_myservice1")
+		reg.serviceById("t_myservice01")
 		reg.dependencyByType(T_MyService01#)
 		reg.autobuild(T_MyService01#)
 		reg.injectIntoFields(T_MyService01())
@@ -23,7 +23,7 @@ internal class TestRegistry : IocTest {
 
 		verifyErr(IocErr#) { reg.startup }
 		verifyErr(IocErr#) { reg.shutdown }
-		verifyErr(IocErr#) { reg.serviceById("t_myservice1") }
+		verifyErr(IocErr#) { reg.serviceById("t_myservice01") }
 		verifyErr(IocErr#) { reg.dependencyByType(T_MyService01#) }
 		verifyErr(IocErr#) { reg.autobuild(T_MyService01#) }
 		verifyErr(IocErr#) { reg.injectIntoFields(T_MyService01()) }

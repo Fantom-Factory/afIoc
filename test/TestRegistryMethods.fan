@@ -3,9 +3,9 @@ internal class TestRegistryMethods : IocTest {
 
 	Void testServiceById() {
 		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup
-		T_MyService01 myService1 := reg.serviceById("t_myservice1")
+		T_MyService01 myService1 := reg.serviceById("t_myservice01")
 		verifyEq(myService1.service.kick, "ASS!")
-		verifySame(myService1, reg.serviceById("t_MyService1"))
+		verifySame(myService1, reg.serviceById("t_MyService01"))
 	}
 
 	Void testDependencyByType() {

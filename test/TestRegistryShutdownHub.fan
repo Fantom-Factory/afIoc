@@ -3,7 +3,7 @@ internal class TestRegistryShutdownHub : IocTest {
 	
 	Void testRegistryShutdownHub() {
 		reg := RegistryBuilder().addModule(T_MyModule03#).build.startup
-		T_MyService03 service := reg.serviceById("t_myservice3")
+		T_MyService03 service := reg.serviceById("t_myservice03")
 		reg.shutdown
 		
 		verify(service.called)
