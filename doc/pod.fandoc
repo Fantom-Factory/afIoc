@@ -225,8 +225,9 @@ Release Notes [#releaseNotes]
 
 v1.3.4 [#v1.3.4]
 ----------------
- - Chg: `OrderedConfig` values may be null.
- - Chg: `MappedConfig` values may be null.
+ - Chg: `DependencyProvider`s may now provide 'null' values.
+ - Chg: `OrderedConfig` values may be 'null'.
+ - Chg: `MappedConfig` values may be 'null'.
  - Chg: Tweaked `OrderedConfig` placeholder default ordering logic.
  - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.
 
