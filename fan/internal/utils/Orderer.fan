@@ -15,9 +15,9 @@
 ** @see `http://en.wikipedia.org/wiki/Topological_sorting`	
 internal class Orderer {
 
-	internal static const Str placeholder	:=	"AFIOC-PLACEHOLDER"
-	internal static const Str NULL			:=	"AFIOC-NULL"
-	private Str:OrderedNode nodes			:= Str:OrderedNode[:] { caseInsensitive = true }
+	internal static const Str placeholder	:= "AFIOC-PLACEHOLDER"
+	internal static const Str NULL			:= "AFIOC-NULL"
+	private Str:OrderedNode nodes			:= Utils.makeMap(Str#, OrderedNode#)
 
 	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, placeholder, constraints)
@@ -49,7 +49,7 @@ internal class Orderer {
 	}
 	
 	Obj?[] toOrderedList() {
-		order.exclude { it.payload === placeholder }.map { it.payload === NULL ? null : it.payload }
+		order().exclude { it.payload === placeholder }.map { it.payload === NULL ? null : it.payload }
 	}
 	
 	Void clear() {
@@ -60,14 +60,14 @@ internal class Orderer {
 	internal OrderedNode[] order() {
 		nodesIn	 := nodes.dup
 		nodesOut := OrderedNode[,]
-		
+
 		while (!nodesIn.isEmpty) {
 			ctx := OrderingCtx()
 			ctx.withNode(nodesIn.vals[0]) |node| {
 				visit(ctx, nodesIn, nodesOut, node)
 			}
 		}
-		
+
 		return nodesOut
 	}
 	
@@ -90,7 +90,9 @@ internal class Orderer {
 		nodesIn
 			.findAll { 
 				it.dependsOn.any |depName| { 
-					depName == n.name  
+					// BugFix 1.3.6: we sometimes lower the case the depend ids 
+					// they should be case-insenstive anyway
+					depName.equalsIgnoreCase(n.name)
 				}
 			}
 			.each { 

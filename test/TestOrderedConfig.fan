@@ -1,120 +1,139 @@
 
 internal class TestOrderedConfig : IocTest {
-	
-	Void testErrIfConfigIsGeneric() {
-		reg := RegistryBuilder().addModule(T_MyModule31#).build.startup
-		verifyErrMsg(IocMessages.orderedConfigTypeIsGeneric(List#, "s20")) {
-			reg.serviceById("s20")
-		}
-	}
+//	
+//	Void testErrIfConfigIsGeneric() {
+//		reg := RegistryBuilder().addModule(T_MyModule31#).build.startup
+//		verifyErrMsg(IocMessages.orderedConfigTypeIsGeneric(List#, "s20")) {
+//			reg.serviceById("s20")
+//		}
+//	}
+//
+//	Void testBasicConfig() {
+//		reg := RegistryBuilder().addModule(T_MyModule30#).build.startup
+//		s19 := reg.serviceById("s19") as T_MyService19
+//		verifyEq(s19.config, Str["ever", "wot"])
+//	}
+//
+//	Void testBasicConfigViaBuilder() {
+//		reg := RegistryBuilder().addModule(T_MyModule32#).build.startup
+//		s21 := reg.serviceById("s21") as T_MyService21
+//		verifyEq(s21.config, Str["ever", "wot", "ASS!"])
+//	}
+//
+//	Void testConfigMethodInjection() {
+//		reg := RegistryBuilder().addModule(T_MyModule33#).build.startup
+//		s21 := reg.serviceById("s21") as T_MyService21
+//		verifyEq(s21.config, Str["wot", "ASS!"])
+//	}
+//
+//	Void testAddingWrongContribV2() {
+//		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
+//		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(Int#, Str#)) {
+//			s22 := reg.serviceById("s22") as T_MyService22
+//		}
+//	}
+//
+//	Void testOrderedConfigAutobuild() {
+//		reg := RegistryBuilder().addModule(T_MyModule36#).build.startup
+//		s23 := reg.serviceById("s23") as T_MyService23
+//		verifyEq(s23.config, Str["ASS!"])
+//	}
+//
+//	Void testEmptyListCreatedWhenNoContribsFound() {
+//		reg := RegistryBuilder().addModule(T_MyModule38#).build.startup
+//		s23 := reg.serviceById("s23") as T_MyService23
+//		verifyEq(s23.config, Str[,])
+//	}
+//
+//	Void testWrongConfig() {
+//		reg := RegistryBuilder().addModule(T_MyModule34#).build.startup
+//		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(OrderedConfig#, MappedConfig#)) {
+//			reg.serviceById("s21")
+//		}
+//	}
+//
+//	Void testPlaceholderOrder() {
+//		reg := RegistryBuilder().addModule(T_MyModule86#).build.startup
+//		s23 := reg.serviceById("s23") as T_MyService23
+//		
+//		verifyEq(s23.config[0], "simple")
+//		verifyEq(s23.config[1], "preflight")
+//		verifyEq(s23.config[2], "essays1")
+//		verifyEq(s23.config[3], "essays2")
+//		verifyEq(s23.config[4], "index")
+//	}
+//
+//	// ---- test overrides ------------------------------------------------------------------------
+//	
+//	Void testOverride1() {
+//		reg := RegistryBuilder().addModule(T_MyModule69#).build.startup
+//		s23 := reg.serviceById("s23") as T_MyService23
+//		verifyEq(s23.config.size, 1)
+//		verifyEq(s23.config[0], "value2")
+//	}
+//
+//	Void testOverride2() {
+//		reg := RegistryBuilder().addModule(T_MyModule70#).build.startup
+//		s23 := reg.serviceById("s23") as T_MyService23
+//		verifyEq(s23.config.size, 1)
+//		verifyEq(s23.config[0], "value3")
+//	}
+//
+//	Void testOverrideMustExist1() {
+//		reg := RegistryBuilder().addModule(T_MyModule71#).build.startup
+//		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over1")) {
+//			reg.serviceById("s23")
+//		}
+//	}
+//
+//	Void testOverrideMustExist2() {
+//		reg := RegistryBuilder().addModule(T_MyModule72#).build.startup
+//		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over2")) {
+//			reg.serviceById("s23")
+//		}
+//	}
+//	
+//	// ---- test null values ----------------------------------------------------------------------
+//
+//	Void testNullValue() {
+//		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+//		s71 := (T_MyService71) reg.serviceById("s71")
+//		verifyEq(s71.config.size, 1)
+//		verifyEq(s71.config[0], null)		
+//	}
+//
+//	Void testNullValueNotAllowed() {
+//		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+//		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(null, Str#)) {
+//			s19 := (T_MyService28) reg.serviceById("s19")
+//		}
+//	}
+//
+//	Void testCanOverrideWithNull() {
+//		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
+//		s71 := (T_MyService71) reg.serviceById("s71")
+//		verifyEq(s71.config.size, 1)
+//		verifyEq(s71.config[0], null)		
+//	}	
 
-	Void testBasicConfig() {
-		reg := RegistryBuilder().addModule(T_MyModule30#).build.startup
-		s19 := reg.serviceById("s19") as T_MyService19
-		verifyEq(s19.config, Str["ever", "wot"])
-	}
-
-	Void testBasicConfigViaBuilder() {
-		reg := RegistryBuilder().addModule(T_MyModule32#).build.startup
-		s21 := reg.serviceById("s21") as T_MyService21
-		verifyEq(s21.config, Str["ever", "wot", "ASS!"])
-	}
-
-	Void testConfigMethodInjection() {
-		reg := RegistryBuilder().addModule(T_MyModule33#).build.startup
-		s21 := reg.serviceById("s21") as T_MyService21
-		verifyEq(s21.config, Str["wot", "ASS!"])
-	}
-
-	Void testAddingWrongContribV2() {
-		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
-		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(Int#, Str#)) {
-			s22 := reg.serviceById("s22") as T_MyService22
-		}
-	}
-
-	Void testOrderedConfigAutobuild() {
-		reg := RegistryBuilder().addModule(T_MyModule36#).build.startup
-		s23 := reg.serviceById("s23") as T_MyService23
-		verifyEq(s23.config, Str["ASS!"])
-	}
-
-	Void testEmptyListCreatedWhenNoContribsFound() {
-		reg := RegistryBuilder().addModule(T_MyModule38#).build.startup
-		s23 := reg.serviceById("s23") as T_MyService23
-		verifyEq(s23.config, Str[,])
-	}
-
-	Void testWrongConfig() {
-		reg := RegistryBuilder().addModule(T_MyModule34#).build.startup
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(OrderedConfig#, MappedConfig#)) {
-			reg.serviceById("s21")
-		}
-	}
-
-	Void testPlaceholderOrder() {
-		reg := RegistryBuilder().addModule(T_MyModule86#).build.startup
-		s23 := reg.serviceById("s23") as T_MyService23
-		
-		verifyEq(s23.config[0], "simple")
-		verifyEq(s23.config[1], "preflight")
-		verifyEq(s23.config[2], "essays1")
-		verifyEq(s23.config[3], "essays2")
-		verifyEq(s23.config[4], "index")
-	}
-
-	// ---- test overrides ------------------------------------------------------------------------
-	
-	Void testOverride1() {
-		reg := RegistryBuilder().addModule(T_MyModule69#).build.startup
-		s23 := reg.serviceById("s23") as T_MyService23
-		verifyEq(s23.config.size, 1)
-		verifyEq(s23.config[0], "value2")
-	}
-
-	Void testOverride2() {
-		reg := RegistryBuilder().addModule(T_MyModule70#).build.startup
-		s23 := reg.serviceById("s23") as T_MyService23
-		verifyEq(s23.config.size, 1)
-		verifyEq(s23.config[0], "value3")
-	}
-
-	Void testOverrideMustExist1() {
-		reg := RegistryBuilder().addModule(T_MyModule71#).build.startup
-		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over1")) {
-			reg.serviceById("s23")
-		}
-	}
-
-	Void testOverrideMustExist2() {
-		reg := RegistryBuilder().addModule(T_MyModule72#).build.startup
-		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over2")) {
-			reg.serviceById("s23")
-		}
-	}
-	
 	// ---- test null values ----------------------------------------------------------------------
 
-	Void testNullValue() {
-		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
-		s71 := (T_MyService71) reg.serviceById("s71")
-		verifyEq(s71.config.size, 1)
-		verifyEq(s71.config[0], null)		
+	Void testUnorderedIsOrdered() {
+		reg := RegistryBuilder().addModule(T_MyModule89#).build.startup
+		s73 := (T_MyService73) reg.serviceById("s73")
+		Env.cur.err.printLine(s73.config)
+		verifyEq(s73.config.size, 10)
+		verifyEq(s73.config[0], 1)
+		verifyEq(s73.config[1], 2)
+		verifyEq(s73.config[2], 3)
+		verifyEq(s73.config[3], 4)
+		verifyEq(s73.config[4], 5)
+		verifyEq(s73.config[5], 6)
+		verifyEq(s73.config[6], 7)
+		verifyEq(s73.config[7], 8)
+		verifyEq(s73.config[8], 9)
+		verifyEq(s73.config[9], 10)
 	}
-
-	Void testNullValueNotAllowed() {
-		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
-		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(null, Str#)) {
-			s19 := (T_MyService28) reg.serviceById("s19")
-		}
-	}
-
-	Void testCanOverrideWithNull() {
-		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
-		s71 := (T_MyService71) reg.serviceById("s71")
-		verifyEq(s71.config.size, 1)
-		verifyEq(s71.config[0], null)		
-	}	
 }
 
 
@@ -336,5 +355,31 @@ internal class T_MyModule86 {
 		config.addUnordered("essays1")
 		config.addUnordered("essays2")
 		config.addUnordered("index")
+	}
+}
+
+internal class T_MyModule89 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService73#).withId("s73")
+	}
+	@Contribute
+	static Void contributeS73(OrderedConfig config) {		
+		config.addUnordered(1)
+		config.addUnordered(2)
+		config.addUnordered(3)
+		config.addUnordered(4)
+		config.addUnordered(5)
+		config.addUnordered(6)
+		config.addUnordered(7)
+		config.addUnordered(8)
+		config.addUnordered(9)
+		config.addUnordered(10)
+	}
+}
+
+internal class T_MyService73 {
+	Int[] config
+	new make(Int[] config) {
+		this.config = config
 	}
 }
