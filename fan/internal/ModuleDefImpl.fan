@@ -51,23 +51,26 @@ internal const class ModuleDefImpl : ModuleDef {
 		}
 
 		methods.each |method| {
-			if (method.hasFacet(Build#)) {
+			if (method.hasFacet(Build#) || method.name.startsWith("build")) {
 				tracker.track("Found builder method $method.qname") |->| {
 					addServiceDefFromMethod(tracker, serviceDefs, method)
 				}
-			}
+			} else if (method.name.startsWith("build"))
+				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))
 
 			if (method.hasFacet(Contribute#)) {
 				tracker.track("Found contribution method $method.qname") |->| {					
 					addContribDefFromMethod(tracker, contribDefs, method)
 				}
-			}
+			} else if (method.name.startsWith("contribute"))
+				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Contribute#))
 
 			if (method.hasFacet(Advise#)) {
 				tracker.track("Found advice method $method.qname") |->| {					
 					addAdviceDefFromMethod(tracker, adviceDefs, method)
 				}
-			}
+			} else if (method.name.startsWith("advise"))
+				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Advise#))
 		}
 	}
 	
@@ -80,7 +83,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		if (method.params.isEmpty || !method.params[0].type.fits(MethodAdvisor#.toListOf))
 			throw IocErr(IocMessages.adviseMethodMustTakeMethodAdvisorList(method))
 		
-		advise := Utils.getFacetOnSlot(method, Advise#) as Advise
+		advise := (Advise) Utils.getFacetOnSlot(method, Advise#)
 
 		adviceDef := StandardAdviceDef {
 			it.serviceIdGlob	= advise.serviceId
@@ -101,7 +104,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		if (method.params.isEmpty || (method.params[0].type != OrderedConfig# && method.params[0].type != MappedConfig#))
 			throw IocErr(IocMessages.contributionMethodMustTakeConfig(method))
 		
-		contribute := Utils.getFacetOnSlot(method, Contribute#) as Contribute
+		contribute := (Contribute) Utils.getFacetOnSlot(method, Contribute#)
 
 		contribDef	:= StandardContributionDef {
 			it.serviceId	= extractServiceIdFromContributionMethod(contribute, method)
@@ -144,7 +147,7 @@ internal const class ModuleDefImpl : ModuleDef {
 
 		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		
-		build := Utils.getFacetOnSlot(method, Build#) as Build
+		build := (Build) Utils.getFacetOnSlot(method, Build#, false) 
 		if (build.scope != null)
 			scope = build.scope
 		
