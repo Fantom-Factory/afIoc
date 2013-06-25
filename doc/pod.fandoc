@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [30 tests, 172 methods, 254 verifies]'
+  - Extensively tested: - 'All tests passed! [30 tests, 158 methods, 251 verifies]'
 
 
 Quick Start [#quickStart]
@@ -225,7 +225,8 @@ Release Notes [#releaseNotes]
 
 v1.3.6 [#v1.3.6]
 ----------------
- - Bug: Could not inject null into const fields via a custom DependencyProvider
+ - Bug: The implied order of unordered config in OrderConfig was not assured.
+ - Bug: Could not inject null into const fields via a custom DependencyProvider.
 
 v1.3.4 [#v1.3.4]
 ----------------

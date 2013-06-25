@@ -85,7 +85,32 @@ internal class TestOrderer : IocTest {
 		map2 := map.dup
 		verifyEq(map2["dee"], "sigh")
 	}
-	
+
+	Void testUnorderedOrder() {
+		orderer := Orderer()
+		orderer.addOrdered("Un2", 2, ["after: Un1"])
+		orderer.addOrdered("Un6", 6, ["after: Un5"])
+		orderer.addOrdered("Un3", 3, ["after: Un2"])
+		orderer.addOrdered("Un7", 7, ["after: Un6"])
+		orderer.addOrdered("Un4", 4, ["after: Un3"])
+		orderer.addOrdered("Un1", 1)
+		orderer.addOrdered("Un5", 5, ["after: Un4"])
+		orderer.addOrdered("Un8", 8, ["after: Un7"])
+		orderer.addOrdered("Un9", 9, ["after: Un8"])
+		orderer.addOrdered("Un10", 10, ["after: Un9"])
+		list := orderer.toOrderedList
+		verifyEq(1, list[0])
+		verifyEq(2, list[1])
+		verifyEq(3, list[2])
+		verifyEq(4, list[3])
+		verifyEq(5, list[4])
+		verifyEq(6, list[5])
+		verifyEq(7, list[6])
+		verifyEq(8, list[7])
+		verifyEq(9, list[8])
+		verifyEq(10, list[9])
+	}
+
 	internal Void verifyOrder(OrderedNode[] nodes) {
 		nodes.each |n, i| {
 			n.dependsOn.each |depName| {
