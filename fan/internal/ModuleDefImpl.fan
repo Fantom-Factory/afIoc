@@ -147,7 +147,7 @@ internal const class ModuleDefImpl : ModuleDef {
 
 		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		
-		build := (Build) Utils.getFacetOnSlot(method, Build#, false) 
+		build := (Build) Utils.getFacetOnSlot(method, Build#) 
 		if (build.scope != null)
 			scope = build.scope
 		
