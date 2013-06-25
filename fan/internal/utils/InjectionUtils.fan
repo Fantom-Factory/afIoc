@@ -157,11 +157,14 @@ internal const class InjectionUtils {
 	}
 
 	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj? value) {
-		ctx.track("Injecting $value?.typeof?.qname into field $field.signature") |->| {
+		ctx.track("Injecting ${value?.typeof?.qname} into field $field.signature") |->| {
 			if (field.get(target) != null) {
 				ctx.log("Field has non null value. Aborting injection.")
 				return
 			}
+			// BugFix: if injecting null (via DepProvider) then don't throw the Const Err below
+			if (value == null)
+				return	
 			if (field.isConst)
 				throw IocErr(IocMessages.cannotSetConstFields(field))
 			field.set(target, value)

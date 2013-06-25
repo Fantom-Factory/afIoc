@@ -26,6 +26,12 @@ internal class TestDependencyProvider : IocTest {
 		verifyCtx(reg, Uri#, Type[,], T_MyService41#)
 	}
 
+	Void testNullFieldInConstClass() {
+		reg := RegistryBuilder().addModule(T_MyModule88#).build
+		s72 := (T_MyService72) reg.serviceById("s72")
+		verifyNull(s72.oops)
+	}
+
 	private Void verifyCtx(Registry reg, Type type, Type[] facets, Type into) {
 		dp 	:= reg.serviceById("dp") as T_DependencyProvider2
 		ctx := dp.ls["ctx"] as ProviderCtx
@@ -84,4 +90,24 @@ internal const class T_DependencyProvider2 : DependencyProvider {
 		return dependencyType.fits(Uri#)
 	}
 	override Obj? provide(ProviderCtx ctx, Type dependencyType) { `ass` }
+}
+
+internal const class T_DependencyProvider3 : DependencyProvider {
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { dependencyType.fits(Str?#) }
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) { null }
+}
+
+internal class T_MyModule88 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService72#).withId("s72")
+	}
+	@Contribute
+	static Void contributeDependencyProviderSource(OrderedConfig config) {
+		config.addUnordered(config.autobuild(T_DependencyProvider3#))
+	}
+}
+
+internal const class T_MyService72 {
+	@Inject	const Str? oops
+	new make(|This|in) { in(this) }
 }
