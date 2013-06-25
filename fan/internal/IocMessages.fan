@@ -29,6 +29,10 @@ internal const class IocMessages {
 		"Module $module.qname has already been added - ignoring it this time round."
 	}
 	
+	static Str moduleMethodWithNoFacet(Method method, Type facetType) {
+		"Module method $method.qname should be annotated with the @${facetType.name} facet"
+	}
+	
     static Str buildMethodConflict(Str serviceId, Str conflict, Str existing) {
         "Service ${serviceId} (defined by ${conflict}) conflicts with previously defined service defined by ${existing}."
     }
