@@ -127,12 +127,13 @@ internal const class ModuleImpl : Module {
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
-				service := getOrAddService(def) {
-					create(ctx, def, forceCreate)					
-				}
+				service		:= getService(def)
 				
 				// if asked, replace the cached VIRTUAL service with a real one
-				if (forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL) {
+				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
+
+				// create if required
+				if (make4Real || service == null) {
 					service = create(ctx, def, forceCreate)
 					setService(def, service)
 				}
@@ -147,20 +148,21 @@ internal const class ModuleImpl : Module {
 				// TODO: A const service could be created twice if there's a race condition between
 				// two threads. This is only dangerous because Gawd knows what those services do in 
 				// their ctor or PostInject methods!
-				existing 	:= getService(def)
+				service		:= getService(def)
 				
 				// if asked, replace the cached VIRTUAL service with a real one
 				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
 				
-				if (!make4Real && existing != null)
-					return existing
-				
-				// keep the tracker in the current thread
-				service := create(ctx, def, forceCreate)
-
-				// double check service existence
-				// in a race condition, the 1st service created wins
-				getOrAddService(def) { service }
+				// create if required
+				if (make4Real || service == null) {
+					
+					// keep the tracker in the current thread
+					service = create(ctx, def, forceCreate)
+	
+					// double check service existence
+					// in a race condition, the 2st service created wins (why not?)
+					setService(def, service)
+				}
 				
 				return service
 			}
@@ -219,10 +221,6 @@ internal const class ModuleImpl : Module {
 		getServiceState(def.scope) |state->Obj?| { state.services[def.serviceId] }
 	}
 
-	private Obj? getOrAddService(ServiceDef def, |Obj key->Obj| creator) {
-		getServiceState(def.scope) |state->Obj?| { state.services.getOrAdd(def.serviceId, creator) }
-	}
-
 	private Void setService(ServiceDef def, Obj service) {
 		withServiceState(def.scope) |state| { state.services[def.serviceId] = service }
 	}
@@ -235,7 +233,7 @@ internal const class ModuleImpl : Module {
 
 	private ServiceLifecycle getLifecycle(ServiceDef def) {
 		// threaded services will return null on first call, so default to DEFINED
-		getServiceState(def.scope) |state->ServiceLifecycle?| { state.life.get(def.serviceId, ServiceLifecycle.DEFINED) }
+		getServiceState(def.scope) |state->ServiceLifecycle| { state.life.get(def.serviceId, ServiceLifecycle.DEFINED) }
 	}
 
 	private Void setLifecycle(ServiceDef def, ServiceLifecycle lifecycle) {

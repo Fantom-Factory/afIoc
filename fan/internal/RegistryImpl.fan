@@ -352,7 +352,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Void logServiceCreation(Type log, Str msg) {
-		 // Option defaults to 'false' as Ioc ideally should run quietly in the background and not 
+		// Option defaults to 'false' as Ioc ideally should run quietly in the background and not 
 		// interfere with the running of your app.
 		if (options["logServiceCreation"] == true)
 			// e could have set afIoc log level to WARN but then we wouldn't get the banner at startup.
