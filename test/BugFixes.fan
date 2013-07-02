@@ -27,6 +27,32 @@ internal class BugFixes : IocTest {
 		}.send(null).get
 	}
 
+	Void testProxiedServicesAreCachedOnceCreated_perThread() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
+
+		t50_1 	 := reg.serviceById("t50-thread")
+		proxyPod := t50_1.typeof.pod
+
+		t50_1 -> dude
+		t50_1 = reg.serviceById("t50-thread")
+		
+		// once the service is created, it should no longer be in the proxy pod
+		verifyNotEq(t50_1.typeof.pod, proxyPod)
+	}
+
+	Void testProxiedServicesAreCachedOnceCreated_perApplication() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
+
+		t50_1 	 := reg.serviceById("t50-app")
+		proxyPod := t50_1.typeof.pod
+
+		t50_1 -> dude
+		t50_1 = reg.serviceById("t50-app")
+
+		// once the service is created, it should no longer be in the proxy pod
+		verifyNotEq(t50_1.typeof.pod, proxyPod)
+	}
+	
 	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
 		Registry reg 		:= RegistryBuilder().addModule(T_MyModule85#).build.startup
 		T_MyService70 t70	:= reg.serviceById("t70")
@@ -42,6 +68,8 @@ internal class BugFixes : IocTest {
 internal class T_MyModule83 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50").withScope(ServiceScope.perThread)
+		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50-thread").withScope(ServiceScope.perThread)
+		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50-app").withScope(ServiceScope.perApplication)
 	}
 }
 

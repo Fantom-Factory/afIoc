@@ -12,7 +12,7 @@ const class LazyService {
 	private const ThreadStash		threadStash
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
-	
+
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, ObjLocator objLocator) {
 		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ctx, ServiceIds.threadStashManager)
 		this.serviceDef 	= serviceDef
@@ -23,11 +23,11 @@ const class LazyService {
 	Obj? call(Method method, Obj?[] args) {
 		serviceInvoker.invokeMethod(method, args)
 	}
-	
+
 	Obj service() {
 		serviceInvoker.service
 	}
-	
+
 	internal ServiceMethodInvoker serviceInvoker() {
 		(serviceDef.scope == ServiceScope.perApplication) ? getViaAppScope : getViaThreadScope
 	}
@@ -43,22 +43,30 @@ const class LazyService {
 	private Obj? getState(|LazyServiceState -> Obj?| state) {
 		conState.getState(state)
 	}
+
+	override Str toStr() {
+		"LazyService for ${serviceDef.serviceId}"
+	}
 }
 
 ** @since 1.3.0
 internal class LazyServiceState {	
-	private ServiceMethodInvokerThread? caller
-	
+	private ServiceMethodInvokerThread? invoker
+
+	** this does *actually* return the Thread'ed version of `ServiceMethodInvoker`, the called may 
+	** optionally call .toConst() if needed 
 	ServiceMethodInvokerThread getCaller(ObjLocator objLocator, ServiceDef serviceDef) {
-		if (caller != null)
-			return caller
-		
-		ctx := InjectionCtx(objLocator)
-		return ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+		if (invoker != null)
+			return invoker
+
+		ctx 	:= InjectionCtx(objLocator)
+		invoker = ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 			invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
 			invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
 			return invoker
 		}
+
+		return invoker
 	}
 }
 
