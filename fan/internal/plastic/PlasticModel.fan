@@ -1,6 +1,7 @@
 
 ** @since 1.3
-internal class PlasticClassModel {
+@NoDoc
+class PlasticClassModel {
 	
 	Bool 	isConst
 	Str 	className
@@ -24,7 +25,7 @@ internal class PlasticClassModel {
 			throw PlasticErr(PlasticMsgs.canOnlyExtendOneType(className, extends, mixinType))
 		if (!mixinType.isMixin)
 			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(className, mixinType))
-		// given all our test types are internal, we'll let this condition slide for now...
+		// TODO: given all our test types are internal, we'll let this condition slide for now...
 //		if (mixinType.isInternal)
 //			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		
@@ -87,7 +88,8 @@ internal class PlasticClassModel {
 }
 
 ** @since 1.3
-internal class PlasticFieldModel {
+@NoDoc
+class PlasticFieldModel {
 	Bool			 	isOverride
 	PlasticVisibility 	visibility
 	Bool				isConst
@@ -125,7 +127,8 @@ internal class PlasticFieldModel {
 }
 
 ** @since 1.3
-internal class PlasticMethodModel {
+@NoDoc
+class PlasticMethodModel {
 	Bool			 	isOverride
 	PlasticVisibility 	visibility
 	Type				returnType
@@ -152,7 +155,8 @@ internal class PlasticMethodModel {
 }
 
 ** @since 1.3
-internal enum class PlasticVisibility {
+@NoDoc
+enum class PlasticVisibility {
 	visPrivate	("private "),
 	visInternal	("internal "),
 	visProtected("protected "),

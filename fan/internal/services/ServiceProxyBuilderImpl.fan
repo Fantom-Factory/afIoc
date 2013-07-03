@@ -44,8 +44,12 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 					model.overrideMethod(method, body)
 				}
 			
+			Pod? pod
 			code 		:= model.toFantomCode
-			pod 		:= plasticPodCompiler.compile(ctx.tracker, code)
+			podName		:= plasticPodCompiler.generatePodName
+			ctx.track("Compiling Pod '$podName'") |->Obj| {
+				pod 	= plasticPodCompiler.compile(code)
+			}			
 			proxyType 	:= pod.type(model.className)
 			lazyField 	:= proxyType.field("afLazyService")
 			plan 		:= Field:Obj?[lazyField : LazyService(ctx, serviceDef, (ObjLocator) registry)]

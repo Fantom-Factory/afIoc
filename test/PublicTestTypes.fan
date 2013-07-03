@@ -112,5 +112,5 @@ Str<|
 
      |>
 	
-	private const Pod pod := PlasticPodCompiler().compile(OpTracker(), fantomPodCode)
+	private const Pod pod := PlasticPodCompiler().compile(fantomPodCode)
 }
