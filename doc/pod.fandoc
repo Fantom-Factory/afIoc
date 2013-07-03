@@ -228,6 +228,7 @@ v1.3.8 [#v1.3.8]
  - Chg: Added shortcut '@Operator This add(obj)' to `OrderedConfig` and '@Deprecated Void addUnordered(obj)'.
  - Chg: Added shortcut '@Operator This set(key, val)' to `MappedConfig` and '@Deprecated Void addMapped(key, val)'.
  - Chg: Public method on 'OrderedConfig' and 'MappedConfig' now return 'this' and other tweaks.
+ - Chg: Exposed '@NoDoc PlasticPodCompiler' so it may be used outside of afIoc.
 
 v1.3.6 [#v1.3.6]
 ----------------
