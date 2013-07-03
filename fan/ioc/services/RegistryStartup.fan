@@ -5,8 +5,8 @@
 ** following to your module:
 ** 
 **   @Contribute
-**   static Void contributeRegistryStartup(OrderedConfig config, MyService myService) {
-**     config.addUnordered |->| {
+**   static Void contributeRegistryStartup(OrderedConfig conf, MyService myService) {
+**     conf.add |->| {
 **       myService.startup()
 **     }
 **   }
