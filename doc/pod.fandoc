@@ -113,6 +113,7 @@ Services are defined in Module classes, where each meaningful method is static a
 
 The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define services, examples below:
 
+pre>
   static Void bind(ServiceBinder binder) {
 
     // has service ID of 'MyService'
@@ -124,14 +125,16 @@ The exception is 'bind()' which does not have a facet but is declared with a sta
     // has service ID of 'elephant'
     binder.bindImpl(MyServiceImpl#).withId("elephant")
   }
+<pre
 
 Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved and injected as such when the method is called. For example, to manually build a service with the Id 'penguin':
 
+pre>
   @Build { serviceId="penguin" }
   static EmailService buildStuff(EmailConfig config) {
     EmailServiceImpl(config)
   }
-
+<pre
 
 Dependency Injection [#dependencyInjection]
 *******************************************
@@ -177,8 +180,8 @@ Modules may then contribute to the 'Example' service:
 
 pre>
   @Contribute
-  static Void contributeExample(OrderedConfig config) {
-    config.addUnordered("text/plain")
+  static Void contributeExample(OrderedConfig conf) {
+    conf.add("text/plain")
   }
 <pre
 

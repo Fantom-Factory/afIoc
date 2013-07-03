@@ -7,8 +7,8 @@
 **   }
 ** 
 **   @Contribute
-**   static Void contributeServiceOverride(MappedConfig config) {
-**     config.addMapped("dinner", config.autobuild(PieAndMash#))
+**   static Void contributeServiceOverride(MappedConfig conf) {
+**     config["dinner"] = conf.autobuild(PieAndMash#)
 **   }
 ** <pre
 **
@@ -16,7 +16,8 @@
 ** services. 
 **  
 ** @since 1.2
-** @uses MappedConfig of Str:Obj (serviceId:overrideImpl)
+** 
+** @uses MappedConfig of 'Str:Obj' (serviceId:overrideImpl)
 const mixin ServiceOverride {
 	
 	abstract Obj? getOverride(Str serviceId)

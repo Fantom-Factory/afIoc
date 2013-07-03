@@ -6,14 +6,15 @@
 ** 
 ** pre>
 ** @Contribute
-** static Void contributeDependencyProviderSource(OrderedConfig config) {
-**   serviceIdProvider := config.autobuild(ServiceIdProvider#)
-**   config.addUnordered(serviceIdProvider)
+** static Void contributeDependencyProviderSource(OrderedConfig conf) {
+**   serviceIdProvider := conf.autobuild(ServiceIdProvider#)
+**   config.add(serviceIdProvider)
 ** }
 ** <pre
 ** 
 ** @since 1.1
-** @uses OrderedConfig of DependencyProvider
+** 
+** @uses OrderedConfig of `DependencyProvider`
 const mixin DependencyProviderSource {
 	
 	internal abstract Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType)
