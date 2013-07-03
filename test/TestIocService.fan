@@ -142,7 +142,7 @@ internal class T_MyModule54 {
 	}
 	@Contribute
 	static Void contributeRegistryStartup(OrderedConfig config) {
-		config.addUnordered() |->| {
+		config.add() |->| {
 			(Service.find(IocService#) as IocService).serviceById("s2")
 		}
 	}

@@ -48,7 +48,7 @@ internal class T_MyModule56 {
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
 		dp := config.autobuild(T_DependencyProvider1#)
-		config.addUnordered(dp)
+		config.add(dp)
 	}
 }
 internal class T_MyService40 {
@@ -68,7 +68,7 @@ internal class T_MyModule57 {
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider2 dp) {
-		config.addUnordered(dp)
+		config.add(dp)
 	}
 }
 
@@ -103,7 +103,7 @@ internal class T_MyModule88 {
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
-		config.addUnordered(config.autobuild(T_DependencyProvider3#))
+		config.add(config.autobuild(T_DependencyProvider3#))
 	}
 }
 

@@ -169,16 +169,17 @@ internal class T_MyModule02 {
 	}
 	@Contribute{ serviceId="s10" }
 	static Void cont10(MappedConfig config) {
-		config.addMapped("wot", null)
+		config["wot"] = null
+//		config.set("wot", null)
 	}	
 	@Contribute{ serviceId="s28" }
 	static Void cont28(MappedConfig config) {
-		config.addMapped("wot", null)
+		config.set("wot", null)
 	}	
 	@Contribute{ serviceId="s10b" }
 	static Void cont10b(MappedConfig config) {
-		config.addMapped("wot", "ever")
-		config.addOverride("wot", "wot-null", null)
+		config.set("wot", "ever")
+		config.setOverride("wot", "wot-null", null)
 	}	
 }
 
@@ -196,7 +197,7 @@ internal class T_MyModule43 {
 	
 	@Contribute{ serviceId="s27" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("wot", "ever")
+		config.set("wot", "ever")
 	}
 }
 
@@ -210,11 +211,11 @@ internal class T_MyModule44 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("wot", "ever")
+		config.set("wot", "ever")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont2(MappedConfig config) {
-		config.addMapped("wot2", "ever2")
+		config.set("wot2", "ever2")
 	}
 }
 
@@ -236,11 +237,11 @@ internal class T_MyModule45 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("wot", "ever")
+		config.set("wot", "ever")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont2(MappedConfig config) {
-		config.addMapped("wot2", "ever2")
+		config.set("wot2", "ever2")
 	}
 }
 
@@ -251,7 +252,7 @@ internal class T_MyModule46 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config, T_MyService02 s2) {
-		config.addMapped("wot", s2.kick)
+		config.set("wot", s2.kick)
 	}
 }
 
@@ -261,7 +262,7 @@ internal class T_MyModule47 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("wot", 69)
+		config.set("wot", 69)
 	}
 }
 
@@ -271,7 +272,7 @@ internal class T_MyModule48 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("judge", config.autobuild(T_MyService02#)->kick)
+		config.set("judge", config.autobuild(T_MyService02#)->kick)
 	}
 }
 
@@ -287,7 +288,7 @@ internal class T_MyModule50 {
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered(67)
+		config.add(67)
 	}
 }
 
@@ -297,7 +298,7 @@ internal class T_MyModule51 {
 	}
 	@Contribute{ serviceId="s29" }
 	static Void cont(MappedConfig config) {
-		config.addMapped("key", [,])
+		config.set("key", [,])
 	}
 }
 
@@ -314,15 +315,15 @@ internal class T_MyModule62 {
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
-		config.addMapped("key", "value")
-		config.addOverride("key", "over1", "value2")
+		config.set("key", "value")
+		config.setOverride("key", "over1", "value2")
 	}
 }
 
 internal class T_MyModule63 {
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
-		config.addOverride("over1", "over2", "value3")
+		config.setOverride("over1", "over2", "value3")
 	}
 }
 
@@ -332,8 +333,8 @@ internal class T_MyModule64 {
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
-		config.addMapped("key", "value")
-		config.addOverride("non-exist", "over1", "value2")
+		config.set("key", "value")
+		config.setOverride("non-exist", "over1", "value2")
 	}
 }
 
@@ -343,9 +344,9 @@ internal class T_MyModule65 {
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
-		config.addMapped("key", "value")
-		config.addOverride("key", "over1", "value2")
-		config.addOverride("non-exist", "over2", "value3")
+		config.set("key", "value")
+		config.setOverride("key", "over1", "value2")
+		config.setOverride("non-exist", "over2", "value3")
 	}
 }
 
@@ -355,9 +356,9 @@ internal class T_MyModule66 {
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
-		config.addMapped(Str#, "value1")
-		config.addOverride(Str#, Uri#, "value2")
-		config.addOverride(Uri#, File#, "value3")
+		config.set(Str#, "value1")
+		config.setOverride(Str#, Uri#, "value2")
+		config.setOverride(Uri#, File#, "value3")
 	}
 }
 
@@ -367,8 +368,8 @@ internal class T_MyModule67 {
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
-		config.addMapped(Str#, "once")
-		config.addMapped(Str#, "twice")
+		config.set(Str#, "once")
+		config.set(Str#, "twice")
 	}
 }
 
@@ -378,9 +379,9 @@ internal class T_MyModule68 {
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
-		config.addMapped(Str#, "once")
-		config.addOverride(Str#, Uri#, "twice")
-		config.addOverride(Str#, File#, "thrice")
+		config.set(Str#, "once")
+		config.setOverride(Str#, Uri#, "twice")
+		config.setOverride(Str#, File#, "thrice")
 	}
 }
 
@@ -390,9 +391,9 @@ internal class T_MyModule73 {
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
-		config.addMapped(Str#, "once")
-		config.addOverride(Str#, Uri#, "twice")
-		config.addOverride(Uri#, Str#, "thrice")	// attempt to re-use an existing key
+		config.set(Str#, "once")
+		config.setOverride(Str#, Uri#, "twice")
+		config.setOverride(Uri#, Str#, "thrice")	// attempt to re-use an existing key
 	}
 }
 
@@ -402,9 +403,9 @@ internal class T_MyModule74 {
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
-		config.addMapped(Str#, "once")
-		config.addOverride(Str#, Uri#, "twice")
-		config.addOverride(Uri#, Uri#, "thrice")	// attempt to re-use an existing override key
+		config.set(Str#, "once")
+		config.setOverride(Str#, Uri#, "twice")
+		config.setOverride(Uri#, Uri#, "thrice")	// attempt to re-use an existing override key
 	}
 }
 
@@ -421,9 +422,9 @@ internal class T_MyModule82 {
 	}
 	@Contribute
 	static Void contributeS68(MappedConfig config) {
-		config.addMapped(69, "dude")	// use Str override keys
-		config.addOverride(69, "+1", "dude dude")
-		config.addOverride("+1", "+2", "crowd")
+		config.set(69, "dude")	// use Str override keys
+		config.setOverride(69, "+1", "dude dude")
+		config.setOverride("+1", "+2", "crowd")
 	}
 }
 

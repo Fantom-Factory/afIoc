@@ -171,11 +171,11 @@ internal class T_MyModule30 {
 	}
 	@Contribute{ serviceId="s19" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered("wot")
+		config.add("wot")
 	}
 	@Contribute{ serviceId="s19" }
 	static Void cont2(OrderedConfig config) {
-		config.addUnordered("ever")
+		config.add("ever")
 	}
 }
 
@@ -193,7 +193,7 @@ internal class T_MyModule31 {
 	
 	@Contribute{ serviceId="s20" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered("wot")
+		config.add("wot")
 	}
 }
 
@@ -213,11 +213,11 @@ internal class T_MyModule32 {
 	
 	@Contribute{ serviceId="s21" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered("wot")
+		config.add("wot")
 	}
 	@Contribute{ serviceId="s21" }
 	static Void cont2(OrderedConfig config) {
-		config.addUnordered("ever")
+		config.add("ever")
 	}
 }
 
@@ -236,8 +236,8 @@ internal class T_MyModule33 {
 	
 	@Contribute{ serviceId="s21" }
 	static Void cont(OrderedConfig config, T_MyService02 s2) {
-		config.addUnordered("wot")
-		config.addUnordered(s2.kick)
+		config.add("wot")
+		config.add(s2.kick)
 	}
 }
 
@@ -247,7 +247,7 @@ internal class T_MyModule34 {
 	}
 	@Contribute{ serviceId="s21" }
 	static Void cont(MappedConfig config) {
-		config.addMapped(69 ,69)
+		config.set(69 ,69)
 	}
 }
 
@@ -258,7 +258,7 @@ internal class T_MyModule35 {
 	
 	@Contribute{ serviceId="s22" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered(69)
+		config.add(69)
 	}
 }
 
@@ -276,7 +276,7 @@ internal class T_MyModule36 {
 	
 	@Contribute{ serviceId="s23" }
 	static Void cont(OrderedConfig config) {
-		config.addUnordered(config.autobuild(T_MyService02#)->kick)
+		config.add(config.autobuild(T_MyService02#)->kick)
 	}
 }
 
@@ -345,16 +345,17 @@ internal class T_MyModule86 {
 	}
 	@Contribute
 	static Void contributeS23(OrderedConfig config) {		
-		config.addOrderedPlaceholder("filters")
-		config.addOrderedPlaceholder("routes")
+		config.addPlaceholder("filters")
+		config.addPlaceholder("routes")
 		
 		config.addOrdered("corsFilter", "simple", 	  ["before: routes"])
 		config.addOrdered("corsFilter2", "preflight", ["before: routes"])
 
 		// we would expect these to appear *after* the 2 filters above
-		config.addUnordered("essays1")
-		config.addUnordered("essays2")
-		config.addUnordered("index")
+//		config = ,["essays1", "essays2", "index";
+		config.add("essays1")
+		config.add("essays2")
+		config.add("index")
 	}
 }
 
@@ -364,16 +365,16 @@ internal class T_MyModule89 {
 	}
 	@Contribute
 	static Void contributeS73(OrderedConfig config) {		
-		config.addUnordered(1)
-		config.addUnordered(2)
-		config.addUnordered(3)
-		config.addUnordered(4)
-		config.addUnordered(5)
-		config.addUnordered(6)
-		config.addUnordered(7)
-		config.addUnordered(8)
-		config.addUnordered(9)
-		config.addUnordered(10)
+		config.add(1)
+		config.add(2)
+		config.add(3)
+		config.add(4)
+		config.add(5)
+		config.add(6)
+		config.add(7)
+		config.add(8)
+		config.add(9)
+		config.add(10)
 	}
 }
 

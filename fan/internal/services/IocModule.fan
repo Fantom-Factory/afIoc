@@ -8,7 +8,7 @@ internal class IocModule {
 		serviceIdProvider := config.autobuild(ServiceIdProvider#)
 		autobuildProvider := config.autobuild(AutobuildProvider#)
 
-		config.addUnordered(serviceIdProvider)
-		config.addUnordered(autobuildProvider)
+		config.add(serviceIdProvider)
+		config.add(autobuildProvider)
 	}
 }

@@ -19,7 +19,7 @@ class OrderedConfig {
 	private			Str:OrderedOverride	config
 	private			Str:OrderedOverride	overrides 
 
-	
+
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
 			throw WtfErr("Ordered Contrib Type is NOT list???")
@@ -41,16 +41,19 @@ class OrderedConfig {
 	}
 
 	** Adds an unordered object to a service's configuration.
-	Void addUnordered(Obj object) {
+	@Operator
+	This add(Obj object) {
 		id := "Unordered${impliedCount}"
 		addOrdered(id, object)
+		return this
 	}
 
 	** Adds all the unordered objects to a service's configuration.
-	Void addUnorderedAll(Obj[] objects) {
+	This addAll(Obj[] objects) {
 		objects.each |obj| {
-			addUnordered(obj)
+			add(obj)
 		}
+		return this
 	}
 
 	** Adds an ordered object to a service's contribution. Each object has a unique id (case 
@@ -59,12 +62,12 @@ class OrderedConfig {
 	** 
 	** pre>
 	**   config.addOrdered("Breakfast", eggs)
-	**   config.addOrdered("Lunch", ham, ["AFTER: breakfast", "BEFORE: dinner"])
 	**   config.addOrdered("Dinner", pie)
+	**   config.addOrdered("Lunch", ham, ["AFTER: breakfast", "BEFORE: dinner"])
 	** <pre
 	** 
 	** Configuration contributions are ordered across modules. 
-	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
+	This addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
 		if (object !== Orderer.placeholder)
 			object = validateVal(object)
 		
@@ -81,6 +84,7 @@ class OrderedConfig {
 		// this orderer is throwaway, we just use to fail fast on dup key errs
 		orderer.addOrdered(id, object, constraints)
 
+		return this
 	}
 
 	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
@@ -94,8 +98,9 @@ class OrderedConfig {
 	** Placeholders do not appear in the the resulting ordered list. 
 	** 
 	** @since 1.2
-	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
+	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, Orderer.placeholder, constraints)
+		return this
 	}
 
 	** Overrides a contributed ordered object. The original object must exist.
@@ -103,13 +108,14 @@ class OrderedConfig {
 	** Note: Unordered configurations can not be overridden.
 	** 
 	** @since 1.2
-	Void addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := [,]) {
+	This addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := [,]) {
 		newObject	= validateVal(newObject)
 
 		if (overrides.containsKey(existingId))
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
 		
 		overrides[existingId] = OrderedOverride(newId, newObject, newConstraints)
+		return this
 	}
 
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
@@ -186,6 +192,36 @@ class OrderedConfig {
 	override Str toStr() {
 		"OrderedConfig of $listType"
 	}
+	
+	// ---- Deprecated: Kill Me! ------------------------------------------------------------------
+
+	** Adds an unordered object to a service's configuration.
+	@Deprecated { msg="Use add(Obj) instead" }
+	Void addUnordered(Obj object) {
+		add(object)
+	}
+
+	** Adds all the unordered objects to a service's configuration.
+	@Deprecated { msg="Use addAll(Obj) instead" }
+	Void addUnorderedAll(Obj[] objects) {
+		addAll(objects)
+	}
+	
+	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
+	** 
+	** pre>
+	**   config.addPlaceholder("End")
+	**   config.addOrdered("Wot", ever, ["BEFORE: end"])
+	**   config.addOrdered("Last", last, ["AFTER: end"])
+	** <pre
+	** 
+	** Placeholders do not appear in the the resulting ordered list. 
+	** 
+	** @since 1.2
+	@Deprecated { msg="Use addPlaceholder(Str, Str[]) instead" }
+	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
+		addPlaceholder(id, constraints)
+	}	
 }
 
 internal class OrderedOverride {

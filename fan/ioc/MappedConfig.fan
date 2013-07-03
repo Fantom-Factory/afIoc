@@ -33,9 +33,14 @@ class MappedConfig {
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
 		return ctx.objLocator.trackAutobuild(ctx, type, ctorArgs)
 	}
+
+	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
+	@Operator 
+	private Obj? get(Obj key) { null }
 	
 	** Adds a keyed object to the service's configuration.
-	Void addMapped(Obj key, Obj? val) {
+	@Operator
+	This set(Obj key, Obj? val) {
 		key = validateKey(key, false)
 		val = validateVal(val)
 
@@ -43,19 +48,21 @@ class MappedConfig {
 			throw IocErr(IocMessages.configMappedKeyAlreadyDefined(key.toStr))
 
 		config[key] = val
+		return this
 	}
 
 	** Adds all the mapped objects to a service's configuration.
-	Void addMappedAll(Obj:Obj? objects) {
+	This setAll(Obj:Obj? objects) {
 		objects.each |val, key| {
-			addMapped(key, val)
+			set(key, val)
 		}
+		return this
 	}
 	
 	** Overrides an existing contribution by its key. The key must exist.
 	** 
 	** @since 1.2
-	Void addOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
+	This setOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
 		overrideKey = validateKey(overrideKey, true)
 		existingKey = validateKey(existingKey, true)
 		overrideVal	= validateVal(overrideVal)
@@ -70,6 +77,7 @@ class MappedConfig {
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(overrideKey.toStr))
 
 		overrides[existingKey] = MappedOverride(overrideKey, overrideVal)
+		return this
 	}
 
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
@@ -118,7 +126,7 @@ class MappedConfig {
 		config.size
 	}
 	
-	Obj validateKey(Obj key, Bool isOverrideKey) {
+	private Obj validateKey(Obj key, Bool isOverrideKey) {
 		if (!key.typeof.fits(keyType)) {
 			if (!isOverrideKey)
 				throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
@@ -128,7 +136,7 @@ class MappedConfig {
 		return key
 	}
 
-	Obj? validateVal(Obj? val) {
+	private Obj? validateVal(Obj? val) {
 		if (val == null) {
 			if (!valType.isNullable)
 				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", null, valType))
@@ -155,6 +163,28 @@ class MappedConfig {
 
 	override Str toStr() {
 		"MappedConfig of $contribType"
+	}
+	
+	// ---- Deprecated: Kill Me! ------------------------------------------------------------------
+	
+	** Adds a keyed object to the service's configuration.
+	@Deprecated { msg="use set(Obj, Obj?) instead" }
+	Void addMapped(Obj key, Obj? val) {
+		set(key, val)
+	}
+
+	** Adds all the mapped objects to a service's configuration.
+	@Deprecated { msg="use setAll(Obj:Obj?) instead" }
+	Void addMappedAll(Obj:Obj? objects) {
+		setAll(objects)
+	}
+	
+	** Overrides an existing contribution by its key. The key must exist.
+	** 
+	** @since 1.2
+	@Deprecated { msg="use setOverride(Obj, Obj, Obj?) instead" }
+	Void addOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
+		setOverride(existingKey, overrideKey, overrideVal)
 	}	
 }
 
