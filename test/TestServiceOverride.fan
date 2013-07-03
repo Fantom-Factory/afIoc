@@ -39,7 +39,7 @@ internal class T_MyModule58 {
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
-		config.addMapped("s44", config.autobuild(T_MyService44Impl2#))
+		config.set("s44", config.autobuild(T_MyService44Impl2#))
 	}
 }
 
@@ -53,7 +53,7 @@ internal class T_MyModule59 {
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
-		config.addMapped("s45", config.autobuild(T_MyService45Impl2#))
+		config.set("s45", config.autobuild(T_MyService45Impl2#))
 	}
 }
 
@@ -68,13 +68,13 @@ internal class T_MyModule60 {
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
-		config.addMapped("s44", config.autobuild(T_MyService12#))
+		config.set("s44", config.autobuild(T_MyService12#))
 	}
 }
 
 internal class T_MyModule61 {
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
-		config.addMapped("s12", config.autobuild(T_MyService12#))
+		config.set("s12", config.autobuild(T_MyService12#))
 	}
 }
