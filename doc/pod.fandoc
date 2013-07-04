@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [32 tests, 183 methods, 359 verifies]'
+  - Extensively tested: - 'All tests passed! [32 tests, 186 methods, 362 verifies]'
 
 
 Quick Start [#quickStart]
@@ -228,6 +228,9 @@ Release Notes [#releaseNotes]
 
 v1.3.8 [#v1.3.8]
 ----------------
+ - New: Added `TypeCoercer` util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
+ - Chg: `OrderedConfig` contributions are coerced to the contrib type.
+ - Chg: `MappedConfig` key and value contributions are coerced to their required types.
  - Chg: Added shortcut '@Operator This add(obj)' to `OrderedConfig` and '@Deprecated Void addUnordered(obj)'.
  - Chg: Added shortcut '@Operator This set(key, val)' to `MappedConfig` and '@Deprecated Void addMapped(key, val)'.
  - Chg: Public method on 'OrderedConfig' and 'MappedConfig' now return 'this' and other tweaks.

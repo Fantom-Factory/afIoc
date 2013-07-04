@@ -8,6 +8,8 @@
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
+** 
+** @see `TypeCoercer`
 class OrderedConfig {
 
 	internal const	Type 				contribType
@@ -17,8 +19,8 @@ class OrderedConfig {
 	private			Int					impliedCount
 	private			Str[]?				impliedConstraint
 	private			Str:OrderedOverride	config
-	private			Str:OrderedOverride	overrides 
-
+	private			Str:OrderedOverride	overrides
+	private			TypeCoercer			typeCoercer
 
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
@@ -33,6 +35,7 @@ class OrderedConfig {
 		this.impliedCount	= 1
 		this.overrides		= Utils.makeMap(Str#, OrderedOverride#)
 		this.config			= Utils.makeMap(Str#, OrderedOverride#)
+		this.typeCoercer	= TypeCoercer()
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -40,7 +43,8 @@ class OrderedConfig {
 		return ctx.objLocator.trackAutobuild(ctx, type, ctorArgs)
 	}
 
-	** Adds an unordered object to a service's configuration.
+	** Adds an unordered object to a service's configuration. 
+	** An attempt is made to coerce the object to the contrib type.
 	@Operator
 	This add(Obj object) {
 		id := "Unordered${impliedCount}"
@@ -49,6 +53,7 @@ class OrderedConfig {
 	}
 
 	** Adds all the unordered objects to a service's configuration.
+	** An attempt is made to coerce the objects to the contrib type.
 	This addAll(Obj[] objects) {
 		objects.each |obj| {
 			add(obj)
@@ -67,6 +72,8 @@ class OrderedConfig {
 	** <pre
 	** 
 	** Configuration contributions are ordered across modules. 
+	** 
+	** An attempt is made to coerce the object to the contrib type.
 	This addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
 		if (object !== Orderer.placeholder)
 			object = validateVal(object)
@@ -104,6 +111,7 @@ class OrderedConfig {
 	}
 
 	** Overrides a contributed ordered object. The original object must exist.
+	** An attempt is made to coerce the override to the contrib type.
 	** 
 	** Note: Unordered configurations can not be overridden.
 	** 
@@ -184,9 +192,14 @@ class OrderedConfig {
 				throw IocErr(IocMessages.orderedConfigTypeMismatch(null, listType))
 			return object
 		}
-		if (!object.typeof.fits(listType))
-			throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
-		return object
+
+		if (object.typeof.fits(listType))
+			return object
+
+		if (typeCoercer.canCoerce(object.typeof, listType))
+			return typeCoercer.coerce(object, listType)
+
+		throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
 	}
 	
 	override Str toStr() {

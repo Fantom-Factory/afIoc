@@ -15,6 +15,7 @@ class MappedConfig {
 	private 	  	InjectionCtx		ctx
 	private			Obj:Obj?			config
 	private			Obj:MappedOverride	overrides 
+	private			TypeCoercer			typeCoercer
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "Map")
@@ -27,6 +28,7 @@ class MappedConfig {
 		this.contribType	= contribType
 		this.config 		= Utils.makeMap(keyType, valType)
 		this.overrides		= Utils.makeMap(keyType, MappedOverride#)
+		this.typeCoercer	= TypeCoercer()
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -37,8 +39,9 @@ class MappedConfig {
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
 	@Operator 
 	private Obj? get(Obj key) { null }
-	
+
 	** Adds a keyed object to the service's configuration.
+	** An attempt is made to coerce the key / value to the map type.
 	@Operator
 	This set(Obj key, Obj? val) {
 		key = validateKey(key, false)
@@ -52,6 +55,7 @@ class MappedConfig {
 	}
 
 	** Adds all the mapped objects to a service's configuration.
+	** An attempt is made to coerce the keys / values to the map type.
 	This setAll(Obj:Obj? objects) {
 		objects.each |val, key| {
 			set(key, val)
@@ -60,6 +64,9 @@ class MappedConfig {
 	}
 	
 	** Overrides an existing contribution by its key. The key must exist.
+	** An attempt is made to coerce the override key / value to the map type.
+	** 
+	** Note: Override keys may a Str
 	** 
 	** @since 1.2
 	This setOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
@@ -125,15 +132,24 @@ class MappedConfig {
 	internal Int size() {
 		config.size
 	}
-	
+
 	private Obj validateKey(Obj key, Bool isOverrideKey) {
-		if (!key.typeof.fits(keyType)) {
-			if (!isOverrideKey)
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
-			if (!key.typeof.fits(Str#))	// implicit isOverrideKey == true
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))			
-		}
-		return key
+		if (key.typeof.fits(keyType))
+			return key
+		
+		if (isOverrideKey)
+			return key
+
+		if (typeCoercer.canCoerce(key.typeof, keyType))
+			return typeCoercer.coerce(key, keyType)
+
+		// implicit isOverrideKey == true
+		// hmm... looking for an edge case scenario that'll make me un-comment this.
+		// as it is, all tests pass.
+//		if (key.typeof.fits(Str#))
+//			return key
+
+		throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
 	}
 
 	private Obj? validateVal(Obj? val) {
@@ -142,15 +158,18 @@ class MappedConfig {
 				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", null, valType))
 			return val			
 		}
-		
-		if (!val.typeof.fits(valType)) {
-			// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
-			if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
-				val = valType.params["V"].emptyList
-			else
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
-		}
-		return val
+
+		if (val.typeof.fits(valType))
+			return val
+
+		if (typeCoercer.canCoerce(val.typeof, valType))
+			return typeCoercer.coerce(val, valType)
+
+		// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
+		if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
+			return valType.params["V"].emptyList
+
+		throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
 	}
 
 	private once Type keyType() {

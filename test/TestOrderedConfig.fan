@@ -26,13 +26,19 @@ internal class TestOrderedConfig : IocTest {
 		verifyEq(s21.config, Str["wot", "ASS!"])
 	}
 
-	Void testAddingWrongContribV2() {
+	Void testAddingWrongContrib() {
 		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
-		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(Int#, Str#)) {
+		verifyErrMsg(IocMessages.orderedConfigTypeMismatch(Type#, Int#)) {
 			s22 := reg.serviceById("s22") as T_MyService22
 		}
 	}
 
+	Void testContribIsCoerced() {
+		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
+		s22 := reg.serviceById("s22-b") as T_MyService22
+		verifyEq(s22.config[0], 69)
+	}
+	
 	Void testOrderedConfigAutobuild() {
 		reg := RegistryBuilder().addModule(T_MyModule36#).build.startup
 		s23 := reg.serviceById("s23") as T_MyService23
@@ -254,17 +260,22 @@ internal class T_MyModule34 {
 internal class T_MyModule35 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService22#).withId("s22")
+		binder.bindImpl(T_MyService22#).withId("s22-b")
 	}
 	
 	@Contribute{ serviceId="s22" }
 	static Void cont(OrderedConfig config) {
-		config.add(69)
+		config.add(T_MyModule35#)	// add fail, need an Int, not Type
+	}
+	@Contribute{ serviceId="s22-b" }
+	static Void cont2(OrderedConfig config) {
+		config.add("69")	// gets coerced to Int
 	}
 }
 
 internal class T_MyService22 {
-	Str[] config
-	new make(Str[] config) {
+	Int[] config
+	new make(Int[] config) {
 		this.config = config
 	}
 }
