@@ -26,11 +26,24 @@ internal class TestMappedConfig : IocTest {
 		verifyEq(s28.config, Str:Str["wot":"ASS!"])
 	}
 
-	Void testAddingWrongContribV2() {
+	Void testAddingWrongKeyType() {
 		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
-		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("value", Int#, Str#)) {
-			s28 := reg.serviceById("s28") as T_MyService28
+		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("key", Int#, Type#)) {
+			s74 := reg.serviceById("s74-a") as T_MyService74
 		}
+	}
+
+	Void testAddingWrongValueType() {
+		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
+		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("value", Int#, Type#)) {
+			s74 := reg.serviceById("s74-b") as T_MyService74
+		}
+	}
+
+	Void testKeyValueTypeCoercion() {
+		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
+		s68 := reg.serviceById("s68") as T_MyService68
+		verifyEq(s68.config[68], "42")	
 	}
 
 	Void testMappedConfigAutobuild() {
@@ -170,7 +183,6 @@ internal class T_MyModule02 {
 	@Contribute{ serviceId="s10" }
 	static Void cont10(MappedConfig config) {
 		config["wot"] = null
-//		config.set("wot", null)
 	}	
 	@Contribute{ serviceId="s28" }
 	static Void cont28(MappedConfig config) {
@@ -258,11 +270,21 @@ internal class T_MyModule46 {
 
 internal class T_MyModule47 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bindImpl(T_MyService74#).withId("s74-a")
+		binder.bindImpl(T_MyService74#).withId("s74-b")
+		binder.bindImpl(T_MyService68#).withId("s68")
 	}
-	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config) {
-		config.set("wot", 69)
+	@Contribute{ serviceId="s74-a" }
+	static Void cont1(MappedConfig config) {
+		config[68] = T_MyModule47#	// wrong key type 
+	}
+	@Contribute{ serviceId="s74-b" }
+	static Void cont2(MappedConfig config) {
+		config[T_MyModule47#] = 68	// wrong value type 
+	}
+	@Contribute{ serviceId="s68" }
+	static Void cont3(MappedConfig config) {
+		config["68"] = 42	// coerce Int <=> Str 
 	}
 }
 
@@ -431,6 +453,13 @@ internal class T_MyModule82 {
 internal class T_MyService68 {
 	Int:Str config
 	new make(Int:Str config) {
+		this.config = config
+	}
+}
+
+internal class T_MyService74 {
+	Type:Type config
+	new make(Type:Type config) {
 		this.config = config
 	}
 }
