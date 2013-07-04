@@ -229,6 +229,14 @@ internal const class IocMessages {
 		"Advise method '$method.qname' must take a list of ${MethodAdvisor#.name}s as its first parameter. e.g. static Void ${method.name}(${MethodAdvisor#.name}[] methodAdvisors, ...) { ... }"
 	}
 	
+	static Str typeCoercionFail(Type from, Type to) {
+		"Could not coerce ${from.qname} to ${to.qname}"
+	}
+	
+	static Str typeCoercionNotFound(Type from, Type to) {
+		"Could not find coercion from ${from.qname} to ${to.qname}"
+	}
+	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
 	
 	static Str onlyMixinsCanBeProxied(Type mixinType) {
