@@ -98,6 +98,24 @@ internal class TestThreadedAccess : IocTest {
 		}
 	}
 
+	Void testThreadedServicesAreDestroyedOnThreadCleansUp() {
+		reg := (Registry) RegistryBuilder().addModule(T_MyModule90#).build.startup
+		sta := (ServiceStats) reg.serviceById(ServiceIds.serviceStats)
+		tsm := (ThreadStashManager) reg.serviceById(ServiceIds.threadStashManager)
+		
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
+		s02a := reg.serviceById("s02")
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.CREATED)
+		
+		tsm.cleanUpThread
+		
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
+		s02b := reg.serviceById("s02")
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.CREATED)
+		
+		assertNotSame(s02a, s02b)
+	}
+
 	static Void assertSame(Obj? o1, Obj? o2) {
 		if (o1 !== o2)
 			throw Err("Are NOT the same - $o1 : $o2")
@@ -139,6 +157,12 @@ internal class T_MyModule19 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService12#).withId("s12")
 		binder.bindImpl(T_MyService14#).withId("s14")
+	}
+}
+
+internal class T_MyModule90 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService02#).withId("s02").withScope(ServiceScope.perThread)
 	}
 }
 
