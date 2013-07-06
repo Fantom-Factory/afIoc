@@ -5,7 +5,7 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful 'Inversion Of Control' (IOC) framework"
-		version = Version([1,3,7])
+		version = Version([1,3,9])
 
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
