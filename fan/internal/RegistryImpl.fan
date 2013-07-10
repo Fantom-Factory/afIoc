@@ -189,8 +189,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
-		shutdownHub := (RegistryShutdownHubImpl) serviceById(RegistryShutdownHub#.name)
-		threadMan 	:= (ThreadStashManager) serviceById(ThreadStashManager#.name)
+		shutdownHub := (RegistryShutdownHubImpl) serviceById(ServiceIds.registryShutdownHub)
+		threadMan 	:= (ThreadStashManager) serviceById(ServiceIds.threadStashManager)
 
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
