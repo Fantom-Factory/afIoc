@@ -188,8 +188,8 @@ internal const class ModuleImpl : Module {
 	}
 	
 	override Void clear() {
-		withServiceState(ServiceScope.perApplication) |state| { state.services.clear }
-		withServiceState(ServiceScope.perThread) 	  |state| { state.services.clear }
+		withServiceState(ServiceScope.perApplication) |state| { state.clear }
+		withServiceState(ServiceScope.perThread) 	  |state| { state.clear }
 	}
 
 	// ---- Private Methods ----------------------------------------------------
@@ -237,8 +237,10 @@ internal const class ModuleImpl : Module {
 	}
 
 	private Void setLifecycle(ServiceDef def, ServiceLifecycle lifecycle) {
-		if (def.scope != ServiceScope.perInjection)
-			withServiceState(def.scope) |state| { state.life[def.serviceId] = lifecycle }
+		if (def.scope == ServiceScope.perInjection)
+			return
+
+		withServiceState(def.scope) |state| { state.life[def.serviceId] = lifecycle }
 		
 		withStatState|state| { 
 			status := state.stats[def.serviceId].withIncImpls
@@ -284,8 +286,25 @@ internal const class ModuleImpl : Module {
 }
 
 internal class ModuleServices {
-	Str:Obj	services			:= Utils.makeMap(Str#, Obj#)
-	Str:ServiceLifecycle life	:= Utils.makeMap(Str#, ServiceLifecycle#)
+	private OneShotLock 			lock		:= OneShotLock("Registry has been shutdown")
+	private Str:Obj 				pServices	:= Utils.makeMap(Str#, Obj#)
+	private Str:ServiceLifecycle	pLife		:= Utils.makeMap(Str#, ServiceLifecycle#)
+	
+	Str:Obj	services() {
+		lock.check
+		return pServices
+	}
+	
+	Str:ServiceLifecycle life() {
+		lock.check
+		return pLife
+	}
+	
+	Void clear() {
+		lock.lock
+		pServices.clear
+		pLife.clear
+	}
 }
 
 internal class ModuleStats {
