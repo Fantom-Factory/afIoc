@@ -11,12 +11,14 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Bool			noProxy
 	const |InjectionCtx->Obj|	source
 	const Str?					description
-	
+
 	new make(|This| f) { 
 		this.moduleId		= ServiceIds.builtInModuleId
 		this.scope			= ServiceScope.perApplication
 		this.noProxy		= true
-		this.source 		= |InjectionCtx ctx->Obj| { throw IocErr("Can not create BuiltIn service '$serviceId'") }
+		this.source 		= |InjectionCtx ctx->Obj| { 
+			throw IocErr("Can not create BuiltIn BILLL service '$serviceId'") 
+		}
 
 		f(this)
 	}

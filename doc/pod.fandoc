@@ -226,6 +226,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.3.10 [#1.3.10]
+-----------------
+ - Chg: Made it clear when service creation fails due to Registry Shutdown. (Found via race condition in BedSheet tests.)
+
 v1.3.8 [#v1.3.8]
 ----------------
  - New: Added `TypeCoercer` util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
