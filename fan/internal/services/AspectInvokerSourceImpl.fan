@@ -1,14 +1,14 @@
 
 ** @since 1.3.0
 internal const class AspectInvokerSourceImpl : AspectInvokerSource {
-	
+
 	@Inject @ServiceId { serviceId="registry" }
 	const ObjLocator objLocator
-	
+
 	new make(|This|in) {
 		in(this)
 	}
-	
+
 	** Returns `MethodAdvisor`s fully loaded with callbacks
 	override ServiceMethodInvokerThread createServiceMethodInvoker(InjectionCtx ctx, ServiceDef serviceDef) {
 
@@ -31,7 +31,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 					InjectionUtils.callMethod(ctx, it.advisorMethod, null, [methodAdvisors])
 				}
 			}
-		
+
 		service 	:= objLocator.getService(ctx, serviceDef, true)
 		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]][:]
 		

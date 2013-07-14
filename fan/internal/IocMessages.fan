@@ -62,7 +62,7 @@ internal const class IocMessages {
 	}
 
 	static Str noDependencyMatchesType(Type type) {
-		"No dependency macthes type ${type.signature}."
+		"No dependency matches type ${type.signature}."
 	}
 
 	static Str couldNotFindImplType(Type serviceType) {
