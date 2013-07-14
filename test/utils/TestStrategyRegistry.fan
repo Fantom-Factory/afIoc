@@ -18,7 +18,7 @@ internal class TestStrategyRegistry : IocTest {
 		map[IocErr#] 	= 2
 		map[Err#] 		= 1
 		ap := StrategyRegistry(map)
-		
+
 		verifyEq(ap.findExactMatch(Obj#, false), null)
 		verifyEq(ap.findExactMatch(Obj?#, false), null)
 		verifyEq(ap.findExactMatch(Err#, false), 1)
@@ -44,7 +44,7 @@ internal class TestStrategyRegistry : IocTest {
 		map[Err#] 		= 1
 		map[T_StratA#] 	= 3
 		ap := StrategyRegistry(map)
-		
+
 		verifyEq(ap.findBestFit(Obj#, false), null)
 		verifyEq(ap.findBestFit(Obj?#, false), null)
 		verifyEq(ap.findBestFit(Err#), 1)
@@ -62,11 +62,6 @@ internal class TestStrategyRegistry : IocTest {
 		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry. Available values = afIoc::IocErr, sys::Err, afIoc::T_StratA") {   
 			verifyEq(ap.findExactMatch(TestStrategyRegistry#), null)
 		}
-	}
-
-	static Void main(Str[] args) {
-//		Env.cur.err.printLine(T_StratA#.)
-		Env.cur.err.printLine(T_StratA#.inheritance)
 	}
 }
 

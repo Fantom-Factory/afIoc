@@ -1,5 +1,5 @@
 
-** A map Types to Objs that can be looked up via an inheritance search.
+** A map of Types to Objs that can be looked up via an inheritance search.
 const class StrategyRegistry {	
 	private const ConcurrentState 	conState	:= ConcurrentState(StrategyRegistryBestFitCache#)
 	private const Type:Obj? 		values
