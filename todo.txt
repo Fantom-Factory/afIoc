@@ -1,7 +1,11 @@
 
-v1.3.8 Maybe...?
----------------- 
+v1.3.10 Maybe...?
+----------------- 
 
+TypeCoercers to be added via index props
+
+Plastic to use def values
+ - see compilerDoc::ApiDocParser.parseMethod() 
 
 
 Meh... can't be arsed
@@ -15,7 +19,8 @@ service disambiguation via facets
  - is just another dep pro: map of services keyed by type&facet
 
 Move all tests out into a dedicated pod
- - v1.3.4 is 403 Kb!
+ - v1.3.8 is 425 Kb!
+ - wait until over 500 Kb maybe? But what of all the internal classes?
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
