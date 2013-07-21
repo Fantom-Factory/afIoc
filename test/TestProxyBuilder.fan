@@ -9,72 +9,72 @@ internal class TestProxyBuilder : IocTest {
 		spb = (ServiceProxyBuilder) reg.dependencyByType(ServiceProxyBuilder#)
 	}
 	
-//	Void testProxyMethod() {
-//		s50 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-//		verifyEq(s50->dude, "dude")
-//		verifyEq(s50->inc(5), 6)
-//	}
-//	
-//	Void testNonVirtualMethodsAreNotOverridden() {
-//		s51 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s51"))
-//		verifyEq(s51->dude, "Don't override me!")
-//		verifyEq(s51->inc(6), 9)
-//	}
-//	
-//	Void testCanBuildMultipleServices() {
-//		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
-//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-//	}
-//
-//	Void testVirtualButNotImplementedMethodsAreNotCalled() {
-//		s52 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s52"))
-//		verifyEq(s52->dude, "Virtual Reality")
-//		verifyEq(s52->inc(7), 6)
-//	}
-//	
-//	Void testProtectedProxyMethod() {
-//		s54 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s54"))
-//		verifyEq(s54->dude, "dude")
-//	}
-//
-//	Void testCannotProxyInternalMixin() {
-//		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
-//			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s55"))
-//		}
-//	}
-//	
-//	Void testNonConstMixin() {
-//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s56"))
-//	}
-//	
-//	Void testOnlyMixinsAllowed() {
-//		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
-//			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s57"))
-//		}
-//	}
-//	
-//	// Weird shenanigans - const fields aren't allowed. Full stop.
-//	// see http://fantom.org/sidewalk/topic/1921
-//	// So const mixins can't ever declare fields.
-//	Void testPerThreadProxy() {
-//		s58 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s58"))
-//		verifyEq(s58->dude, "Stella!")
-//		
-//		s58.typeof.field("dude").set(s58, "Pint of Pride")
-//		verifyEq(s58->dude, "Pint of Pride")
-//
-//		verifyEq(s58->judge, 69)
-//	}
-//	
-//	Void testWithoutProxy() {
-//		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
-//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
-//		s64 	:= reg.serviceById("s64") as T_MyService64
-//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
-//		s64.dude
-//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
-//	}
+	Void testProxyMethod() {
+		s50 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+		verifyEq(s50->dude, "dude")
+		verifyEq(s50->inc(5), 6)
+	}
+	
+	Void testNonVirtualMethodsAreNotOverridden() {
+		s51 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s51"))
+		verifyEq(s51->dude, "Don't override me!")
+		verifyEq(s51->inc(6), 9)
+	}
+	
+	Void testCanBuildMultipleServices() {
+		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
+		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+	}
+
+	Void testVirtualButNotImplementedMethodsAreNotCalled() {
+		s52 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s52"))
+		verifyEq(s52->dude, "Virtual Reality")
+		verifyEq(s52->inc(7), 6)
+	}
+	
+	Void testProtectedProxyMethod() {
+		s54 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s54"))
+		verifyEq(s54->dude, "dude")
+	}
+
+	Void testCannotProxyInternalMixin() {
+		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
+			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s55"))
+		}
+	}
+	
+	Void testNonConstMixin() {
+		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s56"))
+	}
+	
+	Void testOnlyMixinsAllowed() {
+		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
+			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s57"))
+		}
+	}
+	
+	// Weird shenanigans - const fields aren't allowed. Full stop.
+	// see http://fantom.org/sidewalk/topic/1921
+	// So const mixins can't ever declare fields.
+	Void testPerThreadProxy() {
+		s58 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s58"))
+		verifyEq(s58->dude, "Stella!")
+		
+		s58.typeof.field("dude").set(s58, "Pint of Pride")
+		verifyEq(s58->dude, "Pint of Pride")
+
+		verifyEq(s58->judge, 69)
+	}
+	
+	Void testWithoutProxy() {
+		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
+		s64 	:= reg.serviceById("s64") as T_MyService64
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+		s64.dude
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+	}
 	
 	Void testProxyTypesAreCached() {
 		type	:= PublicTestTypes.type("T_MyService50")

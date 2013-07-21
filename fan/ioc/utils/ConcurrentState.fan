@@ -59,7 +59,12 @@ const class ConcurrentState {
 	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
 	internal static const ActorPool	actorPool	:= ActorPool()
 
-	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?|  { receive(obj) })
+	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?| { 
+//		Env.cur.err.printLine(obj)
+		r:=receive(obj) 
+//		Env.cur.err.printLine(r)
+		return r
+	})
 	private const |->Obj| 			stateFactory
 	private const ThreadStash 		stash
 
