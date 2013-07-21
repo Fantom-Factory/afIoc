@@ -43,17 +43,17 @@ internal class TestPipelineBuilder : IocTest {
 	
 	Void testPipelineTypeMustBeMixins() {
 		verifyErrMsg(IocMessages.pipelineTypeMustBeMixin("Pipeline", T_MyService78#)) {
-			bob.build(T_MyService78#, t76, [,], term)
+			bob.build(T_MyService78#, t76, [,], T_MyService78())
 		}
 
 		verifyErrMsg(IocMessages.pipelineTypeMustBeMixin("Pipeline Filter", T_MyService78#)) {
-			bob.build(t76, T_MyService78#, [,], term)
+			bob.build(t75, T_MyService78#, [,], term)
 		}
 	}
 
 	Void testPipelineMustNotDeclareFields() {
 		verifyErrMsg(IocMessages.pipelineTypeMustNotDeclareFields(T_MyService79#)) {
-			bob.build(T_MyService79#, t76, [,], term)
+			bob.build(T_MyService79#, t76, [,], T_MyService79Impl())
 		}
 	}
 
@@ -88,6 +88,9 @@ internal const class T_MyService77Impl : T_MyService77 { }
 
 internal const class T_MyService78 { }
 
-internal const mixin T_MyService79 { 
+internal mixin T_MyService79 { 
 	abstract Str dude
+}
+internal class T_MyService79Impl : T_MyService79 {
+	override Str dude := ""
 }
