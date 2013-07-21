@@ -2,8 +2,8 @@ using compiler
 
 ** @since 1.3.0
 internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
-	
-	private const ConcurrentState 	conState	:= ConcurrentState(ServiceProxyBuilderState#)
+		
+	private const TypeCache typeCache	:= TypeCache()
 	
 	@Inject 
 	private const Registry registry
@@ -29,8 +29,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	
 	override Type buildProxyType(InjectionCtx ctx, Type serviceType) {
 		// TODO: investigate why getState() throws NPE when type not cached
-		if (getState { it.proxyTypeCache.containsKey(serviceType) })
-			return getState { it.proxyTypeCache[serviceType] }
+		if (typeCache.containsKey(serviceType.qname))
+			return typeCache[serviceType.qname]
 
 		if (!serviceType.isMixin)
 			throw IocErr(IocMessages.onlyMixinsCanBeProxied(serviceType))
@@ -69,62 +69,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		proxyType 	:= pod.type(model.className)
 				
 		// TODO: investigate why this throw NotImmutableErr when inlined
-		return cacheProxyType(serviceType, proxyType)
-	}
-	
-	Type cacheProxyType(Type serviceType, Type proxyType) {
-		withState { it.proxyTypeCache[serviceType] = proxyType } 
-		return proxyType 
-	}
-	
-	private Obj? getState(|ServiceProxyBuilderState -> Obj| state) {
-		conState.getState(state)
-	}	
-	private Void withState(|ServiceProxyBuilderState -> Obj| state) {
-		conState.withState(state)
+		typeCache[serviceType.qname] = proxyType
+		return proxyType
 	}	
 }
 
-internal class ServiceProxyBuilderState {
-	Type:Type	proxyTypeCache	:= [:]
-}
-
-class TestImmutableTypes {
-	
-	static Void main(Str[] args) {
-		
-		proxyPod 	:= compile("class Dude { }", "afPod")
-		proxyType	:= proxyPod.type("Dude")	//.toImmutable
-		
-		|ServiceProxyBuilderState| f := |ServiceProxyBuilderState state| {
-//			state.proxyTypeCache[s] = proxyType
-			s := proxyType.toStr
-			Env.cur.err.printLine(s)
-		}.toImmutable
-		
-		f.call(ServiceProxyBuilderState())
-	}
-	
-	static Pod compile(Str fantomPodCode, Str podName) {
-		try {
-			input 		    := CompilerInput()
-			input.podName 	= podName
-	 		input.summary 	= "Alien-Factory Transient Pod"
-			input.version 	= Version.defVal
-			input.log.level = LogLevel.warn
-			input.isScript 	= true
-			input.output 	= CompilerOutputMode.transientPod
-			input.mode 		= CompilerInputMode.str
-			input.srcStrLoc	= Loc(podName)
-			input.srcStr 	= fantomPodCode
-	
-			compiler 		:= Compiler(input)
-			pod 			:= compiler.compile.transientPod
-			return pod
-
-		} catch (CompilerErr err) {
-			msg := err.msg + "\n$fantomPodCode"
-			throw CompilerErr(msg, err.loc, err.cause, err.level)
-		}
-	}	
-}
