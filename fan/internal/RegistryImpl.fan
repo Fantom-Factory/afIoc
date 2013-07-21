@@ -289,13 +289,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
 		serviceDef := StandardServiceDef() {
-			it.serviceId 	= "${type.name}Autobuild"
-			it.moduleId		= ""
-			it.serviceType 	= type
+			it.serviceId 		= "${type.name}Autobuild"
+			it.moduleId			= ""
+			it.serviceType 		= type
 			it.serviceImplType 	= type	// the important bit
-			it.scope		= ServiceScope.perInjection
-			it.description 	= "$type.qname Autobuild"
-			it.source		= |InjectionCtx ctxx->Obj?| { return null }
+			it.scope			= ServiceScope.perInjection
+			it.description 		= "$type.qname Autobuild"
+			it.source			= |InjectionCtx ctxx->Obj?| { return null }
 		}		
 		return ctx.withServiceDef(serviceDef) |->Obj?| {
 			return InjectionUtils.autobuild(ctx, type, ctorArgs)
