@@ -22,82 +22,89 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services := ServiceDef:Obj?[:]
 			
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.registry
-				it.serviceType 	= Registry#
+				it.serviceId 		= ServiceIds.registry
+				it.serviceType 		= Registry#
 			}] = this
 
 			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.registryStartup
-				it.serviceType 	= RegistryStartup#
-				it.scope		= ServiceScope.perThread
-				it.source		= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
+				it.serviceId 		= ServiceIds.registryStartup
+				it.serviceType 		= RegistryStartup#
+				it.scope			= ServiceScope.perThread
+				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.registryShutdownHub
-				it.serviceType 	= RegistryShutdownHub#
+				it.serviceId 		= ServiceIds.registryShutdownHub
+				it.serviceType 		= RegistryShutdownHub#
 			}] = RegistryShutdownHubImpl()
 			
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.ctorFieldInjector
-				it.serviceType 	= |This|#
-				it.scope		= ServiceScope.perInjection
-				it.description 	= "'$it.serviceId' : Autobuilt. Always."
-				it.source		= |InjectionCtx ctx->Obj| {
+				it.serviceId 		= ServiceIds.ctorFieldInjector
+				it.serviceType 		= |This|#
+				it.scope			= ServiceScope.perInjection
+				it.description 		= "'$it.serviceId' : Autobuilt. Always."
+				it.source			= |InjectionCtx ctx->Obj| {
 					InjectionUtils.makeCtorInjectionPlan(ctx, ctx.building.serviceImplType)
 				}
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.dependencyProviderSource
-				it.serviceType 	= DependencyProviderSource#
-				it.source		= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
+				it.serviceId 		= ServiceIds.dependencyProviderSource
+				it.serviceType 		= DependencyProviderSource#
+				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.serviceOverride
-				it.serviceType 	= ServiceOverride#
-				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceOverrideImpl#)
+				it.serviceId 		= ServiceIds.serviceOverride
+				it.serviceType 		= ServiceOverride#
+				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.serviceStats
-				it.serviceType 	= ServiceStats#
+				it.serviceId 		= ServiceIds.serviceStats
+				it.serviceType 		= ServiceStats#
 			}] = ServiceStatsImpl(this)
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.serviceProxyBuilder
-				it.serviceType 	= ServiceProxyBuilder#
+				it.serviceId 		= ServiceIds.serviceProxyBuilder
+				it.serviceType 		= ServiceProxyBuilder#
 				it.serviceImplType 	= ServiceProxyBuilderImpl#
-				it.source		= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
+				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.plasticPodCompiler
-				it.serviceType 	= PlasticPodCompiler#
+				it.serviceId 		= ServiceIds.plasticPodCompiler
+				it.serviceType 		= PlasticPodCompiler#
 				it.serviceImplType 	= PlasticPodCompiler#
-				it.source		= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
+				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
 			}] = null
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.aspectInvokerSource
-				it.serviceType 	= AspectInvokerSource#
+				it.serviceId 		= ServiceIds.aspectInvokerSource
+				it.serviceType 		= AspectInvokerSource#
 				it.serviceImplType 	= AspectInvokerSourceImpl#
-				it.source		= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.aspectInvokerSource
-				it.serviceType 	= AspectInvokerSource#
+				it.serviceId 		= ServiceIds.aspectInvokerSource
+				it.serviceType 		= AspectInvokerSource#
 				it.serviceImplType 	= AspectInvokerSourceImpl#
-				it.source		= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 	= ServiceIds.threadStashManager
-				it.serviceType 	= ThreadStashManager#
+				it.serviceId 		= ServiceIds.threadStashManager
+				it.serviceType 		= ThreadStashManager#
 			}] = stashManager
+		
+			services[BuiltInServiceDef() {
+				it.serviceId 		= ServiceIds.pipelineBuilder
+				it.serviceType 		= PipelineBuilder#
+				it.serviceImplType 	= PipelineBuilderImpl#
+				it.source			= ServiceDef.fromCtorAutobuild(it, PipelineBuilderImpl#)
+			}] = null
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 
