@@ -35,6 +35,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - Extensively tested: - 'All tests passed! [32 tests, 186 methods, 362 verifies]'
 
 
+
 Quick Start [#quickStart]
 *************************
 
@@ -81,6 +82,7 @@ class MyService2 {
 <pre
 
 
+
 Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
@@ -94,6 +96,7 @@ A **contribution** is a means to configure a service.
 A **module** is a class where services and contributions are defined.
 
 
+
 Loading Modules [#loadingModules]
 *********************************
 Use the `RegistryBuilder` or `IocService` to build and start your `Registry` of services.
@@ -105,6 +108,7 @@ When [building a registry]`RegistryBuilder`, you declare which modules are to lo
 Where '{qname}' is a qualified type name of a module. Additional modules can be declared by the [@SubModule]`SubModule` facet.
 
 Modules can also be loaded from index properties in a similar manner.
+
 
 
 Defining Services [#definingServices]
@@ -136,6 +140,8 @@ pre>
   }
 <pre
 
+
+
 Dependency Injection [#dependencyInjection]
 *******************************************
 IoC performs both ctor and field injection, for normal and const fields.
@@ -158,11 +164,13 @@ On calling 'f' all injectable fields will be set, even fields marked as 'const'.
 After object construction and field injection, any extra setup may be performed via methods annotated with '@PostInjection'. These methods may be of any visibility and all parameters are resolved as dependencies.
 
 
+
 Service Scope [#serviceScope]
 *****************************
 Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services must be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
 (Using proxies) you can even inject a 'perThread' scoped service into a 'perApplication' scoped service! Think about it... you can inject your [http request]`web::WebReq` into any static service you desire!
+
 
 
 Service Configuration [#serviceConfiguration]
@@ -190,6 +198,7 @@ The list and map types are inferred from the ctor definition and all contributio
 If the service declares a map configuration then contribution methods should take a 'MappedConfig' object. If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
 
 
+
 Lazy Loading [#lazyLoading]
 ***************************
 Define your service with a mixin and take advantage of true lazy loading!
@@ -201,6 +210,7 @@ This means registry startup times are quicker than ever and circular service dep
 It also allows you to inject 'perThread' scoped services into 'perApplication' scoped services.
 
 
+
 Advise Your Services [#adviseYourServices]
 ******************************************
 Intercept all calls to services defined by a mixin and wrap them in your own code.
@@ -208,8 +218,27 @@ Intercept all calls to services defined by a mixin and wrap them in your own cod
 See [@Advise]`Advise` for details
 
 
+
+More! [#more]
+*************
+afIoc comes bundled with utility classes that cover common use cases:
+
+ - `RegistryStartup`: (Service) Define tasks to execute when the registry starts up.
+ - `RegistryShutdownHub`: (Service) Define tasks to execute when the registry shuts down.
+ - `ConcurrentState`: Lets your 'const' services hold mutable state!
+ - `ThreadStashManager`: (Service) Keep tabs on threaded state.
+ - `TypeCoercer`: Coerce Objs of one type to another via Fantom's 'toX()' and 'fromX()' methods.
+ - `StrategyRegistry`: Holds a map of 'Type:Obj' where values may be looked up by closest matching type.
+ - `PipelineBuilder`: (Service) Define a pipeline of filters with a terminator.
+
+
+
 Tips [#tips]
 ************
+Strive to keep your services 'const', use `ConcurrentState` to hold state and delcare a serialisation ctor to keep '@Inject'ed fields non-nullable:
+
+  new make(|This| injectInto) { injectInto(this) }
+
 Define one main module and declare it in both the pod meta and the pod index props. Use '@SubModule' to reference additional dependant modules in the same pod.
 
 If you have no say in how your classes are created (say, when you're using flux) then use the following line to inject dependencies when needed:
@@ -223,11 +252,13 @@ IoC gives detailed error reporting should something go wrong, nevertheless shoul
 Don't be scared of creating 'const' services! Use `ConcurrentState` to safely store and access mutable state across thread boundaries.
 
 
+
 Release Notes [#releaseNotes]
 *****************************
 
 v1.3.10 [#1.3.10]
 -----------------
+ - New: Added `PipelineBuilder` service.
  - Chg: Made it clear when service creation fails due to Registry Shutdown. (Found via race condition in afBedSheet tests.)
  - Bug: Proxy Types for lazy services are now cached. Would have caused a memory leak when using creating lots of treaded const services.
 

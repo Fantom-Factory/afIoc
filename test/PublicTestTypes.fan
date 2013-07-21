@@ -7,6 +7,7 @@ internal const class PublicTestTypes {
 	const Str fantomPodCode := 
 Str<|
      using afIoc
+     using concurrent
 
      mixin T_MyService10 { }
      class T_MyService10Impl : T_MyService10 { }
@@ -110,7 +111,30 @@ Str<|
          override Str meth3() { "death" }
      }
 
-     |>
+     // for pipeline builder test
+     const mixin T_MyService75 {
+     	abstract Bool service() 
+     }     
+     const mixin T_MyService76 {
+     	abstract Bool service(T_MyService75 handler) 
+     }
+     const class T_MyService75Term : T_MyService75 {
+     	const Str char
+     	new make(Str char) { this.char = char }
+     	override Bool service() {
+     		Actor.locals["test"] = Actor.locals["test"].toStr + char
+     		return true
+     	}
+     }
+     const class T_MyService76Num : T_MyService76 {
+     	const Str char
+     	new make(Str char) { this.char = char }
+     	override Bool service(T_MyService75 handler) {
+     		Actor.locals["test"] = Actor.locals["test"].toStr + char
+     		return handler.service()
+     	}
+     }
+          |>
 	
 	private const Pod pod := PlasticPodCompiler().compile(fantomPodCode)
 }

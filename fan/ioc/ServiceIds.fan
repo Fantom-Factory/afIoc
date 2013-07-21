@@ -45,4 +45,9 @@ const mixin ServiceIds {
 	internal
 	static const Str aspectInvokerSource		:= "AspectInvokerSource"
 
+	** @see `PipelibeBuilder`
+	** 
+	** @since 1.3.10
+	static const Str pipelineBuilder			:= "PipelineBuilder"
+
 }
