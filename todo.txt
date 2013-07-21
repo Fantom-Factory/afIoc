@@ -1,10 +1,10 @@
 
-v1.3.10 Maybe...?
+v1.3.12 Maybe...?
 ----------------- 
 
 TypeCoercers to be added via index props
 
-Plastic to use def values
+Plastic to override methods with default values
  - see compilerDoc::ApiDocParser.parseMethod() 
 
 

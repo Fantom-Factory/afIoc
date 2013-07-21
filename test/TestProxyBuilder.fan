@@ -9,87 +9,79 @@ internal class TestProxyBuilder : IocTest {
 		spb = (ServiceProxyBuilder) reg.dependencyByType(ServiceProxyBuilder#)
 	}
 	
-	Void testProxyMethod() {
-		s50 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-		verifyEq(s50->dude, "dude")
-		verifyEq(s50->inc(5), 6)
-	}
-	
-	Void testNonVirtualMethodsAreNotOverridden() {
-		s51 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s51"))
-		verifyEq(s51->dude, "Don't override me!")
-		verifyEq(s51->inc(6), 9)
-	}
-	
-	Void testCanBuildMultipleServices() {
-		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
-		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
-	}
-
-	Void testVirtualButNotImplementedMethodsAreNotCalled() {
-		s52 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s52"))
-		verifyEq(s52->dude, "Virtual Reality")
-		verifyEq(s52->inc(7), 6)
-	}
-	
-	Void testProtectedProxyMethod() {
-		s54 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s54"))
-		verifyEq(s54->dude, "dude")
-	}
-
-	Void testCannotProxyInternalMixin() {
-		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
-			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s55"))
-		}
-	}
-	
-	Void testNonConstMixin() {
-		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s56"))
-	}
-	
-	Void testOnlyMixinsAllowed() {
-		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
-			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s57"))
-		}
-	}
-	
-	// Weird shenanigans - const fields aren't allowed. Full stop.
-	// see http://fantom.org/sidewalk/topic/1921
-	// So const mixins can't ever declare fields.
-	Void testPerThreadProxy() {
-		s58 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s58"))
-		verifyEq(s58->dude, "Stella!")
-		
-		s58.typeof.field("dude").set(s58, "Pint of Pride")
-		verifyEq(s58->dude, "Pint of Pride")
-
-		verifyEq(s58->judge, 69)
-	}
-
-	// this test can't be done with out a public test class, but as it's a pretty obvious test
-	// we can do without it
-//	Void testBuilderMethodsAreProxied() {
-//		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
-//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.DEFINED)
+//	Void testProxyMethod() {
+//		s50 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+//		verifyEq(s50->dude, "dude")
+//		verifyEq(s50->inc(5), 6)
+//	}
+//	
+//	Void testNonVirtualMethodsAreNotOverridden() {
+//		s51 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s51"))
+//		verifyEq(s51->dude, "Don't override me!")
+//		verifyEq(s51->inc(6), 9)
+//	}
+//	
+//	Void testCanBuildMultipleServices() {
+//		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
+//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
+//	}
 //
-//		IocHelper.debugOperation |->| {
-//			
-//		s59 	:= reg.serviceById("s59") as T_MyService59
-//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.VIRTUAL)
+//	Void testVirtualButNotImplementedMethodsAreNotCalled() {
+//		s52 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s52"))
+//		verifyEq(s52->dude, "Virtual Reality")
+//		verifyEq(s52->inc(7), 6)
+//	}
+//	
+//	Void testProtectedProxyMethod() {
+//		s54 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s54"))
+//		verifyEq(s54->dude, "dude")
+//	}
 //
-//		verifyEq(s59.wotever->dude, "dude") 
-//		verifyEq(stats.stats["wickedMC"].lifecycle, ServiceLifecycle.CREATED)
+//	Void testCannotProxyInternalMixin() {
+//		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(PublicTestTypes.type("T_MyService55"))) {
+//			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s55"))
 //		}
 //	}
+//	
+//	Void testNonConstMixin() {
+//		spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s56"))
+//	}
+//	
+//	Void testOnlyMixinsAllowed() {
+//		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(PublicTestTypes.type("T_MyService57"))) {
+//			spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s57"))
+//		}
+//	}
+//	
+//	// Weird shenanigans - const fields aren't allowed. Full stop.
+//	// see http://fantom.org/sidewalk/topic/1921
+//	// So const mixins can't ever declare fields.
+//	Void testPerThreadProxy() {
+//		s58 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s58"))
+//		verifyEq(s58->dude, "Stella!")
+//		
+//		s58.typeof.field("dude").set(s58, "Pint of Pride")
+//		verifyEq(s58->dude, "Pint of Pride")
+//
+//		verifyEq(s58->judge, 69)
+//	}
+//	
+//	Void testWithoutProxy() {
+//		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
+//		s64 	:= reg.serviceById("s64") as T_MyService64
+//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+//		s64.dude
+//		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+//	}
 	
-	Void testWithoutProxy() {
-		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
-		s64 	:= reg.serviceById("s64") as T_MyService64
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
-		s64.dude
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+	Void testProxyTypesAreCached() {
+		type	:= PublicTestTypes.type("T_MyService50")
+		bob		:= reg.serviceById(ServiceIds.serviceProxyBuilder) as ServiceProxyBuilder
+		pType1	:= bob.buildProxyType(InjectionCtx(reg), type)
+		pType2	:= bob.buildProxyType(InjectionCtx(reg), type)
+		verifySame(pType1, pType2)
 	}
 }
 
@@ -103,28 +95,10 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
-//		binder.bindImpl(T_MyService59#).withId("s59")
 		binder.bindImpl(T_MyService64#).withId("s64").withoutProxy
 	}
-	
-//	@Build { scope=ServiceScope.perThread}
-//	static T_MyService60 buildWickedMc() {
-//		return T_MyService60Impl() 
-//	}
 }
 
-//	internal class T_MyService59 {
-//		@Inject @ServiceId { serviceId="wickedMC" }
-//		T_MyService60? wotever
-//	}
-//	mixin T_MyService60 {
-//		abstract Str dude()
-//		abstract Int inc(Int i)
-//	}
-//	class T_MyService60Impl : T_MyService60 {
-//		override Str dude() { "dude"; }
-//		override Int inc(Int i) { i + 1 }
-//	}
 
 	internal const mixin T_MyService64 {
 		abstract Str dude()
