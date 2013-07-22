@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [33 tests, 196 methods, 376 verifies]'
+  - Extensively tested: - 'All tests passed! [33 tests, 197 methods, 377 verifies]'
 
 
 
@@ -261,6 +261,7 @@ v1.3.10 [#1.3.10]
  - New: Added `PipelineBuilder` service.
  - Chg: Made it clear when service creation fails due to Registry Shutdown. (Found via race condition in afBedSheet tests.)
  - Bug: Proxy Types for lazy services are now cached. Would have caused a memory leak when using creating lots of treaded const services.
+ - Bug: Stack frames were lost from module builder methods.
 
 v1.3.8 [#v1.3.8]
 ----------------

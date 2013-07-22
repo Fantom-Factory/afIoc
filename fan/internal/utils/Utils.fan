@@ -48,10 +48,14 @@ internal class Utils {
 		try {
 			return func.call
 		} catch (OpTrackerErr opErr) {
-			throw IocErr(opErr.msg, opErr.cause.cause)
+			throw IocErr(opErr.msg, unwrap(opErr))
 		} catch (IocErr iocErr) {
-			throw IocErr(iocErr.msg, iocErr.cause)
+			throw IocErr(iocErr.msg, unwrap(iocErr))
 		}
+	}
+	
+	private static Err? unwrap(Unwrappable err) {
+		(err.cause?.typeof?.fits(Unwrappable#) ?: false) ? unwrap((Unwrappable) err.cause) : err.cause
 	}
 	
 	** Stoopid F4 thinks the 'facet' method is a reserved word!

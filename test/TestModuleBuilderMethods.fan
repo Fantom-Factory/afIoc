@@ -44,6 +44,17 @@ internal class TestModuleBuilderMethods : IocTest {
 			RegistryBuilder().addModule(T_MyModule22#).build
 		}
 	}
+	
+	Void testBuilderMethodAppearsInStackTrace() {
+		try {
+			reg := RegistryBuilder().addModule(T_MyModule91#).build
+			reg.serviceById("t1")
+			fail
+		} catch (Err e) {
+			verify(e.traceToStr.contains("afIoc::T_MyModule91.buildT1"))
+		}
+	}
+
 }
 
 internal class T_MyModule04 {
@@ -107,5 +118,12 @@ internal class T_MyModule37 {
 	@Build
 	T_MyService01 buildT1() {
 		return T_MyService01()
+	}
+}
+
+internal class T_MyModule91 {
+	@Build
+	static T_MyService01 buildT1() {
+		throw Err("Bugger!")
 	}
 }
