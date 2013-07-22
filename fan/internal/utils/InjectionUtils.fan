@@ -32,7 +32,7 @@ internal const class InjectionUtils {
 	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj, Obj?[] providedMethodArgs) {
 		args := findMethodInjectionParams(ctx, method, providedMethodArgs)
 		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
-			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
+				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
 	}
 
