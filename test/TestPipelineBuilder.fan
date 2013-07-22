@@ -8,7 +8,7 @@ internal class TestPipelineBuilder : IocTest {
 	private Type?			 t76
 
 	override Void setup() {
-		reg 	= RegistryBuilder().addModule(T_MyModule91#).build.startup
+		reg 	= RegistryBuilder().build.startup
 		bob 	= (PipelineBuilder) reg.dependencyByType(PipelineBuilder#)
 		term	= PublicTestTypes.type("T_MyService75Term").make(["T"])
 		t75		= PublicTestTypes.type("T_MyService75")
@@ -75,12 +75,6 @@ internal class TestPipelineBuilder : IocTest {
 		}
 	}
 	
-}
-
-internal class T_MyModule91 {
-	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PipelineBuilder#)
-	}
 }
 
 internal const mixin T_MyService77 { }

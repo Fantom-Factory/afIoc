@@ -1,6 +1,12 @@
 
+** Indicates the Err has a more interesting cause
+@NoDoc
+mixin Unwrappable {
+	abstract Err? cause()
+}
+
 ** As thrown by IoC
-const class IocErr : Err {
+const class IocErr : Err, Unwrappable {
 	internal new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
 }
 

@@ -113,6 +113,6 @@ internal const class OpTrackerOp {
 	new make(|This|? f := null) { f?.call(this)	}
 }
 
-internal const class OpTrackerErr : IocErr {
+internal const class OpTrackerErr : IocErr, Unwrappable {
 	internal new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
 }
