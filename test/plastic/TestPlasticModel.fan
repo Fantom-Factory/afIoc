@@ -46,6 +46,12 @@ internal class TestPlasticModel : PlasticTest {
 		}
 	}
 
+	Void testOverrideMethodMayExistInMixinChain() {
+		plasticModel := PlasticClassModel("TestImpl", true)
+		plasticModel.extendMixin(T_PlasticService10#)
+		plasticModel.overrideMethod(T_PlasticService09#deeDee, "wotever")
+	}
+
 	Void testOverrideMethodsMustHaveProtectedScope() {
 		plasticModel := PlasticClassModel("TestImpl", false)
 		plasticModel.extendMixin(T_PlasticService05#)
@@ -112,3 +118,8 @@ internal mixin T_PlasticService08 {
 	abstract Void redirect(Uri uri, Int statusCode := 303)
 }
 
+internal const mixin T_PlasticService09 {
+	abstract Void deeDee()
+}
+
+internal const mixin T_PlasticService10 : T_PlasticService09 { }

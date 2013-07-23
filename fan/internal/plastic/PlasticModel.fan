@@ -1,4 +1,8 @@
 
+** All types are generated with a standard serialisation ctor:
+** 
+**   new make(|This|? f) { f?.call(this) }
+** 
 ** @since 1.3
 @NoDoc
 class PlasticClassModel {
@@ -44,7 +48,7 @@ class PlasticClassModel {
 	
 	** All methods are given public scope. 
 	This overrideMethod(Method method, Str body) {
-		if (method.parent != extends)
+		if (!extends.fits(method.parent))	// think about overriding toStr()
 			throw PlasticErr(PlasticMsgs.overrideMethodDoesNotBelongToSuperType(method, extends))
 		if (method.isPrivate || method.isInternal)
 			throw PlasticErr(PlasticMsgs.overrideMethodHasWrongScope(method))
@@ -67,7 +71,10 @@ class PlasticClassModel {
 		fields.add(PlasticFieldModel(true, PlasticVisibility.visPublic, field.isConst, field.type, field.name, getBody, setBody))
 		return this
 	}
-	
+
+	** All types are generated with a standard serialisation ctor:
+	** 
+	**   new make(|This|? f) { f?.call(this) }
 	Str toFantomCode() {
 		constKeyword 	:= isConst ? "const " : ""
 		extendsKeyword	:= extends == null ? "" : " : ${extends.qname}" 

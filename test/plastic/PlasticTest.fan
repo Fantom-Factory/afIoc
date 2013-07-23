@@ -5,13 +5,14 @@ abstract internal class PlasticTest : Test {
 		errType := PlasticErr#
 		try {
 			func(4)
+			fail("$errType not thrown")
 		} catch (Err e) {
-			if (!e.typeof.fits(errType)) 
-				throw Err("Expected $errType got $e.typeof", e)
-			if (e.msg != errMsg)
-				throw Err("Expected: \n - $errMsg \nGot: \n - $e.msg")
-			return
+			try {
+				verify(e.typeof.fits(errType), "Expected $errType got $e.typeof")
+				verifyEq(e.msg, errMsg, "Expected: \n - $errMsg \nGot: \n - $e.msg")
+			} catch (Err failure) {
+				throw Err(failure.msg, e)
+			}
 		}
-		throw Err("$errType not thrown")
 	}
 }
