@@ -33,10 +33,16 @@ internal class TestAutobuild : IocTest {
 	}
 
 	Void testAutobuildTypeHasToInstantiable() {
-		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService11#)) {
-			reg.autobuild(T_MyService11#)
+		reg := RegistryBuilder().build.startup
+		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService81#)) {
+			reg.autobuild(T_MyService81#)
 		}
+	}
+
+	Void testAutobuildDefaultImpls() {
+		reg := RegistryBuilder().build.startup
+		s80 := (T_MyService80) reg.autobuild(T_MyService80#)
+		verifyEq(s80.dude, "Dude!")
 	}
 }
 
@@ -75,3 +81,12 @@ internal class T_MyService49 {
 		this.ints = ints
 	}
 }
+
+internal mixin T_MyService80 {
+	abstract Str dude
+}
+internal class T_MyService80Impl : T_MyService80 {
+	override Str dude := "Dude!"
+}
+
+internal mixin T_MyService81 { }
