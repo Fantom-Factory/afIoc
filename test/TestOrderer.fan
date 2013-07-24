@@ -113,7 +113,7 @@ internal class TestOrderer : IocTest {
 
 	internal Void verifyOrder(OrderedNode[] nodes) {
 		nodes.each |n, i| {
-			n.dependsOn.each |depName| {
+			n.isBefore.each |depName| {
 				dep := nodes.find { it.name == depName }
 				verify(i < nodes.index(dep)) 
 			}

@@ -22,26 +22,27 @@ internal class Orderer {
 	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, placeholder, constraints)
 	}
-	
+
 	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
+		id = id.trim
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
 		getOrAdd(id, object ?: NULL)
-		
+
 		constraints.each |constraint| {
 			valid := false
 			eachId("before", constraint) |Str idName| {
 				valid = true
 				getOrAdd(idName)	// create placeholder
 				node := getOrAdd(id)
-				if (!node.dependsOn.contains(idName))
-					node.dependsOn.add(idName)				
+				if (!node.isBefore.contains(idName))
+					node.isBefore.add(idName)				
 			}
 			eachId("after", constraint) |Str idName| {
 				valid = true
 				node := getOrAdd(idName)
-				if (!node.dependsOn.contains(id))
-					node.dependsOn.add(id)
+				if (!node.isBefore.contains(id))
+					node.isBefore.add(id)
 			}
 			if (!valid)
 				throw IocErr(IocMessages.configBadPrefix(constraint))
@@ -72,7 +73,7 @@ internal class Orderer {
 	}
 	
 	internal Void eachId(Str prefix, Str constraint, |Str id| op) {
-		constraint = constraint.trim.lower
+		constraint = constraint.trim
 		if (constraint.startsWith(prefix)) {
 			idCsv := constraint[prefix.size..-1].trim
 			if (idCsv.startsWith(":") || idCsv.startsWith("-"))
@@ -89,24 +90,28 @@ internal class Orderer {
 		// follow the dependencies until we find a node that depends on no-one
 		nodesIn
 			.findAll { 
-				it.dependsOn.any |depName| { 
-					// BugFix 1.3.6: we sometimes lower the case the depend ids 
-					// they should be case-insenstive anyway
+				it.isBefore.any |depName| { 
+					// BugFix 1.3.6: we sometimes lower the case of the isBefore ids 
+					// they should be case-insensitive anyway
 					depName.equalsIgnoreCase(n.name)
 				}
 			}
 			.each { 
-				ctx.withNode(it) |node| { 
-					visit(ctx, nodesIn, nodesOut, node)
+				ctx.withNode(it) |node| {
+					// BugFix 1.3.10: ensure we don't visit nodes that have already been moved to nodeOut 
+					if (nodesIn.containsKey(node.name))
+						visit(ctx, nodesIn, nodesOut, node)
 				}
 			}
+		
+		// move node from nodesIn to nodesOut
 		nodesIn.remove(n.name)
 		nodesOut.add(n)
 	}	
 	
 	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
-		node := nodes.getOrAdd(name) {			
-			OrderedNode(name, payload)
+		node := nodes.getOrAdd(name) |->Obj| {			
+			return OrderedNode(name, payload)
 		}
 		if (payload != null)
 			node.payload = payload
@@ -116,7 +121,7 @@ internal class Orderer {
 
 internal class OrderedNode {
 	Str 	name
-	Str[] 	dependsOn	:= [,]
+	Str[] 	isBefore	:= [,]
 	Obj? 	payload	
 	
 	new make(Str name, Obj? payload := null) {
@@ -129,7 +134,7 @@ internal class OrderedNode {
 	}
 	
 	override Str toStr() {
-		"OrderedNode:$name->" + dependsOn.join(",")
+		"${name}->(" + isBefore.join(",") + ")"
 	}
 }
 

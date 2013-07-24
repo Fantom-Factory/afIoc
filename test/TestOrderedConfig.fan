@@ -127,7 +127,6 @@ internal class TestOrderedConfig : IocTest {
 	Void testUnorderedIsOrdered() {
 		reg := RegistryBuilder().addModule(T_MyModule89#).build.startup
 		s73 := (T_MyService73) reg.serviceById("s73")
-		Env.cur.err.printLine(s73.config)
 		verifyEq(s73.config.size, 10)
 		verifyEq(s73.config[0], 1)
 		verifyEq(s73.config[1], 2)
@@ -140,8 +139,41 @@ internal class TestOrderedConfig : IocTest {
 		verifyEq(s73.config[8], 9)
 		verifyEq(s73.config[9], 10)
 	}
+	
+	// ---- Bug Tests -----------------------------------------------------------------------------
+	
+	Void testFilterBug() {
+		reg := RegistryBuilder().addModule(T_MyModule92#).build.startup
+		s82 := (T_MyService82) reg.serviceById("s82")
+		
+		// BugFix 1.3.10: fix the issue below of HttpCleanupFilter being added twice in Orderer.visit(...)
+		
+//-> IeAjaxCacheBustingFilter
+//   visit BedSheetFilters
+//   -> BedSheetFilters
+//     visit HttpErrFilter
+//     -> HttpErrFilter
+//        visit HttpCleanupFilter
+//        -> HttpCleanupFilter
+//           adding HttpCleanupFilter **
+//        <- HttpCleanupFilter
+//        adding HttpErrFilter
+//     <- HttpErrFilter
+//     visit HttpCleanupFilter
+//     -> HttpCleanupFilter
+//        adding HttpCleanupFilter **
+//     <- HttpCleanupFilter
+//     adding BedSheetFilters
+//   <- BedSheetFilters
+//   adding IeAjaxCacheBustingFilter
+//<- IeAjaxCacheBustingFilter
+		
+		verifyEq(s82.filters.size, 3)
+		verifyEq(s82.filters[0], "HttpCleanupFilter#")
+		verifyEq(s82.filters[1], "HttpErrFilter#")
+		verifyEq(s82.filters[2], "IeAjaxCacheBustingFilter#")
+	}	
 }
-
 
 internal class T_MyService71 {
 	Str?[] config
@@ -395,3 +427,27 @@ internal class T_MyService73 {
 		this.config = config
 	}
 }
+
+internal class T_MyService82 { 
+	Str[]? filters
+}
+internal class T_MyModule92 {
+	
+	@Contribute { serviceType=T_MyService82# }
+	static Void contributeHttpPipeline1(OrderedConfig config) {
+		config.addOrdered("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#", ["after: BedSheetFilters"])
+	}
+	
+	@Contribute { serviceType=T_MyService82# }
+	static Void contributeHttpPipeline2(OrderedConfig conf) {
+		conf.addOrdered("HttpCleanupFilter", 	"HttpCleanupFilter#", ["before: BedSheetFilters", "before: HttpErrFilter"])
+		conf.addOrdered("HttpErrFilter", 		"HttpErrFilter#", 	  ["before: BedSheetFilters"])		
+		conf.addPlaceholder("BedSheetFilters")
+	}
+
+	@Build { serviceId="s82"; disableProxy=true }
+	static T_MyService82 buildHttpPipeline(Str[] filters) {
+		return T_MyService82() { it.filters = filters }
+	}	
+}
+

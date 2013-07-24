@@ -62,6 +62,16 @@ internal class TestOrderedConfigOrdering : IocTest {
 		list := orderer.toOrderedList
 		verifyEq(list, Obj?[69])
 	}
+
+	Void testFilterBug() {
+		orderer := Orderer()
+		orderer.addOrdered("IeAjaxCacheBustingFilter", 	"IeAjaxCacheBustingFilter", ["after: BedSheetFilters"])
+		orderer.addOrdered("HttpCleanupFilter", 		"HttpCleanupFilter", 		["before: BedSheetFilters", "before: HttpErrFilter"])
+		orderer.addOrdered("HttpErrFilter", 			"HttpErrFilter", 			["before: BedSheetFilters"])
+		orderer.addPlaceholder("BedSheetFilters")
+		list := orderer.toOrderedList
+		verifyEq(list, Obj?[,].addAll("HttpCleanupFilter HttpErrFilter IeAjaxCacheBustingFilter".split))
+	}
 	
 	Void assertList(Str prefix, Str constraint, Str[] ids) {
 		orderer := Orderer()
@@ -74,7 +84,7 @@ internal class TestOrderedConfigOrdering : IocTest {
 	
 	internal Void assertOrder(OrderedNode[] nodes) {
 		nodes.each |n, i| {
-			n.dependsOn.each |depName| {
+			n.isBefore.each |depName| {
 				dep := nodes.find { it.name == depName }
 				verify(i < nodes.index(dep)) 
 			}
