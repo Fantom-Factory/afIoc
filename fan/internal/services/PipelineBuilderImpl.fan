@@ -1,6 +1,6 @@
 
 ** @since 1.3.10 
-const class PipelineBuilderImpl : PipelineBuilder {
+internal const class PipelineBuilderImpl : PipelineBuilder {
 	
 	private const TypeCache typeCache	:= TypeCache()
 
