@@ -43,7 +43,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
     }	
 	
 	override ServiceBindingOptions bindImpl(Type serviceType) {
-		if (serviceType.isMixin) {
+		if (serviceType.isAbstract) {
 			expectedImplName 	:= serviceType.qname + "Impl"
 			implType 			:= Type.find(expectedImplName, false)
 			

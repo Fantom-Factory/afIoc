@@ -66,7 +66,7 @@ internal const class IocMessages {
 	}
 
 	static Str couldNotFindImplType(Type serviceType) {
-		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service interface to a specific implementation type."
+		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service mixin to a specific implementation type."
 	}
 
 	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
