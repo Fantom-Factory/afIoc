@@ -54,7 +54,7 @@ internal const class ModuleImpl : Module {
 	}
 
 	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
-		threadStash = stashManager.createStash(moduleDef.moduleId)
+		threadStash = stashManager.createStash(moduleName(moduleDef.moduleId))
 		serviceDefs	:= Str:ServiceDef[:] { caseInsensitive = true }
 		
 		moduleDef.serviceDefs.each |def| { 
@@ -97,6 +97,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
+//		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList 
 		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
     }
 
@@ -274,6 +275,10 @@ internal const class ModuleImpl : Module {
 			default:
 				throw WtfErr("(Get) Wot scope is ${scope}?")
 		}
+	}
+	
+	private Str moduleName(Str modId) {
+		modId.contains("::") ? modId[(modId.index("::")+1)..-1] : modId 
 	}
 	
 	private Void withStatState(|ModuleStats| state) {
