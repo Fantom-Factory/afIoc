@@ -15,7 +15,7 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 	}
 
 	new make() {
-		this.prefix = createPrefix(ThreadStashManager#)
+		this.prefix = createPrefix("ThreadStash")
 	}
 
 	override ThreadStash createStash(Str owner) {
@@ -39,10 +39,10 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 
 	// ---- Helper Methods ------------------------------------------------------------------------
 	
-	private Str createPrefix(Type type) {
+	private Str createPrefix(Str name) {
 		count 	:= counter ?: 1
-		padded	:= count.toStr.padl(4, '0')
-		prefix 	:= "${type.name}.${padded}"
+		padded	:= count.toStr.padl(2, '0')
+		prefix 	:= "${name}.${padded}"
 		counter = count + 1
 		return prefix
 	}
