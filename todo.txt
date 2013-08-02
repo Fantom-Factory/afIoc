@@ -7,6 +7,9 @@ TypeCoercers to be added via index props
 Plastic to override methods with default values
  - see compilerDoc::ApiDocParser.parseMethod() 
 
+Enable plastic to override const mixin fields - see http://fantom.org/sidewalk/topic/2177#c14055
+
+
 
 Meh... can't be arsed
 ---------------------
