@@ -258,6 +258,7 @@ Release Notes [#releaseNotes]
 
 v1.3.12 [#1.3.12]
 -----------------
+ - New: Added `RegistryBuilder.moduleTypes` to return a list of modules types held by the builder.
  - Chg: ThreadStashs have less verbose names.
 
 v1.3.10 [#1.3.10]
