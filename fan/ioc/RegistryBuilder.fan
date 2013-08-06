@@ -81,6 +81,11 @@ class RegistryBuilder {
 			return this
 		}
 	}
+
+	** Returns a list of modules types currently held by this builder.
+	Type[] moduleTypes() {
+		moduleDefs.map { it.moduleType }
+	}
 	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
 	** for invoking `Registry.startup`
