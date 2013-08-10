@@ -172,6 +172,14 @@ internal class TestMappedConfig : IocTest {
 		verifyEq(s10.config.size, 1)
 		verifyEq(s10.config["wot"], null)		
 	}	
+
+	// ---- test remove ---------------------------------------------------------------------------
+	
+	Void testRemove() {
+		reg := RegistryBuilder().addModule(T_MyModule95#).build.startup
+		s28 := reg.serviceById("s28") as T_MyService28
+		verifyEq(s28.config.size, 0)
+	}
 }
 
 internal class T_MyModule02 {
@@ -461,5 +469,13 @@ internal class T_MyService74 {
 	Type:Type config
 	new make(Type:Type config) {
 		this.config = config
+	}
+}
+
+@SubModule{ modules=[T_MyModule62#] }
+internal class T_MyModule95 {
+	@Contribute { serviceType=T_MyService28# }
+	static Void remove(MappedConfig config) {
+		config.remove("over1", "remove")
 	}
 }

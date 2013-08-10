@@ -68,7 +68,7 @@ class MappedConfig {
 	** 
 	** Note: Override keys may a Str
 	** 
-	** @since 1.2
+	** @since 1.2.0
 	This setOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
 		overrideKey = validateKey(overrideKey, true)
 		existingKey = validateKey(existingKey, true)
@@ -87,6 +87,14 @@ class MappedConfig {
 		return this
 	}
 
+	** A special kind of override whereby, should this be the last override applied, the value is 
+	** removed from the configuration.
+	** 
+	** @since 1.3.12
+	This remove(Obj existingKey, Obj overrideKey) {
+		setOverride(existingKey, overrideKey, Orderer.delete)
+	}
+	
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		contribution.contributeMapped(ctx, this)
 	}
@@ -126,7 +134,7 @@ class MappedConfig {
 			}
 		}
 
-		return config
+		return config.exclude |val -> Bool| { val == Orderer.delete }
 	}
 
 	internal Int size() {
@@ -153,6 +161,9 @@ class MappedConfig {
 	}
 
 	private Obj? validateVal(Obj? val) {
+		if (val == Orderer.delete)
+			return val
+
 		if (val == null) {
 			if (!valType.isNullable)
 				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", null, valType))
