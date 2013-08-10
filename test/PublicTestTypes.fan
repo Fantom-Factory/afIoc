@@ -134,6 +134,15 @@ Str<|
      		return handler.service()
      	}
      }
+
+     const mixin T_MyService83 {
+          abstract Str dude
+          abstract Int inc(Int i)
+     }
+     const class T_MyService83Impl : T_MyService83 {
+          override Str dude { get {"dude"} set { } }
+          override Int inc(Int i) { i + 1 }
+     }
           |>
 	
 	private const Pod pod := PlasticPodCompiler().compile(fantomPodCode)
