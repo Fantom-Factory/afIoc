@@ -129,7 +129,7 @@ class OrderedConfig {
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
 	** 
-	** @since 1.3.12
+	** @since 1.4.0
 	This remove(Str existingId, Str newId) {
 		if (overrides.containsKey(existingId))
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
@@ -137,7 +137,7 @@ class OrderedConfig {
 		overrides[existingId] = OrderedOverride(newId, Orderer.delete, Str#.emptyList)
 		return this
 	}
-	
+
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		// implied ordering only per contrib method
 		impliedConstraint = null
@@ -216,36 +216,6 @@ class OrderedConfig {
 	
 	override Str toStr() {
 		"OrderedConfig of $listType"
-	}
-	
-	// ---- Deprecated: Kill Me! ------------------------------------------------------------------
-
-	** Adds an unordered object to a service's configuration.
-	@Deprecated { msg="Use add(Obj) instead" }
-	Void addUnordered(Obj object) {
-		add(object)
-	}
-
-	** Adds all the unordered objects to a service's configuration.
-	@Deprecated { msg="Use addAll(Obj) instead" }
-	Void addUnorderedAll(Obj[] objects) {
-		addAll(objects)
-	}
-	
-	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
-	** 
-	** pre>
-	**   config.addPlaceholder("End")
-	**   config.addOrdered("Wot", ever, ["BEFORE: end"])
-	**   config.addOrdered("Last", last, ["AFTER: end"])
-	** <pre
-	** 
-	** Placeholders do not appear in the the resulting ordered list. 
-	** 
-	** @since 1.2
-	@Deprecated { msg="Use addPlaceholder(Str, Str[]) instead" }
-	Void addOrderedPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		addPlaceholder(id, constraints)
 	}	
 }
 

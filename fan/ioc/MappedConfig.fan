@@ -90,7 +90,7 @@ class MappedConfig {
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
 	** 
-	** @since 1.3.12
+	** @since 1.4.0
 	This remove(Obj existingKey, Obj overrideKey) {
 		setOverride(existingKey, overrideKey, Orderer.delete)
 	}
@@ -194,28 +194,6 @@ class MappedConfig {
 	override Str toStr() {
 		"MappedConfig of $contribType"
 	}
-	
-	// ---- Deprecated: Kill Me! ------------------------------------------------------------------
-	
-	** Adds a keyed object to the service's configuration.
-	@Deprecated { msg="use set(Obj, Obj?) instead" }
-	Void addMapped(Obj key, Obj? val) {
-		set(key, val)
-	}
-
-	** Adds all the mapped objects to a service's configuration.
-	@Deprecated { msg="use setAll(Obj:Obj?) instead" }
-	Void addMappedAll(Obj:Obj? objects) {
-		setAll(objects)
-	}
-	
-	** Overrides an existing contribution by its key. The key must exist.
-	** 
-	** @since 1.2
-	@Deprecated { msg="use setOverride(Obj, Obj, Obj?) instead" }
-	Void addOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
-		setOverride(existingKey, overrideKey, overrideVal)
-	}	
 }
 
 internal class MappedOverride {
