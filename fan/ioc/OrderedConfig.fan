@@ -116,7 +116,7 @@ class OrderedConfig {
 	** Note: Unordered configurations can not be overridden.
 	** 
 	** @since 1.2
-	This addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := [,]) {
+	This addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := Str#.emptyList) {
 		newObject	= validateVal(newObject)
 
 		if (overrides.containsKey(existingId))
@@ -167,8 +167,8 @@ class OrderedConfig {
 			}
 			
 			orderer := Orderer()
-			config.each |val| {
-				orderer.addOrdered(val.key, val.val, val.con)
+			config.each |val, key| {
+				orderer.addOrdered(key, val.val, val.con)
 			}
 		
 			return ctx.track("Ordering configuration contributions") |->List| {

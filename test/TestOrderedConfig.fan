@@ -172,7 +172,16 @@ internal class TestOrderedConfig : IocTest {
 		verifyEq(s82.filters[0], "HttpCleanupFilter#")
 		verifyEq(s82.filters[1], "HttpErrFilter#")
 		verifyEq(s82.filters[2], "IeAjaxCacheBustingFilter#")
-	}	
+	}
+
+	Void testOverrideBug() {
+		reg := RegistryBuilder().addModule(T_MyModule94#).build.startup
+		s82 := (T_MyService82) reg.serviceById("s82")
+		
+		verifyEq(s82.filters.size, 2)
+		verifyEq(s82.filters[0], "A")
+		verifyEq(s82.filters[1], "D")		
+	}
 }
 
 internal class T_MyService71 {
@@ -430,6 +439,9 @@ internal class T_MyService73 {
 
 internal class T_MyService82 { 
 	Str[]? filters
+	new make(Str[] config) {
+		this.filters = config
+	}
 }
 internal class T_MyModule92 {
 	
@@ -437,7 +449,7 @@ internal class T_MyModule92 {
 	static Void contributeHttpPipeline1(OrderedConfig config) {
 		config.addOrdered("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#", ["after: BedSheetFilters"])
 	}
-	
+
 	@Contribute { serviceType=T_MyService82# }
 	static Void contributeHttpPipeline2(OrderedConfig conf) {
 		conf.addOrdered("HttpCleanupFilter", 	"HttpCleanupFilter#", ["before: BedSheetFilters", "before: HttpErrFilter"])
@@ -447,7 +459,20 @@ internal class T_MyModule92 {
 
 	@Build { serviceId="s82"; disableProxy=true }
 	static T_MyService82 buildHttpPipeline(Str[] filters) {
-		return T_MyService82() { it.filters = filters }
+		return T_MyService82(filters)
 	}	
+}
+
+internal class T_MyModule94 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService82#).withId("s82")
+	}	
+	@Contribute { serviceType=T_MyService82# }
+	static Void contribute(OrderedConfig conf) {
+		conf.addOrdered("A", "A", ["before: C", "before: B"])
+		conf.addOrdered("B", "B", ["before: C"])
+		conf.addPlaceholder("C")	
+		conf.addOverride("B", "D", "D")
+	}
 }
 

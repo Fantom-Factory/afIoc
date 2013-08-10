@@ -5,10 +5,9 @@ v1.3.12 Maybe...?
 Do some testing around:
 Enable plastic to override const mixin fields - see http://fantom.org/sidewalk/topic/2177#c14055
 
-Add "silentStartup" option
-
 add delete() methods to config - meh!
 
+delete deprecated methods
 
 
 Meh... can't be arsed
