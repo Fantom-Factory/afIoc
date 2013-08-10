@@ -4,8 +4,8 @@ internal const class IocMessages {
 	// ---- Err Messages --------------------------------------------------------------------------
 
 	static Str invalidRegistryOptions(Str[] invalidKeys, Str[] validKeys) {
-		invalidStr	:= invalidKeys.join(", ") 
-		validStr	:= validKeys.join(", ") 
+		invalidStr	:= invalidKeys.sort.join(", ") 
+		validStr	:= validKeys.sort.join(", ") 
 		return "The following are invalid registry options: $invalidStr - valid keys are $validStr"
 	}
 	

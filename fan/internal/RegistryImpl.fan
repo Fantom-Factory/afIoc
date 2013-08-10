@@ -182,23 +182,26 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		startup := serviceById(ServiceIds.registryStartup) as RegistryStartupImpl
 		startup.go(tracker)
 		
-		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
-		
-		stats := this.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
-		srvcs := "\n\n${stats.size} Services:\n\n"
-		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
-		unreal:= 0
-		stats.each {
-			srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle}\n"
-			if (it.lifecycle == ServiceLifecycle.DEFINED)
-				unreal++
+		if (!options.get("suppressStartupMsg", false)) {
+			millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+			
+			stats := this.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
+			srvcs := "\n\n${stats.size} Services:\n\n"
+			maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
+			unreal:= 0
+			stats.each {
+				srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle}\n"
+				if (it.lifecycle == ServiceLifecycle.DEFINED)
+					unreal++
+			}
+			perce := (100d * unreal / stats.size).toLocale("0.00")
+			srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
+			
+			title := Utils.banner(options["bannerText"])
+			title += "IoC started up in ${millis}ms\n"
+			log.info(srvcs + title)
 		}
-		perce := (100d * unreal / stats.size).toLocale("0.00")
-		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
 		
-		title := Utils.banner(options["bannerText"])
-		title += "IoC started up in ${millis}ms\n"
-		log.info(srvcs + title)
 		return this
 	}
 	

@@ -259,6 +259,7 @@ Release Notes [#releaseNotes]
 v1.3.12 [#1.3.12]
 -----------------
  - New: Added `RegistryBuilder.moduleTypes` to return a list of modules types held by the builder.
+ - New: Added 'suppressStartupMsg' build option.
  - Chg: Transferred VCS ownership to [AlienFactory]`https://bitbucket.org/AlienFactory`
  - Chg: Test code is no longer distributed with the afIoc.pod - pod size was nearing 500 Kb!
  - Chg: ThreadStashs have less verbose names.

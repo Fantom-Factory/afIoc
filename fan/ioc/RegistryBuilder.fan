@@ -7,8 +7,13 @@ class RegistryBuilder {
 	private BuildCtx	ctx 		:= BuildCtx("Building IoC Registry")
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
-
-	new make() {
+	private Str:Obj		options
+	
+	** Create a 'RegistryBuilder'. 
+	** 
+	** Builder 'Options' are reserved for future use. 
+	new make([Str:Obj]? options := null) {
+		this.options = (options != null) ? options : Utils.makeMap(Str#, Obj#).add("suppressLogging", false)
 		addModule(IocModule#)
 	}
 
@@ -17,7 +22,8 @@ class RegistryBuilder {
 		(RegistryBuilder) Utils.stackTraceFilter |->RegistryBuilder| {		
 			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
 				lock.check
-				logger.info("Adding module definition for $moduleType.qname")
+				if (moduleType != IocModule# && !options["suppressLogging"])
+					logger.info("Adding module definition for $moduleType.qname")
 				
 				ctx.withModule(moduleType) |->| {			
 					if (moduleDefs.find { it.moduleType == moduleType } != null) {
@@ -57,8 +63,9 @@ class RegistryBuilder {
 	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
 	** which defines the qualified name of a module to load.
 	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
-		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			logger.info("Adding modules from dependencies of '$pod.name'")
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {
+			if (!options["suppressLogging"])
+				logger.info("Adding modules from dependencies of '$pod.name'")
 			addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
 			return this
 		}
@@ -68,7 +75,8 @@ class RegistryBuilder {
 	** a module to load.
 	This addModulesFromIndexProperties() {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			logger.info("Adding modules from index properties")
+			if (!options["suppressLogging"])
+				logger.info("Adding modules from index properties")
 			ctx.track("Adding modules from index properties") |->| {
 				lock.check
 				moduleNames := Env.cur.index("afIoc.module")
@@ -94,8 +102,10 @@ class RegistryBuilder {
 	**  -  'logServiceCreation': Bool specifies if each service creation should be logged to INFO. 
 	** 		Default is 'false'. For extensive debug info, use 
 	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
-	**  -  'disableProxies': Bool specifies if proxy generation for mixin fronted services should 
-	** 		be disabled. Default is 'false'.
+	**  -  'disableProxies': Bool specifies if all proxy generation for mixin fronted services  
+	** 		should be disabled. Default is 'false'.
+	**  -  'suppressStartupMsg': Bool specifies if the default (verbose) startup log message should 
+	** 		be suppressed. Default is 'false'.
     Registry build([Str:Obj]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
@@ -105,6 +115,7 @@ class RegistryBuilder {
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
+				"suppressStartupMsg"		: false,
 				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
 			])
 
