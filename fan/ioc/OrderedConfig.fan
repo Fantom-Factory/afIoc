@@ -104,7 +104,7 @@ class OrderedConfig {
 	** 
 	** Placeholders do not appear in the the resulting ordered list. 
 	** 
-	** @since 1.2
+	** @since 1.2.0
 	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, Orderer.placeholder, constraints)
 		return this
@@ -115,7 +115,7 @@ class OrderedConfig {
 	** 
 	** Note: Unordered configurations can not be overridden.
 	** 
-	** @since 1.2
+	** @since 1.2.0
 	This addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := Str#.emptyList) {
 		newObject	= validateVal(newObject)
 
@@ -126,6 +126,18 @@ class OrderedConfig {
 		return this
 	}
 
+	** A special kind of override whereby, should this be the last override applied, the value is 
+	** removed from the configuration.
+	** 
+	** @since 1.3.12
+	This remove(Str existingId, Str newId) {
+		if (overrides.containsKey(existingId))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
+
+		overrides[existingId] = OrderedOverride(newId, Orderer.delete, Str#.emptyList)
+		return this
+	}
+	
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		// implied ordering only per contrib method
 		impliedConstraint = null

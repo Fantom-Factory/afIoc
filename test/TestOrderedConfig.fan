@@ -182,6 +182,17 @@ internal class TestOrderedConfig : IocTest {
 		verifyEq(s82.filters[0], "A")
 		verifyEq(s82.filters[1], "D")		
 	}
+
+	// ---- Remove Tests --------------------------------------------------------------------------
+
+	Void testRemove() {
+		reg := RegistryBuilder().addModule(T_MyModule93#).build.startup
+		s82 := (T_MyService82) reg.serviceById("s82")
+		
+		verifyEq(s82.filters.size, 2)
+		verifyEq(s82.filters[0], "HttpCleanupFilter#")
+		verifyEq(s82.filters[1], "IeAjaxCacheBustingFilter#")		
+	}
 }
 
 internal class T_MyService71 {
@@ -461,6 +472,14 @@ internal class T_MyModule92 {
 	static T_MyService82 buildHttpPipeline(Str[] filters) {
 		return T_MyService82(filters)
 	}	
+}
+
+@SubModule { modules=[T_MyModule92#] }
+internal class T_MyModule93 {
+	@Contribute { serviceType=T_MyService82# }
+	static Void contributeRemoval(OrderedConfig config) {
+		config.remove("HttpErrFilter", "gone")
+	}
 }
 
 internal class T_MyModule94 {
