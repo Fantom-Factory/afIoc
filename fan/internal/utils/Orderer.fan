@@ -16,11 +16,16 @@
 internal class Orderer {
 
 	internal static const Str placeholder	:= "AFIOC-PLACEHOLDER"
+	internal static const Str delete		:= "AFIOC-DELETE"
 	internal static const Str NULL			:= "AFIOC-NULL"
 	private Str:OrderedNode nodes			:= Utils.makeMap(Str#, OrderedNode#)
 
 	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
 		addOrdered(id, placeholder, constraints)
+	}
+
+	Void remove(Str id) {
+		addOrdered(id, delete)
 	}
 
 	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
@@ -48,16 +53,16 @@ internal class Orderer {
 				throw IocErr(IocMessages.configBadPrefix(constraint))
 		}
 	}
-	
+
 	Obj?[] toOrderedList() {
-		order().exclude { it.payload === placeholder }.map { it.payload === NULL ? null : it.payload }
+		order().exclude { it.payload === placeholder || it.payload == delete }.map { it.payload === NULL ? null : it.payload }
 	}
-	
+
 	Void clear() {
 		nodes.each { it.payload = null }
 		nodes.clear
 	}
-	
+
 	internal OrderedNode[] order() {
 		nodesIn	 := nodes.dup
 		nodesOut := OrderedNode[,]
@@ -71,7 +76,7 @@ internal class Orderer {
 
 		return nodesOut
 	}
-	
+
 	internal Void eachId(Str prefix, Str constraint, |Str id| op) {
 		constraint = constraint.trim
 		if (constraint.startsWith(prefix)) {
@@ -103,12 +108,12 @@ internal class Orderer {
 						visit(ctx, nodesIn, nodesOut, node)
 				}
 			}
-		
+
 		// move node from nodesIn to nodesOut
 		nodesIn.remove(n.name)
 		nodesOut.add(n)
 	}	
-	
+
 	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
 		node := nodes.getOrAdd(name) |->Obj| {			
 			return OrderedNode(name, payload)
@@ -123,16 +128,16 @@ internal class OrderedNode {
 	Str 	name
 	Str[] 	isBefore	:= [,]
 	Obj? 	payload	
-	
+
 	new make(Str name, Obj? payload := null) {
 		this.name 	 = name
 		this.payload = payload
 	}
-	
+
 	Bool isPlaceholder() {
 		payload == null
 	}
-	
+
 	override Str toStr() {
 		"${name}->(" + isBefore.join(",") + ")"
 	}
@@ -140,7 +145,7 @@ internal class OrderedNode {
 
 internal class OrderingCtx {
 	private OrderedNode[]	nodeStack	:= [,]
-	
+
 	Void withNode(OrderedNode node, |OrderedNode node| operation) {
 		nodeStack.push(node)
 
@@ -159,11 +164,11 @@ internal class OrderingCtx {
 			nodeStack.pop
 		}
 	}
-	
+
 	Str[] stackNames() {
 		nodeStack.map { it.name }
 	}
-	
+
 	override Str toStr() {
 		stackNames.join(" -> ")
 	}
