@@ -7,11 +7,6 @@ Enable plastic to override const mixin fields - see http://fantom.org/sidewalk/t
 
 Add "silentStartup" option
 
-Delete test src and docs from .pod 
-Move all tests out into a dedicated pod
- - v1.3.8 is 425 Kb!
- - wait until over 500 Kb maybe? But what of all the internal classes?
-
 add delete() methods to config - meh!
 
 
