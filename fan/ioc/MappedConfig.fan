@@ -16,6 +16,7 @@ class MappedConfig {
 	private			Obj:Obj?			config
 	private			Obj:MappedOverride	overrides 
 	private			TypeCoercer			typeCoercer
+	private			Int					overrideCount
 	
 	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "Map")
@@ -29,6 +30,7 @@ class MappedConfig {
 		this.config 		= Utils.makeMap(keyType, valType)
 		this.overrides		= Utils.makeMap(keyType, MappedOverride#)
 		this.typeCoercer	= TypeCoercer()
+		this.overrideCount	= 1
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
@@ -68,37 +70,49 @@ class MappedConfig {
 	** 
 	** Note: Override keys may a Str
 	** 
+	** Note: If a 'newId' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newId'.
+	** 
 	** @since 1.2.0
-	This setOverride(Obj existingKey, Obj overrideKey, Obj? overrideVal) {
-		overrideKey = validateKey(overrideKey, true)
+	This setOverride(Obj existingKey, Obj? newValue, Obj? newKey := null) {
+		if (newKey == null)
+			newKey = "OverrideKey${overrideCount}"
+		overrideCount = overrideCount + 1
+		
+		newKey 		= validateKey(newKey, true)
 		existingKey = validateKey(existingKey, true)
-		overrideVal	= validateVal(overrideVal)
+		newValue	= validateVal(newValue)
 
 		if (overrides.containsKey(existingKey))
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
-		if (config.containsKey(overrideKey))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(overrideKey.toStr))
+		if (config.containsKey(newKey))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(newKey.toStr))
 
-		if (overrides.vals.map { it.key }.contains(overrideKey))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(overrideKey.toStr))
+		if (overrides.vals.map { it.key }.contains(newKey))
+		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(newKey.toStr))
 
-		overrides[existingKey] = MappedOverride(overrideKey, overrideVal)
+		overrides[existingKey] = MappedOverride(newKey, newValue)
 		return this
 	}
 
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
 	** 
+	** Note: If a 'newKey' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
+	** 
 	** @since 1.4.0
-	This remove(Obj existingKey, Obj overrideKey) {
-		setOverride(existingKey, overrideKey, Orderer.delete)
+	This remove(Obj existingKey, Obj? newKey := null) {
+		setOverride(existingKey, Orderer.delete, newKey)
 	}
 	
+	** dynamically invoked
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		contribution.contributeMapped(ctx, this)
 	}
 
+	** dynamically invoked
 	internal Map getConfig() {
 		keys := Utils.makeMap(keyType, keyType)
 		config.each |val, key| { keys[key] = key }
