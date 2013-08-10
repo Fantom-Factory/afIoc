@@ -2,17 +2,27 @@
 v1.3.12 Maybe...?
 -----------------
 
-TypeCoercers to be added via index props
-
-Plastic to override methods with default values
- - see compilerDoc::ApiDocParser.parseMethod() 
-
+Do some testing around:
 Enable plastic to override const mixin fields - see http://fantom.org/sidewalk/topic/2177#c14055
+
+Add "silentStartup" option
+
+Delete test src and docs from .pod 
+Move all tests out into a dedicated pod
+ - v1.3.8 is 425 Kb!
+ - wait until over 500 Kb maybe? But what of all the internal classes?
+
+add delete() methods to config - meh!
 
 
 
 Meh... can't be arsed
 ---------------------
+TypeCoercers to be added via index props
+
+Plastic to override methods with default values
+ - see compilerDoc::ApiDocParser.parseMethod() 
+
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  - it's messy and I don't need it
@@ -20,10 +30,6 @@ Re-do DepdendencyCtx to give more detail
 
 service disambiguation via facets 
  - is just another dep pro: map of services keyed by type&facet
-
-Move all tests out into a dedicated pod
- - v1.3.8 is 425 Kb!
- - wait until over 500 Kb maybe? But what of all the internal classes?
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
