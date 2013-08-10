@@ -18,6 +18,7 @@ class OrderedConfig {
 	private			Orderer				orderer
 	private			Int					impliedCount
 	private			Str[]?				impliedConstraint
+	private			Int					overrideCount
 	private			Str:OrderedOverride	config
 	private			Str:OrderedOverride	overrides
 	private			TypeCoercer			typeCoercer
@@ -33,6 +34,7 @@ class OrderedConfig {
 		this.contribType	= contribType
 		this.orderer		= Orderer()
 		this.impliedCount	= 1
+		this.overrideCount	= 1
 		this.overrides		= Utils.makeMap(Str#, OrderedOverride#)
 		this.config			= Utils.makeMap(Str#, OrderedOverride#)
 		this.typeCoercer	= TypeCoercer()
@@ -74,9 +76,8 @@ class OrderedConfig {
 	** Configuration contributions are ordered across modules. 
 	** 
 	** An attempt is made to coerce the object to the contrib type.
-	This addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
-		if (object !== Orderer.placeholder)
-			object = validateVal(object)
+	This addOrdered(Str id, Obj? value, Str[] constraints := Str#.emptyList) {
+		value = validateVal(value)
 		
 		if (constraints.isEmpty) {
 			constraints = impliedConstraint ?: constraints
@@ -86,10 +87,10 @@ class OrderedConfig {
 			impliedConstraint = ["after: $id"]
 		}
 		
-		config[id] = OrderedOverride(id, object, constraints)
+		config[id] = OrderedOverride(id, value, constraints)
 		
 		// this orderer is throwaway, we just use to fail fast on dup key errs
-		orderer.addOrdered(id, object, constraints)
+		orderer.addOrdered(id, value, constraints)
 
 		return this
 	}
@@ -115,35 +116,43 @@ class OrderedConfig {
 	** 
 	** Note: Unordered configurations can not be overridden.
 	** 
+	** Note: If a 'newId' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newId'.     
+	** 
 	** @since 1.2.0
-	This addOverride(Str existingId, Str newId, Obj? newObject, Str[] newConstraints := Str#.emptyList) {
-		newObject	= validateVal(newObject)
+	This addOverride(Str existingId, Obj? newValue, Str[] newConstraints := Str#.emptyList, Str? newId := null) {
+		newValue = validateVal(newValue)
 
 		if (overrides.containsKey(existingId))
 		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
-		
-		overrides[existingId] = OrderedOverride(newId, newObject, newConstraints)
+
+		if (newId == null)
+			newId = "Override${overrideCount}"
+
+		overrideCount = overrideCount + 1
+		overrides[existingId] = OrderedOverride(newId, newValue, newConstraints)
 		return this
 	}
 
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
 	** 
+	** Note: If a 'newId' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newId'.
+	** 
 	** @since 1.4.0
-	This remove(Str existingId, Str newId) {
-		if (overrides.containsKey(existingId))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
-
-		overrides[existingId] = OrderedOverride(newId, Orderer.delete, Str#.emptyList)
-		return this
+	This remove(Str existingId, Str? newId := null) {
+		addOverride(existingId, Orderer.delete, Str#.emptyList, newId)
 	}
 
+	** dynamically invoked
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		// implied ordering only per contrib method
 		impliedConstraint = null
 		contribution.contributeOrdered(ctx, this)
 	}
 
+	** dynamically invoked
 	internal List getConfig() {
 		ctx.track("Applying config overrides to '$serviceDef.serviceId'") |->List| {
 			keys := Utils.makeMap(Str#, Str#)
@@ -199,6 +208,9 @@ class OrderedConfig {
 	}
 	
 	private Obj? validateVal(Obj? object) {
+		if (object == Orderer.delete || object == Orderer.placeholder)
+			return object
+		
 		if (object == null) {
 			if (!listType.isNullable)
 				throw IocErr(IocMessages.orderedConfigTypeMismatch(null, listType))

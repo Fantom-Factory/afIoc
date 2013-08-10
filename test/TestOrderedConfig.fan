@@ -219,7 +219,7 @@ internal class T_MyModule87 {
 	@Contribute{ serviceId="s71b" }
 	static Void cont10b(OrderedConfig config) {
 		config.addOrdered("wot", "ever")
-		config.addOverride("wot", "wot-null", null)
+		config.addOverride("wot", null, [,], "wot-null")
 	}	
 }
 
@@ -363,7 +363,7 @@ internal class T_MyModule69 {
 	@Contribute
 	static Void contributeS23(OrderedConfig config) {
 		config.addOrdered("key", "value1")
-		config.addOverride("key", "over1", "value2")
+		config.addOverride("key", "value2", [,], "over1")
 	}
 }
 
@@ -374,8 +374,8 @@ internal class T_MyModule70 {
 	@Contribute
 	static Void contributeS23(OrderedConfig config) {
 		config.addOrdered("key", "value1")
-		config.addOverride("key", "over1", "value2")
-		config.addOverride("over1", "over2", "value3")
+		config.addOverride("key", "value2", [,], "over1")
+		config.addOverride("over1", "value3", [,], "over2")
 	}
 }
 
@@ -386,7 +386,7 @@ internal class T_MyModule71 {
 	@Contribute
 	static Void contributeS23(OrderedConfig config) {
 		config.addOrdered("key", "value")
-		config.addOverride("non-exist", "over1", "value2")
+		config.addOverride("non-exist", "value2", [,], "over1")
 	}
 }
 
@@ -397,8 +397,8 @@ internal class T_MyModule72 {
 	@Contribute
 	static Void contributeS23(OrderedConfig config) {
 		config.addOrdered("key", "value")
-		config.addOverride("key", "over1", "value2")
-		config.addOverride("non-exist", "over2", "value3")
+		config.addOverride("key", "value2", [,], "over1")
+		config.addOverride("non-exist", "value3", [,], "over2")
 	}
 }
 
@@ -491,7 +491,7 @@ internal class T_MyModule94 {
 		conf.addOrdered("A", "A", ["before: C", "before: B"])
 		conf.addOrdered("B", "B", ["before: C"])
 		conf.addPlaceholder("C")	
-		conf.addOverride("B", "D", "D")
+		conf.addOverride("B", "D", [,], "D")
 	}
 }
 

@@ -261,6 +261,7 @@ v1.4.0 [#1.4.0]
  - New: Added `OrderedConfig.remove` and `MappedConfig.remove`.
  - New: Added `RegistryBuilder.moduleTypes` to return a list of modules types held by the builder.
  - New: Added 'suppressStartupMsg' build option.
+ - Chg: Rejigged the config override argument order. (Breaking Change.)
  - Chg: Deleted '@Deprecated' config methods.
  - Chg: Transferred VCS ownership to [AlienFactory]`https://bitbucket.org/AlienFactory`
  - Chg: Test code is no longer distributed with the afIoc.pod - pod size was nearing 500 Kb!
