@@ -83,6 +83,12 @@ internal class TestProxyBuilder : IocTest {
 		pType2	:= bob.buildProxyType(InjectionCtx(reg), type)
 		verifySame(pType1, pType2)
 	}
+	
+	Void testConstFieldsOnMixin() {
+		s83 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s83"))
+		verifyEq(s83->dude, "dude")
+		verifyEq(s83->inc(5), 6)
+	}
 }
 
 internal class T_MyModule76 {
@@ -95,6 +101,7 @@ internal class T_MyModule76 {
 		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
 		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
 		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
+		binder.bindImpl(PublicTestTypes.type("T_MyService83")).withId("s83")
 		binder.bindImpl(T_MyService64#).withId("s64").withoutProxy
 	}
 }

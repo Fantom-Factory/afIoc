@@ -91,6 +91,11 @@ internal class TestPlasticModel : PlasticTest {
 			plasticModel.overrideMethod(T_PlasticService08#redirect, "wotever")
 		}
 	}
+	
+	Void testConstTypeCanHaveFields() {
+		plasticModel := PlasticClassModel("TestImpl", true)
+		plasticModel.addField(Str#, "wotever")
+	}
 
 }
 
