@@ -258,7 +258,8 @@ Release Notes [#releaseNotes]
 
 v1.4.2 [#1.4.2]
 ---------------
- - New: Added 'PlasticClassModel.extendClass()' and the model may now extend multiple Mixins.
+ - New: Added `ConcurrentCache` class, an application of `ConcurrentState` designed for fast reads.
+ - New: Added 'PlasticClassModel.extendClass()' for the model may now extend multiple Mixins.
  - New: Added 'PlasticClassModel.addMethod()' for adding new methods.
  - Chg: `ConcurrentState` state may now be 'null'.
 
