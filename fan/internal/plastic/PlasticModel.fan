@@ -6,39 +6,67 @@
 ** @since 1.3
 @NoDoc
 class PlasticClassModel {
-	
-	const Bool 	isConst
-	const Str 	className
-	
-	Type[]					extends := [Obj#]	{ private set }
-	PlasticFieldModel[]		fields	:= [,]		{ private set }
-	PlasticMethodModel[]	methods	:= [,]		{ private set }
+		const Bool 					isConst
+		const Str 					className
+			Type					superClass	:= Obj#		{ private set }
+			Type[]					mixins		:= [,]		{ private set }	// for user info only
+
+	private Type[] 					extends		:= [,]
+	private PlasticFieldModel[]		fields		:= [,]
+	private PlasticMethodModel[]	methods		:= [,]
 
 	** I feel you should know upfront if you want the class to be const or not
 	new make(Str className, Bool isConst) {
 		this.isConst 	= isConst
 		this.className	= className
+		
+		extends.add(superClass)
 	}
-	
+
+	This extendClass(Type classType) {
+		if (isConst && !classType.isConst)
+			throw PlasticErr(PlasticMsgs.constTypeCannotSubclassNonConstType(className, classType))
+		if (!isConst && classType.isConst)
+			throw PlasticErr(PlasticMsgs.nonConstTypeCannotSubclassConstType(className, classType))
+		if (superClass != Obj#)
+			throw PlasticErr(PlasticMsgs.canOnlyExtendOneClass(className, superClass, classType))
+		if (!classType.isClass)
+			throw PlasticErr(PlasticMsgs.canOnlyExtendClass(classType))
+		if (classType.isInternal)
+			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, classType))
+		
+		extends = extends.exclude { it == superClass}.add(classType)
+		superClass = classType
+		return this	
+	}
+
 	This extendMixin(Type mixinType) {
 		if (isConst && !mixinType.isConst)
 			throw PlasticErr(PlasticMsgs.constTypeCannotSubclassNonConstType(className, mixinType))
 		if (!isConst && mixinType.isConst)
 			throw PlasticErr(PlasticMsgs.nonConstTypeCannotSubclassConstType(className, mixinType))
+		if (!mixinType.isMixin)
+			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(mixinType))
 		// TODO: given all our test types are internal, we'll let this condition slide for now...
 //		if (mixinType.isInternal)
 //			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		
+		mixins.add(mixinType)
 		extends.add(mixinType)
 		return this
 	}
-	
+
 	** All fields have public scope. Why not!? You're not compiling against it!
 	This addField(Type fieldType, Str fieldName, Str? getBody := null, Str? setBody := null) {
 		if (isConst && !fieldType.isConst)
 			throw PlasticErr(PlasticMsgs.constTypesMustHaveConstFields(className, fieldType, fieldName))
 		
 		fields.add(PlasticFieldModel(false, PlasticVisibility.visPublic, fieldType.isConst, fieldType, fieldName, getBody, setBody))
+		return this
+	}
+
+	This addMethod(Type returnType, Str methodName, Str signature, Str body) {
+		methods.add(PlasticMethodModel(false, PlasticVisibility.visPublic, returnType, methodName, signature, body))
 		return this
 	}
 
@@ -71,7 +99,7 @@ class PlasticClassModel {
 
 	** All types are generated with a standard serialisation ctor:
 	** 
-	**   new make(|This|? f) { f?.call(this) }
+	**   new make(|This|? f := null) { f?.call(this) }
 	Str toFantomCode() {
 		constKeyword 	:= isConst ? "const " : ""
 		extendsKeyword	:= extends.exclude { it == Obj#}.isEmpty ? "" : " : " + extends.exclude { it == Obj#}.map { it.qname }.join(",") 
@@ -92,8 +120,7 @@ class PlasticClassModel {
 }
 
 ** @since 1.3
-@NoDoc
-class PlasticFieldModel {
+internal class PlasticFieldModel {
 	Bool			 	isOverride
 	PlasticVisibility 	visibility
 	Bool				isConst
@@ -131,8 +158,7 @@ class PlasticFieldModel {
 }
 
 ** @since 1.3
-@NoDoc
-class PlasticMethodModel {
+internal class PlasticMethodModel {
 	Bool			 	isOverride
 	PlasticVisibility 	visibility
 	Type				returnType
