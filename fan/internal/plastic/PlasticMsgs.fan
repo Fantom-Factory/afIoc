@@ -12,14 +12,6 @@ internal const class PlasticMsgs {
 		"Const type ${typeName} can not subclass non-const type ${superType.qname}"
 	}
 
-	static Str canOnlyExtendOneType(Str typeName, Type superType1, Type superType2) {
-		"Currently, Plastic only supports extending ONE type - class ${typeName} : ${superType1.qname}, ${superType2.qname}"
-	}
-
-	static Str canOnlyExtendMixins(Str typeName, Type superType) {
-		"Currently, Plastic only supports extending mixins - class ${typeName} : ${superType.qname}"
-	}
-
 	static Str superTypesMustBePublic(Str typeName, Type superType) {
 		"Super types must be 'public' or 'protected' scope - class ${typeName} : ${superType.qname}"
 	}
@@ -28,8 +20,8 @@ internal const class PlasticMsgs {
 		"Const type ${typeName} must ONLY declare const fields - ${fieldType.qname} ${fieldName}"
 	}
 
-	static Str overrideMethodDoesNotBelongToSuperType(Method method, Type superType) {
-		"Method ${method.qname} does not belong to super type ${superType.qname}"
+	static Str overrideMethodDoesNotBelongToSuperType(Method method, Type[] superTypes) {
+		"Method ${method.qname} does not belong to super types " + superTypes.map { it.qname }.join(", ")
 	}
 
 	static Str overrideMethodHasWrongScope(Method method) {
@@ -40,8 +32,8 @@ internal const class PlasticMsgs {
 		"Method ${method.qname} must be virtual (or abstract)"
 	}
 
-	static Str overrideFieldDoesNotBelongToSuperType(Field field, Type superType) {
-		"Field ${field.qname} does not belong to super type ${superType.qname}"
+	static Str overrideFieldDoesNotBelongToSuperType(Field field, Type[] superTypes) {
+		"Field ${field.qname} does not belong to super type " + superTypes.map { it.qname }.join(", ")
 	}
 
 	static Str overrideFieldHasWrongScope(Field field) {

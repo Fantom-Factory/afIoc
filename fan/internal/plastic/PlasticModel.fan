@@ -1,18 +1,18 @@
 
 ** All types are generated with a standard serialisation ctor:
 ** 
-**   new make(|This|? f) { f?.call(this) }
+**   new make(|This|? f := null) { f?.call(this) }
 ** 
 ** @since 1.3
 @NoDoc
 class PlasticClassModel {
 	
-	Bool 	isConst
-	Str 	className
-	Type?	extends
+	const Bool 	isConst
+	const Str 	className
 	
-	PlasticFieldModel[]		fields	:= [,]
-	PlasticMethodModel[]	methods	:= [,]
+	Type[]					extends := [Obj#]	{ private set }
+	PlasticFieldModel[]		fields	:= [,]		{ private set }
+	PlasticMethodModel[]	methods	:= [,]		{ private set }
 
 	** I feel you should know upfront if you want the class to be const or not
 	new make(Str className, Bool isConst) {
@@ -25,15 +25,11 @@ class PlasticClassModel {
 			throw PlasticErr(PlasticMsgs.constTypeCannotSubclassNonConstType(className, mixinType))
 		if (!isConst && mixinType.isConst)
 			throw PlasticErr(PlasticMsgs.nonConstTypeCannotSubclassConstType(className, mixinType))
-		if (extends != null)
-			throw PlasticErr(PlasticMsgs.canOnlyExtendOneType(className, extends, mixinType))
-		if (!mixinType.isMixin)
-			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(className, mixinType))
 		// TODO: given all our test types are internal, we'll let this condition slide for now...
 //		if (mixinType.isInternal)
 //			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		
-		extends = mixinType
+		extends.add(mixinType)
 		return this
 	}
 	
@@ -45,10 +41,10 @@ class PlasticClassModel {
 		fields.add(PlasticFieldModel(false, PlasticVisibility.visPublic, fieldType.isConst, fieldType, fieldName, getBody, setBody))
 		return this
 	}
-	
+
 	** All methods are given public scope. 
 	This overrideMethod(Method method, Str body) {
-		if (!extends.fits(method.parent))	// think about overriding toStr()
+		if (!extends.any { it.fits(method.parent) })
 			throw PlasticErr(PlasticMsgs.overrideMethodDoesNotBelongToSuperType(method, extends))
 		if (method.isPrivate || method.isInternal)
 			throw PlasticErr(PlasticMsgs.overrideMethodHasWrongScope(method))
@@ -63,7 +59,8 @@ class PlasticClassModel {
 
 	** All fields are given public scope. 
 	This overrideField(Field field, Str? getBody := null, Str? setBody := null) {
-		if (field.parent != extends)
+		// FIXME: Err if there's no extend type (else we get a NPE here)
+		if (!extends.any { it.fits(field.parent) })
 			throw PlasticErr(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(field, extends))
 		if (field.isPrivate || field.isInternal)
 			throw PlasticErr(PlasticMsgs.overrideFieldHasWrongScope(field))
@@ -77,13 +74,13 @@ class PlasticClassModel {
 	**   new make(|This|? f) { f?.call(this) }
 	Str toFantomCode() {
 		constKeyword 	:= isConst ? "const " : ""
-		extendsKeyword	:= extends == null ? "" : " : ${extends.qname}" 
+		extendsKeyword	:= extends.exclude { it == Obj#}.isEmpty ? "" : " : " + extends.exclude { it == Obj#}.map { it.qname }.join(",") 
 		
 		code := "${constKeyword}class ${className}${extendsKeyword} {\n\n"
 		fields.each { code += it.toFantomCode }
 		
 		code += "\n"
-		code += "	new make(|This|? f) {
+		code += "	new make(|This|? f := null) {
 		         		f?.call(this)
 		         	}\n"
 		code += "\n"

@@ -15,21 +15,6 @@ internal class TestPlasticModel : PlasticTest {
 		}
 	}
 
-	Void testCanOnlyExtendOneType() {
-		plasticModel := PlasticClassModel("TestImpl", false)
-		plasticModel.extendMixin(T_PlasticService02#)
-		verifyErrMsg(PlasticMsgs.canOnlyExtendOneType("TestImpl", T_PlasticService02#, T_PlasticService03#)) {
-			plasticModel.extendMixin(T_PlasticService03#)
-		}
-	}
-
-	Void testCanOnlyExtendMixins() {
-		plasticModel := PlasticClassModel("TestImpl", false)
-		verifyErrMsg(PlasticMsgs.canOnlyExtendMixins("TestImpl", T_PlasticService04#)) {
-			plasticModel.extendMixin(T_PlasticService04#)
-		}
-	}
-
 	Void testFieldsForConstTypeMustByConst() {
 		plasticModel := PlasticClassModel("TestImpl", true)
 		plasticModel.extendMixin(T_PlasticService01#)
@@ -41,7 +26,7 @@ internal class TestPlasticModel : PlasticTest {
 	Void testOverrideMethodsMustBelongToSuperType() {
 		plasticModel := PlasticClassModel("TestImpl", true)
 		plasticModel.extendMixin(T_PlasticService01#)
-		verifyErrMsg(PlasticMsgs.overrideMethodDoesNotBelongToSuperType(Int#abs, T_PlasticService01#)) {
+		verifyErrMsg(PlasticMsgs.overrideMethodDoesNotBelongToSuperType(Int#abs, [Obj#, T_PlasticService01#])) {
 			plasticModel.overrideMethod(Int#abs, "wotever")
 		}
 	}
@@ -71,7 +56,7 @@ internal class TestPlasticModel : PlasticTest {
 	Void testOverrideFieldsMustBelongToSuperType() {
 		plasticModel := PlasticClassModel("TestImpl", true)
 		plasticModel.extendMixin(T_PlasticService01#)
-		verifyErrMsg(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(Int#minVal, T_PlasticService01#)) {
+		verifyErrMsg(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(Int#minVal, [Obj#, T_PlasticService01#])) {
 			plasticModel.overrideField(Int#minVal, "wotever")
 		}
 	}
