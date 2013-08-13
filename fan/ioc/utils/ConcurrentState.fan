@@ -1,8 +1,11 @@
 using concurrent
 
 **
-** A helper class used to store, access and retrieve mutable state within a 'const' class. For IoC 
-** this means your services can be declared as 'perApplication' or singleton scope.
+** A helper class used to store, access and retrieve mutable state within a 'const' class. 
+** For IoC this means your services can be declared as 'perApplication' or singleton scope.
+** 
+** In Java terms, the 'getState() { ... }' method behaves in a similar fashion to the 
+** 'synchronized' keyword, only allowing one thread through at a time.
 ** 
 ** 'ConcurrentState' wraps a state object in an Actor, and provides access to it via the 
 ** 'withState' and 'getState' methods. Note that by their nature, these methods are immutable 
@@ -60,7 +63,7 @@ const class ConcurrentState {
 	internal static const ActorPool	actorPool	:= ActorPool()
 
 	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
-	private const |->Obj| 			stateFactory
+	private const |->Obj?| 			stateFactory
 	private const ThreadStash 		stash
 
 	private Obj? state {
@@ -70,25 +73,27 @@ const class ConcurrentState {
 
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
 	new makeWithStateType(Type stateType) {
-		this.stateFactory	= |->Obj| { stateType.make }
+		this.stateFactory	= |->Obj?| { stateType.make }
 		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
 	}
 
-	new makeWithStateFactory(|->Obj| stateFactory) {
+	new makeWithStateFactory(|->Obj?| stateFactory) {
 		this.stateFactory	= stateFactory
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 	}
 
-	** Use to access state. Call 'get()' on the returned 'Future' to ensure any Errs are rethrown. 
-	virtual Future withState(|Obj->Obj?| f) {
+	** Use to access state, effectively wrapping the given func in a Java 'synchronized { ... }' 
+	** block. Call 'get()' on the returned 'Future' to ensure any Errs are rethrown. 
+	virtual Future withState(|Obj?->Obj?| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable
 		future 	:= stateActor.send([true, func].toImmutable)
 		return future
 	}
 
-	** Use to return state
-	virtual Obj? getState(|Obj->Obj?| f) {
+	** Use to return state, effectively wrapping the given func in a Java 'synchronized { ... }' 
+	** block. 
+	virtual Obj? getState(|Obj?->Obj?| f) {
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable
 		future := stateActor.send([false, func].toImmutable)
@@ -110,7 +115,7 @@ const class ConcurrentState {
 		try {
 			// lazily create our state
 			if (state == null) 
-				state = stateFactory()
+				state = stateFactory.call()
 
 			return func.call(state)
 
