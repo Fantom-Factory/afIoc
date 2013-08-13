@@ -260,6 +260,7 @@ v1.4.2 [#1.4.2]
 ---------------
  - New: Added 'PlasticClassModel.extendClass()' and the model may now extend multiple Mixins.
  - New: Added 'PlasticClassModel.addMethod()' for adding new methods.
+ - Chg: `ConcurrentState` state may now be 'null'.
 
 v1.4.0 [#1.4.0]
 ---------------
