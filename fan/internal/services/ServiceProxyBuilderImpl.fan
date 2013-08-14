@@ -3,7 +3,7 @@ using compiler
 ** @since 1.3.0
 internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		
-	private const TypeCache typeCache	:= TypeCache()
+	private const ConcurrentCache typeCache	:= ConcurrentCache()
 	
 	@Inject 
 	private const Registry registry
