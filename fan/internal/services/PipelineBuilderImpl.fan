@@ -2,7 +2,7 @@
 ** @since 1.3.10 
 internal const class PipelineBuilderImpl : PipelineBuilder {
 	
-	private const TypeCache typeCache	:= TypeCache()
+	private const ConcurrentCache typeCache	:= ConcurrentCache()
 
 	@Inject	
 	private const PlasticPodCompiler plasticPodCompiler
