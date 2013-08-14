@@ -1,4 +1,7 @@
-using concurrent
+using concurrent::Actor
+using concurrent::ActorPool
+using concurrent::AtomicInt
+using concurrent::Future
 
 **
 ** A helper class used to store, access and retrieve mutable state within a 'const' class. 
@@ -65,7 +68,12 @@ const class ConcurrentState {
 	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
 	private const |->Obj?| 			stateFactory
 	private const ThreadStash 		stash
-
+	
+	** Keeps count of the number of 'ConcurrentState' instances that have been created.
+	** For debug purposes.
+	@NoDoc
+	static const AtomicInt			instanceCount	:= AtomicInt() 
+	
 	private Obj? state {
 		get { stash["state"] }
 		set { stash["state"] = it }
@@ -75,11 +83,13 @@ const class ConcurrentState {
 	new makeWithStateType(Type stateType) {
 		this.stateFactory	= |->Obj?| { stateType.make }
 		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
+		instanceCount.incrementAndGet
 	}
 
 	new makeWithStateFactory(|->Obj?| stateFactory) {
 		this.stateFactory	= stateFactory
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
+		instanceCount.incrementAndGet
 	}
 
 	** Use to access state, effectively wrapping the given func in a Java 'synchronized { ... }' 
