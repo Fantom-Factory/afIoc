@@ -11,6 +11,8 @@ class PlasticClassModel {
 			Type					superClass	:= Obj#		{ private set }
 			Type[]					mixins		:= [,]		{ private set }	// for user info only
 
+	private Pod[] 					usingPods	:= [,]
+	private Type[] 					usingTypes	:= [,]
 	private Type[] 					extends		:= [,]
 	private PlasticFieldModel[]		fields		:= [,]
 	private PlasticMethodModel[]	methods		:= [,]
@@ -21,6 +23,18 @@ class PlasticClassModel {
 		this.className	= className
 		
 		extends.add(superClass)
+	}
+
+	** @since 1.4.4
+	This usingPod(Pod pod) {
+		usingPods.add(pod)
+		return this
+	}
+
+	** @since 1.4.4
+	This usingType(Type type) {
+		usingTypes.add(type)
+		return this
 	}
 
 	This extendClass(Type classType) {
@@ -65,6 +79,7 @@ class PlasticClassModel {
 		return this
 	}
 
+	** @since 1.4.2
 	This addMethod(Type returnType, Str methodName, Str signature, Str body) {
 		methods.add(PlasticMethodModel(false, PlasticVisibility.visPublic, returnType, methodName, signature, body))
 		return this
@@ -101,10 +116,14 @@ class PlasticClassModel {
 	** 
 	**   new make(|This|? f := null) { f?.call(this) }
 	Str toFantomCode() {
+		code := ""
+		usingPods.unique.each  { code += "using ${it.name}\n" }
+		usingTypes.unique.each { code += "using ${it.qname}\n" }
+		code += "\n"
 		constKeyword 	:= isConst ? "const " : ""
 		extendsKeyword	:= extends.exclude { it == Obj#}.isEmpty ? "" : " : " + extends.exclude { it == Obj#}.map { it.qname }.join(",") 
 		
-		code := "${constKeyword}class ${className}${extendsKeyword} {\n\n"
+		code += "${constKeyword}class ${className}${extendsKeyword} {\n\n"
 		fields.each { code += it.toFantomCode }
 		
 		code += "\n"
