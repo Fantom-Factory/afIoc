@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [34 tests, 205 methods, 498 verifies]'
+  - Extensively tested: - 'All tests passed! [35 tests, 206 methods, 501 verifies]'
 
 
 
