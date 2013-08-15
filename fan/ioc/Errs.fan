@@ -8,6 +8,8 @@ mixin Unwrappable {
 ** As thrown by IoC
 const class IocErr : Err, Unwrappable {
 	
+	** A trace of IoC operations that led to the Err. 
+	** A succinct and more informative stack trace if you will.
 	const Str? operationsTrace
 	
 	internal new make(Str msg := "", Err? cause := null, Str? opTrace := null) : super(msg, cause) {
@@ -18,8 +20,11 @@ const class IocErr : Err, Unwrappable {
 		opTrace := (cause == null) ? typeof.qname : (cause is IocErr ? "" : cause.typeof.qname + ": ")
 		opTrace += msg
 		if (operationsTrace != null) {
-			opTrace += "Operations trace:\n"
-			opTrace += operationsTrace
+			opTrace += "\nOperations trace:\n"
+			operationsTrace.splitLines.each |op, i| { 
+				opTrace += ("  [${(i+1).toStr.justr(2)}] $op\n")
+			}
+			opTrace += "Stack trace:"
 		}
 		return opTrace
 	}
