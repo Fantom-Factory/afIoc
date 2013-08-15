@@ -102,7 +102,6 @@ class PlasticClassModel {
 
 	** All fields are given public scope. 
 	This overrideField(Field field, Str? getBody := null, Str? setBody := null) {
-		// FIXME: Err if there's no extend type (else we get a NPE here)
 		if (!extends.any { it.fits(field.parent) })
 			throw PlasticErr(PlasticMsgs.overrideFieldDoesNotBelongToSuperType(field, extends))
 		if (field.isPrivate || field.isInternal)

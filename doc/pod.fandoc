@@ -257,6 +257,11 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.4.4 [#1.4.4]
+---------------
+ - Chg: Made the useful OperationsTrace a field of `IocErr`.
+ - Chg: afPlastic now generates 'using' statements.
+
 v1.4.2 [#1.4.2]
 ---------------
  - New: Added `ConcurrentCache` class, an application of `ConcurrentState` designed for fast reads.

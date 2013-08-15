@@ -7,7 +7,22 @@ mixin Unwrappable {
 
 ** As thrown by IoC
 const class IocErr : Err, Unwrappable {
-	internal new make(Str msg := "", Err? cause := null) : super(msg, cause) {}
+	
+	const Str? operationsTrace
+	
+	internal new make(Str msg := "", Err? cause := null, Str? opTrace := null) : super(msg, cause) {
+		this.operationsTrace = opTrace
+	}
+	
+	override Str toStr() {
+		opTrace := (cause == null) ? typeof.qname : (cause is IocErr ? "" : cause.typeof.qname + ": ")
+		opTrace += msg
+		if (operationsTrace != null) {
+			opTrace += "Operations trace:\n"
+			opTrace += operationsTrace
+		}
+		return opTrace
+	}
 }
 
 ** A generic helper Err thrown when a value is not found in an expected list of values.
