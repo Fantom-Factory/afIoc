@@ -10,21 +10,21 @@ const class IocErr : Err, Unwrappable {
 	
 	** A trace of IoC operations that led to the Err. 
 	** A succinct and more informative stack trace if you will.
-	const Str? operationsTrace
+	const Str? operationTrace
 	
 	internal new make(Str msg := "", Err? cause := null, Str? opTrace := null) : super(msg, cause) {
-		this.operationsTrace = opTrace
+		this.operationTrace = opTrace
 	}
 	
 	override Str toStr() {
 		opTrace := (cause == null) ? typeof.qname : (cause is IocErr ? "" : cause.typeof.qname + ": ")
 		opTrace += msg
-		if (operationsTrace != null) {
-			opTrace += "\nOperations trace:\n"
-			operationsTrace.splitLines.each |op, i| { 
+		if (operationTrace != null) {
+			opTrace += "\nIoc Operation Trace:\n"
+			operationTrace.splitLines.each |op, i| { 
 				opTrace += ("  [${(i+1).toStr.justr(2)}] $op\n")
 			}
-			opTrace += "Stack trace:"
+			opTrace += "Stack Trace:"
 		}
 		return opTrace
 	}
