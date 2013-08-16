@@ -32,13 +32,9 @@ internal class OpTracker {
 			
 		} catch (Err err) {
 			if (!logged) {
-				opTrace := StrBuf()
-		        operations.each |op, i| {
-		        	opTrace.add("  [${(i+1).toStr.justr(2)}] $op.description\n")
-		        }
-				
 				logged = true
-				throw IocErr(err.msg, err, opTrace.toStr)
+				opTrace := operations.join("\n") { it.description }
+				throw IocErr(err.msg, err, opTrace)
 			}
 			throw err
 
