@@ -259,7 +259,7 @@ Release Notes [#releaseNotes]
 
 v1.4.4 [#1.4.4]
 ---------------
- - Chg: Made the useful OperationsTrace a field of `IocErr`.
+ - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
  - Chg: afPlastic now generates 'using' statements.
 
 v1.4.2 [#1.4.2]
