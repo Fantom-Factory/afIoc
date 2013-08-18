@@ -79,7 +79,7 @@ internal class Orderer {
 
 	internal Void eachId(Str prefix, Str constraint, |Str id| op) {
 		constraint = constraint.trim
-		if (constraint.startsWith(prefix)) {
+		if (constraint.lower.startsWith(prefix.lower)) {
 			idCsv := constraint[prefix.size..-1].trim
 			if (idCsv.startsWith(":") || idCsv.startsWith("-"))
 				idCsv = idCsv[1..-1].trim

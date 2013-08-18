@@ -37,6 +37,15 @@ internal class TestOrderedConfigOrdering : IocTest {
 		assertOrder(nodes)
 	}
 	
+	Void testBeforeAndAfterAreCaseInsensitive() {
+		orderer := Orderer()
+		orderer.addOrdered("2", "2", ["aFtEr 1"])
+		orderer.addOrdered("1", "1", ["BeFoRe: 2"])
+		nodes := orderer.order
+		verifyEq(nodes.map { it.name }, Obj?["1", "2"])
+		assertOrder(nodes)
+	}
+	
 	Void testPlaceholdersNotAllowed1() {
 		orderer := Orderer()
 		orderer.addOrdered("2", "2", ["after 1"])
