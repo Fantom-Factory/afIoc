@@ -19,7 +19,7 @@ const class IocErr : Err, Unwrappable {
 	override Str toStr() {
 		opTrace := (cause == null) ? typeof.qname : (cause is IocErr ? "" : cause.typeof.qname + ": ")
 		opTrace += msg
-		if (operationTrace != null) {
+		if (operationTrace != null && !operationTrace.isEmpty) {
 			opTrace += "\nIoc Operation Trace:\n"
 			operationTrace.splitLines.each |op, i| { 
 				opTrace += ("  [${(i+1).toStr.justr(2)}] $op\n")
