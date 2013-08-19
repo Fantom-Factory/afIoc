@@ -259,6 +259,7 @@ Release Notes [#releaseNotes]
 
 v1.4.4 [#1.4.4]
 ---------------
+ - New: 'PlasticCompilationErr' gives detailed info and code snippets on compilation Errs.
  - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
  - Chg: afPlastic now generates 'using' statements.
  - Chg: Toned down `RegistryBuilder` logging.
