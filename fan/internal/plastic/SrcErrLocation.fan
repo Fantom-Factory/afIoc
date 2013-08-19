@@ -6,7 +6,7 @@ const class SrcErrLocation {
 	const Int 	errLineNo
 	const Str 	errMsg
 
-	internal new make(Uri srcLocation, Str srcCode, Int errLineNo, Str errMsg) {
+	new make(Uri srcLocation, Str srcCode, Int errLineNo, Str errMsg) {
 		this.srcLocation	= srcLocation
 		this.srcCode		= srcCode.splitLines
 		this.errLineNo		= errLineNo
