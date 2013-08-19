@@ -27,7 +27,9 @@ class RegistryBuilder {
 				
 				ctx.withModule(moduleType) |->| {			
 					if (moduleDefs.find { it.moduleType == moduleType } != null) {
-						logger.warn(IocMessages.moduleAlreadyAdded(moduleType))
+						// Debug because sometimes you can't help adding the same module twice (via dependencies)
+						// afBedSheet is a prime example
+						logger.debug(IocMessages.moduleAlreadyAdded(moduleType))
 						return
 					}
 					

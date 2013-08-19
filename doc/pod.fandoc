@@ -261,6 +261,7 @@ v1.4.4 [#1.4.4]
 ---------------
  - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
  - Chg: afPlastic now generates 'using' statements.
+ - Chg: Toned down `RegistryBuilder` logging.
  - Bug: 'Before' and 'After' ordering constraints were not case insensitive.
 
 v1.4.2 [#1.4.2]
