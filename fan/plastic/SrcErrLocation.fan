@@ -40,7 +40,7 @@ const class SrcErrLocation {
 	}
 
 	private Bool canTrim(Int:Str lines) {
-		lines.vals.all { it[0].isSpace }
+		lines.vals.all { it.size > 0 && it[0].isSpace }
 	}
 
 	private Void trim(Int:Str lines) {
