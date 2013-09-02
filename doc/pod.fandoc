@@ -257,6 +257,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.4.6 [#1.4.6]
+---------------
+ - Bug: `SrcErrLocation` could Err when trimming leading whitespace from code snippet.
+
 v1.4.4 [#1.4.4]
 ---------------
  - New: 'PlasticCompilationErr' gives detailed info and code snippets.
