@@ -102,7 +102,7 @@ internal const class IocMessages {
 	}
 	
 	static Str cannotSetConstFields(Field field) {
-		"To set const field '$field.qname' use a serialisation ctor: new make(|This|? f := null) { f?.call(this) }"
+		"Can not set const field '$field.qname'. Try using a serialisation ctor: new make(|This|? f := null) { f?.call(this) }"
 	}
 	
 	static Str serviceRecursion(Str[] serviceIds) {
