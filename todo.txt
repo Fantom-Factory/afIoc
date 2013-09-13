@@ -1,5 +1,5 @@
 
-v1.4.4 Maybe...?
+v1.4.6 Maybe...?
 -----------------
 
 
@@ -7,9 +7,6 @@ v1.4.4 Maybe...?
 Meh... can't be arsed
 ---------------------
 TypeCoercers to be added via index props
-
-Plastic to override methods with default values
- - see compilerDoc::ApiDocParser.parseMethod() 
 
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
