@@ -186,7 +186,7 @@ internal const class InjectionUtils {
 
 	    	if (!field.hasFacet(facetType)) 
 	    		return false
-			
+
     		ctx.log("Found field $field.signature")
 			return true
 		}

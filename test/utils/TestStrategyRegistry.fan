@@ -29,12 +29,26 @@ internal class TestStrategyRegistry : IocTest {
 		verifyEq(ap.findExactMatch(T_InnerIocErr?#, false), null)
 		verifyEq(ap.findExactMatch(TestStrategyRegistry?#, false), null)
 		
-		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry. Available values = afIoc::IocErr, sys::Err") {   
-			verifyEq(ap.findExactMatch(TestStrategyRegistry#), null)
+		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry.") {
+			try {
+				ap.findExactMatch(TestStrategyRegistry#)
+			} catch (NotFoundErr nfe) {
+				verifyEq(nfe.availableValues[0], "afIoc::IocErr")
+				verifyEq(nfe.availableValues[1], "sys::Err")
+				verifyEq(nfe.availableValues.size, 2)
+				throw nfe
+			}
 		}
 
-		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::T_InnerIocErr. Available values = afIoc::IocErr, sys::Err") {   
-			verifyEq(ap.findExactMatch(T_InnerIocErr#), null)
+		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::T_InnerIocErr.") {   
+			try {
+				ap.findExactMatch(T_InnerIocErr#)
+			} catch (NotFoundErr nfe) {
+				verifyEq(nfe.availableValues[0], "afIoc::IocErr")
+				verifyEq(nfe.availableValues[1], "sys::Err")
+				verifyEq(nfe.availableValues.size, 2)
+				throw nfe
+			}
 		}
 	}
 
@@ -59,8 +73,16 @@ internal class TestStrategyRegistry : IocTest {
 		verifyEq(ap.findBestFit(T_StratA?#, false), 3)	// should find A even though it's not directly in the map
 		verifyEq(ap.findBestFit(T_StratC?#, false), 3)
 		
-		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry. Available values = afIoc::IocErr, sys::Err, afIoc::T_StratA") {   
-			verifyEq(ap.findExactMatch(TestStrategyRegistry#), null)
+		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry.") {
+			try {
+				ap.findExactMatch(TestStrategyRegistry#)
+			} catch (NotFoundErr nfe) {
+				verifyEq(nfe.availableValues[0], "afIoc::IocErr")
+				verifyEq(nfe.availableValues[1], "sys::Err")
+				verifyEq(nfe.availableValues[2], "afIoc::T_StratA")
+				verifyEq(nfe.availableValues.size, 3)
+				throw nfe				
+			}
 		}
 	}
 }

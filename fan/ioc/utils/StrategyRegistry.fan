@@ -32,7 +32,7 @@ const class StrategyRegistry {
 			state.cache.getOrAdd(nonNullable) |->Obj?| {
 				deltas := values
 					.findAll |val, type| { nonNullable.fits(type) }
-					.map |val, type->Int| {
+					.map |val, type->Int?| {
 						nonNullable.inheritance.eachWhile |sup, i| {
 							(sup == type || sup.mixins.contains(type)) ? i : null
 						}
@@ -52,7 +52,7 @@ const class StrategyRegistry {
 		checked ? throw NotFoundErr("Could not find match for Type ${nonNullable}.", values.keys) : null
 	}
 	
-	private Obj? getState(|StrategyRegistryBestFitCache -> Obj| state) {
+	private Obj? getState(|StrategyRegistryBestFitCache->Obj?| state) {
 		conState.getState(state)
 	}
 }

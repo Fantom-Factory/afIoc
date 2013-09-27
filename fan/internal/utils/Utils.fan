@@ -43,12 +43,24 @@ internal class Utils {
 		}
 	}
 
+	** Unwrap afIoc Errs to find the root cause. 
+	**  - if an afIoc Err, throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace.
+	**  - if NOT an afIoc Err, wrap it in a new afIoc Err with the opTrace.
+	** This adds extra opTrace info to all non-afIoc Errs and reduces the number of stack frames
+	** on all internal afIoc Errs.
 	** @see http://fantom.org/sidewalk/topic/2147
 	static Obj? stackTraceFilter(|->Obj?| func) {
 		try {
 			return func.call
 		} catch (IocErr iocErr) {
-			throw IocErr(iocErr.msg, unwrap(iocErr), iocErr.operationTrace)
+			unwrapped := unwrap(iocErr)
+
+			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 
+			if (unwrapped is IocErr)
+				throw IocErr(iocErr.msg, null, iocErr.operationTrace)
+			
+			// wrap root err in an afIoc Err, giving extra opTrace info and any helpful ioc Err 
+			throw IocErr(iocErr.msg, unwrapped, iocErr.operationTrace)
 		}
 	}
 	
