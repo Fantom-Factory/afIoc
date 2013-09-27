@@ -34,15 +34,19 @@ const class IocErr : Err, Unwrappable {
 ** 
 ** This purposely does not extend `IocErr` so it may be freely used by other frameworks
 const class NotFoundErr : Err {
-	const Str[] values
+	const Str[] availableValues
 	
-	new make(Str msg, Obj?[] values, Err? cause := null) : super(msg + availableValues(values), cause) {
-		this.values = values.exclude { it == null }.map { it.toStr }
+	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
+		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }
 	}
 
-	Str availableValues(Obj?[] values) {
-		vals := values.exclude { it == null }.map { it.toStr }.join(", ")
-		return " Available values = ${vals}"
+	override Str toStr() {
+		buf := StrBuf()
+		buf.add("${typeof.qname}: ${msg}\n")
+		buf.add("\nAvailable values:\n")
+		availableValues.each { buf.add("  $it\n")}
+		buf.add("\nStack Trace:")
+		return buf.toStr
 	}
 }
 

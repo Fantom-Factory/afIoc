@@ -97,8 +97,9 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-//		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList 
-		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
+		// TODO: use best fit?
+		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList 
+//		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
