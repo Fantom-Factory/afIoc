@@ -55,10 +55,10 @@ class Main {
     test3 := (MyService1) registry.autobuild(MyService1#)           // build a new service
     test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
 
-    test1.service2.kick	// --> Ass!
-    test2.service2.kick	// --> Ass!
-    test3.service2.kick	// --> Ass!
-    test4.service2.kick	// --> Ass!
+    test1.service2.kick // --> Ass!
+    test2.service2.kick // --> Ass!
+    test3.service2.kick // --> Ass!
+    test4.service2.kick // --> Ass!
 
     Service.find(IocService#).uninstall
   }
@@ -97,9 +97,24 @@ A **module** is a class where services and contributions are defined.
 
 
 
-Loading Modules [#loadingModules]
-*********************************
-Use the `RegistryBuilder` or `IocService` to build and start your `Registry` of services.
+Starting the IoC [#loadingModules]
+**********************************
+You can use the `IocService` to start a 'afIoc' as a Fantom service:
+
+    IocService([MyModule#]).start
+    ...
+    reg     := ((IocService) Service.find(IocService#)).registry
+    service := reg.dependencyByType(MyService#)
+    ...
+    Service.find(IocService#).uninstall
+
+Or you can use the `RegistryBuilder` to manage the registry manually;
+
+    reg := RegistryBuilder().addModule(MyModule#).build.startup
+    ...
+    service := reg.dependencyByType(MyService#)
+    ...
+    reg.shutdown
 
 When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules in dependant pods, in which case, each pod should have declared the following meta:
 
