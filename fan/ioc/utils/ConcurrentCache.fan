@@ -12,12 +12,23 @@ using afIoc::ConcurrentState
 ** @since 1.4.2
 const class ConcurrentCache {
 	private const ConcurrentState 	conState	:= ConcurrentState(|->Obj?| { atomicMap })
-	private const AtomicRef 		atomicMap	:= AtomicRef([:].toImmutable)
+	private const AtomicRef 		atomicMap	:= AtomicRef()
+	
+	new make(|This|? f := null) {
+		f?.call(this)
+		this.map = [:]
+	}
+	
+	** Make a 'ConcurrentCache' using the given immutable map 
+	** @since 1.4.6
+	new makeWithMap([Obj:Obj?] map) {
+		this.map = map 
+	}
 	
 	** A read-only copy of the cache map.
 	[Obj:Obj?] map {
 		get { atomicMap.val }
-		private set { }
+		private set { atomicMap.val = it.toImmutable }
 	}
 	
 	** Returns the value associated with the given key.
