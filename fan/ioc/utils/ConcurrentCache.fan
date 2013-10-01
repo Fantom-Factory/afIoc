@@ -31,6 +31,20 @@ const class ConcurrentCache {
 		private set { atomicMap.val = it.toImmutable }
 	}
 	
+	** Returns the value associated with the given key. If it doesn't exist then it is added from 
+	** the value function. 
+	** 
+	** This method is **NOT** thread safe. If two actors call this method at the same time, the 
+	** value function could be called twice for the same key. 
+	** @since 1.4.6
+	Obj getOrAdd(Obj key, |->Obj| valFunc) {
+		if (!containsKey(key)) {
+			val := valFunc.call()
+			set(key, val)
+		}
+		return get(key)
+	}
+	
 	** Returns the value associated with the given key.
 	@Operator
 	Obj? get(Obj key) {
