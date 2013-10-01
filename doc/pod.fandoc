@@ -274,7 +274,7 @@ Release Notes [#releaseNotes]
 
 v1.4.6 [#1.4.6]
 ---------------
- - New: Added 'makeWithMap()' ctor `ConcurrentCache`.
+ - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to `ConcurrentCache`.
  - New: `NotFoundErr` now pretty prints available values.
  - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
  - Bug: `SrcErrLocation` could Err when trimming leading whitespace from code snippet.
