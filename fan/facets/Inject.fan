@@ -1,5 +1,5 @@
 
-// TODO: see http://fantom.org/sidewalk/topic/2186
+// TODO: Facet Inheritance - see http://fantom.org/sidewalk/topic/2186
 // see TestInjectFacetInheritance
 // @FacetMeta { inherited = true } 
 

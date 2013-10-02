@@ -68,7 +68,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		}			
 		proxyType 	:= pod.type(model.className)
 				
-		// TODO: investigate why this throw NotImmutableErr when inlined
+		// TODO: investigate why this throws NotImmutableErr when inlined
 		typeCache[serviceType.qname] = proxyType
 		return proxyType
 	}	

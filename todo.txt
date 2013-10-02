@@ -1,6 +1,19 @@
 
-v1.4.6 Maybe...?
+v1.4.8 Maybe...?
 -----------------
+Create a dependency on afPlastic (removing afIoc's interval version)
+ - Not future proof - a new afPlastic may break afIoc
+ - No reuse is gained. Only the PlasticErr / Code snippet would be reused for BedSheet reporting,
+   but afIoc plastic is only used for LazyService, which so far has never failed.
+   (Mainly 'cos I don't use the feature much...?)
+ - afIoc's impressive test coverage would go down... :'(
+ - Would need to override / re-implment PlasticCompiler with srcCodePadding - not sure how.
+vs
+ - It feels right!
+ - Dodgy service creation *may* fail - would be good to get decent errors.
+ - Auto bug fixes.
+ - *I* control the dependency and can keep backwards compatability.
+ - Pfft - all bad points are "What Ifs" - fuck it, let's do it!
 
 
 
@@ -23,22 +36,6 @@ service disambiguation via facets
 
 Just Plain Bad Ideas:
 ---------------------
-Create a dependency on afPlastic (removing afIoc's interval version)
- - Not future proof - a new afPlastic may break afIoc
- - No reuse is gained. Only the PlasticErr / Code snippet would be reused for BedSheet reporting,
-   but afIoc plastic is only used for LazyService, which so far has never failed.
-   (Mainly 'cos I don't use the feature much...?)
- - afIoc's impressive test coverage would go down... :'(
-
-vs
-
- - It feels right!
- - Dodgy service creation *may* fail - would be good to get decent errors.
- - Auto bug fixes.
- - *I* control the dependency and can keep backwards compatability.
- - Pfft - all bad points are "What Ifs" - fuck it, let's do it!
-
-
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS
  - use placeholders instead
 

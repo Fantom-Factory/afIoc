@@ -8,9 +8,14 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 	}
 
 	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {
-		dependencyProviders.any { it.canProvide(proCtx, dependencyType) }		
+		dependencyProviders.any |provider->Bool| {
+			// providers can't provide themselves!
+			if (provider.typeof.fits(dependencyType))
+				return false;
+			return provider.canProvide(proCtx, dependencyType) 
+		}		
 	}
-	
+
 	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
 		dps := dependencyProviders.findAll { it.canProvide(proCtx, dependencyType) }
 

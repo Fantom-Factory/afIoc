@@ -32,6 +32,12 @@ internal class TestDependencyProvider : IocTest {
 		verifyNull(s72.oops)
 	}
 
+	Void testDependencyProvidersCanHaveLazyServices() {			
+		reg := RegistryBuilder().addModule(T_MyModule96#).build
+		s72 := (T_MyService72) reg.serviceById("s72")
+		verifyEq(s72.oops, "Dredd")
+	}
+
 	private Void verifyCtx(Registry reg, Type type, Type[] facets, Type into) {
 		dp 	:= reg.serviceById("dp") as T_DependencyProvider2
 		ctx := dp.ls["ctx"] as ProviderCtx
@@ -110,4 +116,29 @@ internal class T_MyModule88 {
 internal const class T_MyService72 {
 	@Inject	const Str? oops
 	new make(|This|in) { in(this) }
+}
+
+internal class T_MyModule96 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService72#).withId("s72")
+		binder.bindImpl(T_MyService83#).withId("s83")
+		binder.bindImpl(T_DependencyProvider4#).withId("dp4")
+	}
+	@Contribute
+	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider4 dp) {
+		config.add(dp)
+	}
+}
+internal const class T_DependencyProvider4 : DependencyProvider {
+	@Inject const T_MyService83 s83
+	new make(|This|in) { in(this) }
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { t:=s83.judge; return dependencyType.fits(Str?#) }
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) { s83.judge }
+}
+const mixin T_MyService83 {
+	abstract Str judge()
+}
+const class T_MyService83Impl : T_MyService83 {
+	new make(|This|in) { in(this) }
+	override Str judge() { "Dredd" }
 }

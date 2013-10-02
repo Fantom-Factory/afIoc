@@ -97,9 +97,9 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-		// TODO: use best fit?
-		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList 
-//		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
+		// TODO: Think of a test / use case to use findBestFit()!
+//		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList
+		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
@@ -151,16 +151,16 @@ internal const class ModuleImpl : Module {
 				// two threads. This is only dangerous because Gawd knows what those services do in 
 				// their ctor or PostInject methods!
 				service		:= getService(def)
-				
+
 				// if asked, replace the cached VIRTUAL service with a real one
 				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
-				
+
 				// create if required
 				if (make4Real || service == null) {
-					
+
 					// keep the tracker in the current thread
 					service = create(ctx, def, forceCreate)
-	
+
 					// double check service existence
 					// in a race condition, the 2st service created wins (why not?)
 					setService(def, service)
