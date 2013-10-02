@@ -121,7 +121,7 @@ internal const class T_MyService72 {
 internal class T_MyModule96 {
 	static Void bind(ServiceBinder binder) {
 		binder.bindImpl(T_MyService72#).withId("s72")
-		binder.bindImpl(T_MyService83#).withId("s83")
+		binder.bindImpl(T_MyService84#).withId("s84")
 		binder.bindImpl(T_DependencyProvider4#).withId("dp4")
 	}
 	@Contribute
@@ -130,15 +130,15 @@ internal class T_MyModule96 {
 	}
 }
 internal const class T_DependencyProvider4 : DependencyProvider {
-	@Inject const T_MyService83 s83
+	@Inject const T_MyService84 s84
 	new make(|This|in) { in(this) }
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { t:=s83.judge; return dependencyType.fits(Str?#) }
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) { s83.judge }
+	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {s84.judge; return dependencyType.fits(Str?#) }
+	override Obj? provide(ProviderCtx ctx, Type dependencyType) { s84.judge }
 }
-const mixin T_MyService83 {
+const mixin T_MyService84 {
 	abstract Str judge()
 }
-const class T_MyService83Impl : T_MyService83 {
+const class T_MyService84Impl : T_MyService84 {
 	new make(|This|in) { in(this) }
 	override Str judge() { "Dredd" }
 }

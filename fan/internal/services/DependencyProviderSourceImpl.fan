@@ -15,7 +15,7 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {
 		dependencyProviders.any |provider->Bool| {
 			// providers can't provide themselves!
-			if (provider.typeof.fits(dependencyType))
+			if (dependencyType.fits(provider.typeof))
 				return false;
 			return provider.canProvide(proCtx, dependencyType) 
 		}		
