@@ -61,7 +61,7 @@ class PlasticClassModel {
 			throw PlasticErr(PlasticMsgs.nonConstTypeCannotSubclassConstType(className, mixinType))
 		if (!mixinType.isMixin)
 			throw PlasticErr(PlasticMsgs.canOnlyExtendMixins(mixinType))
-		// TODO: given all our test types are internal, we'll let this condition slide for now...
+		// given all our test types are internal, we'll let this condition slide for now...
 //		if (mixinType.isInternal)
 //			throw PlasticErr(PlasticMsgs.superTypesMustBePublic(className, mixinType))
 		

@@ -2,8 +2,13 @@
 ** @since 1.3.0
 internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
-	@Inject @ServiceId { serviceId="registry" }
-	const ObjLocator objLocator
+// 	As clean as this is, we can't use it, because we get recursion from DepProviders who require
+//	injected lazy services.
+//	@Inject @ServiceId { serviceId="registry" }
+
+	@Inject
+	const Registry	registry
+	private ObjLocator objLocator() { (ObjLocator) registry }
 
 	new make(|This|in) {
 		in(this)
