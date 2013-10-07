@@ -39,7 +39,7 @@ const mixin ServiceIds {
 
 	** @since 1.3
 	internal
-	static const Str plasticPodCompiler			:= "PlasticPodCompiler"
+	static const Str plasticCompiler			:= "PlasticCompiler"
 
 	** @since 1.3
 	internal

@@ -1,4 +1,6 @@
 using compiler
+using afPlastic::IocClassModel
+using afPlastic::PlasticCompiler
 
 ** @since 1.3.0
 internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
@@ -9,7 +11,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	private const Registry registry
 	
 	@Inject
-	private const PlasticPodCompiler plasticPodCompiler
+	private const PlasticCompiler plasticCompiler
 	
 	new make(|This|di) { di(this) }
 
@@ -38,7 +40,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		if (!serviceType.isPublic)
 			throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
 		
-		model := PlasticClassModel(serviceType.name + "Impl", serviceType.isConst)
+		model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
 		
 		model.extendMixin(serviceType)
 		model.addField(LazyService#, "afLazyService")
@@ -62,9 +64,9 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 		Pod? pod
 		code 		:= model.toFantomCode
-		podName		:= plasticPodCompiler.generatePodName
+		podName		:= plasticCompiler.generatePodName
 		ctx.track("Compiling Pod '$podName'") |->Obj| {
-			pod 	= plasticPodCompiler.compile(code, podName)
+			pod 	= plasticCompiler.compileCode(code, podName)
 		}			
 		proxyType 	:= pod.type(model.className)
 				

@@ -15,8 +15,8 @@ class Build : BuildPod {
 					"repo.private"	: "true"
 				]
 
-		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0", "build 1.0"]
-		srcDirs = [`test/`, `test/utils/`, `test/plastic/`, `fan/`, `fan/plastic/`, `fan/ioc/`, `fan/ioc/utils/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
+		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0", "afPlastic 1.0.2+"]
+		srcDirs = [`test/`, `test/utils/`, `fan/`, `fan/ioc/`, `fan/ioc/utils/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
 		resDirs = [`doc/`]
 		
 		docApi = true
