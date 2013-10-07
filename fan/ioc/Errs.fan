@@ -17,7 +17,9 @@ const class IocErr : Err, Unwrappable {
 	}
 	
 	override Str toStr() {
-		opTrace := (cause == null) ? typeof.qname : (cause is IocErr ? "" : "${cause.typeof.qname}: ")
+		opTrace := (cause == null) 
+				? "${typeof.qname}: " 
+				: (cause is IocErr ? "" : "${cause.typeof.qname}: ")
 		opTrace += msg
 		if (operationTrace != null && !operationTrace.isEmpty) {
 			opTrace += "\nIoc Operation Trace:\n"
