@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 210 methods, 538 verifies]'
+  - Extensively tested: - 'All tests passed! [34 tests, 197 methods, 496 verifies]'
 
 
 
@@ -276,9 +276,9 @@ v1.4.6 [#1.4.6]
 ---------------
  - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to `ConcurrentCache`.
  - New: `NotFoundErr` now pretty prints available values.
+ - Chg: [afPlastic]`http://repo.status302.com/doc/afPlastic/#overview` has been broken out into an external dependency.
  - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
  - Bug: `DependencyProvider`s could Err when they depended on lazy services (recursion error).
- - Bug: `SrcErrLocation` could Err when trimming leading whitespace from code snippet.
 
 v1.4.4 [#1.4.4]
 ---------------

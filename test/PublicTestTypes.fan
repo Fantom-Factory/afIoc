@@ -1,3 +1,4 @@
+using afPlastic::PlasticCompiler
 
 ** Bugger, I've got test classes that need to be public!
 internal const class PublicTestTypes {
@@ -145,5 +146,5 @@ Str<|
      }
           |>
 	
-	private const Pod pod := PlasticPodCompiler().compile(fantomPodCode)
+	private const Pod pod := PlasticCompiler().compileCode(fantomPodCode)
 }

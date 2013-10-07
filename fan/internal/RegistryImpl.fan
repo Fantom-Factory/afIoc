@@ -1,4 +1,5 @@
 using concurrent::Future
+using afPlastic::PlasticCompiler
 
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
@@ -74,10 +75,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.plasticPodCompiler
-				it.serviceType 		= PlasticPodCompiler#
-				it.serviceImplType 	= PlasticPodCompiler#
-				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticPodCompiler#)
+				it.serviceId 		= ServiceIds.plasticCompiler
+				it.serviceType 		= PlasticCompiler#
+				it.serviceImplType 	= PlasticCompiler#
+				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
 			}] = null
 		
 			services[BuiltInServiceDef() {

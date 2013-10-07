@@ -1,3 +1,5 @@
+using afPlastic::PlasticCompiler
+using afPlastic::IocClassModel
 
 ** @since 1.3.10 
 internal const class PipelineBuilderImpl : PipelineBuilder {
@@ -5,7 +7,7 @@ internal const class PipelineBuilderImpl : PipelineBuilder {
 	private const ConcurrentCache typeCache	:= ConcurrentCache()
 
 	@Inject	
-	private const PlasticPodCompiler plasticPodCompiler
+	private const PlasticCompiler plasticCompiler
 
 	private const Method[]	objMethods	:= Obj#.methods
 	
@@ -62,7 +64,7 @@ internal const class PipelineBuilderImpl : PipelineBuilder {
 		if (!filterType.isPublic)
 			throw IocErr(IocMessages.pipelineTypeMustBePublic("Pipeline Filter", filterType))
 		
-		model := PlasticClassModel("${pipelineType.name}Bridge", pipelineType.isConst)
+		model := IocClassModel("${pipelineType.name}Bridge", pipelineType.isConst)
 		model.extendMixin(pipelineType)
 		model.addField(filterType, "next")
 		model.addField(pipelineType, "handler")
@@ -74,8 +76,8 @@ internal const class PipelineBuilderImpl : PipelineBuilder {
 		}
 
 		code 		:= model.toFantomCode
-		podName		:= plasticPodCompiler.generatePodName
-		pod 		:= plasticPodCompiler.compile(code, podName)
+		podName		:= plasticCompiler.generatePodName
+		pod 		:= plasticCompiler.compileCode(code, podName)
 		bridgeType 	:= pod.type(model.className)
 		
 		typeCache[key(pipelineType, filterType)] = bridgeType
