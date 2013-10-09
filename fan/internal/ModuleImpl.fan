@@ -279,7 +279,7 @@ internal const class ModuleImpl : Module {
 	}
 	
 	private Str moduleName(Str modId) {
-		modId.contains("::") ? modId[(modId.index("::")+1)..-1] : modId 
+		modId.contains("::") ? modId[(modId.index("::")+2)..-1] : modId 
 	}
 	
 	private Void withStatState(|ModuleStats| state) {

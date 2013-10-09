@@ -28,3 +28,7 @@ Download from [status302](http://repo.status302.com/browse/afIoc).
 Install via fanr:
 
     fanr install -r http://repo.status302.com/fanr/ afIoc
+
+To use in a project, add a dependency in your `build.fan`:
+
+    depends = ["sys 1.0", ..., "afIoc 1.4.6+"]
