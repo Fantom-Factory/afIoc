@@ -279,6 +279,7 @@ v1.4.6 [#1.4.6]
  - Chg: [afPlastic]`http://repo.status302.com/doc/afPlastic/#overview` has been broken out into an external dependency.
  - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
  - Bug: `DependencyProvider`s could Err when they depended on lazy services (recursion error).
+ - Bug: `ThreadStash` name prefix tidy.
 
 v1.4.4 [#1.4.4]
 ---------------

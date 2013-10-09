@@ -12,7 +12,7 @@ class Build : BuildPod {
 					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
 					"proj.name"		: "AF-IOC",
 					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "true"
+					"repo.private"	: "false"
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0", "afPlastic 1.0.2+"]
