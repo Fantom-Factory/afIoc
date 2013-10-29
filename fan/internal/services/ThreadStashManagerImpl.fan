@@ -14,8 +14,8 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 		set { }
 	}
 
-	new make() {
-		this.prefix = createPrefix("ThreadStash")
+	new make(Str prefix := "ThreadStash") {
+		this.prefix = createPrefix(prefix)
 	}
 
 	override ThreadStash createStash(Str owner) {
