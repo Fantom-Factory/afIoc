@@ -2,12 +2,19 @@
 internal class Utils {
 
 	static Str banner(Str heading) {
-		title	:= "$heading /___/   "
-		title 	= title.padl(61, ' ')
-		title = "   ___    __                 _____        _                  
-		           / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
-		          / _  | / /_ / / -_|/ _  / / __// _ \\/ _/ __/ _  / __|/ // / 
-		         /_/ |_|/___//_/\\__|/_//_/ /_/   \\_,_/__/\\__/____/_/   \\_, /  \n" + title
+		title := Str<|   ___    __                 _____        _                  
+		                / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
+		               / _  | / /_ / / -_|/ _  / / __// _ \/ _/ __/ _  / __|/ // / 
+		              /_/ |_|/___//_/\__|/_//_/ /_/   \_,_/__/\__/____/_/   \_, /  
+		              |>
+		first := true
+		while (!heading.isEmpty) {
+			banner := heading.size > 52 ? heading[0..<52] : heading
+			heading = heading[banner.size..-1]
+			banner = banner.padl(52, ' ') + (first ? " /___/   \n" : "\n")
+			title += banner
+			first = false
+		}
 		title 	+= "\n\n"
 		return title
 	}

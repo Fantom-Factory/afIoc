@@ -1,6 +1,10 @@
 
 internal class TestRegistryBuilder : IocTest {
 
+	Void testBannerText() {
+		RegistryBuilder().build(["bannerText":"I'm completely operational and all my circuits are  functioning perfectly.                    - HAL 9000"]).startup
+	}
+
 	Void testRegistryOptions() {
 		reg  := RegistryBuilder().build(["hereMeNow":true, "meNull":null])
 		opts := (RegistryOptions) reg.dependencyByType(RegistryOptions#)
@@ -13,13 +17,13 @@ internal class TestRegistryBuilder : IocTest {
 		verify(opts.options.containsKey("meNull"))
 		verifyNull(opts.options["meNull"])
 	}
-	
+
 	Void testRegistryOptionValues() {
 		verifyErrMsg(IocMessages.invalidRegistryValue("disableProxies", Int#, Bool#)) { 
 			RegistryBuilder().build(["disableProxies":true, "disableProxies":69])
 		}
 	}
-	
+
 	Void testDisabeProxy() {
 		reg := (RegistryImpl) RegistryBuilder().addModule(T_MyModule76#).build(["DISableProxIES":true]).startup
 		
