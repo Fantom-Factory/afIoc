@@ -50,4 +50,9 @@ const mixin ServiceIds {
 	** @since 1.3.10
 	static const Str pipelineBuilder			:= "PipelineBuilder"
 
+	** @see `RegistryOptions`
+	** 
+	** @since 1.4.8
+	static const Str registryOptions			:= "RegistryOptions"
+
 }

@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [34 tests, 197 methods, 496 verifies]'
+  - Extensively tested: - 'All tests passed! [34 tests, 198 methods, 497 verifies]'
 
 
 
@@ -271,6 +271,12 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 
 Release Notes [#releaseNotes]
 *****************************
+
+v1.4.8 [#1.4.8]
+---------------
+ - New: RegistryBuilder options are now available via `RegistryOptions`.
+ - Chg: Injectable services are now documented with '@Inject'.
+ - Chg: Enabled multi-line banner text.
 
 v1.4.6 [#1.4.6]
 ---------------

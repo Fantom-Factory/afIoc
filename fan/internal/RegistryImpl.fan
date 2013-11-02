@@ -9,9 +9,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
 	private const Duration					startTime
-	override const Str:Obj					options
+	override const Str:Obj?					options
 	
-	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj] options) {
+	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime					= tracker.startTime
 		this.options					= options
 		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
@@ -55,7 +55,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceType 		= DependencyProviderSource#
 				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
-
+ 
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.serviceOverride
 				it.serviceType 		= ServiceOverride#
@@ -99,6 +99,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceImplType 	= PipelineBuilderImpl#
 				it.source			= ServiceDef.fromCtorAutobuild(it, PipelineBuilderImpl#)
 			}] = null
+		
+			services[BuiltInServiceDef() {
+				it.serviceId 		= ServiceIds.registryOptions
+				it.serviceType 		= RegistryOptions#
+			}] = RegistryOptionsImpl(options)
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 

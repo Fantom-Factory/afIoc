@@ -108,11 +108,11 @@ class RegistryBuilder {
 	** 		should be disabled. Default is 'false'.
 	**  -  'suppressStartupMsg': Bool specifies if the default (verbose) startup log message should 
 	** 		be suppressed. Default is 'false'.
-    Registry build([Str:Obj]? options := null) {
+    Registry build([Str:Obj?]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
 
-			options = options?.rw ?: Utils.makeMap(Str#, Obj#)
+			options = options?.rw ?: Utils.makeMap(Str#, Obj?#)
 			
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,

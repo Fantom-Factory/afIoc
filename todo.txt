@@ -1,11 +1,7 @@
 
-v1.4.8 Maybe...?
+v1.4.10 Maybe...?
 -----------------
 
-StartupOptions
-
-Sometimes it's useful to pass const data into reg services - like BedSheetMetaData.
-Might be nice to have some startup options available as an @Injectable service?
 
 
 Meh... can't be arsed

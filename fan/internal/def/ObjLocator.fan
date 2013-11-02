@@ -27,7 +27,7 @@ internal const mixin ObjLocator {
 
 	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
 	
-	abstract Str:Obj options()
+	abstract Str:Obj? options()
 	
 	abstract Str:ServiceStat stats()
 	
