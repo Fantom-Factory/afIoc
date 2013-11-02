@@ -10,6 +10,8 @@ Might be nice to have some startup options available as an @Injectable service?
 
 Meh... can't be arsed
 ---------------------
+ServiceIds should probably be fully qualified type names to avoid conflicts
+
 TypeCoercers to be added via index props
 
 Re-do DepdendencyCtx to give more detail 

@@ -1,5 +1,5 @@
 
-** Returns a map of all services defined by this IoC.
+** @Inject - Returns a map of all services defined by this IoC.
 ** 
 ** @since 1.2.0
 const mixin ServiceStats {

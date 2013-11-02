@@ -1,5 +1,5 @@
 
-** Override a defined service with your own implementation. 
+** @Inject -Override a defined service with your own implementation. 
 ** 
 ** pre>
 **   static Void bind(ServiceBinder binder) {
