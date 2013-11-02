@@ -1,6 +1,19 @@
 
 internal class TestRegistryBuilder : IocTest {
 
+	Void testRegistryOptions() {
+		reg  := RegistryBuilder().build(["hereMeNow":true, "meNull":null])
+		opts := (RegistryOptions) reg.dependencyByType(RegistryOptions#)
+		verify(opts.options["hereMeNow"])
+	}
+
+	Void testRegistryOptionsCanBeNull() {
+		reg  := RegistryBuilder().build(["meNull":null])
+		opts := (RegistryOptions) reg.dependencyByType(RegistryOptions#)
+		verify(opts.options.containsKey("meNull"))
+		verifyNull(opts.options["meNull"])
+	}
+	
 	Void testRegistryOptionValues() {
 		verifyErrMsg(IocMessages.invalidRegistryValue("disableProxies", Int#, Bool#)) { 
 			RegistryBuilder().build(["disableProxies":true, "disableProxies":69])
