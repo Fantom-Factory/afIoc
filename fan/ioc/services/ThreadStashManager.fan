@@ -1,4 +1,5 @@
 
+** @Inject -
 ** Creates and keeps tabs on `ThreadStash`s so they may be cleaned up, say, at the end of a web 
 ** request.
 ** 

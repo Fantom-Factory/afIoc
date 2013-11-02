@@ -89,13 +89,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.aspectInvokerSource
-				it.serviceType 		= AspectInvokerSource#
-				it.serviceImplType 	= AspectInvokerSourceImpl#
-				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
-			}] = null
-		
-			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.threadStashManager
 				it.serviceType 		= ThreadStashManager#
 			}] = stashManager

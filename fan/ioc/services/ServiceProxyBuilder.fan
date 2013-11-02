@@ -1,5 +1,5 @@
 
-** Builds and caches Proxy Types. The Types are cached because:
+** @Inject - Builds and caches Proxy Types. The Types are cached because:
 **  - as they're already loaded by the VM, we may as well!
 **  - we have to, to prevent memory leaks!
 ** 

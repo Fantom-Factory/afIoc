@@ -1,11 +1,5 @@
 
 internal class TestRegistryBuilder : IocTest {
-	
-	Void testRegistryOptionKeys() {
-		verifyErrMsg(IocMessages.invalidRegistryOptions(["Wotup!?", "Nuffin"], "disableProxies bannerText suppressStartupMsg logServiceCreation".split)) { 
-			RegistryBuilder().build(["disableProxies":true, "Wotup!?":true, "Nuffin":69])
-		}
-	}
 
 	Void testRegistryOptionValues() {
 		verifyErrMsg(IocMessages.invalidRegistryValue("disableProxies", Int#, Bool#)) { 

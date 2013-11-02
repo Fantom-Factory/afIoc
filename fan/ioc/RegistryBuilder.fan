@@ -100,7 +100,7 @@ class RegistryBuilder {
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
 	** for invoking `Registry.startup`
 	** 
-	** Options are passed to the registry to specify some behaviour:
+	** Options are passed to the registry to specify extra behaviour:
 	**  -  'logServiceCreation': Bool specifies if each service creation should be logged to INFO. 
 	** 		Default is 'false'. For extensive debug info, use 
 	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
@@ -118,14 +118,8 @@ class RegistryBuilder {
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
 				"suppressStartupMsg"		: false,
-				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
+				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version"
 			])
-
-			invalid := Utils.makeMap(Str#, Obj#).addAll(options)
-			defaults.keys.each { invalid.remove(it) }
-			
-			if (!invalid.isEmpty)
-				throw IocErr(IocMessages.invalidRegistryOptions(invalid.keys, defaults.keys))
 
 			defaults.each |val, key| {
 				optType := options[key]?.typeof

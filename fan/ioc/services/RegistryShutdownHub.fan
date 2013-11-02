@@ -1,5 +1,5 @@
 
-**
+** @Inject - 
 ** Event hub for notifications when the `Registry` shuts down. All listeners need to immutable 
 ** funcs, which essentially means only 'const' classes can contribute.
 ** 
