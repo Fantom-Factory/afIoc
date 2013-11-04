@@ -275,7 +275,7 @@ Release Notes [#releaseNotes]
 v1.4.8 [#1.4.8]
 ---------------
  - New: RegistryBuilder options are now available via `RegistryOptions`.
- - Chg: Injectable services are now documented with '@Inject'.
+ - Chg: Injectable services are now documented with '(Service)'.
  - Chg: Enabled multi-line banner text.
 
 v1.4.6 [#1.4.6]
