@@ -1,5 +1,5 @@
 
-** @Inject - Holds the options passed into [RegistryBuilder.build()]`RegistryBuilder.build`.
+** (Service) - Holds the options passed into [RegistryBuilder.build()]`RegistryBuilder.build`.
 ** Useful for passing external immutable data into services.   
 const mixin RegistryOptions {
 	

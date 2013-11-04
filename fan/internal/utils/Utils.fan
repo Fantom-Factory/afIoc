@@ -11,7 +11,7 @@ internal class Utils {
 		while (!heading.isEmpty) {
 			banner := heading.size > 52 ? heading[0..<52] : heading
 			heading = heading[banner.size..-1]
-			banner = banner.padl(52, ' ') + (first ? " /___/   \n" : "\n")
+			banner = first ? (banner.padl(52, ' ') + " /___/   \n") : (banner.padr(52, ' ') + "\n")
 			title += banner
 			first = false
 		}

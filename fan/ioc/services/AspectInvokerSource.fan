@@ -1,5 +1,5 @@
 
-** @Inject - Can't be internal since it's used by auto-generated lazy services.
+** (Service) - Can't be internal since it's used by auto-generated lazy services.
 ** 
 ** @since 1.3.0
 @NoDoc

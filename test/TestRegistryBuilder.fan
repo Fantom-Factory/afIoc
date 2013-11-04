@@ -2,7 +2,8 @@
 internal class TestRegistryBuilder : IocTest {
 
 	Void testBannerText() {
-		RegistryBuilder().build(["bannerText":"I'm completely operational and all my circuits are  functioning perfectly.                    - HAL 9000"]).startup
+		RegistryBuilder().build(["bannerText":"align right"]).startup
+		RegistryBuilder().build(["bannerText":"I'm completely operational and all my circuits are  functioning perfectly. - HAL 9000"]).startup
 	}
 
 	Void testRegistryOptions() {
