@@ -1,5 +1,5 @@
 
-** @Inject - The registry of IoC services.
+** (Service) - The registry of IoC services.
 const mixin Registry {
 	
  	** Invoke to execute all contributions to the `RegistryStartup` service.

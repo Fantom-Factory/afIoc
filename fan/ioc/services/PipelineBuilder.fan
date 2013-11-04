@@ -1,5 +1,5 @@
 
-** @Inject -
+** (Service) -
 ** In this pattern, also know as a *filter chain*, a service endpoint (known as the terminator) is
 ** at the end of a pipeline of filters. 
 ** 

@@ -22,9 +22,9 @@ class RegistryBuilder {
 		(RegistryBuilder) Utils.stackTraceFilter |->RegistryBuilder| {		
 			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
 				lock.check
-				if (moduleType != IocModule# && !options["suppressLogging"])
+				if (moduleType != IocModule# && !options["suppressLogging"] && !moduleTypes.contains(moduleType))
 					logger.info("Adding module definition for $moduleType.qname")
-				
+
 				ctx.withModule(moduleType) |->| {			
 					if (moduleDefs.find { it.moduleType == moduleType } != null) {
 						// Debug because sometimes you can't help adding the same module twice (via dependencies)
