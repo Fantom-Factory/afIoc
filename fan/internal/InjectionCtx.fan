@@ -1,15 +1,35 @@
+using concurrent::Actor
 
 internal class InjectionCtx {
 
+	static const Str 			ctxKey			:= "afIoc.injectionCtx"		
+	static const Str 			cntKey			:= "afIoc.injectionCtx.count"		
 	private ServiceDef[]		defStack	:= [,]
 	private ConfigProvider[]	configStack	:= [,]
 	private Facet[][]			facetsStack	:= [,]
 	OpTracker 					tracker
 	ObjLocator? 				objLocator
 
+	** for testing only
 	new make(ObjLocator? objLocator, OpTracker tracker := OpTracker()) {
 		this.objLocator = objLocator
 		this.tracker	= tracker
+	}
+
+	static Obj? withCtx(ObjLocator? objLocator, OpTracker? tracker, |InjectionCtx ctx->Obj?| f) {
+		ctx := Actor.locals[ctxKey] ?: InjectionCtx.make(objLocator, tracker ?: OpTracker())
+		Actor.locals[ctxKey] = ctx
+		Actor.locals[cntKey] = ((Int?) Actor.locals[cntKey] ?: 0) + 1
+		
+		try {
+			return f.call(ctx)
+		} finally {
+			Actor.locals[cntKey] = ((Int?) Actor.locals[cntKey] ?: 0) - 1
+			if ((Int) Actor.locals[cntKey] == 0) {
+				Actor.locals.remove(ctxKey)
+				Actor.locals.remove(cntKey)
+			}
+		}
 	}
 
 	Obj? track(Str description, |->Obj?| operation) {

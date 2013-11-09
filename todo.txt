@@ -2,6 +2,13 @@
 v1.4.10 Maybe...?
 -----------------
 
+Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
+
+Re-do DepdendencyCtx to give more detail 
+ - See ProviderCtx for details
+ - it's messy and I don't need it
+ - but then I could inject Loggers... Hmm...?
+
 
 
 Meh... can't be arsed
@@ -9,11 +16,6 @@ Meh... can't be arsed
 ServiceIds should probably be fully qualified type names to avoid conflicts
 
 TypeCoercers to be added via index props
-
-Re-do DepdendencyCtx to give more detail 
- - See ProviderCtx for details
- - it's messy and I don't need it
- - but then I could inject Loggers... Hmm...?
 
 service disambiguation via facets 
  - is just another dep pro: map of services keyed by type&facet

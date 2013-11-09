@@ -12,6 +12,7 @@ internal class TestTypeCoercer : IocTest {
 		verifyEq(tc.coerce(69, Str#), "69")
 		verifyEq(tc.coerce(69f, Str#), "69.0")
 		verifyEq(tc.coerce("69", Int#), 69)
+		verifyEq(tc.coerce(`69`, File#), `69`.toFile)
 
 		// fromXXX()
 		verifyEq(tc.coerce("2000-01-01T00:00:00Z UTC", DateTime#), DateTime.defVal)

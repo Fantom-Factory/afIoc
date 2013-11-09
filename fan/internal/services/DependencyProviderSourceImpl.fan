@@ -3,13 +3,15 @@
 internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 	private const DependencyProvider[] dependencyProviders
 
-	new make(DependencyProvider[] dependencyProviders) {
+	new make(DependencyProvider[] dependencyProviders, Registry registry) {
 		this.dependencyProviders = dependencyProviders.toImmutable
 		
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
 		// with lazy services
-		ctx := InjectionCtx(null).providerCtx
-		dependencyProviders.each { it.canProvide(ctx, Void#) }
+		InjectionCtx.withCtx((ObjLocator) registry, null) |ctx->Obj?| {
+			dependencyProviders.each { it.canProvide(ctx.providerCtx, Void#) }
+			return null
+		}
 	}
 
 	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {
