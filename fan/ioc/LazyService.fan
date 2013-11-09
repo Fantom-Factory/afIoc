@@ -1,5 +1,6 @@
 using concurrent::AtomicBool
 using concurrent::AtomicRef
+using concurrent::Actor
 using afIoc::ConcurrentState
 
 ** Should we add this source to the generated proxy pods, and delete it from afIoc?
@@ -33,7 +34,18 @@ const class LazyService {
 	}
 
 	private ServiceMethodInvoker getViaAppScope() {
-		return getState { getCaller(objLocator, serviceDef).toConst }
+		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
+			Unsafe ctxWrapper := Unsafe(ctx)	// pass ctx into the state thread
+			return getState |state->Obj?| {
+				Actor.locals[InjectionCtx.ctxKey] = ctxWrapper.val
+				try {
+					return state.getCaller(objLocator, serviceDef).toConst 
+				} finally {
+					// we can do this because this state thread is MINE!
+					Actor.locals.remove(InjectionCtx.ctxKey)
+				}
+			}
+		}
 	}
 
 	private ServiceMethodInvoker getViaThreadScope() {
@@ -59,14 +71,14 @@ internal class LazyServiceState {
 		if (invoker != null)
 			return invoker
 
-		ctx 	:= InjectionCtx(objLocator)
-		invoker = ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-			invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
-			invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
+		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
+			invoker = ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
+				invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
+				return invoker
+			}
 			return invoker
 		}
-
-		return invoker
 	}
 }
 

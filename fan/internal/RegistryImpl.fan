@@ -163,9 +163,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		injCtx				:= InjectionCtx(this, tracker)
-		depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
-		serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)
+		InjectionCtx.withCtx(this, tracker) |injCtx->Obj?| {   
+			depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
+			serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)
+			return null
+		}
 	}
 
 
@@ -200,7 +202,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			title += "IoC started up in ${millis}ms\n"
 			log.info(srvcs + title)
 		}
-		
+
 		return this
 	}
 	
@@ -230,9 +232,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj serviceById(Str serviceId) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			ctx := InjectionCtx(this)
-			return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
-				trackServiceById(ctx, serviceId)
+			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {   
+				return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
+					return trackServiceById(ctx, serviceId)
+				}
 			}
 		}
 	}
@@ -240,10 +243,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj dependencyByType(Type dependencyType) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			ctx := InjectionCtx(this)
-			return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-				// as ctx is brand new, this won't return null
-				trackDependencyByType(ctx, dependencyType)
+			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+				return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
+					// as ctx is brand new, this won't return null
+					return trackDependencyByType(ctx, dependencyType)
+				}
 			}
 		}
 	}
@@ -253,7 +257,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
-			return trackAutobuild(InjectionCtx(this), type2, ctorArgs)
+			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+				return trackAutobuild(ctx, type2, ctorArgs)
+			}
 		}
 	}
 
@@ -261,7 +267,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
-			return trackInjectIntoFields(InjectionCtx(this), object)
+			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+				return trackInjectIntoFields(ctx, object)
+			}
 		}
 	}
 

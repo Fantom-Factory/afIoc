@@ -152,7 +152,7 @@ internal const class InjectionUtils {
 
 	private static Obj? findDependencyByType(InjectionCtx ctx, Type dependencyType) {
 		ctx.track("Looking for dependency of type $dependencyType") |->Obj?| {
-			ctx.objLocator.trackDependencyByType(ctx, dependencyType)			
+			ctx.objLocator.trackDependencyByType(ctx, dependencyType)
 		}
 	}
 

@@ -272,6 +272,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 Release Notes [#releaseNotes]
 *****************************
 
+v1.4.10 [#1.4.10]
+-----------------
+ - Chg: InjectionCtx is now threaded and used in Lazy Service creation. (Um, that means more complete Operation Stacks in IocErrs!)
+
 v1.4.8 [#1.4.8]
 ---------------
  - New: RegistryBuilder options are now available via `RegistryOptions`.

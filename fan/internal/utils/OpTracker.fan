@@ -82,7 +82,8 @@ internal class OpTracker {
 
 	private Void popOp() {
 		op := operations.pop
-		if (logEnabled) {
+		// don't log if we're backing out of an error
+		if (logEnabled && !logged) {
 			depth 	:= operations.size + 1
 			pad		:= "".justr(depth)			
 			millis	:= (Duration.now - op.startTime).toMillis.toLocale("#,000")
