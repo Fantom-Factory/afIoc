@@ -27,38 +27,14 @@ internal class BugFixes : IocTest {
 		}.send(null).get
 	}
 
-	Void testProxiedServicesAreCachedOnceCreated_perThread() {
-		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
-
-		t50_1 	 := reg.serviceById("t50-thread")
-		proxyPod := t50_1.typeof.pod
-
-		t50_1 -> dude
-		t50_1 = reg.serviceById("t50-thread")
-		
-		// once the service is created, it should no longer be in the proxy pod
-		verifyNotEq(t50_1.typeof.pod, proxyPod)
-	}
-
-	Void testProxiedServicesAreCachedOnceCreated_perApplication() {
-		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
-
-		t50_1 	 := reg.serviceById("t50-app")
-		proxyPod := t50_1.typeof.pod
-
-		t50_1 -> dude
-		t50_1 = reg.serviceById("t50-app")
-
-		// once the service is created, it should no longer be in the proxy pod
-		verifyNotEq(t50_1.typeof.pod, proxyPod)
-	}
-	
 	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
 		Registry reg 		:= RegistryBuilder().addModule(T_MyModule85#).build.startup
 		T_MyService70 t70	:= reg.serviceById("t70")
 		verifyNotNull(t70)
 	}
-	
+
+	// A service is proxied for a reason, usually so a threaed one can be injected into an app one, if we start 
+	// returning the real service, the whole point of having a proxy is lost! (Oh, and the app crashes!)
 	Void testProxiedServicesStayProxied() {
 		reg := RegistryBuilder().addModule(T_MyModule85#).build.startup
 		
