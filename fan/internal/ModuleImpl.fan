@@ -115,7 +115,7 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
-	override Obj? service(InjectionCtx ctx, Str serviceId, Bool forceCreate) {
+	override Obj? service(InjectionCtx ctx, Str serviceId, Bool returnReal) {
         def := serviceDefs[serviceId]
 		if (def == null)
 			// nope, the service is not one of ours
@@ -125,48 +125,19 @@ internal const class ModuleImpl : Module {
 		return ctx.withServiceDef(def) |->Obj?| {
 			
 			if (def.scope == ServiceScope.perInjection) {
-				return create(ctx, def, forceCreate)
+				return getOrMakeService(ctx, def, returnReal, false)
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
-				service		:= getService(def)
-				
-				// if asked, replace the cached VIRTUAL service with a real one
-				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
-
-				// create if required
-				if (make4Real || service == null) {
-					service = create(ctx, def, forceCreate)
-					setService(def, service)
-				}
-				
-				return service
+				return getOrMakeService(ctx, def, returnReal, true)
 			}
 
+			// Because of recursion (service1 creates service2), you can not create the service inside an actor ('cos 
+			// the actor will block when it eventually messages itself). So...
+			// TODO: A const service could be created twice if there's a race condition between two threads. This is 
+			// only dangerous because Gawd knows what those services do in their ctor or PostInject methods!
 			if (def.scope == ServiceScope.perApplication) {
-				// Because of recursion (service1 creates service2), you can not create the service
-				// inside an actor ('cos the actor will block when it eventually messages itself). 
-				// So...
-				// TODO: A const service could be created twice if there's a race condition between
-				// two threads. This is only dangerous because Gawd knows what those services do in 
-				// their ctor or PostInject methods!
-				service		:= getService(def)
-
-				// if asked, replace the cached VIRTUAL service with a real one
-				make4Real	:= forceCreate && getLifecycle(def) == ServiceLifecycle.VIRTUAL
-
-				// create if required
-				if (make4Real || service == null) {
-
-					// keep the tracker in the current thread
-					service = create(ctx, def, forceCreate)
-
-					// double check service existence
-					// in a race condition, the 2st service created wins (why not?)
-					setService(def, service)
-				}
-				
-				return service
+				return getOrMakeService(ctx, def, returnReal, true)
 			}
 			
 			throw WtfErr("What scope is {$def.scope}???")
@@ -195,29 +166,55 @@ internal const class ModuleImpl : Module {
 	}
 
 	// ---- Private Methods ----------------------------------------------------
-	
-    private Obj create(InjectionCtx ctx, ServiceDef def, Bool forceCreate) {
-		if (ctx.objLocator.options["disableProxies"] == true)
-			forceCreate = true
+
+	private Obj getOrMakeService(InjectionCtx ctx, ServiceDef def, Bool returnReal, Bool useCache) {
+		if (returnReal)
+			return getOrMakeRealService(ctx, def, useCache)
+		if (ctx.objLocator?.options?.get("disableProxies") == true)
+			return getOrMakeRealService(ctx, def, useCache)
+		if (!def.proxiable)
+			return getOrMakeRealService(ctx, def, useCache)
 		
-		if (!forceCreate && def.proxiable && getLifecycle(def) == ServiceLifecycle.DEFINED) {
-			return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
-				proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
-				service			:= proxyBuilder.buildProxy(ctx, def)
-				
-				setLifecycle(def, ServiceLifecycle.VIRTUAL)
-				return service
-			}
+		return getOrMakeProxyService(ctx, def, useCache)
+	}
+
+	private Obj getOrMakeRealService(InjectionCtx ctx, ServiceDef def, Bool useCache) {
+		if (useCache) {
+			exisitng := getService(def)
+			if (exisitng != null)
+				return exisitng
 		}
-		
+
 		return ctx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			
-			setLifecycle(def, ServiceLifecycle.CREATED)
+			if (useCache) {
+				setService(def, service)
+				setLifecycle(def, ServiceLifecycle.CREATED)
+			}
 			return service
 	    }	
-    }
+	}
+
+	private Obj getOrMakeProxyService(InjectionCtx ctx, ServiceDef def, Bool useCache) {
+		if (useCache) {
+			exisitng := getProxy(def)
+			if (exisitng != null)
+				return exisitng
+		}
+		
+		return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
+			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
+			proxy			:= proxyBuilder.buildProxy(ctx, def)
+			
+			if (useCache) {
+				setProxy(def, proxy)
+				setLifecycle(def, ServiceLifecycle.VIRTUAL)
+			}
+			return proxy
+		}
+	}
 
 	private Obj? getService(ServiceDef def) {
 		getServiceState(def.scope) |state->Obj?| { state.services[def.serviceId] }
@@ -225,6 +222,14 @@ internal const class ModuleImpl : Module {
 
 	private Void setService(ServiceDef def, Obj service) {
 		withServiceState(def.scope) |state| { state.services[def.serviceId] = service }
+	}
+
+	private Obj? getProxy(ServiceDef def) {
+		getServiceState(def.scope) |state->Obj?| { state.proxies[def.serviceId] }
+	}
+
+	private Void setProxy(ServiceDef def, Obj service) {
+		withServiceState(def.scope) |state| { state.proxies[def.serviceId] = service }
 	}
 
 	private Void setStat(ServiceDef def, ServiceStat stat) {
@@ -294,11 +299,17 @@ internal const class ModuleImpl : Module {
 internal class ModuleServices {
 	private OneShotLock 			lock		:= OneShotLock("Registry has been shutdown")
 	private Str:Obj 				pServices	:= Utils.makeMap(Str#, Obj#)
+	private Str:Obj 				pProxies	:= Utils.makeMap(Str#, Obj#)
 	private Str:ServiceLifecycle	pLife		:= Utils.makeMap(Str#, ServiceLifecycle#)
 	
 	Str:Obj	services() {
 		lock.check
 		return pServices
+	}
+	
+	Str:Obj	proxies() {
+		lock.check
+		return pProxies
 	}
 	
 	Str:ServiceLifecycle life() {
@@ -309,6 +320,7 @@ internal class ModuleServices {
 	Void clear() {
 		lock.lock
 		pServices.clear
+		pProxies.clear
 		pLife.clear
 	}
 }

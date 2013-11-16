@@ -370,7 +370,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool forceCreate) {
+	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool returnReal) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
 			ctx.log("Found override for service '${serviceDef.serviceId}'")
@@ -378,7 +378,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId, forceCreate)
+		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId, returnReal)
 	}
 
 	override Void logServiceCreation(Type log, Str msg) {
