@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [34 tests, 199 methods, 497 verifies]'
+  - Extensively tested: - 'All tests passed! [34 tests, 198 methods, 498 verifies]'
 
 
 
@@ -275,6 +275,7 @@ Release Notes [#releaseNotes]
 v1.4.10 [#1.4.10]
 -----------------
  - Chg: InjectionCtx is now threaded and used in Lazy Service creation. (Um, that means more complete Operation Stacks in IocErrs!)
+ - Bug: Once a proxied service, always a proxied service! In some cases the *real* service could be returned.
 
 v1.4.8 [#1.4.8]
 ---------------
