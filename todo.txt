@@ -9,7 +9,8 @@ Re-do DepdendencyCtx to give more detail
  - it's messy and I don't need it
  - but then I could inject Loggers... Hmm...?
 
-
+Make SyncState - a consistent API for thread and const data
+ - make an afIocUtils pod? (break out most of current cruft)
 
 Meh... can't be arsed
 ---------------------
