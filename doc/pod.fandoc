@@ -1,6 +1,6 @@
 Overview [#overview]
 ********************
-**afIoC** is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
+'afIoc' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
 
@@ -33,6 +33,8 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - simple API - 1 facet and 4 registry methods and you're away!
   - over 75 bespoke and informative Err messages!
   - Extensively tested: - 'All tests passed! [34 tests, 198 methods, 498 verifies]'
+
+> **ALIEN-AID:** For tips and tutorials on afIoc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
 
 
 
@@ -275,7 +277,7 @@ Release Notes [#releaseNotes]
 v1.4.10 [#1.4.10]
 -----------------
  - Chg: InjectionCtx is now threaded and used in Lazy Service creation. (Um, that means more complete Operation Stacks in IocErrs!)
- - Bug: Once a proxied service, always a proxied service! In some cases the *real* service could be returned.
+ - Bug: Once a proxied service, always a proxied service! In some cases the *real* service could have been returned.
 
 v1.4.8 [#1.4.8]
 ---------------
