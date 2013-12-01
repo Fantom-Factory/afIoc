@@ -8,7 +8,7 @@
 ** 
 **   @Contribute
 **   static Void contributeServiceOverride(MappedConfig conf) {
-**     config["dinner"] = conf.autobuild(PieAndMash#)
+**     conf["dinner"] = conf.autobuild(PieAndMash#)
 **   }
 ** <pre
 **
