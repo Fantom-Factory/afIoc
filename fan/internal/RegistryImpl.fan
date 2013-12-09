@@ -180,12 +180,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// Do dat startup!
 		tracker := OpTracker()
-		startup := serviceById(ServiceIds.registryStartup) as RegistryStartupImpl
+		startup := (RegistryStartupImpl) serviceById(ServiceIds.registryStartup)
 		startup.go(tracker)
 		
-		if (!options.get("suppressStartupMsg", false)) {
-			millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
-			
+		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+		msg		:= ""
+		
+		if (!options.get("suppressStartupServiceList", false)) {
 			stats := this.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
 			srvcs := "\n\n${stats.size} Services:\n\n"
 			maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
@@ -197,11 +198,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 			perce := (100d * unreal / stats.size).toLocale("0.00")
 			srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
+			msg   += srvcs
+		}
 			
+		if (!options.get("suppressStartupBanner", false)) {
 			title := Utils.banner(options["bannerText"])
 			title += "IoC started up in ${millis}ms\n"
-			log.info(srvcs + title)
+			msg   += title
 		}
+		
+		if (!msg.trim.isEmpty)
+			log.info(msg)
 
 		return this
 	}
