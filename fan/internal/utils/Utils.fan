@@ -2,7 +2,8 @@
 internal class Utils {
 
 	static Str banner(Str heading) {
-		title := Str<|   ___    __                 _____        _                  
+		title := "\n"
+		title += Str<|   ___    __                 _____        _                  
 		                / _ |  / /  _____  _____  / ___/__  ___/ /_________  __ __ 
 		               / _  | / /_ / / -_|/ _  / / __// _ \/ _/ __/ _  / __|/ // / 
 		              /_/ |_|/___//_/\__|/_//_/ /_/   \_,_/__/\__/____/_/   \_, /  
@@ -15,7 +16,7 @@ internal class Utils {
 			title += banner
 			first = false
 		}
-		title 	+= "\n\n"
+		title 	+= "\n"
 		return title
 	}
 	

@@ -2,6 +2,7 @@ using concurrent::AtomicRef
 using concurrent::Future
 using afIoc::ConcurrentState
 
+// TODO: add clear() method
 ** A map that shares its state across threads providing fast reads and synchronised writes. It's
 ** an application of `ConcurrentState` for use when reads far out number the writes.
 ** 
