@@ -94,13 +94,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = stashManager
 		
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.pipelineBuilder
-				it.serviceType 		= PipelineBuilder#
-				it.serviceImplType 	= PipelineBuilderImpl#
-				it.source			= ServiceDef.fromCtorAutobuild(it, PipelineBuilderImpl#)
-			}] = null
-		
-			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryOptions
 				it.serviceType 		= RegistryOptions#
 			}] = RegistryOptionsImpl(options)
