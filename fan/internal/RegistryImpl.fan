@@ -194,7 +194,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			msg   += srvcs
 		}
 		
-		Env.cur.err.printLine(options)
 		if (!options.get("suppressStartupBanner", false)) {
 			title := Utils.banner(options["bannerText"])
 			name  := options["appName"] ?: "Ioc"

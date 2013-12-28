@@ -15,9 +15,9 @@ internal class ThreadStack {
 
 	private Obj get(Int index, Bool checked := true) {
 		if (checked && stack.isEmpty)
-			throw IocErr("ThreadStack with id '$stackId' is empty")
+			throw Err("ThreadStack with id '$stackId' is empty")
 		if (checked && stack.getSafe(index) == null)
-			throw IocErr("ThreadStack with id '$stackId' only has ${stack.size} elements")
+			throw Err("ThreadStack with id '$stackId' only has ${stack.size} elements")
 		return stack.getSafe(index)
 	}
 	
@@ -61,8 +61,12 @@ internal class ThreadStack {
 		getStack(stackId, checked)?.get(-2, checked) 
 	}
 
+	static Obj[]? elements(Str stackId, Bool checked := true) {
+		getStack(stackId, checked)?.stack
+	}
+
 	private static ThreadStack? getStack(Str stackId, Bool checked) {
-		Actor.locals.get(stackId) ?: (checked ? throw IocErr("Could not find ThreadStack in Actor.locals() with id '$stackId'") : null)		
+		Actor.locals.get(stackId) ?: (checked ? throw Err("Could not find ThreadStack in Actor.locals() with id '$stackId'") : null)		
 	}
 
 	private static ThreadStack getOrMakeStack(Str stackId) {

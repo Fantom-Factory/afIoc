@@ -21,9 +21,7 @@ const class IocHelper {
 	** A read only copy of the 'Actor.locals' map with the keys sorted alphabetically. Handy for 
 	** debugging. Example:
 	** 
-	**   IocHelper.locals.each |value, key| {
-	**     echo("$key = $value")
-	**   }
+	**   IocHelper.locals.each |value, key| { echo("$key = $value") }
 	** 
 	static Str:Obj? locals() {
 		Str:Obj? map := [:] { ordered = true }

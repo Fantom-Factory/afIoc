@@ -34,7 +34,7 @@ const internal class ConfigProvider {
 
 	private Type? findConfigType(Method buildMethod) {
 		InjectionCtx.track("Looking for configuration parameter") |->Type?| {
-			config := |->Obj?| {
+			config := |->Type?| {
 				if (buildMethod.params.isEmpty)
 					return null
 				
@@ -50,7 +50,7 @@ const internal class ConfigProvider {
 			if (config == null)
 				InjectionCtx.log("No configuration parameter found")
 			else 
-				InjectionCtx.log("Found $config")
+				InjectionCtx.log("Found $config.signature")
 			
 			return config
 		}			

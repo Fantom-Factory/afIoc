@@ -21,7 +21,7 @@ internal const class InjectionUtils {
 						return true
 					}
 				})
-				log("No injection fields found")
+			log("No injection fields found")
 		}
 
 		callPostInjectMethods(object)
@@ -31,7 +31,7 @@ internal const class InjectionUtils {
 	static Obj? callMethod(Method method, Obj? obj, Obj?[] providedMethodArgs) {
 		args := findMethodInjectionParams(method, providedMethodArgs)
 		return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
-				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
+			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
 	}
 
@@ -90,7 +90,7 @@ internal const class InjectionUtils {
 			}
 		}
 	}
-	
+
 	static Func makeCtorInjectionPlan(Type building) {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
@@ -127,7 +127,7 @@ internal const class InjectionUtils {
 
 	private static Obj?[] findMethodInjectionParams(Method method, Obj?[] providedMethodArgs) {
 		return track("Determining injection parameters for $method.signature") |->Obj?[]| {
-			InjectionCtx.withFacets(Facet[,]) |->Obj?[]| {
+			InjectionCtx.withFacets(Facet#.emptyList) |->Obj?[]| {
 				params := method.params.map |param, index| {
 					
 					log("Found parameter ${index+1}) $param.type")
@@ -190,7 +190,7 @@ internal const class InjectionUtils {
 			return true
 		}
 	}
-	
+
 	static Obj? track(Str description, |->Obj?| operation) {
 		InjectionCtx.track(description, operation)
 	}

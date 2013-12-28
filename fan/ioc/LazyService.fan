@@ -37,7 +37,7 @@ const class LazyService {
 		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
 			Unsafe ctxWrapper := Unsafe(InjectionCtx.peek)	// pass ctx into the state thread
 			return getState |state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionCtx.stackId, ctxWrapper.val) |InjectionCtx ctx2 -> Obj?| {
+				 ThreadStack.pushAndRun(InjectionCtx.injectCtxId, ctxWrapper.val) |InjectionCtx ctx2 -> Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 
 				 }
 			}
