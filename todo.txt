@@ -5,11 +5,15 @@ v1.5.0 Maybe...?
 Use 'appName' from startup options -> appName started up in XXX secs
 
 Registry.createProxy() - may have to change Lazy service
+Registry.createProxy(mixinType, implType)
+ - as impl type is not a service, it's quite useless.
+ - better to enhance plastic
+
+Registry.callMethod()
 
 Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
 Default to the Service type name if given.
  
-
 Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
 
 Re-do DepdendencyCtx to give more detail 
@@ -18,12 +22,13 @@ Re-do DepdendencyCtx to give more detail
  - but then I could inject Loggers... Hmm...?
 
 Make SyncState - a consistent API for thread and const data
- - make an afIocUtils pod? (break out most of current cruft)
+
+ServiceIds should probably be fully qualified type names to avoid conflicts
+
+
 
 Meh... can't be arsed
 ---------------------
-ServiceIds should probably be fully qualified type names to avoid conflicts
-
 TypeCoercers to be added via index props
 
 service disambiguation via facets 
@@ -41,10 +46,6 @@ OrderConfig wildcards - e.g. "before: *" NO WILDCARDS
 
 Create PerThreadService 
  - is just a registry.get()!
-
-Registry.createProxy(mixinType, implType)
- - as impl type is not a service, it's quite useless.
- - better to enhance plastic
 
 IocHelper.eagerLoadBuiltInServices
  - I mean, why?
