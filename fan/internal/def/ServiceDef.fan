@@ -39,7 +39,7 @@ internal const mixin ServiceDef {
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return InjectionCtx.withProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
+				return InjectionCtx.withConfigProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
 					return InjectionUtils.callMethod(method, null, Obj#.emptyList)
 				}
 			}
@@ -55,7 +55,7 @@ internal const mixin ServiceDef {
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return InjectionCtx.withProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
+				return InjectionCtx.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
 					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList)
 					InjectionUtils.injectIntoFields(obj)
 					return obj

@@ -15,13 +15,15 @@ internal const class InjectionUtils {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					InjectionCtx.withFacets(field.facets) |->Bool| {
-						dependency := findDependencyByType(field.type)
-						inject(object, field, dependency)
-						return true
+					InjectionCtx.injectingField(object.typeof, field) |->Bool| {
+						InjectionCtx.withFacets(field.facets) |->Bool| {
+							dependency := findDependencyByType(field.type)
+							inject(object, field, dependency)
+							return true
+						}
 					}
 				})
-			log("No injection fields found")
+				log("No injection fields found")
 		}
 
 		callPostInjectMethods(object)
@@ -29,9 +31,11 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? callMethod(Method method, Obj? obj, Obj?[] providedMethodArgs) {
-		args := findMethodInjectionParams(method, providedMethodArgs)
-		return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
-			return (obj == null) ? method.callList(args) : method.callOn(obj, args)
+		InjectionCtx.injectingMethod(method.parent, method) |->Obj?| {
+			args := findMethodInjectionParams(method, providedMethodArgs)
+			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
+				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
+			}
 		}
 	}
 
@@ -61,7 +65,7 @@ internal const class InjectionUtils {
 				}
 				if (params[0].params.size == params[1].params.size)
 					throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
-				
+
 				return params[0]
 			}()
 
@@ -79,7 +83,11 @@ internal const class InjectionUtils {
 				return building.make()
 			}
 		}
-		args := findMethodInjectionParams(ctor, providedCtorArgs)
+		
+		args := InjectionCtx.injectingCtor(building, ctor) |->Obj?| {
+			return findMethodInjectionParams(ctor, providedCtorArgs)
+		}
+		
 		return track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			try {
 				return ctor.callList(args)
@@ -95,9 +103,11 @@ internal const class InjectionUtils {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(building, Inject#, true).each |field| {
-				InjectionCtx.withFacets(field.facets) |->| {
-					dependency := findDependencyByType(field.type)
-					plan[field] = dependency
+				InjectionCtx.injectingFieldViaItBlock(building, field) |->| {
+					InjectionCtx.withFacets(field.facets) |->| {
+						dependency := findDependencyByType(field.type)
+						plan[field] = dependency
+					}
 				}
 			}
 			if (plan.isEmpty)

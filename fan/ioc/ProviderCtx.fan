@@ -27,6 +27,9 @@ class ProviderCtx {
 
 	// notes on possible injection ctx
 	// useful to have field name also - check if enabled with sys:debug=false
+
+//ItBlockCor
+
 //	building type
 // - autobuild
 // - serviceDef
@@ -60,3 +63,10 @@ class ProviderCtx {
 //abstract Bool canProvide(ProviderCtx ctx, InjectionMode , Type dependencyType, Type injectingInto, Facet[] facets)
 
 }
+
+//enum class InjectionType {
+//	FieldInjection,
+//	FieldInjectionViaItBlock,
+//	CtorInjection,
+//	MethodInjection;	
+//}
