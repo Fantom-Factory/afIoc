@@ -30,7 +30,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - inject your own objects, not just services
 
 - **Designed to help YOU the developer!**
-  - simple API - 1 facet and 4 registry methods and you're away!
+  - simple API - 1 facet and a 2 registry methods is all you need!
   - over 75 bespoke and informative Err messages!
   - Extensively tested: - 'All tests passed! [33 tests, 190 methods, 482 verifies]'
 
