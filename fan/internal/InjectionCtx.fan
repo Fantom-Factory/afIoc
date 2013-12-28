@@ -26,7 +26,7 @@ internal class InjectionCtx {
 		ThreadStack.forTesting_clear(stackId)
 	}
 
-	static Obj? withCtx(ObjLocator? objLocator, OpTracker? tracker, |InjectionCtx ctx->Obj?| f) {
+	static Obj? withCtx(ObjLocator? objLocator, OpTracker? tracker, |->Obj?| f) {
 		ctx := peek(false) ?: InjectionCtx.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same
 		return ThreadStack.pushAndRun(stackId, ctx, f)

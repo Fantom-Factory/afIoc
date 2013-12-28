@@ -5,6 +5,6 @@
 @NoDoc
 const mixin AspectInvokerSource {
 	
-	abstract internal ServiceMethodInvokerThread createServiceMethodInvoker(InjectionCtx ctx, ServiceDef serviceDef)
+	abstract internal ServiceMethodInvokerThread createServiceMethodInvoker(ServiceDef serviceDef)
 	
 }
