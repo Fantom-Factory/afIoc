@@ -34,8 +34,8 @@ const class LazyService {
 	}
 
 	private ServiceMethodInvoker getViaAppScope() {
-		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
-			Unsafe ctxWrapper := Unsafe(ctx)	// pass ctx into the state thread
+		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
+			Unsafe ctxWrapper := Unsafe(InjectionCtx.peek)	// pass ctx into the state thread
 			return getState |state->Obj?| {
 				 ThreadStack.pushAndRun(InjectionCtx.stackId, ctxWrapper.val) |InjectionCtx ctx2 -> Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 
@@ -67,10 +67,10 @@ internal class LazyServiceState {
 		if (invoker != null)
 			return invoker
 
-		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
+		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
 			invoker = InjectionCtx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
-				invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
+				invoker		:= invokerSrc.createServiceMethodInvoker(serviceDef)
 				return invoker
 			}
 			return invoker

@@ -15,7 +15,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 	}
 
 	** Returns `MethodAdvisor`s fully loaded with callbacks
-	override ServiceMethodInvokerThread createServiceMethodInvoker(InjectionCtx ctx, ServiceDef serviceDef) {
+	override ServiceMethodInvokerThread createServiceMethodInvoker(ServiceDef serviceDef) {
 
 		// create a MethodAdvisor for each (non-Obj) method to be advised
 		methodAdvisors := (MethodAdvisor[]) serviceDef.serviceType.methods.rw

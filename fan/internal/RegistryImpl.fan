@@ -156,7 +156,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		InjectionCtx.withCtx(this, tracker) |injCtx->Obj?| {   
+		InjectionCtx.withCtx(this, tracker) |->Obj?| {   
 			depProSrc			= trackServiceById(ServiceIds.dependencyProviderSource)
 			serviceOverrides	= trackServiceById(ServiceIds.serviceOverride)
 			return null
@@ -234,7 +234,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj serviceById(Str serviceId) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {   
+			return InjectionCtx.withCtx(this, null) |->Obj?| {   
 				return InjectionCtx.track("Locating service by ID '$serviceId'") |->Obj| {
 					return trackServiceById(serviceId)
 				}
@@ -245,7 +245,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj dependencyByType(Type dependencyType) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+			return InjectionCtx.withCtx(this, null) |->Obj?| {
 				return InjectionCtx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
 					// as ctx is brand new, this won't return null
 					return trackDependencyByType(dependencyType)
@@ -259,7 +259,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
-			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+			return InjectionCtx.withCtx(this, null) |->Obj?| {
 				return trackAutobuild(type2, ctorArgs)
 			}
 		}
@@ -269,7 +269,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
-			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
+			return InjectionCtx.withCtx(this, null) |->Obj?| {
 				return trackInjectIntoFields(object)
 			}
 		}
