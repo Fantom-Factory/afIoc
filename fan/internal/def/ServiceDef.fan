@@ -5,7 +5,7 @@
 internal const mixin ServiceDef {
 
 	** Returns a factory func that creates the service implementation
-	abstract |InjectionCtx->Obj| createServiceBuilder()
+	abstract |->Obj| createServiceBuilder()
 
 	** Returns the service id, which is usually the unqualified service type name.
 	abstract Str serviceId()
@@ -31,8 +31,8 @@ internal const mixin ServiceDef {
 		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
 	}
 	
-	static |InjectionCtx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
-		|InjectionCtx ctx->Obj| {
+	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
+		|->Obj| {
 			InjectionCtx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
 				objLocator := InjectionCtx.peek.objLocator
 				objLocator.logServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
@@ -46,8 +46,8 @@ internal const mixin ServiceDef {
 		}
 	}
 	
-	static |InjectionCtx->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
-		|InjectionCtx ctx->Obj| {
+	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
+		|->Obj| {
 			InjectionCtx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
 				objLocator := InjectionCtx.peek.objLocator
 				objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")

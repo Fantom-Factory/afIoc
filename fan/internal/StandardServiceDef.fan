@@ -7,8 +7,8 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Type?		serviceImplType
 	override const ServiceScope	scope
 	override const Bool			noProxy
-	const |InjectionCtx->Obj|	source
-	const Str					description
+			 const |->Obj|		source
+			 const Str			description
 
 	new make(|This|? f := null) { 
 		f?.call(this)
@@ -16,7 +16,7 @@ internal const class StandardServiceDef : ServiceDef {
 			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
 	}
 	
-	override |InjectionCtx->Obj| createServiceBuilder() {
+	override |->Obj| createServiceBuilder() {
 		source
 	}
 	
