@@ -120,7 +120,7 @@ class MappedConfig {
 		// don't alter the class state so getConfig() may be called more than once
 		Obj:Obj? config := this.config.dup
 
-		ctx.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
+		InjectionCtx.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
 			Obj:MappedOverride norm := overrides.dup
 			found := true
@@ -132,7 +132,7 @@ class MappedConfig {
 						keys[overrideKey] = keys[existingKey]
 						found = true
 						
-						ctx.log("'${overrideKey}' overrides '${existingKey}'")
+						InjectionCtx.log("'${overrideKey}' overrides '${existingKey}'")
 						config[keys[existingKey]] = val.val
 						return true
 					} else {

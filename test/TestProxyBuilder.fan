@@ -1,3 +1,4 @@
+using concurrent
 
 internal class TestProxyBuilder : IocTest {
 	
@@ -7,8 +8,14 @@ internal class TestProxyBuilder : IocTest {
 	override Void setup() {
 		reg = (RegistryImpl) RegistryBuilder().addModule(T_MyModule76#).build.startup
 		spb = (ServiceProxyBuilder) reg.dependencyByType(ServiceProxyBuilder#)
+		
+		InjectionCtx.forTesting_push(InjectionCtx(reg))
 	}
-	
+
+	override Void teardown() {
+		InjectionCtx.forTesting_clear()		
+	}
+
 	Void testProxyMethod() {
 		s50 := spb.buildProxy(InjectionCtx(null), reg.serviceDefById("s50"))
 		verifyEq(s50->dude, "dude")

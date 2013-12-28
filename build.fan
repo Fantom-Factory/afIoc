@@ -1,4 +1,4 @@
-using build::BuildPod
+using build
 
 class Build : BuildPod {
 	
@@ -10,7 +10,7 @@ class Build : BuildPod {
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
 					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
-					"proj.name"		: "AF-IOC",
+					"proj.name"		: "afIoc",
 					"license.name"	: "BSD 2-Clause License",
 					"repo.private"	: "true"
 				]
@@ -24,5 +24,19 @@ class Build : BuildPod {
 
 		// exclude test code when building the pod
 		srcDirs = srcDirs.exclude { it.toStr.startsWith("test/") }
+	}
+	
+	@Target { help = "Compile to pod file and associated natives" }
+	override Void compile() {
+		super.compile
+		
+		destDir := Env.cur.homeDir.plus(`src/${podName}/`)
+		destDir.delete
+		destDir.create		
+		`fan/`.toFile.copyInto(destDir)
+		
+		log.indent
+		log.info("Copied `fan/` to ${destDir.normalize}")
+		log.unindent
 	}
 }

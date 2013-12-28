@@ -14,18 +14,21 @@ const mixin ServiceStats {
 ** @since 1.2.0
 const class ServiceStat {
 	const Str 				serviceId
-	const Type				type
+	const Type				serviceType
 	const ServiceScope 		scope
 	const Bool				proxyDisabled
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls
 
-	internal new make(|This|? f) { f?.call(this) }
+	@NoDoc @Deprecated { msg="Use 'serviceType' instead" } 
+	const Type				type
+
+	internal new make(|This|? f) { f?.call(this); type = serviceType }
 
 	internal This withLifecyle(ServiceLifecycle newLifecycle) {
 		ServiceStat {
 			it.serviceId	= this.serviceId
-			it.type			= this.type
+			it.serviceType	= this.serviceType
 			it.scope		= this.scope
 			it.proxyDisabled= this.proxyDisabled
 			it.lifecycle	= newLifecycle
@@ -36,7 +39,7 @@ const class ServiceStat {
 	internal This withIncImpls() {
 		ServiceStat {
 			it.serviceId	= this.serviceId
-			it.type			= this.type
+			it.serviceType	= this.serviceType
 			it.scope		= this.scope
 			it.proxyDisabled= this.proxyDisabled
 			it.lifecycle	= this.lifecycle

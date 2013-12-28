@@ -9,9 +9,9 @@ internal class OpTracker {
 	private Bool				logged		:= false
 	private LogLevel			logLevel	:= LogLevel.debug
 
-	new makeWithLoglevel(LogLevel logLevel) {
-		this.logLevel = logLevel
-	}
+//	new makeWithLoglevel(LogLevel logLevel) {
+//		this.logLevel = logLevel
+//	}
 	
 	new make(Str? lifetimeMsg := null) {
 		if (lifetimeMsg != null)

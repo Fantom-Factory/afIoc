@@ -37,13 +37,9 @@ const class LazyService {
 		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
 			Unsafe ctxWrapper := Unsafe(ctx)	// pass ctx into the state thread
 			return getState |state->Obj?| {
-				Actor.locals[InjectionCtx.ctxKey] = ctxWrapper.val
-				try {
+				 ThreadStack.pushAndRun(InjectionCtx.stackId, ctxWrapper.val) |InjectionCtx ctx2 -> Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 
-				} finally {
-					// we can do this because this state thread is MINE!
-					Actor.locals.remove(InjectionCtx.ctxKey)
-				}
+				 }
 			}
 		}
 	}
@@ -72,7 +68,7 @@ internal class LazyServiceState {
 			return invoker
 
 		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
-			invoker = ctx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+			invoker = InjectionCtx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
 				invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
 				return invoker
