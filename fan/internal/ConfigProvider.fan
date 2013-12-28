@@ -18,7 +18,7 @@ const internal class ConfigProvider {
 	}
 
 	Obj? provide(ProviderCtx proCtx, Type dependencyType) {
-		objLocator := proCtx.injectionCtx.objLocator
+		objLocator := InjectionCtx.peek.objLocator
 		config := null
 		if (configType.name == "List")
 			config = OrderedConfig(objLocator, serviceDef, configType)

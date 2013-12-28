@@ -2,8 +2,6 @@
 ** As given to `DependencyProvider`s.
 class ProviderCtx {
 	
-	internal InjectionCtx injectionCtx
-	
 	** All facets the field (to be injected) is annotated with 
 	Facet[] facets
 
