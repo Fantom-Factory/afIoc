@@ -17,7 +17,7 @@ internal const class ServiceIdProvider : DependencyProvider {
 		
 		serviceId := (serviceIds[0] as ServiceId).serviceId
 		ctx.log("Found @ServiceId { $serviceId }")
-		service := ((ObjLocator) registry).trackServiceById(ctx.injectionCtx, serviceId)
+		service := ((ObjLocator) registry).trackServiceById(serviceId)
 		
 		if (!service.typeof.fits(dependencyType))
 			throw IocErr(IocMessages.serviceIdDoesNotFit(serviceId, service.typeof, dependencyType))

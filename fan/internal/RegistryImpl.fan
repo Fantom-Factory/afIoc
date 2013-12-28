@@ -3,7 +3,7 @@ using afPlastic::PlasticCompiler
 
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
-	
+
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const Str:Module				modules
 	private const DependencyProviderSource?	depProSrc
@@ -46,7 +46,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
 				it.source			= |InjectionCtx ctx->Obj| {
-					InjectionUtils.makeCtorInjectionPlan(ctx, InjectionCtx.building.serviceImplType)
+					InjectionUtils.makeCtorInjectionPlan(InjectionCtx.building.serviceImplType)
 				}
 			}] = null
 
@@ -157,8 +157,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		InjectionCtx.withCtx(this, tracker) |injCtx->Obj?| {   
-			depProSrc			= trackServiceById(injCtx, ServiceIds.dependencyProviderSource)
-			serviceOverrides	= trackServiceById(injCtx, ServiceIds.serviceOverride)
+			depProSrc			= trackServiceById(ServiceIds.dependencyProviderSource)
+			serviceOverrides	= trackServiceById(ServiceIds.serviceOverride)
 			return null
 		}
 	}
@@ -236,7 +236,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLockCheck
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {   
 				return InjectionCtx.track("Locating service by ID '$serviceId'") |->Obj| {
-					return trackServiceById(ctx, serviceId)
+					return trackServiceById(serviceId)
 				}
 			}
 		}
@@ -248,7 +248,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
 				return InjectionCtx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
 					// as ctx is brand new, this won't return null
-					return trackDependencyByType(ctx, dependencyType)
+					return trackDependencyByType(dependencyType)
 				}
 			}
 		}
@@ -260,7 +260,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
-				return trackAutobuild(ctx, type2, ctorArgs)
+				return trackAutobuild(type2, ctorArgs)
 			}
 		}
 	}
@@ -270,7 +270,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
-				return trackInjectIntoFields(ctx, object)
+				return trackInjectIntoFields(object)
 			}
 		}
 	}
@@ -278,14 +278,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
-	override Obj trackServiceById(InjectionCtx ctx, Str serviceId) {
+	override Obj trackServiceById(Str serviceId) {
 		serviceDef 
 			:= serviceDefById(serviceId) 
 			?: throw IocErr(IocMessages.serviceIdNotFound(serviceId))
-		return getService(ctx, serviceDef, false)
+		return getService(serviceDef, false)
 	}
 
-	override Obj? trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
+	override Obj? trackDependencyByType(Type dependencyType) {
 
 		// ask dependency providers first, for they may dictate dependency scope
 		if (depProSrc?.canProvideDependency(InjectionCtx.providerCtx, dependencyType) ?: false) {
@@ -297,7 +297,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			InjectionCtx.log("Found Service '$serviceDef.serviceId'")
-			return getService(ctx, serviceDef, false)			
+			return getService(serviceDef, false)			
 		}
 
 		config := InjectionCtx.provideConfig(dependencyType)
@@ -309,7 +309,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
 	}
 
-	override Obj trackAutobuild(InjectionCtx ctx, Type type, Obj?[] ctorArgs) {
+	override Obj trackAutobuild(Type type, Obj?[] ctorArgs) {
 		Type? implType := type
 		
 		if (implType.isAbstract) {
@@ -330,12 +330,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 		
 		return InjectionCtx.withServiceDef(serviceDef) |->Obj?| {
-			return InjectionUtils.autobuild(ctx, implType, ctorArgs)
+			return InjectionUtils.autobuild(implType, ctorArgs)
 		}
 	}
 
-	override Obj trackInjectIntoFields(InjectionCtx ctx, Obj object) {
-		return InjectionUtils.injectIntoFields(ctx, object)
+	override Obj trackInjectIntoFields(Obj object) {
+		return InjectionUtils.injectIntoFields(object)
 	}
 
 	override ServiceDef? serviceDefById(Str serviceId) {
@@ -372,7 +372,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool returnReal) {
+	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
 			InjectionCtx.log("Found override for service '${serviceDef.serviceId}'")
@@ -380,7 +380,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		return modules[serviceDef.moduleId].service(ctx, serviceDef.serviceId, returnReal)
+		return modules[serviceDef.moduleId].service(serviceDef.serviceId, returnReal)
 	}
 
 	override Void logServiceCreation(Type log, Str msg) {
