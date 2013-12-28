@@ -12,19 +12,19 @@ class MappedConfig {
 	
 	internal const	Type 				contribType
 	private  const 	ServiceDef 			serviceDef
-	private 	  	InjectionCtx		ctx
+	private 	  	ObjLocator 			objLocator
 	private			Obj:Obj?			config
 	private			Obj:MappedOverride	overrides 
 	private			TypeCoercer			typeCoercer
 	private			Int					overrideCount
 	
-	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
+	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "Map")
 			throw WtfErr("Ordered Contrib Type is NOT map???")
 		if (contribType.isGeneric)
 			throw IocErr(IocMessages.mappedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
 		
-		this.ctx 			= ctx
+		this.objLocator		= objLocator
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
 		this.config 		= Utils.makeMap(keyType, valType)
@@ -35,7 +35,7 @@ class MappedConfig {
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		return ctx.objLocator.trackAutobuild(type, ctorArgs)
+		return objLocator.trackAutobuild(type, ctorArgs)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
@@ -108,7 +108,7 @@ class MappedConfig {
 	}
 	
 	** dynamically invoked
-	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
+	internal Void contribute(Contribution contribution) {
 		contribution.contributeMapped(this)
 	}
 
