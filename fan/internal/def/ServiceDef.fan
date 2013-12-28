@@ -39,7 +39,7 @@ internal const mixin ServiceDef {
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
 				return InjectionCtx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
-					return InjectionUtils.callMethod(ctx, method, null, Obj#.emptyList)
+					return InjectionUtils.callMethod(method, null, Obj#.emptyList)
 				}
 			}
 		}
@@ -49,13 +49,13 @@ internal const mixin ServiceDef {
 		|InjectionCtx ctx->Obj| {
 			InjectionCtx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
 				InjectionCtx.peek.objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
-				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
+				ctor := InjectionUtils.findAutobuildConstructor(serviceImplType)
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
 				return InjectionCtx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType, Obj#.emptyList)
-					InjectionUtils.injectIntoFields(ctx, obj)
+					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList)
+					InjectionUtils.injectIntoFields(obj)
 					return obj
 				}
 			}			

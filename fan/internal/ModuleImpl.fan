@@ -115,7 +115,7 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
-	override Obj? service(InjectionCtx ctx, Str serviceId, Bool returnReal) {
+	override Obj? service(Str serviceId, Bool returnReal) {
         def := serviceDefs[serviceId]
 		if (def == null)
 			// nope, the service is not one of ours
@@ -125,11 +125,11 @@ internal const class ModuleImpl : Module {
 		return InjectionCtx.withServiceDef(def) |->Obj?| {
 			
 			if (def.scope == ServiceScope.perInjection) {
-				return getOrMakeService(ctx, def, returnReal, false)
+				return getOrMakeService(def, returnReal, false)
 			}
 			
 			if (def.scope == ServiceScope.perThread) {
-				return getOrMakeService(ctx, def, returnReal, true)
+				return getOrMakeService(def, returnReal, true)
 			}
 
 			// Because of recursion (service1 creates service2), you can not create the service inside an actor ('cos 
@@ -137,7 +137,7 @@ internal const class ModuleImpl : Module {
 			// TODO: A const service could be created twice if there's a race condition between two threads. This is 
 			// only dangerous because Gawd knows what those services do in their ctor or PostInject methods!
 			if (def.scope == ServiceScope.perApplication) {
-				return getOrMakeService(ctx, def, returnReal, true)
+				return getOrMakeService(def, returnReal, true)
 			}
 			
 			throw WtfErr("What scope is {$def.scope}???")
@@ -167,18 +167,18 @@ internal const class ModuleImpl : Module {
 
 	// ---- Private Methods ----------------------------------------------------
 
-	private Obj getOrMakeService(InjectionCtx ctx, ServiceDef def, Bool returnReal, Bool useCache) {
+	private Obj getOrMakeService(ServiceDef def, Bool returnReal, Bool useCache) {
 		if (returnReal)
-			return getOrMakeRealService(ctx, def, useCache)
-		if (ctx.objLocator?.options?.get("disableProxies") == true)
-			return getOrMakeRealService(ctx, def, useCache)
+			return getOrMakeRealService(def, useCache)
+		if (InjectionCtx.peek(false)?.objLocator?.options?.get("disableProxies") == true)
+			return getOrMakeRealService(def, useCache)
 		if (!def.proxiable)
-			return getOrMakeRealService(ctx, def, useCache)
+			return getOrMakeRealService(def, useCache)
 		
-		return getOrMakeProxyService(ctx, def, useCache)
+		return getOrMakeProxyService(def, useCache)
 	}
 
-	private Obj getOrMakeRealService(InjectionCtx ctx, ServiceDef def, Bool useCache) {
+	private Obj getOrMakeRealService(ServiceDef def, Bool useCache) {
 		if (useCache) {
 			exisitng := getService(def)
 			if (exisitng != null)
@@ -187,7 +187,7 @@ internal const class ModuleImpl : Module {
 
 		return InjectionCtx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
-	        service := creator.call(ctx)
+	        service := creator.call(InjectionCtx.peek)
 			
 			if (useCache) {
 				setService(def, service)
@@ -197,7 +197,7 @@ internal const class ModuleImpl : Module {
 	    }	
 	}
 
-	private Obj getOrMakeProxyService(InjectionCtx ctx, ServiceDef def, Bool useCache) {
+	private Obj getOrMakeProxyService(ServiceDef def, Bool useCache) {
 		if (useCache) {
 			exisitng := getProxy(def)
 			if (exisitng != null)
@@ -205,8 +205,8 @@ internal const class ModuleImpl : Module {
 		}
 		
 		return InjectionCtx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
-			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
-			proxy			:= proxyBuilder.buildProxy(ctx, def)
+			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceIds.serviceProxyBuilder)
+			proxy			:= proxyBuilder.buildProxy(def)
 			
 			if (useCache) {
 				setProxy(def, proxy)

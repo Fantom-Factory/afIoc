@@ -9,9 +9,9 @@
 @NoDoc
 const mixin ServiceProxyBuilder {
 
-	internal abstract Obj buildProxy(InjectionCtx ctx, ServiceDef serviceDef)
+	internal abstract Obj buildProxy(ServiceDef serviceDef)
 
 	** Returns a cached Type if exists, otherwise compiles a new proxy type 
-	internal abstract Type buildProxyType(InjectionCtx ctx, Type serviceType)
+	internal abstract Type buildProxyType(Type serviceType)
 
 }

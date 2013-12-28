@@ -35,7 +35,7 @@ class MappedConfig {
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		return ctx.objLocator.trackAutobuild(ctx, type, ctorArgs)
+		return ctx.objLocator.trackAutobuild(type, ctorArgs)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
@@ -109,7 +109,7 @@ class MappedConfig {
 	
 	** dynamically invoked
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
-		contribution.contributeMapped(ctx, this)
+		contribution.contributeMapped(this)
 	}
 
 	** dynamically invoked

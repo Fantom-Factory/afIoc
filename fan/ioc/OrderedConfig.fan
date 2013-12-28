@@ -42,7 +42,7 @@ class OrderedConfig {
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		return ctx.objLocator.trackAutobuild(ctx, type, ctorArgs)
+		return ctx.objLocator.trackAutobuild(type, ctorArgs)
 	}
 
 	** Adds an unordered object to a service's configuration. 
@@ -149,7 +149,7 @@ class OrderedConfig {
 	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
 		// implied ordering only per contrib method
 		impliedConstraint = null
-		contribution.contributeOrdered(ctx, this)
+		contribution.contributeOrdered(this)
 	}
 
 	** dynamically invoked

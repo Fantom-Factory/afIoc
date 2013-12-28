@@ -16,12 +16,12 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	new make(|This|di) { di(this) }
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
-	override internal Obj buildProxy(InjectionCtx ctx, ServiceDef serviceDef) {
+	override internal Obj buildProxy(ServiceDef serviceDef) {
 		InjectionCtx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
-			proxyType	:= buildProxyType(ctx, serviceType)
+			proxyType	:= buildProxyType(serviceType)
 			lazyField 	:= proxyType.field("afLazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(ctx, serviceDef, (ObjLocator) registry)]
+			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
 			ctorFunc 	:= Field.makeSetFunc(plan)
 			proxy		:= proxyType.make([ctorFunc])
 			
@@ -29,7 +29,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		}
 	}
 	
-	override Type buildProxyType(InjectionCtx ctx, Type serviceType) {
+	override Type buildProxyType(Type serviceType) {
 		// TODO: investigate why getState() throws NPE when type not cached
 		if (typeCache.containsKey(serviceType.qname))
 			return typeCache[serviceType.qname]

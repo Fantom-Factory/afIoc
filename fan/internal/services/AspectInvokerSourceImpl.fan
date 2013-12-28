@@ -33,11 +33,11 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 		if (!adviceDefs.isEmpty)
 			InjectionCtx.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
 				adviceDefs.each { 
-					InjectionUtils.callMethod(ctx, it.advisorMethod, null, [methodAdvisors])
+					InjectionUtils.callMethod(it.advisorMethod, null, [methodAdvisors])
 				}
 			}
 
-		service 	:= objLocator.getService(ctx, serviceDef, true)
+		service 	:= objLocator.getService(serviceDef, true)
 		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]][:]
 		
 		methodAdvisors.each {

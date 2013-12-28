@@ -14,8 +14,8 @@ const class LazyService {
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
 
-	internal new make(InjectionCtx ctx, ServiceDef serviceDef, ObjLocator objLocator) {
-		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ctx, ServiceIds.threadStashManager)
+	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
+		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ServiceIds.threadStashManager)
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
 		this.threadStash	= stashManager.createStash(serviceDef.serviceId + "-proxy")
@@ -69,7 +69,7 @@ internal class LazyServiceState {
 
 		return InjectionCtx.withCtx(objLocator, null) |ctx->Obj?| {
 			invoker = InjectionCtx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ctx, ServiceIds.aspectInvokerSource)
+				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
 				invoker		:= invokerSrc.createServiceMethodInvoker(ctx, serviceDef)
 				return invoker
 			}

@@ -18,19 +18,19 @@ internal const class ContributionImpl : Contribution {
 		throw WtfErr("Both serviceId & serviceType are null!?")
 	}
 
-	override Void contributeOrdered(InjectionCtx ctx, OrderedConfig config) {
+	override Void contributeOrdered(OrderedConfig config) {
 		InjectionCtx.track("Gathering ORDERED configuration of type $config.contribType") |->| {
 			sizeBefore := config.size
-			InjectionUtils.callMethod(ctx, method, null, [config])
+			InjectionUtils.callMethod(method, null, [config])
 			sizeAfter := config.size
 			InjectionCtx.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
 	}
 
-	override Void contributeMapped(InjectionCtx ctx, MappedConfig config) {
+	override Void contributeMapped(MappedConfig config) {
 		InjectionCtx.track("Gathering MAPPED configuration of type $config.contribType") |->| {			
 			sizeBefore := config.size
-			InjectionUtils.callMethod(ctx, method, null, [config])
+			InjectionUtils.callMethod(method, null, [config])
 			sizeAfter := config.size
 			InjectionCtx.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
