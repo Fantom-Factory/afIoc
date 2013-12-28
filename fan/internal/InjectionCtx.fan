@@ -105,10 +105,8 @@ internal class InjectionCtx {
 	}
 	
 	static ProviderCtx providerCtx() {
-		ctx := peek
 		return ProviderCtx {
-			it.injectionCtx 	= ctx
-			it.facets			= ctx.facetsStack.peek ?: Facet#.emptyList
+			it.facets = peek.facetsStack.peek ?: Facet#.emptyList
 		}
 	}
 	
