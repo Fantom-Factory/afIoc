@@ -45,7 +45,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceType 		= |This|#
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
-				it.source			= |InjectionCtx ctx->Obj| {
+				it.source			= |->Obj| {
 					InjectionUtils.makeCtorInjectionPlan(InjectionCtx.building.serviceImplType)
 				}
 			}] = null
@@ -326,7 +326,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceImplType 	= implType	// the important bit
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$type.qname Autobuild"
-			it.source			= |InjectionCtx ctxx->Obj?| { return null }
+			it.source			= |->Obj?| { return null }
 		}		
 		
 		return InjectionCtx.withServiceDef(serviceDef) |->Obj?| {

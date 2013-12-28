@@ -187,7 +187,7 @@ internal const class ModuleImpl : Module {
 
 		return InjectionCtx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
-	        service := creator.call(InjectionCtx.peek)
+	        service := creator.call()
 			
 			if (useCache) {
 				setService(def, service)

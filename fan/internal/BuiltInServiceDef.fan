@@ -9,21 +9,21 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Type?		serviceImplType
 	override const ServiceScope	scope
 	override const Bool			noProxy
-	const |InjectionCtx->Obj|	source
-	const Str?					description
+			 const |->Obj|		source
+			 const Str?			description
 
 	new make(|This| f) { 
 		this.moduleId		= ServiceIds.builtInModuleId
 		this.scope			= ServiceScope.perApplication
 		this.noProxy		= true
-		this.source 		= |InjectionCtx ctx->Obj| { 
+		this.source 		= |->Obj| { 
 			throw IocErr("Can not create BuiltIn BILLL service '$serviceId'") 
 		}
 
 		f(this)
 	}
 
-	override |InjectionCtx->Obj| createServiceBuilder() {
+	override |->Obj| createServiceBuilder() {
 		source
 	}
 	
