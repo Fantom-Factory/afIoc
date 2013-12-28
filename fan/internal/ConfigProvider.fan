@@ -5,9 +5,9 @@ const internal class ConfigProvider {
 	const ServiceDef 		serviceDef
 	const Type? 			configType
 	
-	new make(InjectionCtx ctx, ServiceDef serviceDef, Method buildMethod) { 
-		this.configType	= findConfigType(ctx, buildMethod)
-		this.objLocator	= ctx.objLocator
+	new make(ObjLocator objLocator, ServiceDef serviceDef, Method buildMethod) { 
+		this.configType	= findConfigType(buildMethod)
+		this.objLocator	= objLocator
 		this.serviceDef	= serviceDef
 	}
 
@@ -18,21 +18,21 @@ const internal class ConfigProvider {
 	}
 
 	Obj? provide(ProviderCtx proCtx, Type dependencyType) {
-		ctx := proCtx.injectionCtx
+		objLocator := proCtx.injectionCtx.objLocator
 		config := null
 		if (configType.name == "List")
-			config = OrderedConfig(ctx, serviceDef, configType)
+			config = OrderedConfig(objLocator, serviceDef, configType)
 		if (configType.name == "Map")
-			config = MappedConfig(ctx, serviceDef, configType)
+			config = MappedConfig(objLocator, serviceDef, configType)
 
 		objLocator.contributionsByServiceDef(serviceDef).each {
-			config->contribute(ctx, it)
+			config->contribute(it)
 		}
 		
 		return config->getConfig
 	}
 
-	private Type? findConfigType(InjectionCtx ctx, Method buildMethod) {
+	private Type? findConfigType(Method buildMethod) {
 		InjectionCtx.track("Looking for configuration parameter") |->Type?| {
 			config := |->Obj?| {
 				if (buildMethod.params.isEmpty)

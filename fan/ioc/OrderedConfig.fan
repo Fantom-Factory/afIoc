@@ -14,7 +14,7 @@ class OrderedConfig {
 
 	internal const	Type 				contribType
 	private  const 	ServiceDef 			serviceDef
-	private 	  	InjectionCtx		ctx
+	private 	  	ObjLocator 			objLocator
 	private			Orderer				orderer
 	private			Int					impliedCount
 	private			Str[]?				impliedConstraint
@@ -23,13 +23,13 @@ class OrderedConfig {
 	private			Str:OrderedOverride	overrides
 	private			TypeCoercer			typeCoercer
 
-	internal new make(InjectionCtx ctx, ServiceDef serviceDef, Type contribType) {
+	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
 			throw WtfErr("Ordered Contrib Type is NOT list???")
 		if (contribType.isGeneric)
 			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
 
-		this.ctx 			= ctx
+		this.objLocator 	= objLocator
 		this.serviceDef 	= serviceDef
 		this.contribType	= contribType
 		this.orderer		= Orderer()
@@ -42,7 +42,7 @@ class OrderedConfig {
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		return ctx.objLocator.trackAutobuild(type, ctorArgs)
+		return objLocator.trackAutobuild(type, ctorArgs)
 	}
 
 	** Adds an unordered object to a service's configuration. 
@@ -146,7 +146,7 @@ class OrderedConfig {
 	}
 
 	** dynamically invoked
-	internal Void contribute(InjectionCtx ctx, Contribution contribution) {
+	internal Void contribute(Contribution contribution) {
 		// implied ordering only per contrib method
 		impliedConstraint = null
 		contribution.contributeOrdered(this)
