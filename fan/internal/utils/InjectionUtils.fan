@@ -3,7 +3,7 @@ internal const class InjectionUtils {
 	private const static Log 	log 		:= Utils.getLog(InjectionUtils#)
 
 	static Obj autobuild(InjectionCtx ctx, Type type, Obj?[] ctorArgs) {
-		ctx.track("Autobuilding $type.qname") |->Obj| {
+		InjectionCtx.track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(ctx, type)
 			obj  := createViaConstructor(ctx, ctor, type, ctorArgs)
 			injectIntoFields(ctx, obj)
@@ -13,16 +13,16 @@ internal const class InjectionUtils {
 
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(InjectionCtx ctx, Obj object) {
-		ctx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
+		InjectionCtx.track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(ctx, object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					ctx.withFacets(field.facets) |->Bool| {
+					InjectionCtx.withFacets(field.facets) |->Bool| {
 						dependency := findDependencyByType(ctx, field.type)
 						inject(ctx, object, field, dependency)
 						return true
 					}
 				})
-				ctx.log("No injection fields found")
+				InjectionCtx.log("No injection fields found")
 		}
 
 		callPostInjectMethods(ctx, object)
@@ -31,14 +31,14 @@ internal const class InjectionUtils {
 
 	static Obj? callMethod(InjectionCtx ctx, Method method, Obj? obj, Obj?[] providedMethodArgs) {
 		args := findMethodInjectionParams(ctx, method, providedMethodArgs)
-		return ctx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
+		return InjectionCtx.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 		}
 	}
 
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
 	static Method? findAutobuildConstructor(InjectionCtx ctx, Type type) {
-		ctx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
+		InjectionCtx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
 			ctor := |->Method?| {
 				constructors := findConstructors(type)
 
@@ -67,21 +67,21 @@ internal const class InjectionUtils {
 			}()
 
 			if (ctor == null)
-				ctx.log("Found ${type.name}()")
+				InjectionCtx.log("Found ${type.name}()")
 			else
-				ctx.log("Found ${ctor.signature}")
+				InjectionCtx.log("Found ${ctor.signature}")
 			return ctor
 		}
 	}
 
 	static Obj createViaConstructor(InjectionCtx ctx, Method? ctor, Type building, Obj?[] providedCtorArgs) {
 		if (ctor == null) {
-			return ctx.track("Instantiating $building via ${building.name}()...") |->Obj| {
+			return InjectionCtx.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
 			}
 		}
 		args := findMethodInjectionParams(ctx, ctor, providedCtorArgs)
-		return ctx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
+		return InjectionCtx.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			try {
 				return ctor.callList(args)
 			
@@ -93,16 +93,16 @@ internal const class InjectionUtils {
 	}
 	
 	static Func makeCtorInjectionPlan(InjectionCtx ctx, Type building) {
-		ctx.track("Creating injection plan for fields of $building.qname") |->Obj| {
+		InjectionCtx.track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(ctx, building, Inject#, true).each |field| {
-				ctx.withFacets(field.facets) |->| {
+				InjectionCtx.withFacets(field.facets) |->| {
 					dependency := findDependencyByType(ctx, field.type)
 					plan[field] = dependency
 				}
 			}
 			if (plan.isEmpty)
-				ctx.log("No injection fields found")
+				InjectionCtx.log("No injection fields found")
 			return Field.makeSetFunc(plan)
 		}
 	}
@@ -111,29 +111,29 @@ internal const class InjectionUtils {
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
 	private static Obj callPostInjectMethods(InjectionCtx ctx, Obj object) {
-		ctx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
+		InjectionCtx.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
 					method.hasFacet(PostInjection#)
 				}
 				.reduce(false) |bool, method| {
-					ctx.log("Found method $method.signature")
+					InjectionCtx.log("Found method $method.signature")
 					callMethod(ctx, method, object, Obj#.emptyList)
 					return true
 				})
-				ctx.log("No post injection methods found")
+				InjectionCtx.log("No post injection methods found")
 			return object
 		}
 	}
 
 	private static Obj?[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[] providedMethodArgs) {
-		return ctx.track("Determining injection parameters for $method.signature") |->Obj?[]| {
-			ctx.withFacets(Facet[,]) |->Obj?[]| {
+		return InjectionCtx.track("Determining injection parameters for $method.signature") |->Obj?[]| {
+			InjectionCtx.withFacets(Facet[,]) |->Obj?[]| {
 				params := method.params.map |param, index| {
 					
-					ctx.log("Found parameter ${index+1}) $param.type")
+					InjectionCtx.log("Found parameter ${index+1}) $param.type")
 					if (index < providedMethodArgs.size) {
-						ctx.log("Parameter provided")
+						InjectionCtx.log("Parameter provided")
 						
 						provided := providedMethodArgs[index] 
 						if (provided != null && !provided.typeof.fits(param.type))
@@ -144,22 +144,22 @@ internal const class InjectionUtils {
 					return findDependencyByType(ctx, param.type)
 				}		
 				if (params.isEmpty)
-					ctx.log("No injection parameters found")
+					InjectionCtx.log("No injection parameters found")
 				return params
 			}
 		}
 	}
 
 	private static Obj? findDependencyByType(InjectionCtx ctx, Type dependencyType) {
-		ctx.track("Looking for dependency of type $dependencyType") |->Obj?| {
-			ctx.objLocator.trackDependencyByType(ctx, dependencyType)
+		InjectionCtx.track("Looking for dependency of type $dependencyType") |->Obj?| {
+			InjectionCtx.peek.objLocator.trackDependencyByType(ctx, dependencyType)
 		}
 	}
 
 	private static Void inject(InjectionCtx ctx, Obj target, Field field, Obj? value) {
-		ctx.track("Injecting ${value?.typeof?.qname} into field $field.signature") |->| {
+		InjectionCtx.track("Injecting ${value?.typeof?.qname} into field $field.signature") |->| {
 			if (field.get(target) != null) {
-				ctx.log("Field has non null value. Aborting injection.")
+				InjectionCtx.log("Field has non null value. Aborting injection.")
 				return
 			}
 			// BugFix: if injecting null (via DepProvider) then don't throw the Const Err below
@@ -187,7 +187,7 @@ internal const class InjectionUtils {
 	    	if (!field.hasFacet(facetType)) 
 	    		return false
 
-    		ctx.log("Found field $field.signature")
+    		InjectionCtx.log("Found field $field.signature")
 			return true
 		}
 	}

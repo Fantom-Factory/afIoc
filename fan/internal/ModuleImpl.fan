@@ -29,7 +29,7 @@ internal const class ModuleImpl : Module {
 
 			stat := ServiceStat {
 				it.serviceId	= def.serviceId
-				it.type			= def.serviceType
+				it.serviceType	= def.serviceType
 				it.scope		= def.scope
 				it.lifecycle	= ServiceLifecycle.BUILTIN
 				it.noOfImpls	= (service == null) ? 0 : 1
@@ -61,7 +61,7 @@ internal const class ModuleImpl : Module {
 			serviceDefs[def.serviceId] = def
 			stat := ServiceStat {
 				it.serviceId	= def.serviceId
-				it.type			= def.serviceType
+				it.serviceType	= def.serviceType
 				it.scope		= def.scope
 				it.proxyDisabled= def.noProxy
 				it.lifecycle	= ServiceLifecycle.DEFINED
@@ -122,7 +122,7 @@ internal const class ModuleImpl : Module {
 			return null
 
 		// we're going deeper!
-		return ctx.withServiceDef(def) |->Obj?| {
+		return InjectionCtx.withServiceDef(def) |->Obj?| {
 			
 			if (def.scope == ServiceScope.perInjection) {
 				return getOrMakeService(ctx, def, returnReal, false)
@@ -185,7 +185,7 @@ internal const class ModuleImpl : Module {
 				return exisitng
 		}
 
-		return ctx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
+		return InjectionCtx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call(ctx)
 			
@@ -204,7 +204,7 @@ internal const class ModuleImpl : Module {
 				return exisitng
 		}
 		
-		return ctx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
+		return InjectionCtx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ctx, ServiceIds.serviceProxyBuilder)
 			proxy			:= proxyBuilder.buildProxy(ctx, def)
 			

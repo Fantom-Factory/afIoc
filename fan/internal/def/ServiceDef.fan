@@ -31,29 +31,29 @@ internal const mixin ServiceDef {
 		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
 	}
 	
-	static |InjectionCtx ctx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
+	static |InjectionCtx->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
 		|InjectionCtx ctx->Obj| {
-			ctx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
+			InjectionCtx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
 				ctx.objLocator.logServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return ctx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
+				return InjectionCtx.withProvider(ConfigProvider(ctx, serviceDef, method)) |->Obj?| {
 					return InjectionUtils.callMethod(ctx, method, null, Obj#.emptyList)
 				}
 			}
 		}
 	}
 	
-	static |InjectionCtx ctx->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
+	static |InjectionCtx->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
 		|InjectionCtx ctx->Obj| {
-			ctx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
-				ctx.objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
+			InjectionCtx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
+				InjectionCtx.peek.objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
 				ctor := InjectionUtils.findAutobuildConstructor(ctx, serviceImplType)
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return ctx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
+				return InjectionCtx.withProvider(ConfigProvider(ctx, serviceDef, ctor)) |->Obj?| {
 					obj := InjectionUtils.createViaConstructor(ctx, ctor, serviceImplType, Obj#.emptyList)
 					InjectionUtils.injectIntoFields(ctx, obj)
 					return obj

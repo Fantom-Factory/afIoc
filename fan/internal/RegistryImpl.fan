@@ -46,7 +46,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
 				it.source			= |InjectionCtx ctx->Obj| {
-					InjectionUtils.makeCtorInjectionPlan(ctx, ctx.building.serviceImplType)
+					InjectionUtils.makeCtorInjectionPlan(ctx, InjectionCtx.building.serviceImplType)
 				}
 			}] = null
 
@@ -193,10 +193,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
 			msg   += srvcs
 		}
-			
+		
+		Env.cur.err.printLine(options)
 		if (!options.get("suppressStartupBanner", false)) {
 			title := Utils.banner(options["bannerText"])
-			title += "IoC started up in ${millis}ms\n"
+			name  := options["appName"] ?: "Ioc"
+			title += "${name} started up in ${millis}ms\n"
 			msg   += title
 		}
 		
@@ -233,7 +235,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {   
-				return ctx.track("Locating service by ID '$serviceId'") |->Obj| {
+				return InjectionCtx.track("Locating service by ID '$serviceId'") |->Obj| {
 					return trackServiceById(ctx, serviceId)
 				}
 			}
@@ -244,7 +246,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			return InjectionCtx.withCtx(this, null) |ctx->Obj?| {
-				return ctx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
+				return InjectionCtx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
 					// as ctx is brand new, this won't return null
 					return trackDependencyByType(ctx, dependencyType)
 				}
@@ -286,21 +288,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? trackDependencyByType(InjectionCtx ctx, Type dependencyType) {
 
 		// ask dependency providers first, for they may dictate dependency scope
-		if (depProSrc?.canProvideDependency(ctx.providerCtx, dependencyType) ?: false) {
-			dependency := depProSrc.provideDependency(ctx.providerCtx, dependencyType)
-			ctx.log("Found Dependency via Provider : '$dependency?.typeof'")
+		if (depProSrc?.canProvideDependency(InjectionCtx.providerCtx, dependencyType) ?: false) {
+			dependency := depProSrc.provideDependency(InjectionCtx.providerCtx, dependencyType)
+			InjectionCtx.log("Found Dependency via Provider : '$dependency?.typeof'")
 			return dependency
 		}
 
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
-			ctx.log("Found Service '$serviceDef.serviceId'")
+			InjectionCtx.log("Found Service '$serviceDef.serviceId'")
 			return getService(ctx, serviceDef, false)			
 		}
 
-		config := ctx.provideConfig(dependencyType)
+		config := InjectionCtx.provideConfig(dependencyType)
 		if (config != null) {
-			ctx.logExpensive |->Str| { "Found Configuration '$config.typeof'" }
+			InjectionCtx.logExpensive |->Str| { "Found Configuration '$config.typeof.signature'" }
 			return config
 		}
 
@@ -327,7 +329,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.source			= |InjectionCtx ctxx->Obj?| { return null }
 		}		
 		
-		return ctx.withServiceDef(serviceDef) |->Obj?| {
+		return InjectionCtx.withServiceDef(serviceDef) |->Obj?| {
 			return InjectionUtils.autobuild(ctx, implType, ctorArgs)
 		}
 	}
@@ -373,7 +375,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj getService(InjectionCtx ctx, ServiceDef serviceDef, Bool returnReal) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
-			ctx.log("Found override for service '${serviceDef.serviceId}'")
+			InjectionCtx.log("Found override for service '${serviceDef.serviceId}'")
 			return service
 		}
 

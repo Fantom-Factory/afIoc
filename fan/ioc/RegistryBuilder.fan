@@ -118,7 +118,8 @@ class RegistryBuilder {
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
 				"suppressStartupMsg"		: false,
-				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version"
+				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
+				"appName"					: "Ioc"
 			])
 
 			defaults.each |val, key| {

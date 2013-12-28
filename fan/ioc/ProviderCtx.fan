@@ -14,14 +14,14 @@ class ProviderCtx {
 	** 
 	** See `IocHelper.debugOperation`
 	Obj? track(Str description, |->Obj?| operation) {
-		injectionCtx.track(description, operation)
+		InjectionCtx.track(description, operation)
 	}
 
 	** Logs details via the 'OpTracker'.
 	** 
 	** See `IocHelper.debugOperation`
 	Void log(Str description) {
-		injectionCtx.log(description)
+		InjectionCtx.log(description)
 	}
 
 	//	** The object the dependency will be injected into

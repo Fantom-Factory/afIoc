@@ -17,7 +17,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
 	override internal Obj buildProxy(InjectionCtx ctx, ServiceDef serviceDef) {
-		ctx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
+		InjectionCtx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= buildProxyType(ctx, serviceType)
 			lazyField 	:= proxyType.field("afLazyService")
@@ -65,7 +65,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		Pod? pod
 		code 		:= model.toFantomCode
 		podName		:= plasticCompiler.generatePodName
-		ctx.track("Compiling Pod '$podName'") |->Obj| {
+		InjectionCtx.track("Compiling Pod '$podName'") |->Obj| {
 			pod 	= plasticCompiler.compileCode(code, podName)
 		}			
 		proxyType 	:= pod.type(model.className)
