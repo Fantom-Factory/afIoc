@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and a 2 registry methods is all you need!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [33 tests, 190 methods, 482 verifies]'
+  - Extensively tested: - 'All tests passed! [36 tests, 195 methods, 490 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on afIoc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
 
@@ -274,8 +274,10 @@ Release Notes [#releaseNotes]
 *****************************
 v1.5.0 [#1.5.0]
 ---------------
- - New: 'ProviderCtx' contains details as to what type of injection is taking place.
+ - New: 'Registry.createProxy()' lets you create a lazy proxy from an arbituary mixin / impl pair.
+ - New: 'Registry.callMethod()' lets you invoke methods with dependencies injected into the parameters.
  - New: 'LogProvider' lets you inject 'Log' instances.
+ - New: 'ProviderCtx' contains details as to what type of injection is taking place.
  - Chg: Removed dependency type from 'DependencyProvider' method signatures. It moved to 'ProviderCtx'.
  - Chg: Liberated the 'PipelineBuilder' util service. It moved to BedSheet. (Breaking change.)
  - Chg: Overhauled 'InjectionCtx' to make use of ThreadStacks so it doesn't need to be passed around.

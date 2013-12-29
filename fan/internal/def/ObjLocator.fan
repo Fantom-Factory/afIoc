@@ -14,6 +14,8 @@ internal const mixin ObjLocator {
 	** fields (of all visibilities) marked with '@Inject'. 
     abstract Obj trackAutobuild(Type type, Obj?[] initParams)
 
+	abstract Obj trackCreateProxy(Type mixinType, Type implType, Obj?[] ctorArgs)
+
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	abstract Obj trackInjectIntoFields(Obj service)	
 
