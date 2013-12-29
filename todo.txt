@@ -2,7 +2,7 @@
 v1.5.0 Maybe...?
 ----------------
 
-Use 'appName' from startup options -> appName started up in XXX secs
+Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
 
 Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
@@ -11,20 +11,21 @@ Registry.createProxy(mixinType, implType)
 
 Registry.callMethod()
 
+ServiceIds should probably be fully qualified type names to avoid conflicts
+
 Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
 Default to the Service type name if given.
  
-Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
-
 Re-do DepdendencyCtx to give more detail 
  - See ProviderCtx for details
  - it's messy and I don't need it
  - but then I could inject Loggers... Hmm...?
 
+Move Service Mixins and Impls into same file
+
 Make SyncState - a consistent API for thread and const data
 
-ServiceIds should probably be fully qualified type names to avoid conflicts
-
+Use 'appName' from startup options -> appName started up in XXX secs
 
 
 Meh... can't be arsed

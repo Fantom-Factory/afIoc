@@ -11,13 +11,13 @@ const internal class ConfigProvider {
 		this.serviceDef	= serviceDef
 	}
 
-	Bool canProvide(ProviderCtx ctx, Type dependencyType) {
+	Bool canProvide(Type dependencyType) {
 		// BugFix: TestCtorInjection#testCorrectErrThrownWithWrongParams
 		// Type#fits does not allow null
 		(configType != null) && dependencyType.fits(configType)
 	}
 
-	Obj? provide(ProviderCtx proCtx, Type dependencyType) {
+	Obj? provide(Type dependencyType) {
 		objLocator := InjectionCtx.peek.objLocator
 		config := null
 		if (configType.name == "List")
