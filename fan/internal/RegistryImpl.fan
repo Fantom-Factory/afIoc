@@ -281,6 +281,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
+	override Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
+		Utils.stackTraceFilter |->Obj?| {
+			shutdownLockCheck
+			return InjectionCtx.withCtx(this, null) |->Obj?| {
+				return InjectionCtx.track("Calling method '$method.signature'") |->Obj?| {
+					return trackCallMethod(method, instance, providedMethodArgs)
+				}
+			}
+		}
+	}
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
@@ -343,6 +353,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj trackInjectIntoFields(Obj object) {
 		return InjectionUtils.injectIntoFields(object)
+	}
+
+	override Obj? trackCallMethod(Method method, Obj? instance, Obj?[] providedMethodArgs) {
+		return InjectionUtils.callMethod(method, instance, providedMethodArgs)
 	}
 
 	override ServiceDef? serviceDefById(Str serviceId) {

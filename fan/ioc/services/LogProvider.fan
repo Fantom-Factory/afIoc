@@ -14,7 +14,7 @@ const class LogProvider : DependencyProvider {
 		get { logCreatorFuncRef.val }
 		set { logCreatorFuncRef.val = it }
 	}	
-	
+
 	internal new make(|This|? in := null) { 
 		logCreatorFunc = |Type type->Log| { return type.pod.log }
 		in?.call(this)

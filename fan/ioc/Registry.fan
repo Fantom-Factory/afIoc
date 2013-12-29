@@ -24,8 +24,8 @@ const mixin Registry {
 	**  - inject dependencies into fields (of all visibilities) marked with '@Inject'
 	**  - call any methods annotated with '@PostInjection'
 	** 
-	** The other parameters (if provided) may be passed to the autobuild ctor. Handy when you wish 
-	** the ctor to take a mixture of objects and services. e.g. for a `fwt::Command`:
+	** The other parameters (if provided) may be passed to the autobuild ctor. Handy when you wish the ctor to take a 
+	** mixture of objects and services. e.g. for a `fwt::Command`:
 	** 
 	** pre>
 	**   registry.autobuild(MySaveCommand#, [entityToSave]).invoke(null)
@@ -53,7 +53,12 @@ const mixin Registry {
 	** 
 	** Returns the object passed in for method chaining.
 	** 
-	** *Note usage of this method is discouraged, it is far better practice for the creator to call 
-	** 'autobuild' instead.*  
-	abstract Obj injectIntoFields(Obj service)	
+	** *Note usage of this method is discouraged, it is far better practice for the creator to call 'autobuild' 
+	** instead.*  
+	abstract Obj injectIntoFields(Obj service)
+
+	** Calls the method, dependency injecting the parameters. 'instance' can be 'null' if calling a static method. 
+	** 
+	** The optional 'providedMethodArgs' are used as method arguments. Any args not provided are dependency injected.
+	abstract Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList)
 }
