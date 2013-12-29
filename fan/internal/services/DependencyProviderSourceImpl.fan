@@ -9,35 +9,35 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
 		// with lazy services
 		ctx := InjectCtx(InjectionType.dependencyByType) { it.dependencyType = Void# }.toProviderCtx
-		dependencyProviders.each { it.canProvide(ctx, Void#) }
+		dependencyProviders.each { it.canProvide(ctx) }
 	}
 
-	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {
+	override Bool canProvideDependency(ProviderCtx ctx) {
 		dependencyProviders.any |provider->Bool| {
 			// providers can't provide themselves!
-			if (dependencyType.fits(provider.typeof))
-				return false;
-			return provider.canProvide(proCtx, dependencyType) 
+			if (ctx.dependencyType.fits(provider.typeof))
+				return false
+			return provider.canProvide(ctx) 
 		}		
 	}
 
-	override Obj? provideDependency(ProviderCtx proCtx, Type dependencyType) {
-		dps := dependencyProviders.findAll { it.canProvide(proCtx, dependencyType) }
+	override Obj? provideDependency(ProviderCtx ctx) {
+		dps := dependencyProviders.findAll { it.canProvide(ctx) }
 
 		if (dps.isEmpty)
 			return null
 		
 		if (dps.size > 1)
-			throw IocErr(IocMessages.onlyOneDependencyProviderAllowed(dependencyType, dps.map { it.typeof }))
+			throw IocErr(IocMessages.onlyOneDependencyProviderAllowed(ctx.dependencyType, dps.map { it.typeof }))
 		
-		dependency := dps[0].provide(proCtx, dependencyType)
+		dependency := dps[0].provide(ctx)
 		
 		if (dependency == null) {
-			if (!dependencyType.isNullable )
-				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+			if (!ctx.dependencyType.isNullable )
+				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
 		} else {
-			if (!dependency.typeof.fits(dependencyType))
-				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, dependencyType))
+			if (!dependency.typeof.fits(ctx.dependencyType))
+				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
 		}
 
 		return dependency

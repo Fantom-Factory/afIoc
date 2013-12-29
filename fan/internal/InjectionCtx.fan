@@ -7,10 +7,10 @@ internal class InjectionCtx {
 	static const Str 			confProviderId	:= "afIoc.configProvider"
 	static const Str 			injectCtxId		:= "afIoc.injectCtx"
 	
-	OpTracker 					tracker
-	ObjLocator? 				objLocator
+	private OpTracker 			tracker
+			ObjLocator?			objLocator
 
-	** for testing only
+	** nullable & internal for testing only
 	new make(ObjLocator? objLocator, OpTracker tracker := OpTracker()) {
 		this.objLocator = objLocator
 		this.tracker	= tracker
@@ -24,7 +24,7 @@ internal class InjectionCtx {
 		ThreadStack.forTesting_clear(injectionCtxId)
 	}
 
-	static Obj? withCtx(ObjLocator? objLocator, OpTracker? tracker, |->Obj?| f) {
+	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
 		ctx := peek(false) ?: InjectionCtx.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, f)
@@ -44,7 +44,6 @@ internal class InjectionCtx {
 
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
 
-	** Only used for detecting recursion 
 	static Obj? withServiceDef(ServiceDef def, |->Obj?| operation) {
 		lastDef := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
 
@@ -65,6 +64,13 @@ internal class InjectionCtx {
 		}
 	}
 
+	static ServiceDef? building() {
+		def := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
+		if (def?.scope == ServiceScope.perInjection)
+			def = ThreadStack.peekParent(serviceDefId, false)
+		return def
+	}
+
 	// ---- Config Providing -------------------------------------------------------------------------------------------
 
 	static Obj? withConfigProvider(ConfigProvider provider, |->Obj?| operation) {
@@ -82,7 +88,6 @@ internal class InjectionCtx {
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 
 	static Obj? doingDependencyByType(Type dependencyType, |->Obj?| func) {
-		// TODO:
 		ctx := InjectCtx(InjectionType.dependencyByType) {
 			it.dependencyType = dependencyType
 		}
@@ -90,7 +95,6 @@ internal class InjectionCtx {
 	}
 	
 	static Obj? doingFieldInjection(Obj injectingInto, Field field, |->Obj?| func) {
-		// TODO:
 		ctx := InjectCtx(InjectionType.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof
@@ -102,7 +106,6 @@ internal class InjectionCtx {
 	}
 
 	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
-		// TODO:
 		ctx := InjectCtx(InjectionType.fieldInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
@@ -113,7 +116,6 @@ internal class InjectionCtx {
 	}
 
 	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |->Obj?| func) {
-		// TODO:
 		ctx := InjectCtx(InjectionType.methodInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= method.parent
@@ -124,7 +126,6 @@ internal class InjectionCtx {
 	}
 
 	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, |->Obj?| func) {
-		// TODO:
 		ctx := InjectCtx(InjectionType.methodInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
@@ -134,26 +135,12 @@ internal class InjectionCtx {
 	}
 
 	static Obj? doingParamInjection(Param param, Int index, |->Obj?| func) {
-		// TODO:
 		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
 		ctx.dependencyType		= param.type
 		ctx.methodParam			= param
 		ctx.methodParamIndex	= index
 		return func.call
 	}
-
-
-	
-	
-	// TODO: this could be CtxObj with all you uneed
-	@Deprecated
-	static ServiceDef? building() {
-		def := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
-		if (def?.scope == ServiceScope.perInjection)
-			def = ThreadStack.peekParent(serviceDefId, false)
-		return def
-	}
-
 
 	// ----
 	
@@ -201,12 +188,4 @@ internal class InjectCtx {
 			it.methodParamIndex		= this.methodParamIndex
 		}
 	}
-}
-
-enum class InjectionType {
-	dependencyByType,
-	fieldInjection,
-	fieldInjectionViaItBlock,
-	ctorInjection,
-	methodInjection;	
 }

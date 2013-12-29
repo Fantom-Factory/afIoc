@@ -289,8 +289,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? trackDependencyByType(Type dependencyType) {
 
 		// ask dependency providers first, for they may dictate dependency scope
-		if (depProSrc?.canProvideDependency(InjectionCtx.providerCtx, dependencyType) ?: false) {
-			dependency := depProSrc.provideDependency(InjectionCtx.providerCtx, dependencyType)
+		ctx := InjectionCtx.providerCtx
+		if (depProSrc?.canProvideDependency(ctx) ?: false) {
+			dependency := depProSrc.provideDependency(ctx)
 			InjectionCtx.logExpensive |->Str| { "Found Dependency via Provider : '$dependency?.typeof'" }
 			return dependency
 		}

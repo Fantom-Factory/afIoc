@@ -61,8 +61,8 @@ internal class T_MyService40 {
 	@Inject	Str? oops
 }
 internal const class T_DependencyProvider1 : DependencyProvider {
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { dependencyType.fits(Str#) }
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) { 69 }
+	override Bool canProvide(ProviderCtx ctx) { ctx.dependencyType.fits(Str#) }
+	override Obj? provide(ProviderCtx ctx) { 69 }
 }
 
 internal class T_MyModule57 {
@@ -90,17 +90,17 @@ internal class T_MyService43 {
 
 internal const class T_DependencyProvider2 : DependencyProvider {
 	const ThreadStash ls := ThreadStash(T_DependencyProvider2#.name)
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
+	override Bool canProvide(ProviderCtx ctx) {
 		ls["ctx"] = ctx
-		ls["type"] = dependencyType
-		return dependencyType.fits(Uri#)
+		ls["type"] = ctx.dependencyType
+		return ctx.dependencyType.fits(Uri#)
 	}
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) { `ass` }
+	override Obj? provide(ProviderCtx ctx) { `ass` }
 }
 
 internal const class T_DependencyProvider3 : DependencyProvider {
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) { dependencyType.fits(Str?#) }
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) { null }
+	override Bool canProvide(ProviderCtx ctx) { ctx.dependencyType.fits(Str?#) }
+	override Obj? provide(ProviderCtx ctx) { null }
 }
 
 internal class T_MyModule88 {
@@ -132,8 +132,8 @@ internal class T_MyModule96 {
 internal const class T_DependencyProvider4 : DependencyProvider {
 	@Inject const T_MyService84 s84
 	new make(|This|in) { in(this) }
-	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {s84.judge; return dependencyType.fits(Str?#) }
-	override Obj? provide(ProviderCtx ctx, Type dependencyType) { s84.judge }
+	override Bool canProvide(ProviderCtx ctx) {s84.judge; return ctx.dependencyType.fits(Str?#) }
+	override Obj? provide(ProviderCtx ctx) { s84.judge }
 }
 const mixin T_MyService84 {
 	abstract Str judge()
