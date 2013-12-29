@@ -85,9 +85,11 @@ internal class T_MyService70 {
 	new make(Int[] config) { }
 }
 
+@NoDoc
 const mixin T_MyService85 {
 	abstract Str judge()
 }
+@NoDoc
 const class T_MyService85Impl : T_MyService85 {
 	override Str judge() { "Dredd" }
 }

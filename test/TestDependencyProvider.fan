@@ -135,9 +135,11 @@ internal const class T_DependencyProvider4 : DependencyProvider {
 	override Bool canProvide(ProviderCtx ctx) {s84.judge; return ctx.dependencyType.fits(Str?#) }
 	override Obj? provide(ProviderCtx ctx) { s84.judge }
 }
+@NoDoc
 const mixin T_MyService84 {
 	abstract Str judge()
 }
+@NoDoc
 const class T_MyService84Impl : T_MyService84 {
 	new make(|This|in) { in(this) }
 	override Str judge() { "Dredd" }

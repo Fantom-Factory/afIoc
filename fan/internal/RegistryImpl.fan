@@ -80,23 +80,28 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceImplType 	= PlasticCompiler#
 				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
 			}] = null
-		
+
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.aspectInvokerSource
 				it.serviceType 		= AspectInvokerSource#
 				it.serviceImplType 	= AspectInvokerSourceImpl#
 				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
-		
+
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.threadStashManager
 				it.serviceType 		= ThreadStashManager#
 			}] = stashManager
-		
+
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryOptions
 				it.serviceType 		= RegistryOptions#
 			}] = RegistryOptionsImpl(options)
+
+			services[BuiltInServiceDef() {
+				it.serviceId 		= ServiceIds.logProvider
+				it.serviceType 		= LogProvider#
+			}] = LogProvider()
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 
