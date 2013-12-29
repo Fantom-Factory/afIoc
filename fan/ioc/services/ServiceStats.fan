@@ -20,10 +20,7 @@ const class ServiceStat {
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls
 
-	@NoDoc @Deprecated { msg="Use 'serviceType' instead" } 
-	const Type				type
-
-	internal new make(|This|? f) { f?.call(this); type = serviceType }
+	internal new make(|This|? f) { f?.call(this) }
 
 	internal This withLifecyle(ServiceLifecycle newLifecycle) {
 		ServiceStat {
@@ -65,4 +62,18 @@ enum class ServiceLifecycle {
 	// leave this last for compare
 	** Builtin services exist before the `Registry` is constructed.
 	BUILTIN;
+}
+
+** @since 1.2.0
+internal const class ServiceStatsImpl : ServiceStats {
+	
+	private const ObjLocator objLocator
+	
+	new make(Registry registry) {
+		this.objLocator = (ObjLocator) registry
+	}
+	
+	override Str:ServiceStat stats() {
+		objLocator.stats
+	}
 }

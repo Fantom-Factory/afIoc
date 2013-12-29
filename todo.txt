@@ -1,10 +1,23 @@
 
+v1.5.0 Done!
+------------
+Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
+
+Re-do DepdendencyCtx to give more detail 
+ - See ProviderCtx for details
+ - it's messy and I don't need it
+ - but then I could inject Loggers... Hmm...?
+
+Move Service Mixins and Impls into same file
+
+
 v1.5.0 Maybe...?
 ----------------
 
-DependencyProvider no longer take DepType (moved into enhanced ctx) breaking change
 
-Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
+Create Log injector - make overridable
+
+poddoc: DependencyProvider no longer take DepType (moved into enhanced ctx) breaking change
 
 Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
@@ -18,13 +31,6 @@ ServiceIds should probably be fully qualified type names to avoid conflicts
 Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
 Default to the Service type name if given.
  
-Re-do DepdendencyCtx to give more detail 
- - See ProviderCtx for details
- - it's messy and I don't need it
- - but then I could inject Loggers... Hmm...?
-
-Move Service Mixins and Impls into same file
-
 Make SyncState - a consistent API for thread and const data
 
 Use 'appName' from startup options -> appName started up in XXX secs
