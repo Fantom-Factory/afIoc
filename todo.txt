@@ -2,6 +2,8 @@
 v1.5.0 Maybe...?
 ----------------
 
+DependencyProvider no longer take DepType (moved into enhanced ctx) breaking change
+
 Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
 
 Registry.createProxy() - may have to change Lazy service

@@ -8,9 +8,9 @@
 const mixin DependencyProvider {
 
 	** Return 'true' if the provider can provide. (!)
-	abstract Bool canProvide(ProviderCtx ctx, Type dependencyType)
+	abstract Bool canProvide(ProviderCtx providerCtx)
 
 	** Return the dependency to be injected
-	abstract Obj? provide(ProviderCtx ctx, Type dependencyType)
+	abstract Obj? provide(ProviderCtx providerCtx)
 	
 }
