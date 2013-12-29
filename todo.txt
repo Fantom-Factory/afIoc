@@ -27,6 +27,7 @@ Make SyncState - a consistent API for thread and const data
 
 Use 'appName' from startup options -> appName started up in XXX secs
 
+test wot happens if static fields are @Inject'd???
 
 Meh... can't be arsed
 ---------------------

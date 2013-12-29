@@ -8,7 +8,8 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
 		// with lazy services
-		dependencyProviders.each { it.canProvide(InjectionCtx.providerCtx, Void#) }
+		ctx := InjectCtx(InjectionType.dependencyByType) { it.dependencyType = Void# }.toProviderCtx
+		dependencyProviders.each { it.canProvide(ctx, Void#) }
 	}
 
 	override Bool canProvideDependency(ProviderCtx proCtx, Type dependencyType) {

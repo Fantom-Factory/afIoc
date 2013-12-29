@@ -43,7 +43,7 @@ internal class TestDependencyProvider : IocTest {
 		ctx := dp.ls["ctx"] as ProviderCtx
 		typ := dp.ls["type"] as Type
 		verifyEq(typ, type)
-		verifyEq(Type[,].addAll(ctx.facets.map{it.typeof}), facets)
+		verifyEq(Type[,].addAll(ctx.fieldFacets.map{it.typeof}), facets)
 	}
 }
 

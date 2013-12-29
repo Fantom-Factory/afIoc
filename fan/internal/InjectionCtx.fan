@@ -7,7 +7,6 @@ internal class InjectionCtx {
 	static const Str 			confProviderId	:= "afIoc.configProvider"
 	static const Str 			injectCtxId		:= "afIoc.injectCtx"
 	
-	private Facet[][]			facetsStack	:= [,]
 	OpTracker 					tracker
 	ObjLocator? 				objLocator
 
@@ -90,10 +89,11 @@ internal class InjectionCtx {
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 	
-	static Obj? injectingField(Type injectingInto, Field field, |->Obj?| func) {
+	static Obj? doingFieldInjection(Obj injectingInto, Field field, |->Obj?| func) {
 		// TODO:
 		ctx := InjectCtx(InjectionType.fieldInjection) {
 			it.injectingInto	= injectingInto
+			it.injectingIntoType= injectingInto.typeof
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
@@ -101,10 +101,10 @@ internal class InjectionCtx {
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 
-	static Obj? injectingFieldViaItBlock(Type injectingInto, Field field, |->Obj?| func) {
+	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
 		// TODO:
 		ctx := InjectCtx(InjectionType.fieldInjection) {
-			it.injectingInto	= injectingInto
+			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
@@ -112,27 +112,28 @@ internal class InjectionCtx {
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 
-	static Obj? injectingMethod(Type injectingInto, Method method, |->Obj?| func) {
+	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |->Obj?| func) {
 		// TODO:
 		ctx := InjectCtx(InjectionType.methodInjection) {
 			it.injectingInto	= injectingInto
+			it.injectingIntoType= method.parent
 			it.method			= method
 			it.methodFacets		= method.facets		
 		}
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 
-	static Obj? injectingCtor(Type injectingInto, Method ctor, |->Obj?| func) {
+	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, |->Obj?| func) {
 		// TODO:
 		ctx := InjectCtx(InjectionType.methodInjection) {
-			it.injectingInto	= injectingInto
+			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
 		}
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 
-	static Obj? injectingParam(Param param, Int index, |->Obj?| func) {
+	static Obj? doingParamInjection(Param param, Int index, |->Obj?| func) {
 		// TODO:
 		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
 		ctx.dependencyType		= param.type
@@ -155,22 +156,10 @@ internal class InjectionCtx {
 
 
 	// ----
-
-	@Deprecated
-	static Obj? withFacets(Facet[] facets, |->Obj?| operation) {
-		ctx := peek
-		ctx.facetsStack.push(facets)
-		try {
-			return operation.call()
-		} finally {			
-			ctx.facetsStack.pop
-		}
-	}
 	
 	static ProviderCtx providerCtx() {
-		return ProviderCtx {
-			it.facets = peek.facetsStack.peek ?: Facet#.emptyList
-		}
+		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
+		return ctx.toProviderCtx
 	}
 	
 	static InjectionCtx? peek(Bool checked := true) {
@@ -179,9 +168,10 @@ internal class InjectionCtx {
 }
 
 internal class InjectCtx {
-	
 	InjectionType 	injectionType
-	Type?			injectingInto
+	
+	Obj?			injectingInto
+	Type?			injectingIntoType
 	Type?			dependencyType
 
 	Field?			field
@@ -195,6 +185,21 @@ internal class InjectCtx {
 	new make(InjectionType injectionType, |This|? in := null) {
 		in?.call(this)
 		this.injectionType = injectionType
+	}
+	
+	ProviderCtx toProviderCtx() {
+		ProviderCtx {
+			it.injectionType		= this.injectionType
+			it.injectingInto		= this.injectingInto
+			it.injectingIntoType	= this.injectingIntoType
+			it.dependencyType		= this.dependencyType
+			it.field				= this.field
+			it.fieldFacets			= this.fieldFacets ?: Facet#.emptyList
+			it.method				= this.method
+			it.methodFacets			= this.methodFacets ?: Facet#.emptyList
+			it.methodParam			= this.methodParam
+			it.methodParamIndex		= this.methodParamIndex
+		}
 	}
 }
 

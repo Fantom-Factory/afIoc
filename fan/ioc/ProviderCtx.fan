@@ -1,10 +1,25 @@
 
 ** As given to `DependencyProvider`s.
-const class ProviderCtx {
+class ProviderCtx {
 	
 	** All facets the field (to be injected) is annotated with 
-	const Facet[] facets
+//	const Facet[] facets
 
+	// TODO: fandoc
+	const InjectionType	injectionType
+	
+		  Obj?			injectingInto
+	const Type?			injectingIntoType
+	const Type?			dependencyType
+
+	const Field?		field
+	const Facet[]		fieldFacets
+
+	const Method?		method
+	const Facet[]		methodFacets
+	const Param?		methodParam
+	const Int?			methodParamIndex
+	
 	internal new make(|This| f) { f(this) }
 
 	** Adds an nested operation description to the 'OpTracker'. This provides contextual 

@@ -7,7 +7,7 @@ internal const class AutobuildProvider : DependencyProvider {
 	new make(|This|di) { di(this) }
 	
 	override Bool canProvide(ProviderCtx ctx, Type dependencyType) {
-		!ctx.facets.findType(Autobuild#).isEmpty
+		!ctx.fieldFacets.findType(Autobuild#).isEmpty
 	}
 	
 	override Obj? provide(ProviderCtx ctx, Type dependencyType) {

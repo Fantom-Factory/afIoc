@@ -15,12 +15,10 @@ internal const class InjectionUtils {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					InjectionCtx.injectingField(object.typeof, field) |->Bool| {
-						InjectionCtx.withFacets(field.facets) |->Bool| {
-							dependency := findDependencyByType(field.type)
-							inject(object, field, dependency)
-							return true
-						}
+					InjectionCtx.doingFieldInjection(object, field) |->Bool| {
+						dependency := findDependencyByType(field.type)
+						inject(object, field, dependency)
+						return true
 					}
 				})
 				log("No injection fields found")
@@ -31,7 +29,7 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? callMethod(Method method, Obj? obj, Obj?[] providedMethodArgs) {
-		InjectionCtx.injectingMethod(method.parent, method) |->Obj?| {
+		InjectionCtx.doingMethodInjection(obj, method) |->Obj?| {
 			args := findMethodInjectionParams(method, providedMethodArgs)
 			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
@@ -84,7 +82,7 @@ internal const class InjectionUtils {
 			}
 		}
 		
-		args := InjectionCtx.injectingCtor(building, ctor) |->Obj?| {
+		args := InjectionCtx.doingCtorInjection(building, ctor) |->Obj?| {
 			return findMethodInjectionParams(ctor, providedCtorArgs)
 		}
 		
@@ -103,11 +101,9 @@ internal const class InjectionUtils {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(building, Inject#, true).each |field| {
-				InjectionCtx.injectingFieldViaItBlock(building, field) |->| {
-					InjectionCtx.withFacets(field.facets) |->| {
-						dependency := findDependencyByType(field.type)
-						plan[field] = dependency
-					}
+				InjectionCtx.doingFieldInjectionViaItBlock(building, field) |->| {
+					dependency := findDependencyByType(field.type)
+					plan[field] = dependency
 				}
 			}
 			if (plan.isEmpty)
@@ -137,27 +133,25 @@ internal const class InjectionUtils {
 
 	private static Obj?[] findMethodInjectionParams(Method method, Obj?[] providedMethodArgs) {
 		return track("Determining injection parameters for $method.signature") |->Obj?[]| {
-			InjectionCtx.withFacets(Facet#.emptyList) |->Obj?[]| {
-				params := method.params.map |param, index| {
+			params := method.params.map |param, index| {
+				
+				log("Found parameter ${index+1}) $param.type")
+				if (index < providedMethodArgs.size) {
+					log("Parameter provided")
 					
-					log("Found parameter ${index+1}) $param.type")
-					if (index < providedMethodArgs.size) {
-						log("Parameter provided")
-						
-						provided := providedMethodArgs[index] 
-						if (provided != null && !provided.typeof.fits(param.type))
-							throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
-						return provided
-					}
-					
-					return InjectionCtx.injectingParam(param, index) |->Obj?| {
-						return findDependencyByType(param.type)
-					}
-				}		
-				if (params.isEmpty)
-					log("No injection parameters found")
-				return params
-			}
+					provided := providedMethodArgs[index] 
+					if (provided != null && !provided.typeof.fits(param.type))
+						throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
+					return provided
+				}
+				
+				return InjectionCtx.doingParamInjection(param, index) |->Obj?| {
+					return findDependencyByType(param.type)
+				}
+			}		
+			if (params.isEmpty)
+				log("No injection parameters found")
+			return params
 		}
 	}
 
