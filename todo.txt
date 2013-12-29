@@ -10,13 +10,12 @@ Re-do DepdendencyCtx to give more detail
 
 Move Service Mixins and Impls into same file
 
+Create Log injector - make overridable
+
+
 
 v1.5.0 Maybe...?
 ----------------
-
-
-Create Log injector - make overridable
-
 Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
@@ -34,6 +33,8 @@ Make SyncState - a consistent API for thread and const data
 Use 'appName' from startup options -> appName started up in XXX secs
 
 test wot happens if static fields are @Inject'd???
+
+
 
 Meh... can't be arsed
 ---------------------

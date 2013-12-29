@@ -17,6 +17,8 @@ internal const mixin ObjLocator {
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	abstract Obj trackInjectIntoFields(Obj service)	
 
+	abstract Obj? trackCallMethod(Method method, Obj? instance, Obj?[] providedMethodArgs)	
+
 	abstract ServiceDef? serviceDefById(Str serviceId)
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType) 
