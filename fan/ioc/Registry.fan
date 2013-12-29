@@ -49,6 +49,10 @@ const mixin Registry {
 	** Impl note: A list is used rather than splats so 'nulls' can be passed in. 
     abstract Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList)
 
+	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
+	** whenever a mixin method is invoked.
+	abstract Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList)
+
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 
 	** Returns the object passed in for method chaining.

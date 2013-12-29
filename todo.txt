@@ -12,6 +12,7 @@ Move Service Mixins and Impls into same file
 
 Create Log injector - make overridable
 
+Registry.callMethod()
 
 
 v1.5.0 Maybe...?
@@ -20,8 +21,6 @@ Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
  - better to enhance plastic
-
-Registry.callMethod()
 
 ServiceIds should probably be fully qualified type names to avoid conflicts
 

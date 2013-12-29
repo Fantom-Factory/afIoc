@@ -12,10 +12,12 @@ using afPlastic::PlasticCompiler
 @NoDoc
 const mixin ServiceProxyBuilder {
 
-	internal abstract Obj buildProxy(ServiceDef serviceDef)
+	internal abstract Obj createProxyForService(ServiceDef serviceDef)
+
+	internal abstract Obj createProxyForMixin(ServiceDef serviceDef)
 
 	** Returns a cached Type if exists, otherwise compiles a new proxy type 
-	internal abstract Type buildProxyType(Type serviceType)
+	internal abstract Type compileProxyType(Type serviceType)
 }
 
 
@@ -34,20 +36,27 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	new make(|This|di) { di(this) }
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
-	override internal Obj buildProxy(ServiceDef serviceDef) {
+	override internal Obj createProxyForService(ServiceDef serviceDef) {
 		InjectionCtx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
-			proxyType	:= buildProxyType(serviceType)
-			lazyField 	:= proxyType.field("afLazyService")
-			plan 		:= Field:Obj?[lazyField : LazyService(serviceDef, (ObjLocator) registry)]
-			ctorFunc 	:= Field.makeSetFunc(plan)
-			proxy		:= proxyType.make([ctorFunc])
-			
-			return proxy
+			proxyType	:= compileProxyType(serviceType)
+			builder		:= CtorPlanBuilder(proxyType)
+			builder["afLazyService"] = LazyProxyForService(serviceDef, (ObjLocator) registry)
+			return builder.makeObj
+		}
+	}
+
+	override internal Obj createProxyForMixin(ServiceDef serviceDef) {
+		InjectionCtx.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
+			serviceType	:= serviceDef.serviceType			
+			proxyType	:= compileProxyType(serviceType)
+			builder		:= CtorPlanBuilder(proxyType)
+			builder["afLazyService"] = LazyProxyForMixin(serviceDef, (ObjLocator) registry)
+			return builder.makeObj
 		}
 	}
 	
-	override Type buildProxyType(Type serviceType) {
+	override Type compileProxyType(Type serviceType) {
 		// TODO: investigate why getState() throws NPE when type not cached
 		if (typeCache.containsKey(serviceType.qname))
 			return typeCache[serviceType.qname]
@@ -57,11 +66,11 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 		if (!serviceType.isPublic)
 			throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
-		
+	
 		model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
 		
 		model.extendMixin(serviceType)
-		model.addField(LazyService#, "afLazyService")
+		model.addField(LazyProxy#, "afLazyService")
 
 		serviceType.fields.rw
 			.each |field| {

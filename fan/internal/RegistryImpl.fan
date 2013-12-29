@@ -264,9 +264,20 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname") 
+			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
 			return InjectionCtx.withCtx(this, null) |->Obj?| {
 				return trackAutobuild(type2, ctorArgs)
+			}
+		}
+	}
+	
+	override Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList) {
+		Utils.stackTraceFilter |->Obj?| {
+			shutdownLockCheck
+			return InjectionCtx.withCtx(this, null) |->Obj?| {
+				return InjectionCtx.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
+					return trackCreateProxy(mixinType, implType, ctorArgs)
+				}
 			}
 		}
 	}
@@ -351,6 +362,29 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
+	override Obj trackCreateProxy(Type mixinType, Type implType, Obj?[] ctorArgs) {
+		spb := (ServiceProxyBuilder) trackServiceById(ServiceIds.serviceProxyBuilder)
+		
+		if (implType.isMixin) 
+			throw IocErr(IocMessages.bindImplNotClass(implType))
+
+		if (!implType.fits(mixinType)) 
+			throw IocErr(IocMessages.bindImplDoesNotFit(mixinType, implType))
+		
+		// create a dummy serviceDef
+		serviceDef := StandardServiceDef() {
+			it.serviceId 		= "${mixinType.name}CreateProxy"
+			it.moduleId			= ""
+			it.serviceType 		= mixinType
+			it.serviceImplType 	= implType
+			it.scope			= ServiceScope.perInjection
+			it.description 		= "$mixinType.qname Create Proxy"
+			it.source			= |->Obj?| { autobuild(implType, ctorArgs) }
+		}
+
+		return spb.createProxyForMixin(serviceDef)
+	}
+	
 	override Obj trackInjectIntoFields(Obj object) {
 		return InjectionUtils.injectIntoFields(object)
 	}
