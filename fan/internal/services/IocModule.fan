@@ -4,11 +4,12 @@
 internal class IocModule {
 
 	@Contribute
-	static Void contributeDependencyProviderSource(OrderedConfig config) {
+	static Void contributeDependencyProviderSource(OrderedConfig config, LogProvider logProvider) {
 		serviceIdProvider := config.autobuild(ServiceIdProvider#)
 		autobuildProvider := config.autobuild(AutobuildProvider#)
 
 		config.add(serviceIdProvider)
 		config.add(autobuildProvider)
+		config.add(logProvider)
 	}
 }

@@ -17,8 +17,6 @@ v1.5.0 Maybe...?
 
 Create Log injector - make overridable
 
-poddoc: DependencyProvider no longer take DepType (moved into enhanced ctx) breaking change
-
 Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
