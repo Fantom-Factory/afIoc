@@ -150,7 +150,9 @@ internal const class InjectionUtils {
 						return provided
 					}
 					
-					return findDependencyByType(param.type)
+					return InjectionCtx.injectingParam(param, index) |->Obj?| {
+						return findDependencyByType(param.type)
+					}
 				}		
 				if (params.isEmpty)
 					log("No injection parameters found")

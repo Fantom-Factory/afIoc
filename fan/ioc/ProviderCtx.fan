@@ -1,9 +1,9 @@
 
 ** As given to `DependencyProvider`s.
-class ProviderCtx {
+const class ProviderCtx {
 	
 	** All facets the field (to be injected) is annotated with 
-	Facet[] facets
+	const Facet[] facets
 
 	internal new make(|This| f) { f(this) }
 

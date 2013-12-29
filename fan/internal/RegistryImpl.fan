@@ -246,8 +246,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLockCheck
 			return InjectionCtx.withCtx(this, null) |->Obj?| {
 				return InjectionCtx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-					// as ctx is brand new, this won't return null
-					return trackDependencyByType(dependencyType)
+					return InjectionCtx.doingDependencyByType(dependencyType) |->Obj| {
+						// as ctx is brand new, this won't return null
+						return trackDependencyByType(dependencyType)
+					}
 				}
 			}
 		}
@@ -289,13 +291,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// ask dependency providers first, for they may dictate dependency scope
 		if (depProSrc?.canProvideDependency(InjectionCtx.providerCtx, dependencyType) ?: false) {
 			dependency := depProSrc.provideDependency(InjectionCtx.providerCtx, dependencyType)
-			InjectionCtx.log("Found Dependency via Provider : '$dependency?.typeof'")
+			InjectionCtx.logExpensive |->Str| { "Found Dependency via Provider : '$dependency?.typeof'" }
 			return dependency
 		}
 
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
-			InjectionCtx.log("Found Service '$serviceDef.serviceId'")
+			InjectionCtx.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
 			return getService(serviceDef, false)			
 		}
 
