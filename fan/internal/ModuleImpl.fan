@@ -92,8 +92,15 @@ internal const class ModuleImpl : Module {
 
 	// ---- Module Methods ----------------------------------------------------
 	
-	override ServiceDef? serviceDef(Str serviceId) {
+	override ServiceDef? serviceDefByQualifiedId(Str serviceId) {
 		serviceDefs[serviceId]
+	}
+
+	override ServiceDef[] serviceDefsById(Str serviceId) {
+		sIdLower := serviceId.lower
+		return serviceDefs.vals.findAll |serviceDef| {
+			serviceDef.serviceId.lower.endsWith(sIdLower)
+		}
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
@@ -123,14 +130,6 @@ internal const class ModuleImpl : Module {
 
 		// we're going deeper!
 		return InjectionCtx.withServiceDef(def) |->Obj?| {
-			
-			if (def.scope == ServiceScope.perInjection) {
-				return getOrMakeService(def, returnReal, false)
-			}
-			
-			if (def.scope == ServiceScope.perThread) {
-				return getOrMakeService(def, returnReal, true)
-			}
 
 			// Because of recursion (service1 creates service2), you can not create the service inside an actor ('cos 
 			// the actor will block when it eventually messages itself). So...
@@ -138,6 +137,14 @@ internal const class ModuleImpl : Module {
 			// only dangerous because Gawd knows what those services do in their ctor or PostInject methods!
 			if (def.scope == ServiceScope.perApplication) {
 				return getOrMakeService(def, returnReal, true)
+			}
+			
+			if (def.scope == ServiceScope.perThread) {
+				return getOrMakeService(def, returnReal, true)
+			}
+			
+			if (def.scope == ServiceScope.perInjection) {
+				return getOrMakeService(def, returnReal, false)
 			}
 			
 			throw WtfErr("What scope is {$def.scope}???")

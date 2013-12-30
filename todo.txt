@@ -14,9 +14,6 @@ Create Log injector - make overridable
 
 Registry.callMethod()
 
-
-v1.5.0 Maybe...?
-----------------
 Registry.createProxy() - may have to change Lazy service
 Registry.createProxy(mixinType, implType)
  - as impl type is not a service, it's quite useless.
@@ -27,16 +24,22 @@ ServiceIds should probably be fully qualified type names to avoid conflicts
 Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
 Default to the Service type name if given.
  
-Make SyncState - a consistent API for thread and const data
+
+
+v1.5.0 Maybe...?
+----------------
+API documentation overhaul
 
 Use 'appName' from startup options -> appName started up in XXX secs
 
-test wot happens if static fields are @Inject'd???
+use afIoc::ThreadStack in efan - copy, rather than use
 
 
 
 Meh... can't be arsed
 ---------------------
+Make SyncState - a consistent API for thread and const data
+
 TypeCoercers to be added via index props
 
 service disambiguation via facets 

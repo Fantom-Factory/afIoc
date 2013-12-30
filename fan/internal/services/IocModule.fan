@@ -3,7 +3,7 @@
 ** that would require a new ContribitionImpl; too much work!
 internal class IocModule {
 
-	@Contribute
+	@Contribute { serviceType=DependencyProviderSource# }
 	static Void contributeDependencyProviderSource(OrderedConfig config, LogProvider logProvider) {
 		serviceIdProvider := config.autobuild(ServiceIdProvider#)
 		autobuildProvider := config.autobuild(AutobuildProvider#)

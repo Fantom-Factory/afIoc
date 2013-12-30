@@ -8,51 +8,51 @@ const mixin ServiceIds {
 	static const Str builtInModuleId			:= "BuiltInModule"
 
 	** @see `Registry`
-	static const Str registry					:= "Registry"
-	
+	static const Str registry					:= "afIoc::Registry"
+
 	** @see `RegistryStartup`
-	static const Str registryStartup			:= "RegistryStartup"
-	
+	static const Str registryStartup			:= "afIoc::RegistryStartup"
+
 	** @see `RegistryShutdownHub`
-	static const Str registryShutdownHub		:= "RegistryShutdownHub"
+	static const Str registryShutdownHub		:= "afIoc::RegistryShutdownHub"
 
 	** @see `DependencyProviderSource`
-	static const Str dependencyProviderSource	:= "DependencyProviderSource"
-	
+	static const Str dependencyProviderSource	:= "afIoc::DependencyProviderSource"
+
 	** @see `ServiceOverride`
-	static const Str serviceOverride			:= "ServiceOverride"
+	static const Str serviceOverride			:= "afIoc::ServiceOverride"
 
 	** @see `ServiceStats`
-	static const Str serviceStats				:= "ServiceStats"
+	static const Str serviceStats				:= "afIoc::ServiceStats"
 	
 	internal
-	static const Str ctorFieldInjector			:= "CtorFieldInjector"
+	static const Str ctorFieldInjector			:= "afIoc::CtorFieldInjector"
 	
 	** @see `ThreadStashManager`
 	** 
 	** @since 1.3
-	static const Str threadStashManager			:= "ThreadStashManager"
+	static const Str threadStashManager			:= "afIoc::ThreadStashManager"
 	
 	** @since 1.3
 	internal
-	static const Str serviceProxyBuilder		:= "ServiceProxyBuilder"
+	static const Str serviceProxyBuilder		:= "afIoc::ServiceProxyBuilder"
 
 	** @since 1.3
 	internal
-	static const Str plasticCompiler			:= "PlasticCompiler"
+	static const Str plasticCompiler			:= "afIoc::PlasticCompiler"
 
 	** @since 1.3
 	internal
-	static const Str aspectInvokerSource		:= "AspectInvokerSource"
+	static const Str aspectInvokerSource		:= "afIoc::AspectInvokerSource"
 
 	** @see `RegistryOptions`
 	** 
 	** @since 1.4.8
-	static const Str registryOptions			:= "RegistryOptions"
+	static const Str registryOptions			:= "afIoc::RegistryOptions"
 
 	** @see `LogProvider`
 	** 
 	** @since 1.5.0
-	static const Str logProvider				:= "LogProvider"
+	static const Str logProvider				:= "afIoc::LogProvider"
 
 }

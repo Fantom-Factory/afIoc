@@ -6,6 +6,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const Str:Module				modules
+	private const Module[]					moduleList	// a cache for performance reasons
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
 	private const Duration					startTime
@@ -119,8 +120,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				// ensure services aren't defined twice
 				moduleDef.serviceDefs.keys.each |serviceId| {
 					if (serviceIdToModule.containsKey(serviceId)) {
-						existingDef 	:= serviceIdToModule[serviceId].serviceDef(serviceId)
-						conflictingDef 	:= module.serviceDef(serviceId)
+						existingDef 	:= serviceIdToModule[serviceId].serviceDefByQualifiedId(serviceId)
+						conflictingDef 	:= module.serviceDefByQualifiedId(serviceId)
 						throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
 					}
 					serviceIdToModule[serviceId] = module
@@ -129,7 +130,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 
 		// set before we validate the contributions
-		this.modules = moduleIdToModule		
+		this.modules = moduleIdToModule
+		this.moduleList = modules.vals
 		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
@@ -394,9 +396,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefById(Str serviceId) {
-		ServiceDef[] serviceDefs := modules.vals.map |module| {
-			module.serviceDef(serviceId)
-		}.exclude { it == null }
+		// attempt a qualified search first
+		serviceDef := moduleList.eachWhile { it.serviceDefByQualifiedId(serviceId) }
+		if (serviceDef != null)
+			return serviceDef
+
+		serviceDefs := (ServiceDef[]) moduleList.map |module| {
+			module.serviceDefsById(serviceId)
+		}.flatten
 
 		if (serviceDefs.size > 1)
 			throw WtfErr("Multiple services defined for service id $serviceId")
@@ -405,24 +412,27 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
-		ServiceDef[] serviceDefs := modules.vals.map |module| {
+		ServiceDef[] serviceDefs := moduleList.map |module| {
 			module.serviceDefsByType(serviceType)
 		}.flatten
 
-		if (serviceDefs.size > 1)
-			throw IocErr(IocMessages.manyServiceMatches(serviceType, serviceDefs.map { it.serviceId }))
+		if (serviceDefs.size > 1) {
+			// if exists, return the default service, the one with the qname as its serviceId 
+			lastChance := serviceDefs.find { it.serviceId.equalsIgnoreCase(serviceType.qname) }
+			return lastChance ?: throw IocErr(IocMessages.manyServiceMatches(serviceType, serviceDefs.map { it.serviceId }))
+		}
 
 		return serviceDefs.isEmpty ? null : serviceDefs[0]
 	}
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
-		modules.vals.map {
+		moduleList.map {
 			it.contributionsByServiceDef(serviceDef)
 		}.flatten
 	}
 
 	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
-		modules.vals.map {
+		moduleList.map {
 			it.adviceByServiceDef(serviceDef)
 		}.flatten
 	}
