@@ -20,6 +20,9 @@ const class ServiceStat {
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls
 
+	@NoDoc @Deprecated { msg="Use 'serviceType' instead." }
+		  Type				type() { serviceType }
+
 	internal new make(|This|? f) { f?.call(this) }
 
 	internal This withLifecyle(ServiceLifecycle newLifecycle) {
