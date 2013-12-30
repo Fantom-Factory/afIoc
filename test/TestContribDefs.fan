@@ -43,8 +43,9 @@ internal class TestContribDefs : IocTest {
 	
 	Void testWhenNoConfigDefined() {
 		reg := RegistryBuilder().addModule(T_MyModule52#).build.startup
-		reg.dependencyByType(PublicTestTypes.type("T_MyService31"))
-		reg.serviceById("T_MyService31")
+		typ := PublicTestTypes.type("T_MyService31")
+		reg.dependencyByType(typ)
+		reg.serviceById(typ.qname)
 	}
 }
 

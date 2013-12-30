@@ -58,6 +58,19 @@ internal class BugFixes : IocTest {
 		if (o1 != o2)
 			throw Err("Are NOT equal - $o1 : $o2")
 	}
+
+	Void testDupServiceCanBeGottenByType() {
+		reg := RegistryBuilder().addModule(T_MyModule98#).build.startup
+		
+		s1 := reg.serviceById(T_MyService89#.qname)
+		s2 := reg.serviceById("PillowRoutes")
+		
+		t1 := reg.serviceById("T_MyService89")
+		verifyEq(t1, s1)
+
+		t2 := reg.dependencyByType(T_MyService89#)
+		verifyEq(t1, s1)
+	}
 }
 
 internal class T_MyModule83 {
@@ -93,3 +106,11 @@ const mixin T_MyService85 {
 const class T_MyService85Impl : T_MyService85 {
 	override Str judge() { "Dredd" }
 }
+
+internal class T_MyModule98 {
+	static Void bind(ServiceBinder binder) {
+		binder.bindImpl(T_MyService89#)		
+		binder.bindImpl(T_MyService89#).withId("PillowRoutes")
+	}
+}
+internal const class T_MyService89 { }

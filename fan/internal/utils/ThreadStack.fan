@@ -1,6 +1,5 @@
 using concurrent
 
-// TODO: use in efanXtra
 ** I've recently become a fan of threaded stacks - they get me outa a whole lot of trouble!
 internal class ThreadStack {
 

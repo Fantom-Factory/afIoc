@@ -57,7 +57,6 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	}
 	
 	override Type compileProxyType(Type serviceType) {
-		// TODO: investigate why getState() throws NPE when type not cached
 		if (typeCache.containsKey(serviceType.qname))
 			return typeCache[serviceType.qname]
 
@@ -97,7 +96,6 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		}			
 		proxyType 	:= pod.type(model.className)
 				
-		// TODO: investigate why this throws NotImmutableErr when inlined
 		typeCache[serviceType.qname] = proxyType
 		return proxyType
 	}	

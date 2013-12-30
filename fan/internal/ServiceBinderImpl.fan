@@ -37,7 +37,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
         this.serviceMixin	= serviceMixin
         this.serviceImpl 	= serviceImpl
-        this.serviceId 		= serviceMixin.name
+        this.serviceId 		= serviceMixin.qname
 
         return this
     }	

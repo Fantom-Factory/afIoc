@@ -51,6 +51,8 @@ const mixin Registry {
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.
+	** 
+	** @since 1.5.0
 	abstract Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
@@ -64,5 +66,7 @@ const mixin Registry {
 	** Calls the method, dependency injecting the parameters. 'instance' can be 'null' if calling a static method. 
 	** 
 	** The optional 'providedMethodArgs' are used as method arguments. Any args not provided are dependency injected.
+	** 
+	** @since 1.5.0
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList)
 }

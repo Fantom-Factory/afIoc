@@ -2,13 +2,14 @@ using concurrent::AtomicRef
 using concurrent::Future
 using afIoc::ConcurrentState
 
-// TODO: add clear() method
 ** A map that shares its state across threads providing fast reads and synchronised writes. It's
-** an application of `ConcurrentState` for use when reads far out number the writes.
+** an application of `ConcurrentState` for use when *reads* far out number the *writes*.
 ** 
 ** The cache wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all reads 
 ** are made. All writes are made via [ConcurrentState]`afIoc::ConcurrentState` ensuring 
 ** synchronised access. Writing makes a 'rw' copy of the map and is thus a more expensive operation.
+** 
+** Note that all objects held in the map have to be immutable.
 ** 
 ** @since 1.4.2
 const class ConcurrentCache {
@@ -19,7 +20,7 @@ const class ConcurrentCache {
 		f?.call(this)
 		this.map = [:]
 	}
-	
+
 	** Make a 'ConcurrentCache' using the given immutable map 
 	** @since 1.4.6
 	new makeWithMap([Obj:Obj?] map) {
@@ -80,6 +81,10 @@ const class ConcurrentCache {
 		map.vals
 	}
 
+	Void clear() {
+		map.clear
+	}
+	
 	private Future withState(|Obj?| state) {
 		conState.withState(state)
 	}
