@@ -3,9 +3,9 @@ using concurrent::ActorPool
 using concurrent::AtomicInt
 using concurrent::Future
 
-**
-** A helper class used to store, access and retrieve mutable state within a 'const' class. 
-** For IoC this means your services can be declared as 'perApplication' or singleton scope.
+** A helper class to store and retrieve state between threads; use in 'const' classes.
+** For IoC this means your services can be declared as 'perApplication' or singleton scope and 
+** still hold useful data.
 ** 
 ** In Java terms, the 'getState() { ... }' method behaves in a similar fashion to the 
 ** 'synchronized' keyword, only allowing one thread through at a time.
@@ -19,7 +19,7 @@ using concurrent::Future
 ** methods on your State object. The compiler forces all access to the state object to be made 
 ** through the 'withState' and 'getState' methods.
 ** 
-** A full example of a mutable const map class is as follows:
+** A fully usable example of a mutable const map class is as follows:
 ** 
 ** pre>
 ** const class ConstMap {
@@ -28,27 +28,17 @@ using concurrent::Future
 **   ** Note that both 'key' and 'value' need to be immutable
 **   @Operator
 **   Obj get(Obj key) {
-**     getState {
-**       it.map[key]
+**     getState |ConstMapState state -> Obj?| {
+**       return state.map[key]
 **     }
 **   }
 ** 
 **   ** Note that both 'key' and 'value' need to be immutable
 **   @Operator
 **   Void set(Obj key, Obj value) {
-**     withState {
-**       it.map[key] = value
+**     withState |ConstMapState state| {
+**       state.map[key] = value
 **     }
-**   }
-**   
-**   ** helper method used to narrow the state type
-**   private Void withState(|ConstMapState| state) {
-**     conState.withState(state)
-**   }
-** 
-**   ** helper method used to narrow the state type
-**   private Obj? getState(|ConstMapState -> Obj?| state) {
-**     conState.getState(state)
 **   }
 ** }
 ** 

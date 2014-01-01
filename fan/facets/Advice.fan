@@ -1,5 +1,5 @@
 
-** Use in a module class to denote a service advisor method.
+** Use in 'AppModule' classes to denote a service advisor method.
 ** 
 ** Advisor methods let you *intercept* method calls to a mixin fronted service, allowing you to
 **  - perform pre & post method logic

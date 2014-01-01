@@ -1,10 +1,15 @@
 
-**
-** Allows a module to bind service facets to implementations. A 'ServiceBinder' is passed to to 
-** module methods with the following signature: 
+** Passed into the 'AppModule.bind()' method. Allows a module to bind service mixins to service implementations. 
+** Example: 
 ** 
-**   static Void bind(ServiceBinder binder) { ... } 
+** pre>
+** class AppModule {
 ** 
+**   static Void bind(ServiceBinder binder) {
+**     binder.bind(MyService#, MyServiceImpl#)
+**   } 
+** }
+** <pre
 ** This is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
 ** 
 mixin ServiceBinder {

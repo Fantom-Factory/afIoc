@@ -1,5 +1,5 @@
 
-** Use in a module class to denote a service builder method.
+** Use in 'AppModule' classes to denote a service builder method.
 ** 
 ** See [Defining Services]`index#definingServices`
 facet class Build {

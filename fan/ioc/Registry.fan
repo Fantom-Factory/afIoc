@@ -1,5 +1,5 @@
 
-** (Service) - The registry of IoC services.
+** (Service) - The registry of IoC services; this is the main IoC service. 
 const mixin Registry {
 	
  	** Invoke to execute all contributions to the `RegistryStartup` service.

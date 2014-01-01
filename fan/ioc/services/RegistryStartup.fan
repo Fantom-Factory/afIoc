@@ -1,15 +1,21 @@
 
-** (Service) - 
-** Executes a series of (user defined) operations when the `Registry` starts up. Operations are 
-** defined by contributing listeners to the 'RegistryStartup' service. For example, add the 
-** following to your module:
+** (Service) - Contribute functions to be executed on `Registry` start up.
+**  
+** Functions need not be immutable.
 ** 
-**   @Contribute
+** Example usage:
+** 
+** pre>
+** class AppModule {
+** 
+**   @Contribute { serviceTyoe=RegistryStartup# }
 **   static Void contributeRegistryStartup(OrderedConfig conf, MyService myService) {
 **     conf.add |->| {
 **       myService.startup()
 **     }
 **   }
+** }
+** <pre
 ** 
 ** @uses OrderedConfig of |->|
 const mixin RegistryStartup { }
