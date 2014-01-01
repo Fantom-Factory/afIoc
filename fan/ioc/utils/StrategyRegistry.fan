@@ -1,10 +1,10 @@
 
-** A map of Types to Objs that can be looked up via an inheritance search.
+** A helper class that looks up Objs via Type inheritance search.
 const class StrategyRegistry {	
 	private const ConcurrentState 	conState	:= ConcurrentState(StrategyRegistryBestFitCache#)
 	private const Type:Obj? 		values
 	
-	** Creates an AdapterPattern with the given list. All types are coerced to non-nullable types.
+	** Creates an StrategyRegistry with the given list. All types are coerced to non-nullable types.
 	** An 'Err' is thrown if a duplicate is found in the process. 
 	new make(Type:Obj? values) {
 		nonDups := Utils.makeMap(Type#, Obj?#)

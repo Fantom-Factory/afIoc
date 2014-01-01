@@ -1,11 +1,11 @@
 
-**
-** Lets you specify additional options for a service, overriding defaults.
+** 
+** Returned from 'AppModule.bind()' methods; lets you specify additional service options. Use to override defaults.
 ** 
 mixin ServiceBindingOptions {
 
-	** Sets a specific id for the service, rather than the default (from the service type). This is 
-	** useful when multiple services implement the same mixin, since service ids must be unique.
+	** Sets a specific id for the service, rather than the default (the qualified name of the service type / mixin).  
+	** Required when you have multiple implementations of the same mixin, since service ids must be unique.
 	abstract This withId(Str id)
 
 	** Uses the the simple (unqualified) class name of the implementation class as the service id.

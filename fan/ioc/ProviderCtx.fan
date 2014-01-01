@@ -1,5 +1,5 @@
 
-** Provides contextual injection information to `DependencyProvider`s.
+** Passed into [DependencyProviders]`DependencyProvider` to give contextual injection information.
 class ProviderCtx {
 	
 	** The type of injection.
@@ -45,7 +45,7 @@ class ProviderCtx {
 	}
 }
 
-** Found in `ProviderCtx` to inform `DependencyProvider` what type of injection is occurring.
+** Used by `ProviderCtx` to inform 'DependencyProviders' what type of injection is occurring.
 enum class InjectionType {
 	
 	** A direct call to 'Registry.dependencyByType()' 

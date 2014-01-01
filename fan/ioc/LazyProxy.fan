@@ -82,7 +82,7 @@ internal class LazyProxyForServiceState {
 	}
 }
 
-const class LazyProxyForMixin : LazyProxy {
+internal const class LazyProxyForMixin : LazyProxy {
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyProxyForMixinState#)
 	private const ThreadStash		threadStash
 	private const ServiceDef 		serviceDef

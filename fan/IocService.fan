@@ -134,30 +134,41 @@ const class IocService : Service {
 
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
-	** Convenience for `Registry.serviceById`
+	** Convenience for `Registry#serviceById`
 	Obj serviceById(Str serviceId) {
 		checkServiceStarted
 		return registry.serviceById(serviceId)
 	}
 	
-	** Convenience for `Registry.dependencyByType`
+	** Convenience for `Registry#dependencyByType`
 	Obj dependencyByType(Type serviceType) {
 		checkServiceStarted
 		return registry.dependencyByType(serviceType)
 	}
 
-	** Convenience for `Registry.autobuild`
-	Obj autobuild(Type type) {
+	** Convenience for `Registry#autobuild`
+	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
 		checkServiceStarted
-		return registry.autobuild(type)
+		return registry.autobuild(type, ctorArgs)
 	}
 	
-	** Convenience for `Registry.injectIntoFields`
+	** Convenience for `Registry#createProxy`
+	Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList) {
+		checkServiceStarted
+		return registry.createProxy(mixinType, implType, ctorArgs)		
+	}
+	
+	** Convenience for `Registry#injectIntoFields`
 	Obj injectIntoFields(Obj service) {
 		checkServiceStarted
 		return registry.injectIntoFields(service)
-	}	
-
+	}
+	
+	** Convenience for `Registry#callMethod`
+	Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
+		checkServiceStarted
+		return registry.callMethod(method, instance, providedMethodArgs)		
+	}
 
 	// ---- Private Methods -----------------------------------------------------------------------
 

@@ -102,7 +102,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.logProvider
 				it.serviceType 		= LogProvider#
-			}] = LogProvider()
+			}] = LogProviderImpl()
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 

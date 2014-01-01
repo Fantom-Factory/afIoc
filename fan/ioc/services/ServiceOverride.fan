@@ -1,12 +1,16 @@
 
-** (Service) - Override a defined service with your own implementation. 
+** (Service) - Contribute to override previously defined services. Use to override production services with test 
+** versions, or to replace 3rd party services with your own implementation. 
+** 
+** Use the service Id to specify the original service to override, and pass in the override instance. For example, this
+** shows how to override the service 'dinner' with an instance of 'PieAndMash': 
 ** 
 ** pre>
 **   static Void bind(ServiceBinder binder) {
 **     binder.bindImpl(PieAndChips#).withId("dinner")
 **   }
 ** 
-**   @Contribute
+**   @Contribute { serviceType=ServiceOverride# }
 **   static Void contributeServiceOverride(MappedConfig conf) {
 **     conf["dinner"] = conf.autobuild(PieAndMash#)
 **   }
@@ -20,6 +24,7 @@
 ** @uses MappedConfig of 'Str:Obj' (serviceId:overrideImpl)
 const mixin ServiceOverride {
 	
+	@NoDoc
 	abstract Obj? getOverride(Str serviceId)
 }
 

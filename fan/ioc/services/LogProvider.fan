@@ -1,16 +1,36 @@
 using concurrent::AtomicRef
 
-** (Service) - A provider that injects 'Log' instances. 
-** By default the Log name is the types's pod name. 
-** If different logger instances are desired, change the `#logCreatorFunc`.
-const class LogProvider : DependencyProvider {
-
-	private const AtomicRef logCreatorFuncRef	:= AtomicRef()
+** (Service) - A `DependencyProvider` that injects 'Log' instances. 
+** By default the Log name is the containing Types's pod name. 
+** If different logger instances are desired, change the `#logCreatorFunc`. 
+** 
+** Change it at registry startup before any Loggers are injected:
+** 
+** pre>
+** class AppModule {
+** 
+**   @Contribute { serviceTyoe=RegistryStartup# }
+**   static Void changeLoggers(OrderedConfig conf, LogProvider logProvider) {
+**     conf.add |->| {
+**       logProvider.logCreatorFunc = |Type type->Log| { return Log.get(type.name) } 
+**     }
+**   }
+** } 
+** <pre
+const mixin LogProvider : DependencyProvider {
 	
 	** The func that creates log instances from a given type. Change it at will!
 	** 
 	** Defaults to '|Type type->Log| { return type.pod.log }'
-	|Type->Log| logCreatorFunc {
+	abstract |Type->Log| logCreatorFunc
+	
+}
+
+internal const class LogProviderImpl : LogProvider {
+
+	private const AtomicRef logCreatorFuncRef	:= AtomicRef()
+	
+	override |Type->Log| logCreatorFunc {
 		get { logCreatorFuncRef.val }
 		set { logCreatorFuncRef.val = it }
 	}	

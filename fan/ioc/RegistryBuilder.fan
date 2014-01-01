@@ -1,5 +1,5 @@
 
-** Builds a `Registry` from Modules. Modules may be added manually, defined by 
+** Use to create an IoC `Registry`. Modules may be added manually, defined by 
 ** [meta-data]`sys::Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
 class RegistryBuilder {
 	private const static Log 	logger 		:= Utils.getLog(RegistryBuilder#)

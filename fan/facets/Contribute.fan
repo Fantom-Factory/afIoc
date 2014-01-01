@@ -1,5 +1,5 @@
 
-** Use in a module class to denote a service contribution method. The service to be contributed to 
+** Use in 'AppModule' classes to denote a service contribution method. The service to be contributed to 
 ** is derived from either the serviceId, serviceType, or the method name. 
 ** 
 ** Either 'serviceId' or 'serviceType' should be defined, not both. Or as a last resort, if neither 

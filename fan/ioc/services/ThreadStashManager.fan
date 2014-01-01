@@ -1,22 +1,24 @@
 using concurrent
 
 ** (Service) -
-** Creates and keeps tabs on `ThreadStash`s so they may be cleaned up, say, at the end of a web 
-** request.
+** Use to create [ThreadStashes]`ThreadStash` whose contents may be automatically deleted.
+**  
+** This is important in the context of a web application where resources need to be cleaned up at the end of a web 
+** request / thread. 
 ** 
 ** @since 1.3.0
 const mixin ThreadStashManager {
 
-	** creates a stash with the given prefix
+	** Creates a `ThreadStash` with the given prefix.
 	abstract ThreadStash createStash(Str owner)
 
-	** Returns all (fully qualified) keys in the current thread associated / used with this manager 
+	** Returns all (fully qualified) keys in the current thread associated / used with this manager. 
 	abstract Str[] keys() 
 	
-	** Add a handler to be called on thread clean up
+	** Add a handler to be called on thread clean up. Handlers need to be added for each thread.
 	abstract Void addCleanUpHandler(|->| handler)
 	
-	** Removes all values in the current thread associated / used with this manager
+	** Removes all values in the current thread associated / used with this manager.
 	abstract Void cleanUpThread()
 }
 

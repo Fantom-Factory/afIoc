@@ -1,17 +1,19 @@
 using concurrent::Future
 
-** (Service) - 
-** Event hub for notifications when the `Registry` shuts down. All listeners need to immutable 
-** funcs, which essentially means only 'const' classes can contribute.
+** (Service) - Contribute functions to be executed on `Registry` shut down. 
+** All functions need to be immutable, which essentially means it can only reference 'const' classes.
 ** 
 ** Common usage is add listeners in your service ctor:
 ** 
 ** pre>
+** const class MyService {
+**  
 **   new make(RegistryShutdownHub shutdownHub) {
 **     shutdownHub.addRegistryShutdownListener |->| {
-**       this.shutdown
+**       doStuff()
 **     }
 **   }
+** }
 ** <pre
 ** 
 const mixin RegistryShutdownHub {

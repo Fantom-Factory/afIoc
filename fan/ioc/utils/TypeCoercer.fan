@@ -1,6 +1,6 @@
 
-** Coerces an Obj to a given type via Fantom's 'fromXXX()' / 'toXXX()' ctors and methods. This is 
-** mainly useful for convert to and from Strs.
+** A helper class that coerces Objs to a given Type via 'fromXXX()' / 'toXXX()' ctors and methods. 
+** This is mainly useful for convertint to and from Strs.
 **  
 ** As a lot of repetition of types is expected for each 'TypeCoercer' the conversion methods are 
 ** cached.
