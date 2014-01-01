@@ -6,8 +6,8 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 
 - **Injection - the way *you* want it!**
   - field injection
-  - standard ctor injection
-  - serialisation ctor injection - 'new make(|This|in) { in(this) }'
+  - ctor injection
+  - it-block ctor injection - 'new make(|This|in) { in(this) }'
 
 - **Distributed service configuration between pods and modules**
   - configure *any* service *from* any pod / module
@@ -38,6 +38,20 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 
 
 
+Install [#install]
+******************
+Install 'Ioc' with the [Fantom Respository Manager]`http://fantom.org/doc/docFanr/Tool.html#install`:
+
+  C:\> fanr install -r http://repo.status302.com/fanr/ afIoc
+
+Or to install manually, download the pod from [Status302]`http://repo.status302.com/browse/afIoc` and copy it to '%FAN_HOME%/lib/fan/'.
+
+To use in a Fantom project, add a dependency to its 'build.fan':
+
+  depends = ["sys 1.0", ..., "afIoc 1.5+"]
+
+
+
 Quick Start [#quickStart]
 *************************
 
@@ -54,7 +68,7 @@ class Main {
 
     test1 := (MyService1) registry.serviceById("myservice1")        // return a singleton
     test2 := (MyService1) registry.dependencyByType(MyService1#)    // same instance as test1
-    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new service
+    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
     test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
 
     test1.service2.kick // --> Ass!
@@ -79,7 +93,7 @@ class MyService1 {
 }
 
 class MyService2 {
-  Str kick() { "Ass!" }
+  Str kick() { return "Ass!" }
 }
 <pre
 
@@ -89,9 +103,9 @@ Terminology [#terminology]
 **************************
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is just a Plain Old Fantom Object where there is only one instance (singleton) or one per thread. Each service is identified by a unique ID (usually the unqualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
+A **service** is just a Plain Old Fantom Object where there is only one (singleton) instance for the whole application (or one per thread for non-const classes). Each service is identified by a unique ID (usually the qualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
 
-A **dependency** is any class or object that another class depends on. A dependency may or may not be a service.  For example, a class may depend on having a field 'Int maxNoOfThreads' but that 'Int' isn't a service, it's just a number. Non service dependencies are be managed by user defined [dependency providers]`DependencyProvider`.
+A **dependency** is any class or object that another service depends on. A dependency may or may not be a service.  For example, a class may depend on a field 'Int maxNoOfThreads' but that 'Int' isn't a service, it's just a number. Non service dependencies are managed by user defined [dependency providers]`DependencyProvider`.
 
 A **contribution** is a means to configure a service.
 
@@ -101,7 +115,7 @@ A **module** is a class where services and contributions are defined.
 
 Starting the IoC [#loadingModules]
 **********************************
-You can use the `IocService` to start a 'afIoc' as a Fantom service:
+Use `IocService` to start 'Ioc' as a Fantom service:
 
     IocService([MyModule#]).start
     ...
@@ -110,7 +124,7 @@ You can use the `IocService` to start a 'afIoc' as a Fantom service:
     ...
     Service.find(IocService#).uninstall
 
-Or you can use the `RegistryBuilder` to manage the registry manually;
+Or use `RegistryBuilder` to manage the `Registry` instance manually;
 
     reg := RegistryBuilder().addModule(MyModule#).build.startup
     ...
@@ -118,11 +132,11 @@ Or you can use the `RegistryBuilder` to manage the registry manually;
     ...
     reg.shutdown
 
-When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules in dependant pods, in which case, each pod should have declared the following meta:
+When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules from dependant pods, in which case, each pod should have declared the following meta:
 
 '"afIoc.module" : "{qname}"'
 
-Where '{qname}' is a qualified type name of a module. Additional modules can be declared by the [@SubModule]`SubModule` facet.
+Where '{qname}' is a qualified type name of an 'AppModule' class. Additional modules can be declared by the [@SubModule]`SubModule` facet.
 
 Modules can also be loaded from index properties in a similar manner.
 
@@ -132,30 +146,38 @@ Defining Services [#definingServices]
 *************************************
 Services are defined in Module classes, where each meaningful method is static and annotated with a facet.
 
-The exception is 'bind()' which does not have a facet but is declared with a standard signature. The bind method is the common means to define services, examples below:
+Except the 'bind()' method which, does not have a facet but, is declared with a standard signature. The bind method is also the common means to define services. For example:
 
 pre>
+class AppModule {
+
   static Void bind(ServiceBinder binder) {
 
-    // has service ID of 'MyService'
+    // has service ID of 'myPod::MyService'
     binder.bind(MyService#, MyServiceImpl#)
 
-    // has service ID of 'myServiceImpl'
+    // has service ID of 'myPod::myServiceImpl'
     binder.bindImpl(MyServiceImpl#)
 
     // has service ID of 'elephant'
     binder.bindImpl(MyServiceImpl#).withId("elephant")
   }
+}
 <pre
 
 Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved and injected as such when the method is called. For example, to manually build a service with the Id 'penguin':
 
 pre>
+class AppModule {
+
   @Build { serviceId="penguin" }
   static EmailService buildStuff(EmailConfig config) {
     EmailServiceImpl(config)
   }
+}
 <pre
+
+Services are *not* created until they are referenced or required.
 
 
 
@@ -169,14 +191,27 @@ When IoC autobuilds a service it locates a suitable ctor. This is either the one
 
 Field injection happens *after* the object has been created and so fields must be declared as nullable:
 
+pre>
+class MyService {
   @Inject
   MyService? myService
+}
+<pre
 
-The exception to the rule is if you declare a serialisation ctor:
+The exception is if you declare an it-block ctor:
 
-  new make(|This|? f) { f?.call(this) }
+pre>
+const class MyService {
+  @Inject
+  const MyService myService
 
-On calling 'f' all injectable fields will be set, even fields marked as 'const'.
+  new make(|This|? f := null) { f?.call(this) }
+}
+<pre
+
+On calling 'f' all injectable fields are set, even fields marked as 'const'. The it-block ctor may be abbreviated to:
+
+  new make(|This| f) { f(this) }
 
 After object construction and field injection, any extra setup may be performed via methods annotated with '@PostInjection'. These methods may be of any visibility and all parameters are resolved as dependencies.
 
@@ -184,7 +219,7 @@ After object construction and field injection, any extra setup may be performed 
 
 Service Scope [#serviceScope]
 *****************************
-Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services must be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
+Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services *must* be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
 (Using proxies) you can even inject a 'perThread' scoped service into a 'perApplication' scoped service! Think about it... you can inject your [http request]`web::WebReq` into any static service you desire!
 
@@ -196,6 +231,7 @@ Services can solicit configuration from modules simply by declaring a list or a 
 
 pre>
   class Example {
+
     new make(Str[] mimeTypes) { ... }
     ...
   }
@@ -204,10 +240,13 @@ pre>
 Modules may then contribute to the 'Example' service:
 
 pre>
-  @Contribute
+class AppModule {
+
+  @Contribute { serviceType=Example# }
   static Void contributeExample(OrderedConfig conf) {
     conf.add("text/plain")
   }
+}
 <pre
 
 The list and map types are inferred from the ctor definition and all contribution types must fit.
@@ -222,7 +261,7 @@ Define your service with a mixin and take advantage of true lazy loading!
 
 By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
 
-This means registry startup times are quicker than ever and circular service dependencies are virtually eliminated!
+This means registry startup times can be quicker than ever and circular service dependencies are virtually eliminated!
 
 It also allows you to inject 'perThread' scoped services into 'perApplication' scoped services.
 
@@ -238,14 +277,14 @@ See [@Advise]`Advise` for details
 
 More! [#more]
 *************
-afIoc comes bundled with utility classes that cover common use cases:
+'Ioc' comes bundled with utility classes that cover common use cases:
 
  - `RegistryStartup`: (Service) Define tasks to execute when the registry starts up.
  - `RegistryShutdownHub`: (Service) Define tasks to execute when the registry shuts down.
  - `ConcurrentState`: Lets your 'const' services hold mutable state, accessible from all threads.
  - `ConcurrentCache`: Shares state across threads providing fast reads and synchronised writes.
  - `ThreadStashManager`: (Service) Keep tabs on threaded state.
- - `TypeCoercer`: Coerce Objs of one type to another via Fantom's 'toX()' and 'fromX()' methods.
+ - `TypeCoercer`: Coerce Objs of one type to another via Fantom's 'toXXX()' and 'fromXXX()' methods.
  - `StrategyRegistry`: Holds a map of 'Type:Obj' where values may be looked up by closest matching type.
 
 
