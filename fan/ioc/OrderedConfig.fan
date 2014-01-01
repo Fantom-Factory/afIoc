@@ -154,7 +154,7 @@ class OrderedConfig {
 
 	** dynamically invoked
 	internal List getConfig() {
-		InjectionCtx.track("Applying config overrides to '$serviceDef.serviceId'") |->List| {
+		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->List| {
 			keys := Utils.makeMap(Str#, Str#)
 			config.each |val, key| { keys[key] = key }
 			
@@ -172,7 +172,7 @@ class OrderedConfig {
 						keys[overrideKey] = keys[existingKey]
 						found = true
 						
-						InjectionCtx.log("'${overrideKey}' overrides '${existingKey}'")
+						InjectionTracker.log("'${overrideKey}' overrides '${existingKey}'")
 						config[keys[existingKey]] = val
 						return true
 					} else {
@@ -192,7 +192,7 @@ class OrderedConfig {
 				orderer.addOrdered(key, val.val, val.con)
 			}
 		
-			return InjectionCtx.track("Ordering configuration contributions") |->List| {
+			return InjectionTracker.track("Ordering configuration contributions") |->List| {
 				contribs := orderer.toOrderedList
 				return List.make(listType, contribs.size).addAll(contribs)
 			}

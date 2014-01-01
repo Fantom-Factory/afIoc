@@ -33,13 +33,13 @@ internal const mixin ServiceDef {
 	
 	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
 		|->Obj| {
-			InjectionCtx.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
-				objLocator := InjectionCtx.peek.objLocator
+			InjectionTracker.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
+				objLocator := InjectionTracker.peek.objLocator
 				objLocator.logServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return InjectionCtx.withConfigProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
+				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
 					return InjectionUtils.callMethod(method, null, Obj#.emptyList)
 				}
 			}
@@ -48,14 +48,14 @@ internal const mixin ServiceDef {
 	
 	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
 		|->Obj| {
-			InjectionCtx.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
-				objLocator := InjectionCtx.peek.objLocator
+			InjectionTracker.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
+				objLocator := InjectionTracker.peek.objLocator
 				objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
 				ctor := InjectionUtils.findAutobuildConstructor(serviceImplType)
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
-				return InjectionCtx.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
+				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
 					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList)
 					InjectionUtils.injectIntoFields(obj)
 					return obj

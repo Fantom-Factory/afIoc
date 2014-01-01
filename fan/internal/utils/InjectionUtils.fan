@@ -15,7 +15,7 @@ internal const class InjectionUtils {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findFieldsWithFacet(object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
-					InjectionCtx.doingFieldInjection(object, field) |->Bool| {
+					InjectionTracker.doingFieldInjection(object, field) |->Bool| {
 						dependency := findDependencyByType(field.type)
 						inject(object, field, dependency)
 						return true
@@ -29,7 +29,7 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? callMethod(Method method, Obj? obj, Obj?[] providedMethodArgs) {
-		InjectionCtx.doingMethodInjection(obj, method) |->Obj?| {
+		InjectionTracker.doingMethodInjection(obj, method) |->Obj?| {
 			args := findMethodInjectionParams(method, providedMethodArgs)
 			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
@@ -39,7 +39,7 @@ internal const class InjectionUtils {
 
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
 	static Method? findAutobuildConstructor(Type type) {
-		InjectionCtx.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
+		InjectionTracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
 			ctor := |->Method?| {
 				constructors := findConstructors(type)
 
@@ -82,7 +82,7 @@ internal const class InjectionUtils {
 			}
 		}
 		
-		args := InjectionCtx.doingCtorInjection(building, ctor) |->Obj?| {
+		args := InjectionTracker.doingCtorInjection(building, ctor) |->Obj?| {
 			return findMethodInjectionParams(ctor, providedCtorArgs)
 		}
 		
@@ -101,7 +101,7 @@ internal const class InjectionUtils {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(building, Inject#, true).each |field| {
-				InjectionCtx.doingFieldInjectionViaItBlock(building, field) |->| {
+				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
 					dependency := findDependencyByType(field.type)
 					plan[field] = dependency
 				}
@@ -145,7 +145,7 @@ internal const class InjectionUtils {
 					return provided
 				}
 				
-				return InjectionCtx.doingParamInjection(param, index) |->Obj?| {
+				return InjectionTracker.doingParamInjection(param, index) |->Obj?| {
 					return findDependencyByType(param.type)
 				}
 			}		
@@ -157,7 +157,7 @@ internal const class InjectionUtils {
 
 	private static Obj? findDependencyByType(Type dependencyType) {
 		track("Looking for dependency of type $dependencyType") |->Obj?| {
-			InjectionCtx.peek.objLocator.trackDependencyByType(dependencyType)
+			InjectionTracker.peek.objLocator.trackDependencyByType(dependencyType)
 		}
 	}
 
@@ -198,14 +198,14 @@ internal const class InjectionUtils {
 	}
 
 	static Obj? track(Str description, |->Obj?| operation) {
-		InjectionCtx.track(description, operation)
+		InjectionTracker.track(description, operation)
 	}
 
 	static Void logExpensive(|->Str| msg) {
-		InjectionCtx.logExpensive(msg)
+		InjectionTracker.logExpensive(msg)
 	}
 
 	static Void log(Str msg) {
-		InjectionCtx.log(msg)
+		InjectionTracker.log(msg)
 	}
 }

@@ -129,7 +129,7 @@ internal const class ModuleImpl : Module {
 			return null
 
 		// we're going deeper!
-		return InjectionCtx.withServiceDef(def) |->Obj?| {
+		return InjectionTracker.withServiceDef(def) |->Obj?| {
 
 			// Because of recursion (service1 creates service2), you can not create the service inside an actor ('cos 
 			// the actor will block when it eventually messages itself). So...
@@ -177,7 +177,7 @@ internal const class ModuleImpl : Module {
 	private Obj getOrMakeService(ServiceDef def, Bool returnReal, Bool useCache) {
 		if (returnReal)
 			return getOrMakeRealService(def, useCache)
-		if (InjectionCtx.peek(false)?.objLocator?.options?.get("disableProxies") == true)
+		if (InjectionTracker.peek(false)?.objLocator?.options?.get("disableProxies") == true)
 			return getOrMakeRealService(def, useCache)
 		if (!def.proxiable)
 			return getOrMakeRealService(def, useCache)
@@ -192,7 +192,7 @@ internal const class ModuleImpl : Module {
 				return exisitng
 		}
 
-		return InjectionCtx.track("Creating REAL Service '$def.serviceId'") |->Obj| {
+		return InjectionTracker.track("Creating REAL Service '$def.serviceId'") |->Obj| {
 	        creator := def.createServiceBuilder
 	        service := creator.call()
 			
@@ -211,7 +211,7 @@ internal const class ModuleImpl : Module {
 				return exisitng
 		}
 		
-		return InjectionCtx.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
+		return InjectionTracker.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceIds.serviceProxyBuilder)
 			proxy			:= proxyBuilder.createProxyForService(def)
 			

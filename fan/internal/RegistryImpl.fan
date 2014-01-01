@@ -47,7 +47,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
 				it.source			= |->Obj| {
-					InjectionUtils.makeCtorInjectionPlan(InjectionCtx.building.serviceImplType)
+					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.building.serviceImplType)
 				}
 			}] = null
 
@@ -163,7 +163,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		InjectionCtx.withCtx(this, tracker) |->Obj?| {   
+		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
 			depProSrc			= trackServiceById(ServiceIds.dependencyProviderSource)
 			serviceOverrides	= trackServiceById(ServiceIds.serviceOverride)
 			return null
@@ -240,8 +240,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj serviceById(Str serviceId) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |->Obj?| {   
-				return InjectionCtx.track("Locating service by ID '$serviceId'") |->Obj| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {   
+				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj| {
 					return trackServiceById(serviceId)
 				}
 			}
@@ -251,9 +251,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj dependencyByType(Type dependencyType) {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |->Obj?| {
-				return InjectionCtx.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-					return InjectionCtx.doingDependencyByType(dependencyType) |->Obj| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {
+				return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
+					return InjectionTracker.doingDependencyByType(dependencyType) |->Obj| {
 						// as ctx is brand new, this won't return null
 						return trackDependencyByType(dependencyType)
 					}
@@ -267,7 +267,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
-			return InjectionCtx.withCtx(this, null) |->Obj?| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackAutobuild(type2, ctorArgs)
 			}
 		}
@@ -276,8 +276,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |->Obj?| {
-				return InjectionCtx.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {
+				return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
 					return trackCreateProxy(mixinType, implType, ctorArgs)
 				}
 			}
@@ -288,7 +288,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
-			return InjectionCtx.withCtx(this, null) |->Obj?| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackInjectIntoFields(object)
 			}
 		}
@@ -297,8 +297,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
-			return InjectionCtx.withCtx(this, null) |->Obj?| {
-				return InjectionCtx.track("Calling method '$method.signature'") |->Obj?| {
+			return InjectionTracker.withCtx(this, null) |->Obj?| {
+				return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
 					return trackCallMethod(method, instance, providedMethodArgs)
 				}
 			}
@@ -317,22 +317,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? trackDependencyByType(Type dependencyType) {
 
 		// ask dependency providers first, for they may dictate dependency scope
-		ctx := InjectionCtx.providerCtx
+		ctx := InjectionTracker.providerCtx
 		if (depProSrc?.canProvideDependency(ctx) ?: false) {
 			dependency := depProSrc.provideDependency(ctx)
-			InjectionCtx.logExpensive |->Str| { "Found Dependency via Provider : '$dependency?.typeof'" }
+			InjectionTracker.logExpensive |->Str| { "Found Dependency via Provider : '$dependency?.typeof'" }
 			return dependency
 		}
 
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
-			InjectionCtx.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
+			InjectionTracker.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
 			return getService(serviceDef, false)			
 		}
 
-		config := InjectionCtx.provideConfig(dependencyType)
+		config := InjectionTracker.provideConfig(dependencyType)
 		if (config != null) {
-			InjectionCtx.logExpensive |->Str| { "Found Configuration '$config.typeof.signature'" }
+			InjectionTracker.logExpensive |->Str| { "Found Configuration '$config.typeof.signature'" }
 			return config
 		}
 
@@ -359,7 +359,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.source			= |->Obj?| { return null }
 		}		
 		
-		return InjectionCtx.withServiceDef(serviceDef) |->Obj?| {
+		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
 			return InjectionUtils.autobuild(implType, ctorArgs)
 		}
 	}
@@ -440,7 +440,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
 		service := serviceOverrides?.getOverride(serviceDef.serviceId)
 		if (service != null) {
-			InjectionCtx.log("Found override for service '${serviceDef.serviceId}'")
+			InjectionTracker.log("Found override for service '${serviceDef.serviceId}'")
 			return service
 		}
 

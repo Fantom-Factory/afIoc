@@ -1,6 +1,6 @@
 using concurrent::Actor
 
-internal class InjectionCtx {
+internal class InjectionTracker {
 
 	static const Str 			injectionCtxId	:= "afIoc.injectionCtx"
 	static const Str 			serviceDefId	:= "afIoc.serviceDef"
@@ -16,7 +16,7 @@ internal class InjectionCtx {
 		this.tracker	= tracker
 	}
 
-	static Void forTesting_push(InjectionCtx ctx) {
+	static Void forTesting_push(InjectionTracker ctx) {
 		ThreadStack.forTesting_push(injectionCtxId, ctx)
 	}
 
@@ -25,7 +25,7 @@ internal class InjectionCtx {
 	}
 
 	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
-		ctx := peek(false) ?: InjectionCtx.make(objLocator, tracker ?: OpTracker())
+		ctx := peek(false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, f)
 	}
@@ -149,7 +149,7 @@ internal class InjectionCtx {
 		return ctx.toProviderCtx
 	}
 	
-	static InjectionCtx? peek(Bool checked := true) {
+	static InjectionTracker? peek(Bool checked := true) {
 		ThreadStack.peek(injectionCtxId, checked)
 	}
 }
