@@ -6,11 +6,11 @@ internal const class ServiceIdProvider : DependencyProvider {
 	
 	new make(|This|di) { di(this) }
 	
-	override Bool canProvide(ProviderCtx ctx) {
+	override Bool canProvide(InjectionCtx ctx) {
 		!ctx.fieldFacets.findType(ServiceId#).isEmpty
 	}
 	
-	override Obj? provide(ProviderCtx ctx) {
+	override Obj? provide(InjectionCtx ctx) {
 		serviceIds := ctx.fieldFacets.findType(ServiceId#)
 		if (serviceIds.size > 1)
 			throw WtfErr("WTF? It's a compile error to facetate(?) a field more than once! ${ServiceId#.name} on $ctx.dependencyType?.qname")

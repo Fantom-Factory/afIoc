@@ -144,9 +144,9 @@ internal class InjectionTracker {
 
 	// ----
 	
-	static ProviderCtx providerCtx() {
+	static InjectionCtx injectionCtx() {
 		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
-		return ctx.toProviderCtx
+		return ctx.toInjectionCtx
 	}
 	
 	static InjectionTracker? peek(Bool checked := true) {
@@ -174,8 +174,8 @@ internal class InjectCtx {
 		this.injectionType = injectionType
 	}
 	
-	ProviderCtx toProviderCtx() {
-		ProviderCtx {
+	InjectionCtx toInjectionCtx() {
+		InjectionCtx {
 			it.injectionType		= this.injectionType
 			it.injectingInto		= this.injectingInto
 			it.injectingIntoType	= this.injectingIntoType

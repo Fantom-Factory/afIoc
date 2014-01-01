@@ -40,11 +40,11 @@ internal const class LogProviderImpl : LogProvider {
 		in?.call(this)
 	}
 
-	override Bool canProvide(ProviderCtx ctx) {
+	override Bool canProvide(InjectionCtx ctx) {
 		ctx.dependencyType.fits(Log#) && (ctx.injectingInto != null)
 	}
 
-	override Obj? provide(ProviderCtx ctx) {
+	override Obj? provide(InjectionCtx ctx) {
 		ctx.log("Injecting Log for ${ctx.injectingIntoType.qname}")
 		return logCreatorFunc.call(ctx.injectingIntoType)
 	}
