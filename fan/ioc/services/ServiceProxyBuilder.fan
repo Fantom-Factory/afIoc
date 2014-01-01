@@ -37,7 +37,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
 	override internal Obj createProxyForService(ServiceDef serviceDef) {
-		InjectionCtx.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
+		InjectionTracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
@@ -47,7 +47,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	}
 
 	override internal Obj createProxyForMixin(ServiceDef serviceDef) {
-		InjectionCtx.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
+		InjectionTracker.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
@@ -91,7 +91,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		Pod? pod
 		code 		:= model.toFantomCode
 		podName		:= plasticCompiler.generatePodName
-		InjectionCtx.track("Compiling Pod '$podName'") |->Obj| {
+		InjectionTracker.track("Compiling Pod '$podName'") |->Obj| {
 			pod 	= plasticCompiler.compileCode(code, podName)
 		}			
 		proxyType 	:= pod.type(model.className)

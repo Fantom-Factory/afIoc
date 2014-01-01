@@ -34,14 +34,14 @@ class ProviderCtx {
 	** 
 	** See `IocHelper.debugOperation`
 	Obj? track(Str description, |->Obj?| operation) {
-		InjectionCtx.track(description, operation)
+		InjectionTracker.track(description, operation)
 	}
 
 	** Logs details via the 'OpTracker'.
 	** 
 	** See `IocHelper.debugOperation`
 	Void log(Str description) {
-		InjectionCtx.log(description)
+		InjectionTracker.log(description)
 	}
 }
 

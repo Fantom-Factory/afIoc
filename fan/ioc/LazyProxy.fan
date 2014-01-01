@@ -42,10 +42,10 @@ internal const class LazyProxyForService : LazyProxy {
 	}
 
 	private ServiceMethodInvoker getViaAppScope() {
-		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
-			Unsafe ctxWrapper := Unsafe(InjectionCtx.peek)	// pass ctx into the state thread
+		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForServiceState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionCtx.injectionCtxId, ctxWrapper.val) |->Obj?| {
+				 ThreadStack.pushAndRun(InjectionTracker.injectionCtxId, ctxWrapper.val) |->Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 
 				 }
 			}
@@ -71,8 +71,8 @@ internal class LazyProxyForServiceState {
 		if (invoker != null)
 			return invoker
 
-		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
-			invoker = InjectionCtx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+			invoker = InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
 				invoker		:= invokerSrc.createServiceMethodInvoker(serviceDef)
 				return invoker
@@ -108,10 +108,10 @@ internal const class LazyProxyForMixin : LazyProxy {
 	}
 
 	private Obj getViaAppScope() {
-		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
-			Unsafe ctxWrapper := Unsafe(InjectionCtx.peek)	// pass ctx into the state thread
+		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForMixinState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionCtx.injectionCtxId, ctxWrapper.val) |->Obj?| {
+				 ThreadStack.pushAndRun(InjectionTracker.injectionCtxId, ctxWrapper.val) |->Obj?| {
 					return state.getInstance(objLocator, serviceDef)
 				 }
 			}
@@ -134,8 +134,8 @@ internal class LazyProxyForMixinState {
 		if (instance != null)
 			return instance
 
-		return InjectionCtx.withCtx(objLocator, null) |->Obj?| {
-			return InjectionCtx.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+			return InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 				return serviceDef.createServiceBuilder.call
 			}
 		}

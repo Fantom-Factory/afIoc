@@ -32,15 +32,15 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 			.map |m->MethodAdvisor| { MethodAdvisor(m) }
 		
 		// find all module @Advise methods
-		adviceDefs := (AdviceDef[]) InjectionCtx.track("Gathering advisors for service '$serviceDef.serviceId'") |->AdviceDef[]| {
+		adviceDefs := (AdviceDef[]) InjectionTracker.track("Gathering advisors for service '$serviceDef.serviceId'") |->AdviceDef[]| {
 			ads := objLocator.adviceByServiceDef(serviceDef)
-			InjectionCtx.log("Found $ads.size method(s)")
+			InjectionTracker.log("Found $ads.size method(s)")
 			return ads
 		}
 		
 		// call the module @Advise methods, filling up the MethodAdvisors
 		if (!adviceDefs.isEmpty)
-			InjectionCtx.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
+			InjectionTracker.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
 				adviceDefs.each { 
 					InjectionUtils.callMethod(it.advisorMethod, null, [methodAdvisors])
 				}

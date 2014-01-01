@@ -18,7 +18,7 @@ const internal class ConfigProvider {
 	}
 
 	Obj? provide(Type dependencyType) {
-		objLocator := InjectionCtx.peek.objLocator
+		objLocator := InjectionTracker.peek.objLocator
 		config := null
 		if (configType.name == "List")
 			config = OrderedConfig(objLocator, serviceDef, configType)
@@ -33,7 +33,7 @@ const internal class ConfigProvider {
 	}
 
 	private Type? findConfigType(Method buildMethod) {
-		InjectionCtx.track("Looking for configuration parameter") |->Type?| {
+		InjectionTracker.track("Looking for configuration parameter") |->Type?| {
 			config := |->Type?| {
 				if (buildMethod.params.isEmpty)
 					return null
@@ -48,9 +48,9 @@ const internal class ConfigProvider {
 			}()
 			
 			if (config == null)
-				InjectionCtx.log("No configuration parameter found")
+				InjectionTracker.log("No configuration parameter found")
 			else 
-				InjectionCtx.log("Found $config.signature")
+				InjectionTracker.log("Found $config.signature")
 			
 			return config
 		}			
