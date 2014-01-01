@@ -18,9 +18,9 @@
 ** @uses OrderedConfig of `DependencyProvider`
 const mixin DependencyProviderSource {
 	
-	internal abstract Bool canProvideDependency(ProviderCtx providerCtx)
+	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
 
-	internal abstract Obj? provideDependency(ProviderCtx providerCtx)
+	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
 }
 
 
@@ -33,11 +33,11 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
 		// with lazy services
-		ctx := InjectCtx(InjectionType.dependencyByType) { it.dependencyType = Void# }.toProviderCtx
+		ctx := InjectCtx(InjectionType.dependencyByType) { it.dependencyType = Void# }.toInjectionCtx
 		dependencyProviders.each { it.canProvide(ctx) }
 	}
 
-	override Bool canProvideDependency(ProviderCtx ctx) {
+	override Bool canProvideDependency(InjectionCtx ctx) {
 		dependencyProviders.any |provider->Bool| {
 			// providers can't provide themselves!
 			if (ctx.dependencyType.fits(provider.typeof))
@@ -46,7 +46,7 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		}		
 	}
 
-	override Obj? provideDependency(ProviderCtx ctx) {
+	override Obj? provideDependency(InjectionCtx ctx) {
 		dps := dependencyProviders.findAll { it.canProvide(ctx) }
 
 		if (dps.isEmpty)

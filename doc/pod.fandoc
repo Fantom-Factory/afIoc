@@ -316,10 +316,10 @@ v1.5.0 [#1.5.0]
  - New: 'Registry.createProxy()' lets you create a lazy proxy from an arbituary mixin / impl pair.
  - New: 'Registry.callMethod()' lets you invoke methods with dependencies injected into the parameters.
  - New: 'LogProvider' lets you inject 'Log' instances.
- - New: 'ProviderCtx' contains details as to what type of injection is taking place.
+ - New: 'InjectionCtx' contains details as to what type of injection is taking place. (Renamed from 'ProviderCtx')
  - Chg: When a service type is defined multiple times, a default one is returned by 'dependencyByType'.
  - Chg: Default ServiceIds are now the **fully qualified** names of the service (mixin) type. (Breaking change.)
- - Chg: Removed dependency type from 'DependencyProvider' method signatures. It moved to 'ProviderCtx'. (Breaking change.)
+ - Chg: Removed dependency type from 'DependencyProvider' method signatures. It moved to 'InjectionCtx'. (Breaking change.)
  - Chg: Liberated the 'PipelineBuilder' util service. It moved to BedSheet. (Breaking change.)
  - Chg: Overhauled 'InjectionCtx' to make use of ThreadStacks so it doesn't need to be passed around.
 

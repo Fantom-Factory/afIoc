@@ -1,6 +1,6 @@
 
 ** Passed into [DependencyProviders]`DependencyProvider` to give contextual injection information.
-class ProviderCtx {
+class InjectionCtx {
 	
 	** The type of injection.
 	const InjectionType	injectionType
@@ -45,7 +45,7 @@ class ProviderCtx {
 	}
 }
 
-** Used by `ProviderCtx` to inform 'DependencyProviders' what type of injection is occurring.
+** Used by `InjectionCtx` to inform 'DependencyProviders' what type of injection is occurring.
 enum class InjectionType {
 	
 	** A direct call to 'Registry.dependencyByType()' 

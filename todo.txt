@@ -4,7 +4,7 @@ v1.5.0 Done!
 Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
 
 Re-do DepdendencyCtx to give more detail 
- - See ProviderCtx for details
+ - See InjectionCtx for details
  - it's messy and I don't need it
  - but then I could inject Loggers... Hmm...?
 
