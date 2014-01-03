@@ -5,6 +5,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 
 	override const Str 			moduleId
 	override const Str 			serviceId
+	override const Str 			unqualifiedServiceId
 	override const Type			serviceType
 	override const Type?		serviceImplType
 	override const ServiceScope	scope
@@ -21,6 +22,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 		}
 
 		f(this)
+		unqualifiedServiceId = unqualify(serviceId)
 	}
 
 	override |->Obj| createServiceBuilder() {

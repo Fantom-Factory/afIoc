@@ -96,10 +96,10 @@ internal const class ModuleImpl : Module {
 		serviceDefs[serviceId]
 	}
 
-	override ServiceDef[] serviceDefsById(Str serviceId) {
+	override ServiceDef[] serviceDefsById(Str serviceId, Str unqualifiedId) {
 		sIdLower := serviceId.lower
 		return serviceDefs.vals.findAll |serviceDef| {
-			serviceDef.serviceId.lower.endsWith(sIdLower)
+			serviceDef.matchesId(sIdLower, unqualifiedId)
 		}
 	}
 

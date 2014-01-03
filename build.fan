@@ -9,8 +9,9 @@ class Build : BuildPod {
 
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
-					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
 					"proj.name"		: "Ioc",
+					"proj.uri"		: "http://www.fantomfactory.org/pods/afIoc",
+					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
 					"license.name"	: "BSD 2-Clause License",
 					"repo.private"	: "false"
 				]
