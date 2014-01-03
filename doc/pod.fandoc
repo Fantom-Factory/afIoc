@@ -1,6 +1,6 @@
 Overview [#overview]
 ********************
-'afIoc' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
+'Ioc' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
 
@@ -34,7 +34,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - over 75 bespoke and informative Err messages!
   - Extensively tested: - 'All tests passed! [36 tests, 198 methods, 498 verifies]'
 
-> **ALIEN-AID:** For tips and tutorials on afIoc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
+> **ALIEN-AID:** For tips and tutorials on Ioc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
 
 
 
