@@ -26,12 +26,11 @@ Default to the Service type name if given.
  
 API documentation overhaul
 
-
-
-v1.5.0 Maybe...?
-----------------
-
 Use 'appName' from startup options -> appName started up in XXX secs
+
+
+v1.5.2 Maybe...?
+----------------
 
 use afIoc::ThreadStack in efan - copy, rather than use
 
