@@ -401,8 +401,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (serviceDef != null)
 			return serviceDef
 
+		unqualifiedId := ServiceDef.unqualify(serviceId)
 		serviceDefs := (ServiceDef[]) moduleList.map |module| {
-			module.serviceDefsById(serviceId)
+			module.serviceDefsById(serviceId, unqualifiedId)
 		}.flatten
 
 		if (serviceDefs.size > 1)

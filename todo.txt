@@ -24,11 +24,12 @@ ServiceIds should probably be fully qualified type names to avoid conflicts
 Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
 Default to the Service type name if given.
  
+API documentation overhaul
+
 
 
 v1.5.0 Maybe...?
 ----------------
-API documentation overhaul
 
 Use 'appName' from startup options -> appName started up in XXX secs
 

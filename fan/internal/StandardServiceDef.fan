@@ -3,6 +3,7 @@ internal const class StandardServiceDef : ServiceDef {
 	
 	override const Str 			moduleId
 	override const Str 			serviceId
+	override const Str 			unqualifiedServiceId
 	override const Type			serviceType
 	override const Type?		serviceImplType
 	override const ServiceScope	scope
@@ -14,6 +15,7 @@ internal const class StandardServiceDef : ServiceDef {
 		f?.call(this)
 		if (scope == ServiceScope.perApplication && !serviceType.isConst)
 			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
+		unqualifiedServiceId = unqualify(serviceId)
 	}
 	
 	override |->Obj| createServiceBuilder() {

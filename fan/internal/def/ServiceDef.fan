@@ -10,6 +10,8 @@ internal const mixin ServiceDef {
 	** Returns the service id, which is usually the unqualified service type name.
 	abstract Str serviceId()
 
+	abstract Str unqualifiedServiceId()
+
 	** Returns the id of the module this service was defined in
 	abstract Str moduleId()
 	
@@ -29,6 +31,16 @@ internal const mixin ServiceDef {
 		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
 		// Yeah, exactly! Just don't allow it.
 		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
+	}
+	
+	Bool matchesId(Str qualifiedId, Str unQualifiedId) {
+		if (qualifiedId.equalsIgnoreCase(serviceId))
+			return true
+		return unQualifiedId.equalsIgnoreCase(unqualify(serviceId))
+	}
+	
+	static Str unqualify(Str id) {
+		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}
 	
 	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {

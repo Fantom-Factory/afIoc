@@ -2,20 +2,31 @@
 ** (Service) - Contribute to override previously defined services. Use to override production services with test 
 ** versions, or to replace 3rd party services with your own implementation. 
 ** 
-** Use the service Id to specify the original service to override, and pass in the override instance. For example, this
-** shows how to override the service 'dinner' with an instance of 'PieAndMash': 
+** Use the service Id to specify the original service to override, and pass in the override instance. For example, 
+** to override the 'PieAndChips' service with an instance of 'PieAndMash': 
 ** 
 ** pre>
 **   static Void bind(ServiceBinder binder) {
-**     binder.bindImpl(PieAndChips#).withId("dinner")
+**     binder.bindImpl(PieAndChips#)
 **   }
 ** 
 **   @Contribute { serviceType=ServiceOverride# }
 **   static Void contributeServiceOverride(MappedConfig conf) {
-**     conf["dinner"] = conf.autobuild(PieAndMash#)
+**     conf["myPod::PieAndChips"] = conf.autobuild(PieAndMash#)
 **   }
 ** <pre
 **
+** Or taking advantage of Type Coercion, you can use the Type as the key:
+** 
+** pre>
+**   @Contribute { serviceType=ServiceOverride# }
+**   static Void contributeServiceOverride(MappedConfig conf) {
+**     conf[PieAndChips#] = conf.autobuild(PieAndMash#)
+**   }
+** <pre
+** 
+** Obviously, the overriding class has to fit the original service type.
+** 
 ** Note at present you can not override `perThread` scoped services and non-const (not immutable) 
 ** services. 
 **  
@@ -47,11 +58,10 @@ internal const class ServiceOverrideImpl : ServiceOverride {
 			if (!service.isImmutable)
 				throw IocErr(IocMessages.serviceOverrideNotImmutable(id, service.typeof))
 		}
-		
 		this.overrides = overrides
 	}
 	
 	override Obj? getOverride(Str serviceId) {
-		overrides[serviceId]
+		overrides[serviceId] ?: overrides[ServiceDef.unqualify(serviceId)] 
 	}
 }
