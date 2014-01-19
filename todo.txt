@@ -1,39 +1,10 @@
 
-v1.5.0 Done!
-------------
-Tidy up InjectionCtx and OpTracker - make them truly thread stackable.
-
-Re-do DepdendencyCtx to give more detail 
- - See InjectionCtx for details
- - it's messy and I don't need it
- - but then I could inject Loggers... Hmm...?
-
-Move Service Mixins and Impls into same file
-
-Create Log injector - make overridable
-
-Registry.callMethod()
-
-Registry.createProxy() - may have to change Lazy service
-Registry.createProxy(mixinType, implType)
- - as impl type is not a service, it's quite useless.
- - better to enhance plastic
-
-ServiceIds should probably be fully qualified type names to avoid conflicts
-
-Allow this Dup Err - afIoc::IocErr: Service mixin afBedSheet::Routes is matched by 2 services: PillowRoutes, Routes.
-Default to the Service type name if given.
- 
-API documentation overhaul
-
-Use 'appName' from startup options -> appName started up in XXX secs
-
-
 v1.5.2 Maybe...?
 ----------------
-
 use afIoc::ThreadStack in efan - copy, rather than use
 
+MappedConfig  -> MapConfig  ?
+orderedConfig -> ListConfig ?
 
 
 Meh... can't be arsed
