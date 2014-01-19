@@ -8,7 +8,7 @@
 ** pre>
 ** class AppModule {
 ** 
-**   @Contribute { serviceTyoe=RegistryStartup# }
+**   @Contribute { serviceType=RegistryStartup# }
 **   static Void contributeRegistryStartup(OrderedConfig conf, MyService myService) {
 **     conf.add |->| {
 **       myService.startup()
