@@ -52,6 +52,10 @@ service disambiguation via facets
 
 Just Plain Bad Ideas:
 ---------------------
+Allow other @Inject facets
+ - so BedSheet can define its own, for fewer pod import statements
+ - but if afIoc and afBedSheet are imported at same time ~ conflict!
+ 
 OrderConfig wildcards - e.g. "before: *" NO WILDCARDS
  - use placeholders instead
 
