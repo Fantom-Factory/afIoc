@@ -32,6 +32,11 @@ class TypeCoercer {
 		}
 	}
 
+	** Clears the lookup cache 
+	Void clearCache() {
+		cache.clear
+	}
+	
 	private |Obj->Obj|? coerceMethod(Type fromType, Type toType) {
 		key	:= "${fromType.qname}->${toType.qname}"
 		return cache.getOrAdd(key) { lookupMethod(fromType, toType)  }
