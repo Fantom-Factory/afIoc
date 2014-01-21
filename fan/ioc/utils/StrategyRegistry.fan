@@ -1,7 +1,7 @@
 
 ** A helper class that looks up Objs via Type inheritance search.
 const class StrategyRegistry {	
-	private const ConcurrentState 	conState	:= ConcurrentState(StrategyRegistryBestFitCache#)
+	private const ConcurrentCache 	cache	:= ConcurrentCache([Type:Obj?][:])
 	private const Type:Obj? 		values
 	
 	** Creates an StrategyRegistry with the given list. All types are coerced to non-nullable types.
@@ -28,35 +28,30 @@ const class StrategyRegistry {
 	Obj? findBestFit(Type bestFit, Bool checked := true) {		
 		nonNullable := bestFit.toNonNullable
 		// chill, I got tests for all this!
-		return getState |state->Obj?| {
-			state.cache.getOrAdd(nonNullable) |->Obj?| {
-				deltas := values
-					.findAll |val, type| { nonNullable.fits(type) }
-					.map |val, type->Int?| {
-						nonNullable.inheritance.eachWhile |sup, i| {
-							(sup == type || sup.mixins.contains(type)) ? i : null
-						}
+		return cache.getOrAdd(nonNullable) |->Obj?| {
+			deltas := values
+				.findAll |val, type| { nonNullable.fits(type) }
+				.map |val, type->Int?| {
+					nonNullable.inheritance.eachWhile |sup, i| {
+						(sup == type || sup.mixins.contains(type)) ? i : null
 					}
-				
-				if (deltas.isEmpty)
-					return null
-				
-				minDelta := deltas.vals.min
-				match 	 := deltas.eachWhile |delta, type| { (delta == minDelta) ? type : null }
-				return values[match]
-			}
+				}
+			
+			if (deltas.isEmpty)
+				return null
+			
+			minDelta := deltas.vals.min
+			match 	 := deltas.eachWhile |delta, type| { (delta == minDelta) ? type : null }
+			return values[match]
 		} ?: check(nonNullable, checked)
 	}
 
+	** Clears the lookup cache 
+	Void clearCache() {
+		cache.clear
+	}
+	
 	private Obj? check(Type nonNullable, Bool checked) {
 		checked ? throw NotFoundErr("Could not find match for Type ${nonNullable}.", values.keys) : null
 	}
-	
-	private Obj? getState(|StrategyRegistryBestFitCache->Obj?| state) {
-		conState.getState(state)
-	}
-}
-
-internal class StrategyRegistryBestFitCache {
-	Type:Obj? cache	:= [:]
 }

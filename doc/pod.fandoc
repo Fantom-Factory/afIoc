@@ -311,6 +311,12 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 
 Release Notes [#releaseNotes]
 *****************************
+v1.5.2 [#1.5.2]
+---------------
+ - New: 'ConcurrentCache' gets new methods: 'clear(), isEmpty(), remove(), replace(), size()'.
+ - New: Added 'clearCache()' to 'TypeCoercer'.
+ - New: Added 'clearCache()' to 'StrategyRegistry'.
+
 v1.5.0 [#1.5.0]
 ---------------
  - New: 'Registry.createProxy()' lets you create a lazy proxy from an arbituary mixin / impl pair.

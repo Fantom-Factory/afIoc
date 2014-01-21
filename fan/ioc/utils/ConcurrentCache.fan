@@ -21,7 +21,8 @@ const class ConcurrentCache {
 		this.map = [:]
 	}
 
-	** Make a 'ConcurrentCache' using the given immutable map 
+	** Make a 'ConcurrentCache' using the given immutable map. 
+	** Use when you need a case insensitive map.
 	** @since 1.4.6
 	new makeWithMap([Obj:Obj?] map) {
 		this.map = map 
@@ -39,7 +40,7 @@ const class ConcurrentCache {
 	** This method is **NOT** thread safe. If two actors call this method at the same time, the 
 	** value function could be called twice for the same key. 
 	** @since 1.4.6
-	Obj getOrAdd(Obj key, |->Obj| valFunc) {
+	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
 		if (!containsKey(key)) {
 			val := valFunc.call()
 			set(key, val)
@@ -47,10 +48,12 @@ const class ConcurrentCache {
 		return get(key)
 	}
 	
-	** Returns the value associated with the given key.
+	** Returns the value associated with the given key. 
+	** If key is not mapped, then return the value of the 'def' parameter.  
+	** If 'def' is omitted it defaults to 'null'.
 	@Operator
-	Obj? get(Obj key) {
-		map.get(key)
+	Obj? get(Obj key, Obj? def := null) {
+		map.get(key, def)
 	}
 
 	** Sets the key / value pair, ensuring no data is lost during multi-threaded race conditions.
@@ -81,8 +84,47 @@ const class ConcurrentCache {
 		map.vals
 	}
 
-	Void clear() {
-		map.clear
+	** Remove all key/value pairs from the map.  Return this.
+	This clear() {
+		withState {
+			myMap := map.rw
+			myMap.clear
+			atomicMap.val = myMap.toImmutable
+		}.get
+		return this
+	}
+
+	** Remove the key/value pair identified by the specified key
+	** from the map and return the value. 
+	** If the key was not mapped then return 'null'.
+	Obj? remove(Obj key) {
+		return conState.getState |Obj? x ->Obj?| {
+			myMap := map.rw
+			r := myMap.remove(key)
+			atomicMap.val = myMap.toImmutable
+			return r 
+		}
+	}
+
+	** Replaces the entire content of the cache with the given map. 
+	** The existing map is returned. 
+	Obj:Obj? replace(Obj:Obj? newMap) {
+		oldMap := map
+		withState {
+			map.rw.clear
+			atomicMap.val = newMap.toImmutable
+		}
+		return oldMap
+	}
+	
+	** Return 'true' if size() == 0
+	Bool isEmpty() {
+		map.isEmpty
+	}
+
+	** Get the number of key/value pairs in the map.
+	Int size() {
+		map.size
 	}
 	
 	private Future withState(|Obj?| state) {
