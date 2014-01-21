@@ -13,6 +13,15 @@ internal class TestStrategyRegistry : IocTest {
 		}
 	}
 	
+	Void testNoMacth() {
+		map := Utils.makeMap(Type#, Int?#)
+		map[IocErr#] 	= 2
+		map[Err#] 		= 1
+		ap := StrategyRegistry(map)
+
+		verifyEq(ap.findExactMatch(Bool#, false), null)
+	}
+	
 	Void testExactMacth() {
 		map := Utils.makeMap(Type#, Obj?#)
 		map[IocErr#] 	= 2
