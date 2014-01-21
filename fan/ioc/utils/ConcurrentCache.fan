@@ -43,7 +43,8 @@ const class ConcurrentCache {
 	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
 		if (!containsKey(key)) {
 			val := valFunc.call()
-			set(key, val)
+			if (val != null)
+				set(key, val)
 		}
 		return get(key)
 	}
