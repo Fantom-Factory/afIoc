@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and a 2 registry methods is all you need!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 198 methods, 498 verifies]'
+  - Extensively tested: - 'All tests passed! [36 tests, 202 methods, 513 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on Ioc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
 
@@ -316,6 +316,10 @@ v1.5.2 [#1.5.2]
  - New: 'ConcurrentCache' gets new methods: 'clear(), isEmpty(), remove(), replace(), size()'.
  - New: Added 'clearCache()' to 'TypeCoercer'.
  - New: Added 'clearCache()' to 'StrategyRegistry'.
+ - Chg: Added a 'checked' parameter to 'Registry.dependencyByType()'
+ - Chg: Deprecated 'ServiceBinder.bindImpl()' in favour of a nullable parameter in 'ServiceBinder.bind()'
+ - Chg: Errs thrown in 'Registry.callMethod()' are no longed wrapped in an 'IocErr'.
+ - Bug: 'Registry.callMethod()' could not handle methods with default arguments.
 
 v1.5.0 [#1.5.0]
 ---------------

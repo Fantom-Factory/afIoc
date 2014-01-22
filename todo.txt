@@ -1,8 +1,6 @@
 
 v1.5.2 Maybe...?
 ----------------
-ServiceBinder -> bind()
-
 use afIoc::ThreadStack in efan - copy, rather than use
 
 MappedConfig  -> MapConfig  ? ConfigMap  ?
@@ -11,6 +9,9 @@ orderedConfig -> ListConfig ? ConfigList ?
 
 Meh... can't be arsed
 ---------------------
+@Inject { optional = true }
+ - why would you want to? And what of ctor args? 
+
 Make SyncState - a consistent API for thread and const data
 
 TypeCoercers to be added via index props

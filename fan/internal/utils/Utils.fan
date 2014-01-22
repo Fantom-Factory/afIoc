@@ -72,8 +72,10 @@ internal class Utils {
 		}
 	}
 	
-	private static Err? unwrap(Unwrappable err) {
-		(err.cause?.typeof?.fits(Unwrappable#) ?: false) ? unwrap((Unwrappable) err.cause) : err.cause
+	static Err unwrap(Unwrappable err) {
+		if (err.cause == null)
+			return (Err) err
+		return err.cause.typeof.fits(Unwrappable#) ? unwrap((Unwrappable) err.cause) : err.cause
 	}
 	
 	** Stoopid F4 thinks the 'facet' method is a reserved word!

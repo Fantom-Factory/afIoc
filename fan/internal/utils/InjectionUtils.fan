@@ -16,7 +16,7 @@ internal const class InjectionUtils {
 			if (!findFieldsWithFacet(object.typeof, Inject#, true)
 				.reduce(false) |bool, field| {
 					InjectionTracker.doingFieldInjection(object, field) |->Bool| {
-						dependency := findDependencyByType(field.type)
+						dependency := findDependencyByType(field.type, true)
 						inject(object, field, dependency)
 						return true
 					}
@@ -102,7 +102,7 @@ internal const class InjectionUtils {
 			plan := Field:Obj?[:]
 			findFieldsWithFacet(building, Inject#, true).each |field| {
 				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
-					dependency := findDependencyByType(field.type)
+					dependency := findDependencyByType(field.type, true)
 					plan[field] = dependency
 				}
 			}
@@ -144,20 +144,26 @@ internal const class InjectionUtils {
 						throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
 					return provided
 				}
-				
+
 				return InjectionTracker.doingParamInjection(param, index) |->Obj?| {
-					return findDependencyByType(param.type)
+					dep := findDependencyByType(param.type, false)
+					if (dep != null)
+						return dep
+					if (param.hasDefault)
+						return "afIoc.exclude.me.please!"
+					throw IocErr(IocMessages.noDependencyMatchesType(param.type))
 				}
-			}		
+			}.exclude { it == "afIoc.exclude.me.please!" }
+			
 			if (params.isEmpty)
 				log("No injection parameters found")
 			return params
 		}
 	}
 
-	private static Obj? findDependencyByType(Type dependencyType) {
+	private static Obj? findDependencyByType(Type dependencyType, Bool checked) {
 		track("Looking for dependency of type $dependencyType") |->Obj?| {
-			InjectionTracker.peek.objLocator.trackDependencyByType(dependencyType)
+			InjectionTracker.peek.objLocator.trackDependencyByType(dependencyType, checked)
 		}
 	}
 
