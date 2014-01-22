@@ -238,7 +238,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj serviceById(Str serviceId) {
-		Utils.stackTraceFilter |->Obj| {
+		return Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			return InjectionTracker.withCtx(this, null) |->Obj?| {   
 				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj| {
@@ -248,14 +248,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj dependencyByType(Type dependencyType) {
-		Utils.stackTraceFilter |->Obj| {
+	override Obj? dependencyByType(Type dependencyType, Bool checked := true) {
+		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
-				return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj| {
-					return InjectionTracker.doingDependencyByType(dependencyType) |->Obj| {
+				return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
+					return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
 						// as ctx is brand new, this won't return null
-						return trackDependencyByType(dependencyType)
+						return trackDependencyByType(dependencyType, checked)
 					}
 				}
 			}
@@ -264,7 +264,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	** see http://fantom.org/sidewalk/topic/2149
 	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList) {
-		Utils.stackTraceFilter |->Obj| {
+		return Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
@@ -274,7 +274,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList) {
-		Utils.stackTraceFilter |->Obj?| {
+		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
@@ -285,7 +285,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj injectIntoFields(Obj object) {
-		Utils.stackTraceFilter |->Obj| {
+		return Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
@@ -295,13 +295,19 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
-		Utils.stackTraceFilter |->Obj?| {
-			shutdownLockCheck
-			return InjectionTracker.withCtx(this, null) |->Obj?| {
-				return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
-					return trackCallMethod(method, instance, providedMethodArgs)
+		try {
+			return Utils.stackTraceFilter |->Obj?| {
+				shutdownLockCheck
+				return InjectionTracker.withCtx(this, null) |->Obj?| {
+					return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
+						return trackCallMethod(method, instance, providedMethodArgs)
+					}
 				}
 			}
+		} catch (IocErr iocErr) {
+			unwrapped := Utils.unwrap(iocErr)
+			// if unwrapped is still an IocErr then re-throw the original
+			throw (unwrapped is IocErr) ? iocErr : unwrapped
 		}
 	}
 
@@ -314,7 +320,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return getService(serviceDef, false)
 	}
 
-	override Obj? trackDependencyByType(Type dependencyType) {
+	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
 
 		// ask dependency providers first, for they may dictate dependency scope
 		ctx := InjectionTracker.injectionCtx
@@ -336,7 +342,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return config
 		}
 
-		throw IocErr(IocMessages.noDependencyMatchesType(dependencyType))
+		return checked ? throw IocErr(IocMessages.noDependencyMatchesType(dependencyType)) : null
 	}
 
 	override Obj trackAutobuild(Type type, Obj?[] ctorArgs) {

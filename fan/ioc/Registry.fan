@@ -15,9 +15,9 @@ const mixin Registry {
 	** Obtains a service via its unique service id. 
     abstract Obj serviceById(Str serviceId)
 
-	** Locates a dependency of the given type. The search takes into account inheritance of the 
-	** service mixin, not the service *implementation*.
-    abstract Obj dependencyByType(Type dependencyType)
+	// The search takes into account inheritance of the service mixin, not the service *implementation*.
+	** Locates a dependency of the given type. 
+    abstract Obj? dependencyByType(Type dependencyType, Bool checked := true)
 
 	** Autobuilds an instance of the given type, resolving all dependencies: 
 	**  - create instance via ctor marked with '@Inject' or the ctor with the *most* parameters
@@ -66,7 +66,8 @@ const mixin Registry {
 
 	** Calls the method, dependency injecting the parameters. 'instance' can be 'null' if calling a static method. 
 	** 
-	** The optional 'providedMethodArgs' are used as method arguments. Any args not provided are dependency injected.
+	** The optional 'providedMethodArgs' are used as method arguments. Any args not provided are dependency injected; 
+	** unless they have a default argument, in which case nothing is passed in and the default is used.
 	** 
 	** @since 1.5.0
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList)
