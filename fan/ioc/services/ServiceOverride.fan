@@ -7,7 +7,7 @@
 ** 
 ** pre>
 **   static Void bind(ServiceBinder binder) {
-**     binder.bindImpl(PieAndChips#)
+**     binder.bind(PieAndChips#)
 **   }
 ** 
 **   @Contribute { serviceType=ServiceOverride# }

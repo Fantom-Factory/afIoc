@@ -184,9 +184,9 @@ internal class TestMappedConfig : IocTest {
 
 internal class T_MyModule02 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService10#).withId("s10")
-		binder.bindImpl(T_MyService28#).withId("s28")
-		binder.bindImpl(T_MyService10#).withId("s10b")
+		binder.bind(T_MyService10#).withId("s10")
+		binder.bind(T_MyService28#).withId("s28")
+		binder.bind(T_MyService10#).withId("s10b")
 	}
 	@Contribute{ serviceId="s10" }
 	static Void cont10(MappedConfig config) {
@@ -212,7 +212,7 @@ internal class T_MyService10 {
 
 internal class T_MyModule43 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService27#).withId("s27")
+		binder.bind(T_MyService27#).withId("s27")
 	}
 	
 	@Contribute{ serviceId="s27" }
@@ -227,7 +227,7 @@ internal class T_MyService27 {
 
 internal class T_MyModule44 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
@@ -248,7 +248,7 @@ internal class T_MyService28 {
 
 internal class T_MyModule45 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s2")
+		binder.bind(T_MyService02#).withId("s2")
 	}
 	@Build
 	static T_MyService28 buildS28(Str:Str str, T_MyService02 s2) {
@@ -267,8 +267,8 @@ internal class T_MyModule45 {
 
 internal class T_MyModule46 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s2")
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService02#).withId("s2")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config, T_MyService02 s2) {
@@ -278,9 +278,9 @@ internal class T_MyModule46 {
 
 internal class T_MyModule47 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService74#).withId("s74-a")
-		binder.bindImpl(T_MyService74#).withId("s74-b")
-		binder.bindImpl(T_MyService68#).withId("s68")
+		binder.bind(T_MyService74#).withId("s74-a")
+		binder.bind(T_MyService74#).withId("s74-b")
+		binder.bind(T_MyService68#).withId("s68")
 	}
 	@Contribute{ serviceId="s74-a" }
 	static Void cont1(MappedConfig config) {
@@ -298,7 +298,7 @@ internal class T_MyModule47 {
 
 internal class T_MyModule48 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(MappedConfig config) {
@@ -308,13 +308,13 @@ internal class T_MyModule48 {
 
 internal class T_MyModule49 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}	
 }
 
 internal class T_MyModule50 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
 	static Void cont(OrderedConfig config) {
@@ -324,7 +324,7 @@ internal class T_MyModule50 {
 
 internal class T_MyModule51 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService29#).withId("s29")
+		binder.bind(T_MyService29#).withId("s29")
 	}
 	@Contribute{ serviceId="s29" }
 	static Void cont(MappedConfig config) {
@@ -341,7 +341,7 @@ internal class T_MyService29 {
 
 internal class T_MyModule62 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
@@ -359,7 +359,7 @@ internal class T_MyModule63 {
 
 internal class T_MyModule64 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
@@ -370,7 +370,7 @@ internal class T_MyModule64 {
 
 internal class T_MyModule65 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService28#).withId("s28")
+		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
 	static Void contributeS28(MappedConfig config) {
@@ -382,7 +382,7 @@ internal class T_MyModule65 {
 
 internal class T_MyModule66 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
@@ -394,7 +394,7 @@ internal class T_MyModule66 {
 
 internal class T_MyModule67 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
@@ -405,7 +405,7 @@ internal class T_MyModule67 {
 
 internal class T_MyModule68 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
@@ -417,7 +417,7 @@ internal class T_MyModule68 {
 
 internal class T_MyModule73 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
@@ -429,7 +429,7 @@ internal class T_MyModule73 {
 
 internal class T_MyModule74 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
 	static Void contributeS46(MappedConfig config) {
@@ -448,7 +448,7 @@ internal class T_MyService46 {
 
 internal class T_MyModule82 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService68#).withId("s68")
+		binder.bind(T_MyService68#).withId("s68")
 	}
 	@Contribute
 	static Void contributeS68(MappedConfig config) {

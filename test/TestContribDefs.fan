@@ -86,7 +86,7 @@ internal class T_MyModule29 {
 
 internal class T_MyModule52 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService31"))
+		binder.bind(PublicTestTypes.type("T_MyService31"))
 	}
 }
 

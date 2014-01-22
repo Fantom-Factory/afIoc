@@ -59,7 +59,7 @@ internal class TestModuleBuilderMethods : IocTest {
 
 internal class T_MyModule04 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#)
+		binder.bind(T_MyService02#)
 	}
 	
 	@Build
@@ -74,7 +74,7 @@ internal class T_MyModule04 {
 
 internal class T_MyModule05 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#)
+		binder.bind(T_MyService02#)
 	}
 	
 	@Build
@@ -103,7 +103,7 @@ internal class T_MyModule07 {
 
 internal class T_MyModule21 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService01#).withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService01#).withScope(ServiceScope.perApplication)
 	}
 }
 

@@ -82,8 +82,8 @@ class Main {
 
 class MyModule {                    // every application needs a module class
   static Void bind(ServiceBinder binder) {
-    binder.bindImpl(MyService1#)    // define your singletons here
-    binder.bindImpl(MyService2#)
+    binder.bind(MyService1#)    // define your singletons here
+    binder.bind(MyService2#)
   }
 }
 
@@ -157,10 +157,10 @@ class AppModule {
     binder.bind(MyService#, MyServiceImpl#)
 
     // has service ID of 'myPod::myServiceImpl'
-    binder.bindImpl(MyServiceImpl#)
+    binder.bind(MyServiceImpl#)
 
     // has service ID of 'elephant'
-    binder.bindImpl(MyServiceImpl#).withId("elephant")
+    binder.bind(MyServiceImpl#).withId("elephant")
   }
 }
 <pre

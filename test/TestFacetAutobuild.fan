@@ -21,10 +21,10 @@ internal class TestFacetAutobuild : IocTest {
 
 internal class T_MyModule55 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s2")
-		binder.bindImpl(T_MyService36#).withId("s36")
-		binder.bindImpl(T_MyService37#).withId("s37")
-		binder.bindImpl(T_MyService39#).withId("s39")
+		binder.bind(T_MyService02#).withId("s2")
+		binder.bind(T_MyService36#).withId("s36")
+		binder.bind(T_MyService37#).withId("s37")
+		binder.bind(T_MyService39#).withId("s39")
 	}
 }
 

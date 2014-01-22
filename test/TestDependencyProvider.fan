@@ -49,7 +49,7 @@ internal class TestDependencyProvider : IocTest {
 
 internal class T_MyModule56 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService40#).withId("s40")
+		binder.bind(T_MyService40#).withId("s40")
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
@@ -67,10 +67,10 @@ internal const class T_DependencyProvider1 : DependencyProvider {
 
 internal class T_MyModule57 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_DependencyProvider2#).withId("dp")
-		binder.bindImpl(T_MyService41#).withId("s41")
-		binder.bindImpl(T_MyService42#).withId("s42")
-		binder.bindImpl(T_MyService43#).withId("s43")
+		binder.bind(T_DependencyProvider2#).withId("dp")
+		binder.bind(T_MyService41#).withId("s41")
+		binder.bind(T_MyService42#).withId("s42")
+		binder.bind(T_MyService43#).withId("s43")
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider2 dp) {
@@ -105,7 +105,7 @@ internal const class T_DependencyProvider3 : DependencyProvider {
 
 internal class T_MyModule88 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService72#).withId("s72")
+		binder.bind(T_MyService72#).withId("s72")
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
@@ -120,9 +120,9 @@ internal const class T_MyService72 {
 
 internal class T_MyModule96 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService72#).withId("s72")
-		binder.bindImpl(T_MyService84#).withId("s84")
-		binder.bindImpl(T_DependencyProvider4#).withId("dp4")
+		binder.bind(T_MyService72#).withId("s72")
+		binder.bind(T_MyService84#).withId("s84")
+		binder.bind(T_DependencyProvider4#).withId("dp4")
 	}
 	@Contribute
 	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider4 dp) {

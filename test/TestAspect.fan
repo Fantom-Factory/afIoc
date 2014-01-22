@@ -62,9 +62,9 @@ internal class TestAspect : IocTest {
 
 internal class T_MyModule78 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
-		binder.bindImpl(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
-		binder.bindImpl(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
+		binder.bind(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
+		binder.bind(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
+		binder.bind(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
 	}
 	
 	@Advise { serviceId="*Aspect" }
@@ -90,9 +90,9 @@ internal class T_MyModule80 {
 
 internal class T_MyModule81 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
-		binder.bindImpl(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
-		binder.bindImpl(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
+		binder.bind(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
+		binder.bind(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
+		binder.bind(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
 	}
 	
 	@Advise { serviceId="s??*As*" }
@@ -128,7 +128,7 @@ internal class T_MyModule81 {
 
 internal class T_MyModule11 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService69#).withId("s69")
+		binder.bind(T_MyService69#).withId("s69")
 	}	
 	@Advise { serviceId="s69" }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }
@@ -136,7 +136,7 @@ internal class T_MyModule11 {
 
 internal class T_MyModule84 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService69#).withId("s69")
+		binder.bind(T_MyService69#).withId("s69")
 	}	
 	@Advise { serviceId="s69"; optional=true }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }

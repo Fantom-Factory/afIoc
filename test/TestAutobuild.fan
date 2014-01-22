@@ -48,9 +48,9 @@ internal class TestAutobuild : IocTest {
 
 internal class T_MyModule75 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s2")
-		binder.bindImpl(T_MyService48#)
-		binder.bindImpl(T_MyService49#)
+		binder.bind(T_MyService02#).withId("s2")
+		binder.bind(T_MyService48#)
+		binder.bind(T_MyService49#)
 	}
 }
 

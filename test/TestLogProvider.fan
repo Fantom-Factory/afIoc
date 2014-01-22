@@ -18,7 +18,7 @@ internal class TestLogProvider : IocTest {
 
 internal class T_MyModule97 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService86#).withId("s86")
+		binder.bind(T_MyService86#).withId("s86")
 	}
 }
 

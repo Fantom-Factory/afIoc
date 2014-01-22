@@ -12,7 +12,7 @@ internal class TestRegistryStartup : IocTest {
 internal class T_MyModule39 {
 	
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s2")
+		binder.bind(T_MyService02#).withId("s2")
 	}
 
 	@Contribute

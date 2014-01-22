@@ -36,10 +36,10 @@ internal class TestRecursion : IocTest {
 
 internal class T_MyModule20 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService15#).withId("s15")
-		binder.bindImpl(T_MyService16#).withId("s16")
-		binder.bindImpl(T_MyService17#).withId("s17")
-		binder.bindImpl(T_MyService18#).withId("s18")
+		binder.bind(T_MyService15#).withId("s15")
+		binder.bind(T_MyService16#).withId("s16")
+		binder.bind(T_MyService17#).withId("s17")
+		binder.bind(T_MyService18#).withId("s18")
 	}
 }
 

@@ -51,9 +51,9 @@ internal class TestServiceOverride : IocTest {
 
 internal class T_MyModule58 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService44#).withId("s44")
-		binder.bindImpl(T_MyService44#)
-		binder.bindImpl(T_MyService90#)
+		binder.bind(T_MyService44#).withId("s44")
+		binder.bind(T_MyService44#)
+		binder.bind(T_MyService90#)
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
@@ -73,7 +73,7 @@ internal const class T_MyService90Impl2 : T_MyService90 { override Str judge() {
 
 internal class T_MyModule59 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService45#).withId("s45")
+		binder.bind(T_MyService45#).withId("s45")
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
@@ -87,8 +87,8 @@ internal class T_MyService45Impl2 : T_MyService45 { override Str? dude; override
 
 internal class T_MyModule60 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService44#).withId("s44")
-		binder.bindImpl(T_MyService12#).withId("s12")
+		binder.bind(T_MyService44#).withId("s44")
+		binder.bind(T_MyService12#).withId("s12")
 	}
 	@Contribute
 	private static Void contributeServiceOverride(MappedConfig config) {
