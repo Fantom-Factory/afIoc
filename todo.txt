@@ -1,6 +1,8 @@
 
 v1.5.2 Maybe...?
 ----------------
+ServiceBinder -> bind()
+
 use afIoc::ThreadStack in efan - copy, rather than use
 
 MappedConfig  -> MapConfig  ? ConfigMap  ?

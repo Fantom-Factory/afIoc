@@ -52,8 +52,9 @@ const mixin Registry {
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.
 	** 
+	** If 'implType' is null then it is assumed to have the same name as the mixin, plus a 'Impl' suffix.
 	** @since 1.5.0
-	abstract Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList)
+	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 

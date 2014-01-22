@@ -273,7 +273,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 	
-	override Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList) {
+	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList) {
 		Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
@@ -364,15 +364,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj trackCreateProxy(Type mixinType, Type implType, Obj?[] ctorArgs) {
+	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceIds.serviceProxyBuilder)
 		
-		if (implType.isMixin) 
-			throw IocErr(IocMessages.bindImplNotClass(implType))
-
-		if (!implType.fits(mixinType)) 
-			throw IocErr(IocMessages.bindImplDoesNotFit(mixinType, implType))
+		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
+		mixinType 	= serviceTypes[0] 
+		implType 	= serviceTypes[1] 
 		
+		if (!mixinType.isMixin)
+			throw IocErr(IocMessages.bindMixinIsNot(mixinType))
+
 		// create a dummy serviceDef
 		serviceDef := StandardServiceDef() {
 			it.serviceId 		= "${mixinType.name}CreateProxy"
