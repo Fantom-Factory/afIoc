@@ -25,37 +25,22 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 	// ---- ServiceBinder Methods -----------------------------------------------------------------
 	
-    override ServiceBindingOptions bind(Type serviceMixin, Type serviceImpl) {
+    override ServiceBindingOptions bind(Type serviceMixin, Type? serviceImpl := null) {
         lock.check
         flush
 
-		if (serviceImpl.isMixin) 
-			throw IocErr(IocMessages.bindImplNotClass(serviceImpl))
+		serviceTypes := verifyServiceImpl(serviceMixin, serviceImpl)
 
-		if (!serviceImpl.fits(serviceMixin)) 
-			throw IocErr(IocMessages.bindImplDoesNotFit(serviceMixin, serviceImpl))
-
-        this.serviceMixin	= serviceMixin
-        this.serviceImpl 	= serviceImpl
-        this.serviceId 		= serviceMixin.qname
+        this.serviceMixin	= serviceTypes[0]
+        this.serviceImpl 	= serviceTypes[1]
+        this.serviceId 		= serviceTypes[0].qname
 
         return this
     }	
 	
 	override ServiceBindingOptions bindImpl(Type serviceType) {
-		if (serviceType.isAbstract) {
-			expectedImplName 	:= serviceType.qname + "Impl"
-			implType 			:= Type.find(expectedImplName, false)
-			
-			if (implType == null)
-				throw IocErr(IocMessages.couldNotFindImplType(serviceType))
-
-			return bind(serviceType, implType)
-		}
-
-		return bind(serviceType, serviceType);
+		bind(serviceType);
 	}
-
 	
 	// ---- ServiceBindingOptions Methods ---------------------------------------------------------
 
@@ -106,6 +91,29 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 		addServiceDef(serviceDef)
 		clear
+	}
+
+	static internal Type[] verifyServiceImpl(Type serviceMixin, Type? serviceImpl := null) {
+		if (serviceImpl == null) {
+			if (serviceMixin.isAbstract) {
+				expectedImplName 	:= serviceMixin.qname + "Impl"
+				serviceImpl			= Type.find(expectedImplName, false)
+				
+				if (serviceImpl == null)
+					throw IocErr(IocMessages.couldNotFindImplType(serviceMixin))
+			} else {
+				// assume the mixin was actually the impl
+				serviceImpl = serviceMixin
+			}
+		}
+
+		if (serviceImpl.isMixin) 
+			throw IocErr(IocMessages.bindImplNotClass(serviceImpl))
+
+		if (!serviceImpl.fits(serviceMixin)) 
+			throw IocErr(IocMessages.bindImplDoesNotFit(serviceMixin, serviceImpl))
+
+		return [serviceMixin, serviceImpl]
 	}
 	
 	private Void clear() {
