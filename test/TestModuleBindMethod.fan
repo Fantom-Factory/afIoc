@@ -51,13 +51,13 @@ internal class T_MyModule10 {
 
 internal class T_MyModule13 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService10")).withId("yo")
+		binder.bind(PublicTestTypes.type("T_MyService10")).withId("yo")
 	}
 }
 
 internal class T_MyModule14 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService11#).withId("yo")
+		binder.bind(T_MyService11#).withId("yo")
 	}
 }
 

@@ -100,16 +100,16 @@ internal class TestProxyBuilder : IocTest {
 
 internal class T_MyModule76 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("s50")
-		binder.bindImpl(PublicTestTypes.type("T_MyService51")).withId("s51")
-		binder.bindImpl(PublicTestTypes.type("T_MyService52")).withId("s52")
-		binder.bindImpl(PublicTestTypes.type("T_MyService54")).withId("s54")
-		binder.bindImpl(PublicTestTypes.type("T_MyService55")).withId("s55")
-		binder.bindImpl(PublicTestTypes.type("T_MyService56")).withId("s56")
-		binder.bindImpl(PublicTestTypes.type("T_MyService57")).withId("s57")
-		binder.bindImpl(PublicTestTypes.type("T_MyService58")).withId("s58")
-		binder.bindImpl(PublicTestTypes.type("T_MyService83")).withId("s83")
-		binder.bindImpl(T_MyService64#).withId("s64").withoutProxy
+		binder.bind(PublicTestTypes.type("T_MyService50")).withId("s50")
+		binder.bind(PublicTestTypes.type("T_MyService51")).withId("s51")
+		binder.bind(PublicTestTypes.type("T_MyService52")).withId("s52")
+		binder.bind(PublicTestTypes.type("T_MyService54")).withId("s54")
+		binder.bind(PublicTestTypes.type("T_MyService55")).withId("s55")
+		binder.bind(PublicTestTypes.type("T_MyService56")).withId("s56")
+		binder.bind(PublicTestTypes.type("T_MyService57")).withId("s57")
+		binder.bind(PublicTestTypes.type("T_MyService58")).withId("s58")
+		binder.bind(PublicTestTypes.type("T_MyService83")).withId("s83")
+		binder.bind(T_MyService64#).withId("s64").withoutProxy
 	}
 }
 

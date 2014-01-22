@@ -368,21 +368,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceIds.serviceProxyBuilder)
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
-		mixinType 	= serviceTypes[0] 
-		implType 	= serviceTypes[1] 
+		mixinT 	:= serviceTypes[0] 
+		implT 	:= serviceTypes[1]
 		
-		if (!mixinType.isMixin)
-			throw IocErr(IocMessages.bindMixinIsNot(mixinType))
+		if (!mixinT.isMixin)
+			throw IocErr(IocMessages.bindMixinIsNot(mixinT))
 
 		// create a dummy serviceDef
 		serviceDef := StandardServiceDef() {
-			it.serviceId 		= "${mixinType.name}CreateProxy"
+			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.moduleId			= ""
-			it.serviceType 		= mixinType
-			it.serviceImplType 	= implType
+			it.serviceType 		= mixinT
+			it.serviceImplType 	= implT
 			it.scope			= ServiceScope.perInjection
-			it.description 		= "$mixinType.qname Create Proxy"
-			it.source			= |->Obj?| { autobuild(implType, ctorArgs) }
+			it.description 		= "$mixinT.qname Create Proxy"
+			it.source			= |->Obj?| { autobuild(implT, ctorArgs) }
 		}
 
 		return spb.createProxyForMixin(serviceDef)

@@ -75,16 +75,16 @@ internal class BugFixes : IocTest {
 
 internal class T_MyModule83 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50").withScope(ServiceScope.perThread)
-		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50-thread").withScope(ServiceScope.perThread)
-		binder.bindImpl(PublicTestTypes.type("T_MyService50")).withId("t50-app").withScope(ServiceScope.perApplication)
+		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50").withScope(ServiceScope.perThread)
+		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50-thread").withScope(ServiceScope.perThread)
+		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50-app").withScope(ServiceScope.perApplication)
 	}
 }
 
 internal class T_MyModule85 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService70#).withId("t70")
-		binder.bindImpl(T_MyService85#).withId("t85").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService70#).withId("t70")
+		binder.bind(T_MyService85#).withId("t85").withScope(ServiceScope.perThread)
 	}
 	
 	@Contribute
@@ -109,8 +109,8 @@ const class T_MyService85Impl : T_MyService85 {
 
 internal class T_MyModule98 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService89#)		
-		binder.bindImpl(T_MyService89#).withId("PillowRoutes")
+		binder.bind(T_MyService89#)		
+		binder.bind(T_MyService89#).withId("PillowRoutes")
 	}
 }
 internal const class T_MyService89 { }

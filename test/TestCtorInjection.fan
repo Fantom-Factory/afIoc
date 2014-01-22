@@ -78,14 +78,14 @@ internal class TestCtorInjection : IocTest {
 
 internal class T_MyModule06 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService01#)
-		binder.bindImpl(T_MyService02#)
-		binder.bindImpl(T_MyService04#)
-		binder.bindImpl(T_MyService05#)
-		binder.bindImpl(T_MyService06#)
-		binder.bindImpl(T_MyService07#)
-		binder.bindImpl(T_MyService08#)
-		binder.bindImpl(T_MyService09#)
+		binder.bind(T_MyService01#)
+		binder.bind(T_MyService02#)
+		binder.bind(T_MyService04#)
+		binder.bind(T_MyService05#)
+		binder.bind(T_MyService06#)
+		binder.bind(T_MyService07#)
+		binder.bind(T_MyService08#)
+		binder.bind(T_MyService09#)
 	}
 }
 
@@ -135,11 +135,11 @@ internal class T_MyService09 {
 
 internal class T_MyModule42 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService24#).withId("s24")
-		binder.bindImpl(T_MyService25#).withId("s25")
-		binder.bindImpl(T_MyService30#).withId("s30")
-		binder.bindImpl(T_MyService38#).withId("s38")
-		binder.bindImpl(T_MyService53#).withId("s53")
+		binder.bind(T_MyService24#).withId("s24")
+		binder.bind(T_MyService25#).withId("s25")
+		binder.bind(T_MyService30#).withId("s30")
+		binder.bind(T_MyService38#).withId("s38")
+		binder.bind(T_MyService53#).withId("s53")
 	}
 }
 

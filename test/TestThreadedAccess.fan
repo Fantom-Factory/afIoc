@@ -134,35 +134,35 @@ internal class TestThreadedAccess : IocTest {
 
 internal class T_MyModule16 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("app").withScope(ServiceScope.perApplication)
-		binder.bindImpl(T_MyService12#).withId("the").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService12#).withId("app").withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService12#).withId("the").withScope(ServiceScope.perThread)
 	}
 }
 
 internal class T_MyModule17 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("s12").withScope(ServiceScope.perThread)
-		binder.bindImpl(T_MyService13#).withId("s13").withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService12#).withId("s12").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService13#).withId("s13").withScope(ServiceScope.perApplication)
 	}
 }
 
 internal class T_MyModule18 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("s12").withScope(ServiceScope.perApplication)
-		binder.bindImpl(T_MyService13#).withId("s13").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService12#).withId("s12").withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService13#).withId("s13").withScope(ServiceScope.perThread)
 	}
 }
 
 internal class T_MyModule19 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService12#).withId("s12")
-		binder.bindImpl(T_MyService14#).withId("s14")
+		binder.bind(T_MyService12#).withId("s12")
+		binder.bind(T_MyService14#).withId("s14")
 	}
 }
 
 internal class T_MyModule90 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService02#).withId("s02").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService02#).withId("s02").withScope(ServiceScope.perThread)
 	}
 }
 
@@ -183,8 +183,8 @@ internal class T_MyService14 {
 
 internal class T_MyModule77 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(PublicTestTypes.type("T_MyService61")).withId("s61").withScope(ServiceScope.perThread)
-		binder.bindImpl(PublicTestTypes.type("T_MyService62")).withId("s62").withScope(ServiceScope.perApplication)
+		binder.bind(PublicTestTypes.type("T_MyService61")).withId("s61").withScope(ServiceScope.perThread)
+		binder.bind(PublicTestTypes.type("T_MyService62")).withId("s62").withScope(ServiceScope.perApplication)
 	}
 }
 

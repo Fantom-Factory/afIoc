@@ -13,7 +13,7 @@ internal class TestRegistryShutdownHub : IocTest {
 
 internal class T_MyModule03 {
 	static Void bind(ServiceBinder binder) {
-		binder.bindImpl(T_MyService03#)
+		binder.bind(T_MyService03#)
 	}
 }
 
