@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and a 2 registry methods is all you need!
   - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 206 methods, 532 verifies]'
+  - Extensively tested: - 'All tests passed! [36 tests, 207 methods, 532 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on Ioc, be sure to check out [Fantom-Factory]`http://fantom-factory.blogspot.co.uk/search/label/afIoc`!
 
@@ -313,7 +313,7 @@ Release Notes [#releaseNotes]
 *****************************
 v1.5.2 [#1.5.2]
 ---------------
- - New: 'TypeCoercer' now coverts Lists from one type to another.
+ - New: 'TypeCoercer' now converts Lists from one parameterised type to another.
  - New: 'ConcurrentCache' gets new methods: 'clear(), isEmpty(), remove(), replace(), size()'.
  - New: Added 'clearCache()' to 'TypeCoercer'.
  - New: Added 'clearCache()' to 'StrategyRegistry'.
@@ -321,6 +321,7 @@ v1.5.2 [#1.5.2]
  - Chg: Deprecated 'ServiceBinder.bindImpl()' in favour of a nullable parameter in 'ServiceBinder.bind()'
  - Chg: Errs thrown in 'Registry.callMethod()' are no longed wrapped in an 'IocErr'.
  - Bug: 'Registry.callMethod()' could not handle methods with default arguments.
+ - Bug: 'Log' could not be injected via ctor.
 
 v1.5.0 [#1.5.0]
 ---------------
