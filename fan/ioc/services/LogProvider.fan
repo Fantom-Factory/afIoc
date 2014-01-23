@@ -23,7 +23,6 @@ const mixin LogProvider : DependencyProvider {
 	** 
 	** Defaults to '|Type type->Log| { return type.pod.log }'
 	abstract |Type->Log| logCreatorFunc
-	
 }
 
 internal const class LogProviderImpl : LogProvider {
@@ -41,7 +40,7 @@ internal const class LogProviderImpl : LogProvider {
 	}
 
 	override Bool canProvide(InjectionCtx ctx) {
-		ctx.dependencyType.fits(Log#) && (ctx.injectingInto != null)
+		ctx.dependencyType.fits(Log#) && (ctx.injectingIntoType != null)
 	}
 
 	override Obj? provide(InjectionCtx ctx) {
