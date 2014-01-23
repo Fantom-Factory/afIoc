@@ -42,6 +42,6 @@ internal class T_MyService37 {
 }
 
 internal class T_MyService39 {
-	@Inject @ServiceId { serviceId="s2" } @Autobuild
+	@Inject @ServiceId { id="s2" } @Autobuild
 	T_MyService02? ser2	
 }

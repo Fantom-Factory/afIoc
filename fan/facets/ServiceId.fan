@@ -3,7 +3,7 @@
 ** Use when a service mixin has multiple implementations.
 ** 
 ** pre>
-** @Inject @ServiceId { serviceId = "impl2" }
+** @Inject @ServiceId { id = "impl2" }
 ** MyService myService
 ** <pre
 ** 
@@ -11,5 +11,5 @@
 ** 
 ** @since 1.1.0
 facet class ServiceId {
-	const Str serviceId
+	const Str id
 }

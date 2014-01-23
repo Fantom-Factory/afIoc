@@ -15,7 +15,7 @@ internal const class ServiceIdProvider : DependencyProvider {
 		if (serviceIds.size > 1)
 			throw WtfErr("WTF? It's a compile error to facetate(?) a field more than once! ${ServiceId#.name} on $ctx.dependencyType?.qname")
 		
-		serviceId := (serviceIds[0] as ServiceId).serviceId
+		serviceId := (serviceIds[0] as ServiceId).id 
 		ctx.log("Found @ServiceId { $serviceId }")
 		service := ((ObjLocator) registry).trackServiceById(serviceId)
 		

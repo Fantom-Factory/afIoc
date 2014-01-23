@@ -39,19 +39,19 @@ internal class T_MyModule53 {
 }
 
 internal class T_MyService33 {
-	@Inject @ServiceId {serviceId="impl1"}
+	@Inject @ServiceId {id="impl1"}
 	Obj? impl1
-	@Inject @ServiceId {serviceId="impl2"}
+	@Inject @ServiceId {id="impl2"}
 	Obj? impl2
 }
 internal class T_MyService35 {
-	@Inject @ServiceId {serviceId="impl1"}
+	@Inject @ServiceId {id="impl1"}
 	const Obj? impl1
-	@Inject @ServiceId {serviceId="impl2"}
+	@Inject @ServiceId {id="impl2"}
 	const Obj? impl2
 	new make(|This|di) { di(this) }
 }
 internal class T_MyService34 {	
-	@Inject @ServiceId {serviceId="impl1"}
+	@Inject @ServiceId {id="impl1"}
 	T_MyService33? impl1
 }

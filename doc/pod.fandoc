@@ -320,6 +320,7 @@ v1.5.2 [#1.5.2]
  - Chg: Added a 'checked' parameter to 'Registry.dependencyByType()'
  - Chg: Deprecated 'ServiceBinder.bindImpl()' in favour of a nullable parameter in 'ServiceBinder.bind()'
  - Chg: Errs thrown in 'Registry.callMethod()' are no longed wrapped in an 'IocErr'.
+ - Chg: Renamed '@ServiceId.serviceId' -> '@ServiceId.id'
  - Bug: 'Registry.callMethod()' could not handle methods with default arguments.
  - Bug: 'Log' could not be injected via ctor.
 
