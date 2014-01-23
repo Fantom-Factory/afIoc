@@ -58,6 +58,23 @@ internal class TestCallMethod : IocTest {
 			throw ArgErr("Poo")
 		}
 	}
+
+	Void testLists() {
+		reg := RegistryBuilder().build.startup
+		reg.callMethod(#callMeList, this, [69, Str["Dude"]])
+		verifyEq(num, 69)
+		verifyEq(wot, "[Dude]")
+	}
+
+	Void testEmptyLists() {
+		reg := RegistryBuilder().build.startup
+		
+		// ensure shorthand notation for empty lists still make it through
+		reg.callMethod(#callMeList2, this, [69, [,]])
+		verifyEq(num, 69)
+		verifyEq(wot, "[,]")
+	}
+
 	
 	Void callMe(Int num, Registry registry) {
 		this.num = num
@@ -76,6 +93,14 @@ internal class TestCallMethod : IocTest {
 	Void callMeDefaultIoc(Int num, Registry? registry := null) {
 		this.num = num
 		this.type = registry.typeof
+	}
+	Void callMeList(Int num, Obj[]? objs) {
+		this.num = num
+		this.wot = objs.toStr
+	}
+	Void callMeList2(Int num, Str[] strs) {
+		this.num = num
+		this.wot = strs.toStr
 	}
 }
 

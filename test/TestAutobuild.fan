@@ -23,15 +23,6 @@ internal class TestAutobuild : IocTest {
 		}
 	}
 
-	Void testAutobuildWithList() {
-		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		Int[] ints := [,]
-		// because the list should be passed byRef, I don't want to substitute an empty list of the correct type
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Obj?[]#, Int[]#)) {
-			reg.autobuild(T_MyService49#, [ints])
-		}
-	}
-
 	Void testAutobuildTypeHasToInstantiable() {
 		reg := RegistryBuilder().build.startup
 		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService81#)) {

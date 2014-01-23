@@ -190,10 +190,6 @@ class MappedConfig {
 		if (typeCoercer.canCoerce(val.typeof, valType))
 			return typeCoercer.coerce(val, valType)
 
-		// special case for empty lists - as Obj[,] does not fit Str[,], we make a new Str[,] 
-		if (val.typeof.name == "List" && valType.name == "List" && (val as List).isEmpty)
-			return valType.params["V"].emptyList
-
 		throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
 	}
 
