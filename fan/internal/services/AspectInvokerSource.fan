@@ -13,7 +13,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
 // 	As clean as this is, we can't use it, because we get recursion from DepProviders who require
 //	injected lazy services.
-//	@Inject @ServiceId { serviceId="registry" }
+//	@Inject @ServiceId { id="registry" }
 
 	@Inject
 	const Registry	registry
