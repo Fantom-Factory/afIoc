@@ -11,7 +11,9 @@ class TypeCoercer {
 	
 	** Returns 'true' if 'fromType' can be coerced to the given 'toType'.
 	Bool canCoerce(Type fromType, Type toType) {
-		coerceMethod(fromType, toType) != null
+		if (fromType.name == "List" && toType.name == "List") 
+			return coerceMethod(fromType.params["V"], toType.params["V"]) != null
+		return coerceMethod(fromType, toType) != null
 	}
 	
 	** Coerces the Obj to the given type. 
@@ -20,6 +22,16 @@ class TypeCoercer {
 	**  2. fromXXX()
 	**  3. makeFromXXX() 
 	Obj coerce(Obj value, Type toType) {
+
+		if (value.typeof.name == "List" && toType.name == "List") {
+			toListType 	:= toType.params["V"]
+			toList 		:= toListType.emptyList.rw
+			((List) value).each {
+				toList.add(coerce(it, toListType))
+			}
+			return toList
+		}
+
 		meth := coerceMethod(value.typeof, toType)
 		
 		if (meth == null)

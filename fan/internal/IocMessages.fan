@@ -208,7 +208,7 @@ internal const class IocMessages {
 	}
 	
 	static Str providerMethodArgDoesNotFit(Type providedArg, Type paramArg) {
-		"Provided autobuild parameter '$providedArg.signature' does not fit parameter '$paramArg.signature'"
+		"Provided autobuild argument of type '$providedArg.signature' does not fit parameter '$paramArg.signature'"
 	}
 	
 	static Str fieldNotSetErr(Str fieldDesc, Method ctor) {

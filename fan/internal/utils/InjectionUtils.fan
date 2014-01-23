@@ -140,8 +140,20 @@ internal const class InjectionUtils {
 					log("Parameter provided")
 					
 					provided := providedMethodArgs[index] 
-					if (provided != null && !provided.typeof.fits(param.type))
-						throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
+					if (provided != null) {
+						
+						// special case for lists - as Str[] does not fit Obj[] 
+						if (provided.typeof.name == "List" && param.type.name == "List") {
+							// if the list is empty, who cares about the types!?
+							if (!(provided as List).isEmpty) {
+								providedListType := provided.typeof.params["V"] 
+								paramListType	 := param.type.params["V"]
+								if (!providedListType.fits(paramListType))
+									throw IocErr(IocMessages.providerMethodArgDoesNotFit(providedListType, paramListType))
+							}
+						} else if (!provided.typeof.fits(param.type)) 
+							throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
+					}
 					return provided
 				}
 
