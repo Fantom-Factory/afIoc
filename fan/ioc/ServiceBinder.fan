@@ -1,12 +1,12 @@
 
-** Use in your 'AppModule.bind(ServiceBinder binder) { ... }' method. It's how you tell IoC about your services. If your
-** service implementation is fronted by a mixin, then pass them both in: 
+** Use in your 'AppModule.bind(ServiceBinder binder) {...}' method. It's how you tell IoC about your services. If 
+** your service implementation is fronted by a mixin, then pass them both in: 
 ** 
 ** pre>
 ** class AppModule {
-**   static Void bind(ServiceBinder binder) {
-**     binder.bind(MyServiceImpl#)
-**   } 
+**     static Void bind(ServiceBinder binder) {
+**         binder.bind(MyServiceImpl#)
+**     } 
 ** }
 ** <pre
 **
@@ -14,9 +14,9 @@
 ** 
 ** pre>
 ** class AppModule {
-**   static Void bind(ServiceBinder binder) {
-**     binder.bind(MyServiceImpl#)
-**   } 
+**     static Void bind(ServiceBinder binder) {
+**         binder.bind(MyServiceImpl#)
+**     } 
 ** }
 ** <pre
 ** 
@@ -25,7 +25,6 @@
 ** The default service id is the unqualified name of the service mixin (or impl if no mixin was provided).
 ** 
 ** This is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
-** 
 mixin ServiceBinder {
 
 	** Binds the service mixin to a service impl class. The default service id is the unqualified name of the service mixin. 
