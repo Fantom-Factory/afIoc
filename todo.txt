@@ -1,5 +1,5 @@
 
-v1.5.2 Maybe...?
+v1.5.4 Maybe...?
 ----------------
 use afIoc::ThreadStack in efan - copy, rather than use
 

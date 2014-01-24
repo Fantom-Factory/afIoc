@@ -5,7 +5,7 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful 'Inversion Of Control' (IOC) framework"
-		version = Version("1.5.1")
+		version = Version("1.5.2")
 
 		meta	= [	"org.name"		: "Alien-Factory",
 					"org.uri"		: "http://www.alienfactory.co.uk/",
@@ -13,7 +13,7 @@ class Build : BuildPod {
 					"proj.uri"		: "http://www.fantomfactory.org/pods/afIoc",
 					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
 					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "true"
+					"repo.private"	: "false"
 				]
 
 		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0", "afPlastic 1.0.2+"]
@@ -22,13 +22,13 @@ class Build : BuildPod {
 		
 		docApi = true
 		docSrc = true
-
-		// exclude test code when building the pod
-		srcDirs = srcDirs.exclude { it.toStr.startsWith("test/") }
 	}
 	
 	@Target { help = "Compile to pod file and associated natives" }
 	override Void compile() {
+		// exclude test code when building the pod
+		srcDirs = srcDirs.exclude { it.toStr.startsWith("test/") }
+
 		super.compile
 		
 		destDir := Env.cur.homeDir.plus(`src/${podName}/`)
