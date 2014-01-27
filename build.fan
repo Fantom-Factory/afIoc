@@ -7,16 +7,24 @@ class Build : BuildPod {
 		summary = "A powerful 'Inversion Of Control' (IOC) framework"
 		version = Version("1.5.3")
 
-		meta	= [	"org.name"		: "Alien-Factory",
-					"org.uri"		: "http://www.alienfactory.co.uk/",
-					"proj.name"		: "Ioc",
-					"proj.uri"		: "http://www.fantomfactory.org/pods/afIoc",
-					"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
-					"license.name"	: "BSD 2-Clause License",
-					"repo.private"	: "true"
-				]
+		meta = [	
+			"org.name"		: "Alien-Factory",
+			"org.uri"		: "http://www.alienfactory.co.uk/",
+			"proj.name"		: "IoC",
+			"proj.uri"		: "http://www.fantomfactory.org/pods/afIoc",
+			"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
+			"license.name"	: "BSD 2-Clause License",
+			"repo.private"	: "true"
+		]
 
-		depends = ["sys 1.0", "concurrent 1.0", "compiler 1.0", "afPlastic 1.0.2+"]
+		depends = [
+			"sys 1.0", 
+			"concurrent 1.0", 
+			"compiler 1.0", 
+			"afPlastic 1.0.2+"
+		]
+		
+		
 		srcDirs = [`test/`, `test/utils/`, `fan/`, `fan/ioc/`, `fan/ioc/utils/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
 		resDirs = [`doc/`]
 		
