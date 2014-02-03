@@ -1,14 +1,15 @@
 
 v1.5.4 Maybe...?
 ----------------
-use afIoc::ThreadStack in efan - copy, rather than use
-
-MappedConfig  -> MapConfig  ? ConfigMap  ?
-orderedConfig -> ListConfig ? ConfigList ?
 
 
 Meh... can't be arsed
 ---------------------
+MappedConfig  -> MapConfig  ? ConfigMap  ?
+orderedConfig -> ListConfig ? ConfigList ?
+ - What's the point? The orig names aren't that bad!
+ - And *everyone* would need to update their code, even if they were deprecated! 
+ 
 @Inject { optional = true }
  - why would you want to? And what of ctor args? 
 
