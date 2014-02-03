@@ -12,7 +12,7 @@ internal class ThreadStack {
 		this.stackId = stackId
 	}
 
-	private Obj get(Int index, Bool checked := true) {
+	private Obj? get(Int index, Bool checked := true) {
 		if (checked && stack.isEmpty)
 			throw Err("ThreadStack with id '$stackId' is empty")
 		if (checked && stack.getSafe(index) == null)
