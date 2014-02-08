@@ -71,6 +71,16 @@ internal class BugFixes : IocTest {
 		t2 := reg.dependencyByType(T_MyService89#)
 		verifyEq(t1, s1)
 	}
+	
+	Void testThreadedServicesCanBeAutobuiltInCtor() {
+		reg := RegistryBuilder().addModule(T_MyModule100#).build.startup
+		t2 := reg.serviceById("s92")		
+	}
+
+	Void testThreadedServicesCanBeInjectedIntoCtor() {
+		reg := RegistryBuilder().addModule(T_MyModule100#).build.startup
+		t2 := reg.serviceById("s93")
+	}
 }
 
 internal class T_MyModule83 {
@@ -114,3 +124,21 @@ internal class T_MyModule98 {
 	}
 }
 internal const class T_MyService89 { }
+
+internal class T_MyModule100 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService91#).withScope(ServiceScope.perThread)		
+		binder.bind(T_MyService92#).withId("s92")
+		binder.bind(T_MyService93#).withId("s93")
+	}	
+}
+internal class T_MyService91 { }	// threaded
+internal const class T_MyService92 {
+	new make(Registry reg, |This|in) { 
+		in(this) 
+		reg.dependencyByType(T_MyService91#)
+	}
+}
+internal const class T_MyService93 {
+	new make(T_MyService91 s91, |This|in) { } 	
+}

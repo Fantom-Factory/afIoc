@@ -49,7 +49,7 @@ internal class InjectionTracker {
 
 		// check for allowed scope
 		if (lastDef?.scope == ServiceScope.perApplication && def.scope == ServiceScope.perThread)
-			if (!def.proxiable)
+			if (!def.proxiable && injectionCtx.injectionType.isFieldInjection)
 				throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, def.serviceId))
 
 		return ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {

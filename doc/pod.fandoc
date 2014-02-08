@@ -311,6 +311,11 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 
 Release Notes [#releaseNotes]
 *****************************
+v1.5.4 [#1.5.4]
+---------------
+ - Chg: Available values in 'NotFoundErr' are now sorted alphabetically.
+ - Bug: Attempting to inject or autobuild a threaded service in an app-scoped (const) service gave an error.
+
 v1.5.2 [#1.5.2]
 ---------------
  - New: 'TypeCoercer' now converts Lists from one parameterised type to another.
