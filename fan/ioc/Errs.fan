@@ -39,7 +39,7 @@ const class NotFoundErr : Err {
 	const Str[] availableValues
 	
 	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
-		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }
+		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }.sort
 	}
 
 	override Str toStr() {
