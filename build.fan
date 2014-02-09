@@ -5,7 +5,7 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful 'Inversion Of Control' (IOC) framework"
-		version = Version("1.5.3")
+		version = Version("1.5.4")
 
 		meta = [	
 			"org.name"		: "Alien-Factory",
@@ -13,8 +13,8 @@ class Build : BuildPod {
 			"proj.name"		: "IoC",
 			"proj.uri"		: "http://www.fantomfactory.org/pods/afIoc",
 			"vcs.uri"		: "https://bitbucket.org/AlienFactory/afioc",
-			"license.name"	: "BSD 2-Clause License",
-			"repo.private"	: "true"
+			"license.name"	: "The MIT License",
+			"repo.private"	: "false"
 		]
 
 		depends = [
