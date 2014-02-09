@@ -87,8 +87,8 @@ internal class TestStrategyRegistry : IocTest {
 				ap.findExactMatch(TestStrategyRegistry#)
 			} catch (NotFoundErr nfe) {
 				verifyEq(nfe.availableValues[0], "afIoc::IocErr")
-				verifyEq(nfe.availableValues[1], "sys::Err")
-				verifyEq(nfe.availableValues[2], "afIoc::T_StratA")
+				verifyEq(nfe.availableValues[1], "afIoc::T_StratA")
+				verifyEq(nfe.availableValues[2], "sys::Err")
 				verifyEq(nfe.availableValues.size, 3)
 				throw nfe				
 			}
