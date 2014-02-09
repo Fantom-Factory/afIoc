@@ -32,7 +32,7 @@ internal class TestThreadedAccess : IocTest {
 		verifyErrMsg(IocMessages.threadScopeInAppScope("s13", "s12")) {
 			s12 := reg.serviceById("s12")	// perThread
 			s13 := reg.serviceById("s13")	// perApp
-		}		
+		}
 
 //		Actor(ActorPool()) |->| {
 //			s12i := reg.serviceById("s12")
@@ -171,8 +171,9 @@ internal const class T_MyService12 {
 }
 
 internal const class T_MyService13 {
+	@Inject
 	const T_MyService12 s12
-	new make(T_MyService12 s12) { this.s12 = s12 }
+	new make(|This|in) { in(this) }
 }
 
 internal class T_MyService14 {
