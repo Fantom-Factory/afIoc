@@ -32,7 +32,7 @@ class RegistryBuilder {
 						logger.debug(IocMessages.moduleAlreadyAdded(moduleType))
 						return
 					}
-					
+
 					moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
 					addModuleDef(moduleDef)
 					
