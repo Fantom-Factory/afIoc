@@ -125,11 +125,12 @@ internal class InjectionTracker {
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
 
-	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, |->Obj?| func) {
+	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |->Obj?| func) {
 		ctx := InjectCtx(InjectionType.methodInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
+			it.ctorFieldVals	= fieldVals
 		}
 		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
 	}
@@ -144,9 +145,12 @@ internal class InjectionTracker {
 
 	// ----
 	
+	static InjectCtx injectCtx() {
+		ThreadStack.peek(injectCtxId)
+	}
+	
 	static InjectionCtx injectionCtx() {
-		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
-		return ctx.toInjectionCtx
+		injectCtx.toInjectionCtx
 	}
 	
 	static InjectionTracker? peek(Bool checked := true) {
@@ -168,6 +172,8 @@ internal class InjectCtx {
 	Facet[]?		methodFacets
 	Param?			methodParam
 	Int?			methodParamIndex
+	
+	[Field:Obj?]?	ctorFieldVals
 	
 	new make(InjectionType injectionType, |This|? in := null) {
 		in?.call(this)

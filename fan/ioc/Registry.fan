@@ -24,12 +24,12 @@ const mixin Registry {
 	**  - inject dependencies into fields (of all visibilities) marked with '@Inject'
 	**  - call any methods annotated with '@PostInjection'
 	** 
-	** The other parameters (if provided) may be passed to the autobuild ctor. Handy when you wish the ctor to take a 
-	** mixture of objects and services. e.g. for a `fwt::Command`:
+	** 'ctorArgs' (if provided) will be passed as arguments to the first parameters in the autobuild ctor. 
+	** Handy when you wish the ctor to take a mixture of plain objects and services. e.g. for a `fwt::Command`:
 	** 
 	** pre>
-	**   registry.autobuild(MySaveCommand#, [entityToSave]).invoke(null)
-	**   ..
+	**   registry.autobuild(MySaveCommand#, [entityToSave])
+	**   ...
 	**   class MySaveCommand {
 	**     @Inject
 	**     private EntityDao entityDao
@@ -47,7 +47,9 @@ const mixin Registry {
 	** Note: the passed in parameters **must** be first in the ctor parameter list.
 	** 
 	** Impl note: A list is used rather than splats so 'nulls' can be passed in. 
-    abstract Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList)
+	** 
+	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
+    abstract Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null)
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.
