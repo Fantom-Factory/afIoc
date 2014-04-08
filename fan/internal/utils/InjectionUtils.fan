@@ -1,10 +1,10 @@
 
 internal const class InjectionUtils {
 
-	static Obj autobuild(Type type, Obj?[] ctorArgs) {
+	static Obj autobuild(Type type, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
 		track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(type)
-			obj  := createViaConstructor(ctor, type, ctorArgs)
+			obj  := createViaConstructor(ctor, type, ctorArgs, fieldVals)
 			injectIntoFields(obj)
 			return obj
 		}
@@ -75,14 +75,14 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Obj createViaConstructor(Method? ctor, Type building, Obj?[] providedCtorArgs) {
+	static Obj createViaConstructor(Method? ctor, Type building, Obj?[] providedCtorArgs, [Field:Obj?]? fieldVals) {
 		if (ctor == null) {
 			return track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
 			}
 		}
-		
-		args := InjectionTracker.doingCtorInjection(building, ctor) |->Obj?| {
+
+		args := InjectionTracker.doingCtorInjection(building, ctor, fieldVals) |->Obj?| {
 			return findMethodInjectionParams(ctor, providedCtorArgs)
 		}
 		
@@ -105,6 +105,22 @@ internal const class InjectionUtils {
 					dependency := findDependencyByType(field.type, true)
 					plan[field] = dependency
 				}
+			}
+			ctorFieldVals := InjectionTracker.injectCtx.ctorFieldVals 
+			if (ctorFieldVals != null) {
+				ctorFieldVals.each |val, field| {
+					if (!building.fits(field.parent))
+						throw IocErr(IocMessages.injectionUtils_ctorFieldType_wrongType(field, building))
+					if (val == null) {
+						if (!field.type.isNullable)
+							throw IocErr(IocMessages.injectionUtils_ctorFieldType_nullValue(field))
+					} else {
+						if (!val.typeof.fits(field.type))
+							throw IocErr(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(val, field))
+					}
+				}
+				log("User provided (${ctorFieldVals.size}) ctor field vals")
+				plan.setAll(ctorFieldVals)
 			}
 			if (plan.isEmpty)
 				log("No injection fields found")
@@ -132,12 +148,12 @@ internal const class InjectionUtils {
 	}
 
 	private static Obj?[] findMethodInjectionParams(Method method, Obj?[] providedMethodArgs) {
-		return track("Determining injection parameters for $method.signature") |->Obj?[]| {
+		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			params := method.params.map |param, index| {
 				
-				log("Found parameter ${index+1}) $param.type")
+				log("Parameter ${index+1} = $param.type")
 				if (index < providedMethodArgs.size) {
-					log("Parameter provided")
+					log("Parameter provided by user")
 					
 					provided := providedMethodArgs[index] 
 					if (provided != null) {

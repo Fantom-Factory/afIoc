@@ -35,6 +35,33 @@ internal class TestAutobuild : IocTest {
 		s80 := (T_MyService80) reg.autobuild(T_MyService80#)
 		verifyEq(s80.dude, "Dude!")
 	}
+
+	Void testAutobuildFieldVals() {
+		reg := RegistryBuilder().build.startup
+		s94 := (T_MyService94) reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:"Mask!"])
+		verifyEq(s94.latex, "Mask!")
+	}
+
+	Void testAutobuildBadFieldVals1() {
+		reg := RegistryBuilder().build.startup
+		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_nullValue(T_MyService94#latex)) {			
+			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:null])
+		}
+	}
+
+	Void testAutobuildBadFieldVals2() {
+		reg := RegistryBuilder().build.startup
+		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(666, T_MyService94#latex)) {			
+			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:666])
+		}
+	}
+
+	Void testAutobuildBadFieldVals3() {
+		reg := RegistryBuilder().build.startup
+		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_wrongType(T_MyService47#int, T_MyService94#)) {			
+			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService47#int:69])
+		}
+	}
 }
 
 internal class T_MyModule75 {
@@ -81,3 +108,11 @@ internal class T_MyService80Impl : T_MyService80 {
 }
 
 internal mixin T_MyService81 { }
+
+internal const class T_MyService94 {
+	@Inject const Registry	registry
+			const Str		latex
+	new make(|This| inject) {
+		inject(this)
+	}
+}

@@ -17,6 +17,12 @@ RegistryBuilder.make(), always make sure "suppressLogging" is in the opts, copy 
 
 Extra checks around injecting |This| in, make sure only one is used
 
+Add createProxy to OrderConfig & mapped COnfig
+
+Add field vals to createproxy + 1 test!
+
+
+
 Meh... can't be arsed
 ---------------------
 MappedConfig  -> MapConfig  ? ConfigMap  ?

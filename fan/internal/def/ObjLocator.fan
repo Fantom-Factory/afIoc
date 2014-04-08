@@ -12,7 +12,7 @@ internal const mixin ObjLocator {
 	** Autobuilds a class via a ctor marked with '@Inject', failing that, the ctor with the most 
 	** parameters. Services and dependencies will be injected into the ctor parameters, and into 
 	** fields (of all visibilities) marked with '@Inject'. 
-    abstract Obj trackAutobuild(Type type, Obj?[] initParams)
+    abstract Obj trackAutobuild(Type type, Obj?[] initParams, [Field:Obj?]? fieldVals)
 
 	abstract Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs)
 

@@ -235,6 +235,20 @@ internal const class IocMessages {
 		"Could not find coercion from ${from.qname} to ${to.qname}"
 	}
 	
+	static Str injectionUtils_ctorFieldType_wrongType(Field field, Type building) {
+		"Field ${field.qname} does not belong to ${building.qname}"
+	}
+	
+	static Str injectionUtils_ctorFieldType_nullValue(Field field) {
+		"Field value for ${field.qname} is null"
+	}
+	
+	static Str injectionUtils_ctorFieldType_valDoesNotFit(Obj val, Field field) {
+		"Field value ${val.typeof.signature} does not fit field ${field.qname} ${field.type.signature}"
+	}
+	
+	
+	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
 	
 	static Str onlyMixinsCanBeProxied(Type mixinType) {
@@ -248,6 +262,8 @@ internal const class IocMessages {
 	static Str adviceDoesNotMatchAnyServices(AdviceDef adviceDef, Str[] advisableServiceIds) {
 		"Advisor method '${adviceDef.advisorMethod.qname} with serviceId glob '${adviceDef.serviceIdGlob}' does NOT match any proxy services. Advisable services: " + advisableServiceIds.join(", ")
 	}
+	
+	
 	
 	// ---- One Shot Lock Messages ----------------------------------------------------------------
 

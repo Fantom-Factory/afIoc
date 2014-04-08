@@ -263,12 +263,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	** see http://fantom.org/sidewalk/topic/2149
-	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList) {
+	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLockCheck
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
-				return trackAutobuild(type2, ctorArgs)
+				return trackAutobuild(type2, ctorArgs, fieldVals)
 			}
 		}
 	}
@@ -345,7 +345,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return checked ? throw IocErr(IocMessages.noDependencyMatchesType(dependencyType)) : null
 	}
 
-	override Obj trackAutobuild(Type type, Obj?[] ctorArgs) {
+	override Obj trackAutobuild(Type type, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
 		Type? implType := type
 		
 		if (implType.isAbstract) {
@@ -366,7 +366,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 		
 		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
-			return InjectionUtils.autobuild(implType, ctorArgs)
+			return InjectionUtils.autobuild(implType, ctorArgs, fieldVals)
 		}
 	}
 

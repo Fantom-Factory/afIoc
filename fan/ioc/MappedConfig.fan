@@ -34,8 +34,8 @@ class MappedConfig {
 	}
 
 	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
-	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
-		return objLocator.trackAutobuild(type, ctorArgs)
+	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+		return objLocator.trackAutobuild(type, ctorArgs, fieldVals)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978

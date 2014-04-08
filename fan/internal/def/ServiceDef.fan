@@ -68,7 +68,7 @@ internal const mixin ServiceDef {
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
 				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList)
+					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList, null)
 					InjectionUtils.injectIntoFields(obj)
 					return obj
 				}

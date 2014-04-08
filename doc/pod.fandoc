@@ -31,8 +31,8 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
-  - over 75 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 209 methods, 532 verifies]'
+  - over 70 bespoke and informative Err messages!
+  - Extensively tested: - 'All tests passed! [36 tests, 213 methods, 545 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -311,6 +311,10 @@ Don't be scared of creating 'const' services! Use `ConcurrentState` to safely st
 
 Release Notes [#releaseNotes]
 *****************************
+v1.5.6 [#1.5.6]
+---------------
+ - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' so non-DI fields may also be set by an it-block.
+
 v1.5.4 [#1.5.4]
 ---------------
  - Chg: Available values in 'NotFoundErr' are now sorted alphabetically.
