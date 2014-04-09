@@ -45,6 +45,11 @@ class OrderedConfig {
 		return objLocator.trackAutobuild(type, ctorArgs, fieldVals)
 	}
 
+	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
+	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+		objLocator.trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
+	}
+
 	** Adds an unordered object to a service's configuration. 
 	** An attempt is made to coerce the object to the contrib type.
 	@Operator
