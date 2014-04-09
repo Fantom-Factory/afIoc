@@ -33,9 +33,14 @@ class MappedConfig {
 		this.overrideCount	= 1
 	}
 
-	** A util method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
+	** A helper method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		return objLocator.trackAutobuild(type, ctorArgs, fieldVals)
+		objLocator.trackAutobuild(type, ctorArgs, fieldVals)
+	}
+	
+	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
+	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+		objLocator.trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978

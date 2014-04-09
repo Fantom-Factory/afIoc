@@ -273,12 +273,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 	
-	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList) {
+	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLockCheck
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
-					return trackCreateProxy(mixinType, implType, ctorArgs)
+					return trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
 				}
 			}
 		}
@@ -370,7 +370,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs) {
+	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceIds.serviceProxyBuilder)
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
@@ -388,7 +388,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceImplType 	= implT
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$mixinT.qname Create Proxy"
-			it.source			= |->Obj?| { autobuild(implT, ctorArgs) }
+			it.source			= |->Obj?| { autobuild(implT, ctorArgs, fieldVals) }
 		}
 
 		return spb.createProxyForMixin(serviceDef)

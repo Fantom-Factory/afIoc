@@ -56,7 +56,7 @@ const mixin Registry {
 	** 
 	** If 'implType' is null then it is assumed to have the same name as the mixin, plus a 'Impl' suffix.
 	** @since 1.5.0
-	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList)
+	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 
