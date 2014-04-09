@@ -62,6 +62,13 @@ internal class TestAutobuild : IocTest {
 			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService47#int:69])
 		}
 	}
+	
+	** see http://fantom.org/sidewalk/topic/2256
+	Void testAutobuildListFieldVals() {
+		reg := RegistryBuilder().build.startup
+		s94 := (T_MyService95) reg.autobuild(T_MyService95#, Obj#.emptyList, [T_MyService95#latex:["Mask!"]])
+		verifyEq(s94.latex[0], "Mask!")
+	}
 }
 
 internal class T_MyModule75 {
@@ -112,6 +119,14 @@ internal mixin T_MyService81 { }
 internal const class T_MyService94 {
 	@Inject const Registry	registry
 			const Str		latex
+	new make(|This| inject) {
+		inject(this)
+	}
+}
+
+internal const class T_MyService95 {
+	@Inject const Registry	registry
+			const Str[]?	latex
 	new make(|This| inject) {
 		inject(this)
 	}

@@ -108,16 +108,21 @@ internal const class InjectionUtils {
 			}
 			ctorFieldVals := InjectionTracker.injectCtx.ctorFieldVals 
 			if (ctorFieldVals != null) {
-				ctorFieldVals.each |val, field| {
+				ctorFieldVals = ctorFieldVals.map |val, field| {
 					if (!building.fits(field.parent))
 						throw IocErr(IocMessages.injectionUtils_ctorFieldType_wrongType(field, building))
 					if (val == null) {
 						if (!field.type.isNullable)
 							throw IocErr(IocMessages.injectionUtils_ctorFieldType_nullValue(field))
 					} else {
-						if (!val.typeof.fits(field.type))
+						// .toNonNullable is a fix for http://fantom.org/sidewalk/topic/2256
+						// it doesn't really matter as we've just dealt with null values
+						if (!val.typeof.toNonNullable.fits(field.type.toNonNullable))
 							throw IocErr(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(val, field))
 					}
+					
+					// turn Maps and Lists into their immutable counterparts 
+					return field.isConst ? val.toImmutable : val
 				}
 				log("User provided (${ctorFieldVals.size}) ctor field vals")
 				plan.setAll(ctorFieldVals)
