@@ -2,12 +2,7 @@
 v1.5.6 Maybe...?
 ----------------
 
-In thread stash docs, give example of creating via manager & via @Inject
-Add link to FantomFactory threadedServics article (and write it!)
-
 give access to pod deps - useful for auto scanning / discovery of classes
-
-Extra checks around injecting |This| in, make sure only one is used
 
 
 
