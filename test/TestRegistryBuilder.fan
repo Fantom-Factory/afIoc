@@ -6,15 +6,15 @@ internal class TestRegistryBuilder : IocTest {
 		RegistryBuilder().build(["bannerText":"I'm completely operational and all my circuits are  functioning perfectly. - HAL 9000"]).startup
 	}
 
-	Void testRegistryOptions() {
+	Void testRegistryMeta() {
 		reg  := RegistryBuilder().build(["hereMeNow":true, "meNull":null])
-		opts := (RegistryOptions) reg.dependencyByType(RegistryOptions#)
+		opts := (RegistryMeta) reg.dependencyByType(RegistryMeta#)
 		verify(opts.options["hereMeNow"])
 	}
 
 	Void testRegistryOptionsCanBeNull() {
 		reg  := RegistryBuilder().build(["meNull":null])
-		opts := (RegistryOptions) reg.dependencyByType(RegistryOptions#)
+		opts := (RegistryMeta) reg.dependencyByType(RegistryMeta#)
 		verify(opts.options.containsKey("meNull"))
 		verifyNull(opts.options["meNull"])
 	}
@@ -49,6 +49,6 @@ internal class TestRegistryBuilder : IocTest {
 	Void testRegistryOptionsBecomeCaseInsensitve() {
 		reg := RegistryBuilder().build(Str:Obj?[:] { it.caseInsensitive=false }.add("wot", "ever"))
 		
-		verifyEq(reg.serviceById(ServiceIds.registryOptions)->get("WOT"), "ever")
+		verifyEq(reg.serviceById(ServiceIds.registryMeta)->get("WOT"), "ever")
 	}
 }

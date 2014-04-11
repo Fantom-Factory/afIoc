@@ -45,10 +45,12 @@ const mixin ServiceIds {
 	internal
 	static const Str aspectInvokerSource		:= "afIoc::AspectInvokerSource"
 
-	** @see `RegistryOptions`
+	** @see `RegistryMeta`
 	** 
-	** @since 1.4.8
-	static const Str registryOptions			:= "afIoc::RegistryOptions"
+	** @since 1.5.6
+	static const Str registryMeta				:= "afIoc::RegistryMeta"
+	@NoDoc @Deprecated { msg="Use 'registryMeta' instead" }
+	static const Str registryOptions			:= registryMeta
 
 	** @see `LogProvider`
 	** 
