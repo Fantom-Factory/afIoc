@@ -1,6 +1,12 @@
 
 internal class TestDependencyByType : IocTest {
 	
+	Void testStaticInjectionGivesErr() {
+		verifyErrMsg(IocMessages.injectionUtils_fieldIsStatic(T_MyService97#registry)) {			
+			RegistryBuilder().build.autobuild(T_MyService97#)
+		}
+	}
+	
 	Void testCheckedFalse() {	
 		reg := RegistryBuilder().addModule(T_MyModule99#).build.startup
 		str := reg.dependencyByType(Str#, false)
@@ -28,4 +34,8 @@ internal class T_MyModule99 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService91_2#, T_MyService91Impl#).withoutProxy
 	}
+}
+
+internal class T_MyService97 {
+	@Inject static const Registry? registry
 }

@@ -247,6 +247,10 @@ internal const class IocMessages {
 		"Field value ${val.typeof.signature} does not fit field ${field.qname} ${field.type.signature}"
 	}
 	
+	static Str injectionUtils_fieldIsStatic(Field field) {
+		"Can not @Inject into static fields: ${field.qname}"
+	}
+	
 	
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------
