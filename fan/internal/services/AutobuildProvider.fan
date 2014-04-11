@@ -1,8 +1,7 @@
 
 internal const class AutobuildProvider : DependencyProvider {
 	
-	@Inject
-	private const Registry registry
+	@Inject	private const Registry registry
 
 	new make(|This|di) { di(this) }
 

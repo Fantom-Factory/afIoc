@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 214 methods, 548 verifies]'
+  - Extensively tested: - 'All tests passed! [37 tests, 215 methods, 551 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -313,6 +313,7 @@ Release Notes [#releaseNotes]
 *****************************
 v1.5.6 [#1.5.6]
 ---------------
+ - New: 'ThreadStash' instances can now be '@Inject'ed thanks to a new 'ThreadStash DependencyProvider'
  - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
  - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
 

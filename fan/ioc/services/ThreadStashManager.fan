@@ -37,7 +37,7 @@ internal const class ThreadStashManagerImpl : ThreadStashManager {
 		set { }
 	}
 
-	new make(Str prefix := "ThreadStash") {
+	new make(Str prefix := "Stash") {
 		this.prefix = createPrefix(prefix)
 	}
 

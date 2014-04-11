@@ -2,7 +2,6 @@
 v1.5.6 Maybe...?
 ----------------
 
-Inject thread stashes
 In thread stash docs, give example of creating via manager & via @Inject
 Add link to FantomFactory threadedServics article (and write it!)
 
