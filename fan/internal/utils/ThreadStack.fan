@@ -52,6 +52,10 @@ internal class ThreadStack {
 		}
 	}
 
+	static Void replace(Str stackId, Obj replacement) {
+		getStack(stackId, true).stack[-1] = replacement
+	}
+
 	static Obj? peek(Str stackId, Bool checked := true) {
 		getStack(stackId, checked)?.get(-1, checked)
 	}

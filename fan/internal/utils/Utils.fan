@@ -78,23 +78,17 @@ internal class Utils {
 		return err.cause.typeof.fits(Unwrappable#) ? unwrap((Unwrappable) err.cause) : err.cause
 	}
 	
-	** Stoopid F4 thinks the 'facet' method is a reserved word!
-	** 'hasFacet' is available on Type.
-	static Facet getFacetOnType(Type type, Type annotation) {
-		if (!annotation.isFacet)
-			throw Err("$annotation is not a facet!")
-		return type.facets.find |fac| { 
-			fac.typeof == annotation
-		} ?: throw Err("Facet $annotation.qname not found on $type.qname")
-	}
+	static Obj cloneObj(Obj obj, |Field:Obj|? overridePlan := null) {
+		plan := Field:Obj[:]
+		obj.typeof.fields.each {
+			value := it.get(obj)
+			if (value != null)
+				plan[it] = value
+		}
 
-	** Stoopid F4 thinks the 'facet' method is a reserved word!
-	** 'hasFacet' is available on Slot.
-	static Facet getFacetOnSlot(Slot slot, Type annotation) {
-		if (!annotation.isFacet)
-			throw Err("$annotation is not a facet!")
-		return slot.facets.find |fac| { 
-			fac.typeof == annotation
-		} ?: throw Err("Facet $annotation.qname not found on $slot.qname")
+		overridePlan.call(plan)
+		
+		planFunc := Field.makeSetFunc(plan)
+		return obj.typeof.method("make").call(planFunc)
 	}
 }

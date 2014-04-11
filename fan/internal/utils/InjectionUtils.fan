@@ -106,7 +106,7 @@ internal const class InjectionUtils {
 					plan[field] = dependency
 				}
 			}
-			ctorFieldVals := InjectionTracker.injectCtx.ctorFieldVals 
+			ctorFieldVals := InjectionTracker.injectionCtx.ctorFieldVals 
 			if (ctorFieldVals != null) {
 				ctorFieldVals = ctorFieldVals.map |val, field| {
 					if (!building.fits(field.parent))

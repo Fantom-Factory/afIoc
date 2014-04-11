@@ -27,7 +27,19 @@ class InjectionCtx {
 	** The index of the method 'Param' to be injected. Only available for method injection. 
 	const Int?			methodParamIndex
 
-	internal new make(|This| f) { f(this) }
+	@NoDoc
+	const [Field:Obj?]?	ctorFieldVals
+	
+	internal new makeWithType(InjectionType injectionType, |This|? in := null) {
+		this.fieldFacets	= Facet#.emptyList
+		this.methodFacets	= Facet#.emptyList
+		in?.call(this)
+		this.injectionType	= injectionType
+	}
+
+	private new make(|This|? in := null) {
+		in?.call(this)
+	}
 
 	** Adds an nested operation description to the 'OpTracker'. This provides contextual 
 	** information in the event of an Err.
