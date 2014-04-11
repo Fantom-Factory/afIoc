@@ -13,7 +13,7 @@ internal const class InjectionUtils {
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(Obj object) {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!findFieldsWithFacet(object.typeof, Inject#, true)
+			if (!findInjectableFields(object.typeof, true)
 				.reduce(false) |bool, field| {
 					InjectionTracker.doingFieldInjection(object, field) |->Bool| {
 						dependency := findDependencyByType(field.type, true)
@@ -100,7 +100,7 @@ internal const class InjectionUtils {
 	static Func makeCtorInjectionPlan(Type building) {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
-			findFieldsWithFacet(building, Inject#, true).each |field| {
+			findInjectableFields(building, true).each |field| {
 				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
 					dependency := findDependencyByType(field.type, true)
 					plan[field] = dependency
@@ -219,17 +219,16 @@ internal const class InjectionUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent == type }
 	}
 
-	private static Field[] findFieldsWithFacet(Type type, Type facetType, Bool includeConst) {
+	private static Field[] findInjectableFields(Type type, Bool includeConst) {
 		type.fields.findAll |field| {
-			// Ignore all static and final fields.
-	    	if (field.isStatic)
+	    	if (!field.hasFacet(Inject#)) 
 	    		return false
+
+	    	if (field.isStatic)
+	    		throw IocErr(IocMessages.injectionUtils_fieldIsStatic(field))
 			
 			if (field.isConst && !includeConst)
 				return false
-
-	    	if (!field.hasFacet(facetType)) 
-	    		return false
 
     		log("Found field $field.signature")
 			return true

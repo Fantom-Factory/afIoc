@@ -33,7 +33,7 @@ const class ThreadStash {
 
 	** The prefix used to identify all keys used with this stash
 	const Str prefix
-	
+
 	private Int? counter {
 		get { Actor.locals["${typeof.qname}.counter"] }
 		set { Actor.locals["${typeof.qname}.counter"] = it }
