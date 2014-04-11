@@ -42,7 +42,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = RegistryShutdownHubImpl()
 			
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.ctorFieldInjector
+				it.serviceId 		= ServiceIds.ctorItBlockBuilder
 				it.serviceType 		= |This|#
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
@@ -354,7 +354,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
 		}		
 		
-		// create a dummy serviceDef - this will be used by CtorFieldInjector to find the type being built
+		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
 		serviceDef := StandardServiceDef() {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.moduleId			= ""

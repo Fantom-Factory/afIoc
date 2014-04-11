@@ -19,7 +19,7 @@ internal const mixin ServiceDef {
 	** defined.
 	abstract Type serviceType()
 
-	** Only actually needed by the 'ctorFieldInjector'!
+	** Only actually needed by the 'ctorItBlockBuilder'!
 	** Will be 'null' if built by a builder method 
 	abstract Type? serviceImplType()
 
