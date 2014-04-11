@@ -5,11 +5,13 @@ internal class IocModule {
 
 	@Contribute { serviceType=DependencyProviderSource# }
 	static Void contributeDependencyProviderSource(OrderedConfig config, LogProvider logProvider) {
-		serviceIdProvider := config.autobuild(ServiceIdProvider#)
-		autobuildProvider := config.autobuild(AutobuildProvider#)
+		serviceIdProvider	:= config.autobuild(ServiceIdProvider#)
+		autobuildProvider	:= config.autobuild(AutobuildProvider#)
+		threadStashProvider := config.autobuild(ThreadStashProvider#)
 
 		config.add(serviceIdProvider)
 		config.add(autobuildProvider)
+		config.add(threadStashProvider)
 		config.add(logProvider)
 	}
 }
