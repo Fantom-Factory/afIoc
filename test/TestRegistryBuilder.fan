@@ -37,4 +37,18 @@ internal class TestRegistryBuilder : IocTest {
 		s50->dude
 		verifyEq(stats.stats["s50"].lifecycle, ServiceLifecycle.CREATED)		
 	}
+	
+	Void testSuppressLoggingIsAlwaysAddedToOpts() {
+		// build used to Err if 'SuppressLogging' was not explicitly defined 
+		reg := RegistryBuilder(["wotever":true]).addModule(T_MyModule76#).build
+		
+		// check the reg build ok
+		verifyNotNull(reg.serviceById(ServiceIds.serviceStats))
+	}
+
+	Void testRegistryOptionsBecomeCaseInsensitve() {
+		reg := RegistryBuilder().build(Str:Obj?[:] { it.caseInsensitive=false }.add("wot", "ever"))
+		
+		verifyEq(reg.serviceById(ServiceIds.registryOptions)->get("WOT"), "ever")
+	}
 }

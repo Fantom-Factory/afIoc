@@ -3,7 +3,8 @@
 ** Useful for passing external immutable data into services.   
 const mixin RegistryOptions {
 	
-	** The options passed as into [RegistryBuilder.build()]`RegistryBuilder.build`.
+	** The options as passed as into [RegistryBuilder.build()]`RegistryBuilder.build`. 
+	** This map is case-insensitive.
 	abstract [Str:Obj?] options()
 
 	** Return the value for the specified key. 
