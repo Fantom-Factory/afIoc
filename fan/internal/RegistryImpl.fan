@@ -95,9 +95,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = stashManager
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.registryOptions
+				it.serviceId 		= ServiceIds.registryMeta
 				it.serviceType 		= RegistryOptions#
-			}] = RegistryOptionsImpl(options)
+			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
 
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.logProvider

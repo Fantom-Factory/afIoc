@@ -2,8 +2,6 @@
 v1.5.6 Maybe...?
 ----------------
 
-give access to pod deps - useful for auto scanning / discovery of classes
-
 
 
 Meh... can't be arsed

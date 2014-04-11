@@ -8,7 +8,7 @@ class RegistryBuilder {
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
 	private Str:Obj		options
-	
+
 	** Create a 'RegistryBuilder'. 
 	** 
 	** Builder 'options' are reserved for future use. 
