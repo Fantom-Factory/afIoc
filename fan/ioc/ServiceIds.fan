@@ -26,7 +26,7 @@ const mixin ServiceIds {
 	static const Str serviceStats				:= "afIoc::ServiceStats"
 	
 	internal
-	static const Str ctorFieldInjector			:= "afIoc::CtorFieldInjector"
+	static const Str ctorItBlockBuilder			:= "afIoc::CtorItBlockBuilder"
 	
 	** @see `ThreadStashManager`
 	** 
