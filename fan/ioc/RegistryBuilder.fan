@@ -45,7 +45,7 @@ class RegistryBuilder {
 					addModuleDef(moduleDef)
 					
 					if (moduleType.hasFacet(SubModule#)) {
-						subModule := Utils.getFacetOnType(moduleType, SubModule#) as SubModule
+						subModule := (SubModule) Type#.method("facet").callOn(moduleType, [SubModule#])	// Stoopid F4
 						ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
 							subModule.modules.each { 
 								addModule(it)
@@ -114,10 +114,13 @@ class RegistryBuilder {
 	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
 	**  -  'disableProxies': Bool specifies if all proxy generation for mixin fronted services  
 	** 		should be disabled. Default is 'false'.
-	**  -  'suppressStartupMsg': Bool specifies if the default (verbose) startup log message should 
-	** 		be suppressed. Default is 'false'.
+	**  -  'suppressStartupServiceList': Bool specifies if the service list should be displayed on 
+	** 		startup. Default is 'false'.
+	**  -  'suppressStartupBanner': Bool specifies if the Alien-Factory banner should be displayed  
+	** 		on startup. Default is 'false'.
 	** 
-	** Options may be later retrieved from the `RegistryOptions` service. 
+	** Other options may also be passed in and can later be retrieved from the `RegistryOptions` 
+	** service. 
     Registry build([Str:Obj?]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
@@ -127,9 +130,10 @@ class RegistryBuilder {
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
-				"suppressStartupMsg"		: false,
+				"suppressStartupServiceList": false,
+				"suppressStartupBanner"		: false,
 				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
-				"appName"					: "Ioc"
+				"appName"					: "Ioc",				
 			])
 
 			defaults.each |val, key| {

@@ -45,7 +45,7 @@ internal const class LazyProxyForService : LazyProxy {
 		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
 			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForServiceState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionTracker.injectionCtxId, ctxWrapper.val) |->Obj?| {
+				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 
 				 }
 			}
@@ -111,7 +111,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
 			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForMixinState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionTracker.injectionCtxId, ctxWrapper.val) |->Obj?| {
+				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
 					return state.getInstance(objLocator, serviceDef)
 				 }
 			}

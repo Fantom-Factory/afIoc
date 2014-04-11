@@ -2,10 +2,10 @@ using concurrent::Actor
 
 internal class InjectionTracker {
 
-	static const Str 			injectionCtxId	:= "afIoc.injectionCtx"
+	static const Str 			trackerId		:= "afIoc.injectionTracker"
 	static const Str 			serviceDefId	:= "afIoc.serviceDef"
 	static const Str 			confProviderId	:= "afIoc.configProvider"
-	static const Str 			injectCtxId		:= "afIoc.injectCtx"
+	static const Str 			injectionCtxId	:= "afIoc.injectionCtx"
 	
 	private OpTracker 			tracker
 			ObjLocator?			objLocator
@@ -17,17 +17,17 @@ internal class InjectionTracker {
 	}
 
 	static Void forTesting_push(InjectionTracker ctx) {
-		ThreadStack.forTesting_push(injectionCtxId, ctx)
+		ThreadStack.forTesting_push(trackerId, ctx)
 	}
 
 	static Void forTesting_clear() {
-		ThreadStack.forTesting_clear(injectionCtxId)
+		ThreadStack.forTesting_clear(trackerId)
 	}
 
 	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
 		ctx := peek(false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
-		return ThreadStack.pushAndRun(injectionCtxId, ctx, f)
+		return ThreadStack.pushAndRun(trackerId, ctx, f)
 	}
 
 	static Obj? track(Str description, |->Obj?| operation) {
@@ -88,110 +88,75 @@ internal class InjectionTracker {
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 
 	static Obj? doingDependencyByType(Type dependencyType, |->Obj?| func) {
-		ctx := InjectCtx(InjectionType.dependencyByType) {
+		ctx := InjectionCtx(InjectionType.dependencyByType) {
 			it.dependencyType = dependencyType
 		}
-		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
+		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
 	static Obj? doingFieldInjection(Obj injectingInto, Field field, |->Obj?| func) {
-		ctx := InjectCtx(InjectionType.fieldInjection) {
+		ctx := InjectionCtx(InjectionType.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
 		}
-		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
+		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
 	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
-		ctx := InjectCtx(InjectionType.fieldInjection) {
+		ctx := InjectionCtx(InjectionType.fieldInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
 		}
-		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
+		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
 	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |->Obj?| func) {
-		ctx := InjectCtx(InjectionType.methodInjection) {
+		ctx := InjectionCtx(InjectionType.methodInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= method.parent
 			it.method			= method
-			it.methodFacets		= method.facets		
+			it.methodFacets		= method.facets
+			// this will get replaced with the param value
+			it.dependencyType	= Void#
 		}
-		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
+		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
 	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |->Obj?| func) {
-		ctx := InjectCtx(InjectionType.methodInjection) {
+		ctx := InjectionCtx(InjectionType.methodInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
-			it.ctorFieldVals	= fieldVals
+			it.ctorFieldVals	= fieldVals			
+			// this will get replaced with the param value
+			it.dependencyType	= Void#
 		}
-		return ThreadStack.pushAndRun(injectCtxId, ctx, func)
+		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
 	static Obj? doingParamInjection(Param param, Int index, |->Obj?| func) {
-		ctx := (InjectCtx) ThreadStack.peek(injectCtxId)
-		ctx.dependencyType		= param.type
-		ctx.methodParam			= param
-		ctx.methodParamIndex	= index
+		ctx := (InjectionCtx) ThreadStack.peek(injectionCtxId)
+		newCtx := Utils.cloneObj(ctx) {
+			it[InjectionCtx#dependencyType]		= param.type
+			it[InjectionCtx#methodParam]		= param
+			it[InjectionCtx#methodParamIndex]	= index
+		}
+		ThreadStack.replace(injectionCtxId, newCtx)
 		return func.call
 	}
 
 	// ----
 	
-	static InjectCtx injectCtx() {
-		ThreadStack.peek(injectCtxId)
-	}
-	
 	static InjectionCtx injectionCtx() {
-		injectCtx.toInjectionCtx
+		ThreadStack.peek(injectionCtxId)
 	}
 	
 	static InjectionTracker? peek(Bool checked := true) {
-		ThreadStack.peek(injectionCtxId, checked)
-	}
-}
-
-internal class InjectCtx {
-	InjectionType 	injectionType
-	
-	Obj?			injectingInto
-	Type?			injectingIntoType
-	Type?			dependencyType
-
-	Field?			field
-	Facet[]?		fieldFacets
-
-	Method?			method
-	Facet[]?		methodFacets
-	Param?			methodParam
-	Int?			methodParamIndex
-	
-	[Field:Obj?]?	ctorFieldVals
-	
-	new make(InjectionType injectionType, |This|? in := null) {
-		in?.call(this)
-		this.injectionType = injectionType
-	}
-	
-	InjectionCtx toInjectionCtx() {
-		InjectionCtx {
-			it.injectionType		= this.injectionType
-			it.injectingInto		= this.injectingInto
-			it.injectingIntoType	= this.injectingIntoType
-			it.dependencyType		= this.dependencyType
-			it.field				= this.field
-			it.fieldFacets			= this.fieldFacets ?: Facet#.emptyList
-			it.method				= this.method
-			it.methodFacets			= this.methodFacets ?: Facet#.emptyList
-			it.methodParam			= this.methodParam
-			it.methodParamIndex		= this.methodParamIndex
-		}
+		ThreadStack.peek(trackerId, checked)
 	}
 }

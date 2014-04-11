@@ -83,7 +83,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		if (method.params.isEmpty || !method.params[0].type.fits(MethodAdvisor#.toListOf))
 			throw IocErr(IocMessages.adviseMethodMustTakeMethodAdvisorList(method))
 		
-		advise := (Advise) Utils.getFacetOnSlot(method, Advise#)
+		advise := (Advise) Slot#.method("facet").callOn(method, [Advise#])	// Stoopid F4
 
 		adviceDef := StandardAdviceDef {
 			it.serviceIdGlob	= advise.serviceId
@@ -104,7 +104,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		if (method.params.isEmpty || (method.params[0].type != OrderedConfig# && method.params[0].type != MappedConfig#))
 			throw IocErr(IocMessages.contributionMethodMustTakeConfig(method))
 		
-		contribute := (Contribute) Utils.getFacetOnSlot(method, Contribute#)
+		contribute := (Contribute) Slot#.method("facet").callOn(method, [Contribute#])	// Stoopid F4
 
 		contribDef	:= StandardContributionDef {
 			it.serviceId	= extractServiceIdFromContributionMethod(contribute, method)
@@ -147,7 +147,7 @@ internal const class ModuleDefImpl : ModuleDef {
 
 		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		
-		build := (Build) Utils.getFacetOnSlot(method, Build#) 
+		build := (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
 		if (build.scope != null)
 			scope = build.scope
 		
