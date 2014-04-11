@@ -1,21 +1,22 @@
 using concurrent::Actor
 
-** A wrapper around [Actor.locals]`concurrent::Actor.locals` ensuring a unique namespace per 
-** instance. this means you don't have to worry about name clashes. 
+** A wrapper around [Actor.locals]`concurrent::Actor.locals` that ensures a unique names per 
+** instance. This means you don't have to worry about name clashes. 
 ** 
 ** Example usage:
 ** 
 ** pre>
-**   stash1 := ThreadStash("prefix")
-**   stash1["wot"] = "ever"
+**   stash1 := ThreadStash("name")
+**   stash1["wot"] = "top"
 ** 
-**   stash2 := ThreadStash("prefix")
+**   stash2 := ThreadStash("name")
 **   stash2["wot"] = "banana"
 ** 
-**   Obj.echo(stash1["wot"])  // --> ever
+**   echo(stash1["wot"])  // --> top
+**   echo(stash2["wot"])  // --> banana
 ** <pre
 ** 
-** Though typically you would create calculated field wrappers:
+** Though typically you would create calculated field wrappers for your variables:
 ** 
 ** pre>
 ** const class Example
@@ -28,6 +29,9 @@ using concurrent::Actor
 ** }
 ** <pre
 **
+** Also see `ThreadStashManager` to ensure your thread values get cleaned up, say, at the end of a 
+** HTTP web request.
+** 
 ** @since 1.3.0 (a replacement for 'LocalStash')
 const class ThreadStash {
 

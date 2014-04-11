@@ -1,10 +1,36 @@
 using concurrent
 
 ** (Service) -
-** Use to create [ThreadStashes]`ThreadStash` whose contents may be automatically deleted.
+** Use to create `ThreadStash` instances whose contents can be *cleaned* up. Erm, I mean deleted! 
 **  
-** This is important in the context of a web application where resources need to be cleaned up at the end of a web 
+** This is important in the context of web applications where resources need to be cleaned up at the end of a web 
 ** request / thread. 
+** 
+** Typical usage would be:
+** 
+** pre>
+** class Example {
+**   ThreadStash threadStash
+** 
+**   new make(ThreadStashManager stashManager) {
+**     this.threadStash = stashManager.createStash(this.typeof.name)
+**   }
+** }
+** <pre
+** 
+** Then when 'ThreadStashManager.cleanUp()' is called, all thread local data held in (associated) 
+** 'ThreadStash' instances will be deleted.
+** 
+** With the advent of a ThreadStash `DependencyProvider` in 'IoC 1.5.6' the above example may be 
+** abbreviated to:
+** 
+** pre>
+** class Example {
+**   @Inject ThreadStash threadStash
+** 
+**   new make(|This|in) { in(this) }
+** }
+** <pre
 ** 
 ** @since 1.3.0
 const mixin ThreadStashManager {
