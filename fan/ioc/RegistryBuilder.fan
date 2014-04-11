@@ -11,9 +11,17 @@ class RegistryBuilder {
 	
 	** Create a 'RegistryBuilder'. 
 	** 
-	** Builder 'Options' are reserved for future use. 
-	new make([Str:Obj]? options := null) {
-		this.options = (options != null) ? options : Utils.makeMap(Str#, Obj#).add("suppressLogging", false)
+	** Builder 'options' are reserved for future use. 
+	new make([Str:Obj]? reserved := null) {
+		reserved = reserved?.rw ?: Utils.makeMap(Str#, Obj#)
+		if (!reserved.caseInsensitive)
+			reserved = Utils.makeMap(Str#, Obj#).addAll(reserved)
+		
+		if (!reserved.containsKey("suppressLogging"))
+			reserved.add("suppressLogging", false)
+
+		this.options = reserved
+
 		addModule(IocModule#)
 	}
 
@@ -108,6 +116,8 @@ class RegistryBuilder {
 	** 		should be disabled. Default is 'false'.
 	**  -  'suppressStartupMsg': Bool specifies if the default (verbose) startup log message should 
 	** 		be suppressed. Default is 'false'.
+	** 
+	** Options may be later retrieved from the `RegistryOptions` service. 
     Registry build([Str:Obj?]? options := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock

@@ -7,11 +7,6 @@ Add link to FantomFactory threadedServics article (and write it!)
 
 give access to pod deps - useful for auto scanning / discovery of classes
 
-RegistryBuilder.make(), always make sure "suppressLogging" is in the opts, copy opts into a case-insensitive map if it's not already
- - do the same for RegistryBUilder.build(opts)
-
-@Inject static const XXX xxx should throw Err, can not inject into static!
-
 Extra checks around injecting |This| in, make sure only one is used
 
 
