@@ -28,7 +28,7 @@ const mixin RegistryMeta {
 	abstract Pod[] modulePods()
 }
 
-internal const class RegistryMetaImpl : RegistryMeta {
+internal const class RegistryMetaImpl : RegistryOptions {
 	
 	override const [Str:Obj?]	options
 	override const Type[] 		moduleTypes

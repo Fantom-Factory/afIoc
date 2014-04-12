@@ -23,4 +23,6 @@ internal mixin Module {
 	abstract Str:ServiceStat serviceStats()
 	
 	abstract Void clear()
+
+	abstract Bool hasServices()
 }

@@ -1,7 +1,8 @@
 
 ** A helper class that looks up Objs via Type inheritance search.
 const class StrategyRegistry {	
-	private const ConcurrentCache 	cache	:= ConcurrentCache([Type:Obj?][:])
+	private const ConcurrentCache 	parentCache		:= ConcurrentCache([Type:Obj?][:])
+	private const ConcurrentCache 	childrenCache	:= ConcurrentCache([Type:Obj?[]][:])
 	private const Type:Obj? 		values
 	
 	** Creates an StrategyRegistry with the given list. All types are coerced to non-nullable types.
@@ -13,8 +14,10 @@ const class StrategyRegistry {
 			if (nonDups.containsKey(nonNullable)) 
 				throw Err("Type $nonNullable is already mapped to value ${nonDups[nonNullable]}")
 			nonDups[nonNullable] = val
+			Env.cur.err.printLine(nonDups)
 		}
 		this.values = nonDups.toImmutable
+		Env.cur.err.printLine(this.values)
 	}
 
 	** Standard Map behaviour - looks up an Obj via the type. 
@@ -24,16 +27,23 @@ const class StrategyRegistry {
 			?: check(nonNullable, checked)
 	}
 
-	** Returns the Obj whose mapped Type most closely fits the given param.  
-	Obj? findBestFit(Type bestFit, Bool checked := true) {		
-		nonNullable := bestFit.toNonNullable
+	** Returns the value of the closest parent of the given type.
+	** Example:
+	** pre>
+	**   strategy := StrategyRegistry( [Obj#:1, Num#:2, Int#:3] )
+	**   strategy.findClosestParent(Obj#)   // --> 1
+	**   strategy.findClosestParent(Num#)   // --> 2
+	**   strategy.findClosestParent(Float#) // --> 2
+	** <pre
+	Obj? findClosestParent(Type type, Bool checked := true) {
+		nonNullable := type.toNonNullable
 		// chill, I got tests for all this!
-		return cache.getOrAdd(nonNullable) |->Obj?| {
+		return parentCache.getOrAdd(nonNullable) |->Obj?| {
 			deltas := values
-				.findAll |val, type| { nonNullable.fits(type) }
-				.map |val, type->Int?| {
+				.findAll |val, t2| { nonNullable.fits(t2) }
+				.map |val, t2->Int?| {
 					nonNullable.inheritance.eachWhile |sup, i| {
-						(sup == type || sup.mixins.contains(type)) ? i : null
+						(sup == t2 || sup.mixins.contains(t2)) ? i : null
 					}
 				}
 			
@@ -41,17 +51,43 @@ const class StrategyRegistry {
 				return null
 			
 			minDelta := deltas.vals.min
-			match 	 := deltas.eachWhile |delta, type| { (delta == minDelta) ? type : null }
+			match 	 := deltas.eachWhile |delta, t2| { (delta == minDelta) ? t2 : null }
 			return values[match]
 		} ?: check(nonNullable, checked)
 	}
+	
+	** Returns the values of the children of the given type.
+	** Example:
+	** pre>
+	**   strategy := StrategyRegistry( [Obj#:1, Num#:2, Int#:3] )
+	** 	 strategy.findChildrenOf(Obj#)   // --> [1, 2, 3]
+	**   strategy.findChildrenOf(Num#)   // --> [2, 3]
+	**   strategy.findChildrenOf(Float#) // --> [,]
+	** <pre
+	Obj?[] findChildren(Type type) {
+		nonNullable := type.toNonNullable
+		return childrenCache.getOrAdd(nonNullable) |->Obj?[]| {
+			values.findAll |val, key| { key.fits(type) }.vals
+		}
+	}
+	
+	@NoDoc @Deprecated { msg="Use findClosestParent() instead" }  
+	Obj? findBestFit(Type bestFit, Bool checked := true) {
+		findClosestParent(bestFit, checked)
+	}
 
-	** Clears the lookup cache 
+	** Clears the lookup caches
 	Void clearCache() {
-		cache.clear
+		parentCache.clear
+		parentCache.clear
 	}
 	
 	private Obj? check(Type nonNullable, Bool checked) {
 		checked ? throw NotFoundErr("Could not find match for Type ${nonNullable}.", values.keys) : null
+	}
+	
+	@NoDoc
+	override Str toStr() {
+		values.keys.toStr
 	}
 }

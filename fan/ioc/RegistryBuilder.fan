@@ -59,6 +59,8 @@ class RegistryBuilder {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
 				lock.check
+				if (!options["suppressLogging"])
+					logger.info("Adding module definitions from pod '$pod.name'")
 				internalAddModulesFromPod(pod, addDependencies)
 				return this
 			}
@@ -169,9 +171,6 @@ class RegistryBuilder {
 	}
 
 	private Void internalAddModulesFromPod(Pod pod, Bool addDependencies := true) {
-		if (!options["suppressLogging"])
-			logger.info("Adding module definitions from pod '$pod.name'")
-
 		ctx.withPod(pod) |->| {
 			moduleTypeNames := pod.meta[IocConstants.podMetaModuleName]
 			addModulesFromTypeNames(moduleTypeNames)
