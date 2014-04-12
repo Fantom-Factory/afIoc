@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [37 tests, 219 methods, 556 verifies]'
+  - Extensively tested: - 'All tests passed! [37 tests, 221 methods, 564 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -313,13 +313,15 @@ Release Notes [#releaseNotes]
 *****************************
 v1.5.6 [#1.5.6]
 ---------------
+ - New: 'Registry.dependencyByType()' now returns services via a type inheritance search.
  - New: 'ThreadStash' instances can now be '@Inject'ed thanks to a new 'ThreadStash DependencyProvider'
  - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
  - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
  - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
- - Chg: Attempting to @Inject into a static field will now throw an Err.
+ - Chg: Attempting to '@Inject' into a static field will now throw an Err.
  - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
- - Chg: Re-jigged 'RegistryBuilder' logic.
+ - Chg: Re-jigged 'RegistryBuilder' logic and API.
+ - Chg: Re-jigged 'StrategyRegistry' to add 'findChildren()'.
 
 v1.5.4 [#1.5.4]
 ---------------

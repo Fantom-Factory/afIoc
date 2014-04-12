@@ -6,7 +6,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
 	private const Str:Module				modules
-	private const Module[]					moduleList	// a cache for performance reasons
+	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviderSource?	depProSrc
 	private const ServiceOverride?			serviceOverrides
 	private const Duration					startTime
@@ -97,8 +97,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryMeta
 				it.serviceType 		= RegistryOptions#
-				// FIXME
-				it.serviceType 		= RegistryMeta#
 			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
 
 			services[BuiltInServiceDef() {
@@ -133,7 +131,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// set before we validate the contributions
 		this.modules = moduleIdToModule
-		this.moduleList = modules.vals
+		this.modulesWithServices = modules.vals.findAll |module| { module.hasServices }
 		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
@@ -406,12 +404,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override ServiceDef? serviceDefById(Str serviceId) {
 		// attempt a qualified search first
-		serviceDef := moduleList.eachWhile { it.serviceDefByQualifiedId(serviceId) }
+		serviceDef := modulesWithServices.eachWhile { it.serviceDefByQualifiedId(serviceId) }
 		if (serviceDef != null)
 			return serviceDef
 
 		unqualifiedId := ServiceDef.unqualify(serviceId)
-		serviceDefs := (ServiceDef[]) moduleList.map |module| {
+		serviceDefs := (ServiceDef[]) modulesWithServices.map |module| {
 			module.serviceDefsById(serviceId, unqualifiedId)
 		}.flatten
 
@@ -422,7 +420,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
-		ServiceDef[] serviceDefs := moduleList.map |module| {
+		serviceDefs := (ServiceDef[]) modulesWithServices.map |module| {
 			module.serviceDefsByType(serviceType)
 		}.flatten
 
@@ -436,13 +434,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
-		moduleList.map {
+		modules.vals.map {
 			it.contributionsByServiceDef(serviceDef)
 		}.flatten
 	}
 
 	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
-		moduleList.map {
+		modules.vals.map {
 			it.adviceByServiceDef(serviceDef)
 		}.flatten
 	}

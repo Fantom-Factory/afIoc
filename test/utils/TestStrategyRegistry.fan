@@ -68,19 +68,19 @@ internal class TestStrategyRegistry : IocTest {
 		map[T_StratA#] 	= 3
 		ap := StrategyRegistry(map)
 
-		verifyEq(ap.findBestFit(Obj#, false), null)
-		verifyEq(ap.findBestFit(Obj?#, false), null)
-		verifyEq(ap.findBestFit(Err#), 1)
-		verifyEq(ap.findBestFit(Err?#), 1)
-		verifyEq(ap.findBestFit(IocErr#, false), 2)
-		verifyEq(ap.findBestFit(IocErr?#, false), 2)
-		verifyEq(ap.findBestFit(T_InnerIocErr#, false), 2)
-		verifyEq(ap.findBestFit(T_InnerIocErr?#, false), 2)
-		verifyEq(ap.findBestFit(TestStrategyRegistry?#, false), null)
+		verifyEq(ap.findClosestParent(Obj#, false), null)
+		verifyEq(ap.findClosestParent(Obj?#, false), null)
+		verifyEq(ap.findClosestParent(Err#), 1)
+		verifyEq(ap.findClosestParent(Err?#), 1)
+		verifyEq(ap.findClosestParent(IocErr#, false), 2)
+		verifyEq(ap.findClosestParent(IocErr?#, false), 2)
+		verifyEq(ap.findClosestParent(T_InnerIocErr#, false), 2)
+		verifyEq(ap.findClosestParent(T_InnerIocErr?#, false), 2)
+		verifyEq(ap.findClosestParent(TestStrategyRegistry?#, false), null)
 
-		verifyEq(ap.findBestFit(T_StratB?#, false), 3)
-		verifyEq(ap.findBestFit(T_StratA?#, false), 3)	// should find A even though it's not directly in the map
-		verifyEq(ap.findBestFit(T_StratC?#, false), 3)
+		verifyEq(ap.findClosestParent(T_StratB?#, false), 3)
+		verifyEq(ap.findClosestParent(T_StratA?#, false), 3)	// should find A even though it's not directly in the map
+		verifyEq(ap.findClosestParent(T_StratC?#, false), 3)
 		
 		verifyErrMsgAndType(NotFoundErr#, "Could not find match for Type afIoc::TestStrategyRegistry.") {
 			try {
@@ -93,6 +93,17 @@ internal class TestStrategyRegistry : IocTest {
 				throw nfe				
 			}
 		}
+	}
+	
+	Void testDocs() {
+		strategy := StrategyRegistry([:] { ordered=true; it[Obj#]=1; it[Num#]=2; it[Int#]=3})
+		verifyEq(strategy.findClosestParent(Obj#), 1)
+		verifyEq(strategy.findClosestParent(Num#), 2)
+		verifyEq(strategy.findClosestParent(Float#), 2)
+
+		verifyEq(strategy.findChildren(Obj#),   Obj?[1, 2, 3])
+		verifyEq(strategy.findChildren(Num#),   Obj?[2, 3])
+		verifyEq(strategy.findChildren(Float#), Obj?[,])
 	}
 }
 

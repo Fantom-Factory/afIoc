@@ -104,9 +104,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-		// TODO: Think of a test / use case to use findBestFit()!
-//		typeToServiceDefs.findBestFit(serviceType, false) ?: ServiceDef#.emptyList
-		typeToServiceDefs.findExactMatch(serviceType, false) ?: ServiceDef#.emptyList 
+		typeToServiceDefs.findChildren(serviceType) 
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
@@ -172,6 +170,10 @@ internal const class ModuleImpl : Module {
 		withServiceState(ServiceScope.perThread) 	  |state| { state.clear }
 	}
 
+	override Bool hasServices() {
+		!serviceDefs.isEmpty
+	}
+	
 	// ---- Private Methods ----------------------------------------------------
 
 	private Obj getOrMakeService(ServiceDef def, Bool returnReal, Bool useCache) {
