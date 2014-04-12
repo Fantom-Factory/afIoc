@@ -46,6 +46,7 @@ const class IocService : Service {
 		private set { reg := it; conState.withState |IocServiceState state| { state.registry = reg} }
 	}
 
+	
 
 	// ---- Public Builder Methods ---------------------------------------------------------------- 
 
@@ -54,12 +55,19 @@ const class IocService : Service {
 		this.indexProps		= false
 		this.dependencies	= false
 	}
+
+	** Convenience for `RegistryBuilder.addModules`
+	This addModules(Type[] moduleTypes) {
+		checkServiceNotStarted
+		this.moduleTypes = this.moduleTypes.addAll(moduleTypes)
+		return this
+	}
 	
-	** Convenience for `RegistryBuilder.addModulesFromDependencies`
-	This addModulesFromDependencies(Pod dependenciesOf) {
+	** Convenience for `RegistryBuilder.addModulesFromPod`
+	This addModulesFromPod(Pod pod) {
 		checkServiceNotStarted
 		dependencies = true
-		dependencyPod = dependenciesOf
+		dependencyPod = pod
 		return this
 	}
 
@@ -70,13 +78,7 @@ const class IocService : Service {
 		return this
 	}
 
-	** Convenience for `RegistryBuilder.addModules`
-	This addModules(Type[] moduleTypes) {
-		checkServiceNotStarted
-		this.moduleTypes = this.moduleTypes.addAll(moduleTypes)
-		return this
-	}
-
+	
 
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 
@@ -94,7 +96,7 @@ const class IocService : Service {
 				regBuilder.addModulesFromIndexProperties
 			
 			if (dependencies)
-				regBuilder.addModulesFromDependencies(dependencyPod, true)
+				regBuilder.addModulesFromPod(dependencyPod, true)
 			
 			regBuilder.addModules(moduleTypes)
 			
@@ -132,6 +134,8 @@ const class IocService : Service {
 		registry = null
 	}
 
+
+
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	** Convenience for `Registry#serviceById`
@@ -147,15 +151,15 @@ const class IocService : Service {
 	}
 
 	** Convenience for `Registry#autobuild`
-	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList) {
+	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		checkServiceStarted
-		return registry.autobuild(type, ctorArgs)
+		return registry.autobuild(type, ctorArgs, fieldVals)
 	}
 	
 	** Convenience for `Registry#createProxy`
-	Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList) {
+	Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		checkServiceStarted
-		return registry.createProxy(mixinType, implType, ctorArgs)		
+		return registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 	
 	** Convenience for `Registry#injectIntoFields`
@@ -169,6 +173,8 @@ const class IocService : Service {
 		checkServiceStarted
 		return registry.callMethod(method, instance, providedMethodArgs)		
 	}
+
+
 
 	// ---- Private Methods -----------------------------------------------------------------------
 

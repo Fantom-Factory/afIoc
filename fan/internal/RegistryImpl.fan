@@ -97,6 +97,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryMeta
 				it.serviceType 		= RegistryOptions#
+				// FIXME
+				it.serviceType 		= RegistryMeta#
 			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
 
 			services[BuiltInServiceDef() {
