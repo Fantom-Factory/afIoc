@@ -25,78 +25,69 @@ class RegistryBuilder {
 		addModule(IocModule#)
 	}
 
-	** Adds a module to the registry
+	** Adds a module to the registry. 
+	** Any modules defined with the '@SubModule' facet are also added.
 	This addModule(Type moduleType) {
-		(RegistryBuilder) Utils.stackTraceFilter |->RegistryBuilder| {		
-			ctx.track("Adding module definition for '$moduleType.qname'") |->| {
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
+			ctx.track("Adding module definition for '$moduleType.qname'") |->Obj| {
 				lock.check
-				if (moduleType != IocModule# && !options["suppressLogging"] && !moduleTypes.contains(moduleType))
-					logger.info("Adding module definition for $moduleType.qname")
-
-				ctx.withModule(moduleType) |->| {			
-					if (moduleDefs.find { it.moduleType == moduleType } != null) {
-						// Debug because sometimes you can't help adding the same module twice (via dependencies)
-						// afBedSheet is a prime example
-						logger.debug(IocMessages.moduleAlreadyAdded(moduleType))
-						return
-					}
-
-					moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
-					addModuleDef(moduleDef)
-					
-					if (moduleType.hasFacet(SubModule#)) {
-						subModule := (SubModule) Type#.method("facet").callOn(moduleType, [SubModule#])	// Stoopid F4
-						ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
-							subModule.modules.each { 
-								addModule(it)
-							}
-						}
-					} else
-						ctx.log("No SubModules found")
-				}
+				internalAddModule(moduleType)
+				return this
 			}
-			return this
 		}
 	}
 
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			lock.check
-			moduleTypes.each |moduleType| {
-				addModule(moduleType)
+			ctx.track("Adding module definitions for '$moduleTypes'") |->Obj| {
+				lock.check
+				moduleTypes.each |moduleType| {
+					internalAddModule(moduleType)
+				}
+				return this
 			}
-			return this
+		}
+	}
+	
+	** Inspects the [pod's meta-data]`docLang::Pods#meta` for the key 'afIoc.module'. This is then 
+	** treated as a CSV list of (qualified) module type names to load.
+	** 
+	** If 'addDependencies' is 'true' then the pod's dependencies are also inspected for IoC 
+	** modules. 
+	This addModulesFromPod(Pod pod, Bool addDependencies := true) {
+		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
+			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
+				lock.check
+				internalAddModulesFromPod(pod, addDependencies)
+				return this
+			}
 		}
 	}
 
-	** Checks all dependencies of the given [pod]`sys::Pod` for the meta-data key 'afIoc.module' 
-	** which defines the qualified name of a module to load.
-	This addModulesFromDependencies(Pod pod, Bool addTransitiveDependencies := true) {
-		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {
-			if (!options["suppressLogging"])
-				logger.info("Adding modules from dependencies of '$pod.name'")
-			addModulesFromDependenciesRecursive(pod, addTransitiveDependencies)
-			return this
-		}
+
+	** Note that this method now adds pod dependencies, and not just transitive dependencies as it
+	** used to.
+	@NoDoc @Deprecated { msg="Use addModulesFromPod() instead" }
+	This addModulesFromDependencies(Pod pod, Bool addDependencies := true) {
+		addModulesFromPod(pod, addDependencies)
 	}
 
-	** Looks for all index properties of the key 'afIoc.module' which defines a qualified name of 
+	** Looks for all index properties of key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
 	This addModulesFromIndexProperties() {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			if (!options["suppressLogging"])
-				logger.info("Adding modules from index properties")
-			ctx.track("Adding modules from index properties") |->| {
+			ctx.track("Adding modules from index properties") |->Obj| {
 				lock.check
-				moduleNames := Env.cur.index("afIoc.module")
-				moduleNames.each {
-					addModuleFromTypeName(it)
-				}
-				if (moduleNames.isEmpty)
-					ctx.log("No modules found")
+
+				if (!options["suppressLogging"])
+					logger.info("Adding modules from index properties")
+
+				moduleTypeNames := Env.cur.index(IocConstants.podMetaModuleName)
+				addModulesFromTypeNames(moduleTypeNames.join(","))
+				
+				return this
 			}
-			return this
 		}
 	}
 
@@ -150,65 +141,65 @@ class RegistryBuilder {
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private Type[] addModulesFromDependenciesRecursive(Pod pod, Bool addTransitiveDependencies) {
-		ctx.track("Adding modules from dependencies of '$pod.name'") |->Type[]| {
-			lock.check
+	private Void internalAddModule(Type moduleType) {
+		if (moduleType != IocModule# && !options["suppressLogging"] && !moduleTypes.contains(moduleType))
+			logger.info("Adding module definition for $moduleType.qname")
 
-			Type?[] modTypes := [,]
-		
-			// don't forget me!
-			ctx.withPod(pod) |->| {
-				modType := addModuleFromPod(pod)
-				if (modType != null)
-					modTypes.add(modType)
+		ctx.withModule(moduleType) |->| {			
+			if (moduleDefs.find { it.moduleType == moduleType } != null) {
+				// Debug because sometimes you can't help adding the same module twice (via dependencies)
+				// afBedSheet is a prime example
+				logger.debug(IocMessages.moduleAlreadyAdded(moduleType))
+				return
+			}
 
-				pod.depends.each {
-					dependency := Pod.find(it.name)
-					ctx.withPod(dependency) |->| {
-						modType = addModuleFromPod(dependency)
-						if (modType != null)
-							modTypes.add(modType)
-
-						if (addTransitiveDependencies) {
-							mods := ctx.track("Adding transitive dependencies for '$dependency.name'") |->Obj| {
-								deps := addModulesFromDependenciesRecursive(dependency, addTransitiveDependencies)
-								if (deps.isEmpty)
-									ctx.log("No transitive dependencies found")
-								return deps
-							} 
-							modTypes.addAll(mods)
-						} else
-							ctx.log("Not looking for transitive dependencies")
+			moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
+			moduleDefs.add(moduleDef)
+			
+			if (moduleType.hasFacet(SubModule#)) {
+				subModule := (SubModule) Type#.method("facet").callOn(moduleType, [SubModule#])	// Stoopid F4
+				ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
+					subModule.modules.each { 
+						addModule(it)
 					}
 				}
-
-				if (modTypes.isEmpty)
-					ctx.log("No modules found")				
-			}
-
-			return modTypes
+			} else
+				ctx.log("No SubModules found")
 		}
-	}	
+	}
+
+	private Void internalAddModulesFromPod(Pod pod, Bool addDependencies := true) {
+		if (!options["suppressLogging"])
+			logger.info("Adding module definitions from pod '$pod.name'")
+
+		ctx.withPod(pod) |->| {
+			moduleTypeNames := pod.meta[IocConstants.podMetaModuleName]
+			addModulesFromTypeNames(moduleTypeNames)
+
+			if (addDependencies) {
+				mods := ctx.track("Adding dependencies of '${pod.name}'") |->| {
+					pod.depends.each |depend| {
+						dependency := Pod.find(depend.name)
+						internalAddModulesFromPod(dependency)
+					}
+				} 
+			} else
+				ctx.log("Not inspecting dependencies")
+		}
+	}
 	
-	private Type? addModuleFromPod(Pod pod) {
-		qname := pod.meta[IocConstants.podMetaModuleName]
-		if (qname != null) {
-			return ctx.track("Pod '$pod.name' defines module $qname") |->Obj| {
-				return addModuleFromTypeName(qname)
-			}
+	private Void addModulesFromTypeNames(Str? moduleTypeNames) {
+		if (moduleTypeNames == null) {
+			ctx.log("No modules found")
+			return
 		}
-		return null
-	}
-
-	private Type addModuleFromTypeName(Str moduleTypeName) {
-		moduleType := Type.find(moduleTypeName)
-		addModule(moduleType)
-		return moduleType
-	}
-
-	private This addModuleDef(ModuleDef moduleDef) {
-		this.moduleDefs.add(moduleDef)
-		return this
+		
+		moduleTypeNames.split(',', true).each |moduleTypeName| {
+			ctx.track("Found module '${moduleTypeName}'") |->| {
+				moduleType := Type.find(moduleTypeName)
+				internalAddModule(moduleType)
+			}
+		}		
 	}
 }
 
