@@ -14,10 +14,8 @@ const class StrategyRegistry {
 			if (nonDups.containsKey(nonNullable)) 
 				throw Err("Type $nonNullable is already mapped to value ${nonDups[nonNullable]}")
 			nonDups[nonNullable] = val
-			Env.cur.err.printLine(nonDups)
 		}
 		this.values = nonDups.toImmutable
-		Env.cur.err.printLine(this.values)
 	}
 
 	** Standard Map behaviour - looks up an Obj via the type. 
