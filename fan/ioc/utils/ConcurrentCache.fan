@@ -23,6 +23,7 @@ const class ConcurrentCache {
 
 	** Make a 'ConcurrentCache' using the given immutable map. 
 	** Use when you need a case insensitive map.
+	** 
 	** @since 1.4.6
 	new makeWithMap([Obj:Obj?] map) {
 		this.map = map 
@@ -38,13 +39,13 @@ const class ConcurrentCache {
 	** the value function. 
 	** 
 	** This method is **NOT** thread safe. If two actors call this method at the same time, the 
-	** value function could be called twice for the same key. 
+	** value function could be called twice for the same key.
+	**  
 	** @since 1.4.6
 	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
 		if (!containsKey(key)) {
 			val := valFunc.call()
-			if (val != null)
-				set(key, val)
+			set(key, val)
 		}
 		return get(key)
 	}
@@ -60,13 +61,13 @@ const class ConcurrentCache {
 	** Sets the key / value pair, ensuring no data is lost during multi-threaded race conditions.
 	** Though the same key may be overridden. Both the 'key' and 'val' must be immutable. 
 	@Operator
-	Void set(Obj key, Obj val) {
+	Void set(Obj key, Obj? val) {
 		iKey := key.toImmutable
 		iVal := val.toImmutable
 		withState {
-			myMap := map.rw
-			myMap.set(iKey, iVal)
-			atomicMap.val = myMap.toImmutable
+			newMap := map.rw
+			newMap.set(iKey, iVal)
+			map = newMap
 		}.get
 	}
 
@@ -85,12 +86,10 @@ const class ConcurrentCache {
 		map.vals
 	}
 
-	** Remove all key/value pairs from the map.  Return this.
+	** Remove all key/value pairs from the map. Return this.
 	This clear() {
 		withState {
-			myMap := map.rw
-			myMap.clear
-			atomicMap.val = myMap.toImmutable
+			map = map.rw.clear
 		}.get
 		return this
 	}
@@ -99,22 +98,23 @@ const class ConcurrentCache {
 	** from the map and return the value. 
 	** If the key was not mapped then return 'null'.
 	Obj? remove(Obj key) {
+		iKey := key.toImmutable
 		return conState.getState |Obj? x ->Obj?| {
-			myMap := map.rw
-			r := myMap.remove(key)
-			atomicMap.val = myMap.toImmutable
-			return r 
+			newMap := map.rw
+			val := newMap.remove(iKey)
+			map = newMap
+			return val 
 		}
 	}
 
 	** Replaces the entire content of the cache with the given map. 
 	** The existing map is returned. 
 	Obj:Obj? replace(Obj:Obj? newMap) {
-		oldMap := map
+		iMap	:= newMap.toImmutable
+		oldMap	:= map
 		withState {
-			map.rw.clear
-			atomicMap.val = newMap.toImmutable
-		}
+			map = iMap
+		}.get
 		return oldMap
 	}
 	
