@@ -20,7 +20,7 @@ internal class Utils {
 		return title
 	}
 	
-	static Obj:Obj makeMap(Type keyType, Type valType) {
+	static Obj:Obj? makeMap(Type keyType, Type valType) {
 		mapType := Map#.parameterize(["K":keyType, "V":valType])
 		return keyType.fits(Str#) ? Map.make(mapType) { caseInsensitive = true } : Map.make(mapType) { ordered = true }
 	}
@@ -32,14 +32,6 @@ internal class Utils {
 
 	static Void setLoglevel(LogLevel logLevel) {
 		Utils#.pod.log.level = logLevel
-	}
-
-	static Void setLoglevelDebug() {
-		setLoglevel(LogLevel.debug)
-	}
-
-	static Void setLoglevelInfo() {
-		setLoglevel(LogLevel.info)
 	}
 	
 	static Void debugOperation(|->| operation) {
