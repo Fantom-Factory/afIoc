@@ -78,6 +78,11 @@ const class IocService : Service {
 		return this
 	}
 
+	@NoDoc @Deprecated	// for afGenesis
+	This addModulesFromDependencies(Pod dependenciesOf) {
+		addModulesFromPod(dependenciesOf)
+	}
+
 	
 
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
