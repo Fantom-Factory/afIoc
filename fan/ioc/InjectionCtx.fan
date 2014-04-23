@@ -6,7 +6,7 @@ class InjectionCtx {
 	const InjectionType	injectionType
 	
 	** The 'Type' to be injected
-	const Type			dependencyType
+		  Type			dependencyType { internal set }
 
 	** The object that will receive the injection. Only available for field and (non-static) method injection.  
 		  Obj?			injectingInto
@@ -23,12 +23,12 @@ class InjectionCtx {
 	** The facets of the method to be injected. Is never null, but may be empty. 
 	const Facet[]		methodFacets
 	** The method 'Param' to be injected. Only available for method injection. 
-	const Param?		methodParam
+		  Param?		methodParam  { internal set }
 	** The index of the method 'Param' to be injected. Only available for method injection. 
-	const Int?			methodParamIndex
+		  Int?			methodParamIndex  { internal set }
 
-	@NoDoc
-	const [Field:Obj?]?	ctorFieldVals
+		  @NoDoc
+		  [Field:Obj?]?	ctorFieldVals { internal set }
 	
 	internal new makeWithType(InjectionType injectionType, |This|? in := null) {
 		this.fieldFacets	= Facet#.emptyList
