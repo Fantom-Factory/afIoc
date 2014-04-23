@@ -132,7 +132,7 @@ internal class InjectionTracker {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
-			it.ctorFieldVals	= fieldVals			
+			it.ctorFieldVals	= fieldVals
 			// this will get replaced with the param value
 			it.dependencyType	= Void#
 		}
@@ -141,12 +141,9 @@ internal class InjectionTracker {
 
 	static Obj? doingParamInjection(Param param, Int index, |->Obj?| func) {
 		ctx := (InjectionCtx) ThreadStack.peek(injectionCtxId)
-		newCtx := Utils.cloneObj(ctx) {
-			it[InjectionCtx#dependencyType]		= param.type
-			it[InjectionCtx#methodParam]		= param
-			it[InjectionCtx#methodParamIndex]	= index
-		}
-		ThreadStack.replace(injectionCtxId, newCtx)
+		ctx.dependencyType		= param.type
+		ctx.methodParam			= param
+		ctx.methodParamIndex	= index
 		return func.call
 	}
 
