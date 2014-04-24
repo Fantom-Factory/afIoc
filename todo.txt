@@ -1,7 +1,8 @@
 
 v1.5.8 Maybe...?
 ----------------
-
+expose (in ctor?) the actorpool in concurrentstate / cache
+manage it somehow? in a an ActorPoolPool? ActorPools (plural!)
 
 
 Meh... can't be arsed

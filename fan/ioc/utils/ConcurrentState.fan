@@ -52,12 +52,13 @@ using concurrent::Future
 ** [AtomicRef]`concurrent::AtomicRef`
 ** 
 const class ConcurrentState {
-	private static const Log 		log 		:= Utils.getLog(ConcurrentState#)
-	internal static const ActorPool	actorPool	:= ActorPool()
-
-	private const Actor 			stateActor	:= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
-	private const |->Obj?| 			stateFactory
-	private const ThreadStash 		stash
+	private static const Log 	log 		:= Utils.getLog(ConcurrentState#)
+	
+	** The 'ActorPool' used to store this object's 'Actor'. Set via a ctor it-block.
+			const ActorPool		actorPool
+	private const Actor 		stateActor
+	private const |->Obj?| 		stateFactory
+	private const ThreadStash 	stash
 	
 	** Keeps count of the number of 'ConcurrentState' instances that have been created.
 	** For debug purposes.
@@ -70,15 +71,23 @@ const class ConcurrentState {
 	}
 
 	** The given state type must have a public no-args ctor as per `sys::Type.make`
-	new makeWithStateType(Type stateType) {
+	new makeWithStateType(Type stateType, |This|? f := null) {
+		f?.call(this)
+		if (actorPool == null)
+			actorPool = ActorPool()
 		this.stateFactory	= |->Obj?| { stateType.make }
 		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
+		this.stateActor		= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
 		instanceCount.incrementAndGet
 	}
 
-	new makeWithStateFactory(|->Obj?| stateFactory) {
+	new makeWithStateFactory(|->Obj?| stateFactory, |This|? f := null) {
+		f?.call(this)
+		if (actorPool == null)
+			actorPool = ActorPool()
 		this.stateFactory	= stateFactory
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
+		this.stateActor		= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
 		instanceCount.incrementAndGet
 	}
 

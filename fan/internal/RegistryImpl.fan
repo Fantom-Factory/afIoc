@@ -488,6 +488,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 }
 
 internal class RegistryState {
-	OneShotLock 			startupLock 		:= OneShotLock(IocMessages.registryStarted)
-	OneShotLock 			shutdownLock 		:= OneShotLock(IocMessages.registryShutdown)
+	OneShotLock startupLock 	:= OneShotLock(IocMessages.registryStarted)
+	OneShotLock shutdownLock	:= OneShotLock(IocMessages.registryShutdown)
 }
