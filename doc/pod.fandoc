@@ -322,6 +322,9 @@ v1.5.6 [#1.5.6]
  - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
  - Chg: Re-jigged 'RegistryBuilder' logic and API.
  - Chg: Re-jigged 'StrategyRegistry' to add 'findChildren()'.
+ - Chg: Exposed 'ActorPool' in 'ConcurrentState'.
+ - Chg: 'ConcurrentCache' no longer uses 'ConcurrentState', just an 'AtomicRef'.
+ - Chg: 'TypeCoercer' is now 'const'.
  - Bug: 'ConcurrentCache.replace()' wasn't synchronous.
 
 v1.5.4 [#1.5.4]

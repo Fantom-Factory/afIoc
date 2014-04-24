@@ -1,3 +1,4 @@
+using concurrent::AtomicRef
 
 **
 ** Wraps an afIoc `Registry` instance as Fantom service.
@@ -5,9 +6,9 @@
 ** A Service for all Services!
 ** 
 const class IocService : Service {
-	private static const Log 		log 		:= Utils.getLog(IocService#)
-	private const ThreadStash 		stash		:= ThreadStash(IocService#.name)
-	private const ConcurrentState	conState	:= ConcurrentState(IocServiceState#)
+	private static const Log 	log 		:= Utils.getLog(IocService#)
+	private const ThreadStash 	stash		:= ThreadStash(IocService#.name)
+	private const AtomicRef		registryRef	:= AtomicRef()
 
 	private Type[] moduleTypes {
 		get { stash["moduleTypes"] }
@@ -41,9 +42,9 @@ const class IocService : Service {
 			// see http://fantom.org/sidewalk/topic/2133
 			if (startErr != null)
 				throw startErr
-			return conState.getState |IocServiceState state->Obj?| { return state.registry } 
+			return registryRef.val 
 		}
-		private set { reg := it; conState.withState |IocServiceState state| { state.registry = reg} }
+		private set { registryRef.val = it }
 	}
 
 	
@@ -105,13 +106,8 @@ const class IocService : Service {
 			
 			regBuilder.addModules(moduleTypes)
 			
-			registry := regBuilder.build
+			registry = regBuilder.build
 			
-			// assign registry now, so it may be looked up (via this service) during startup
-			conState.withState |IocServiceState state| {
-				state.registry = registry
-			}
-
 			registry.startup
 			
 		} catch (Err e) {
@@ -191,10 +187,5 @@ const class IocService : Service {
 	private Void checkServiceNotStarted() {
 		if (registry != null)
 			throw IocErr(IocMessages.serviceStarted)
-	}
-	
-}
-
-internal class IocServiceState {
-	Registry? registry
+	}	
 }

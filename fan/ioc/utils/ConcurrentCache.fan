@@ -1,20 +1,20 @@
 using concurrent::AtomicRef
-using concurrent::Future
-using afIoc::ConcurrentState
 
-** A helper class that wraps a 'Map' providing fast reads and synchronised writes betweeen threads.
-** It's an application of `ConcurrentState` for use when *reads* far out number the *writes*.
+** A helper class that wraps a 'Map' providing fast reads and synchronised writes between threads.
+** 'ConcurrentCache' works in a similar vein to Java's [CopyOnWriteArrayList]`http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html`
+** and is useful for when *reads* far out number the *writes*.
 ** 
-** The cache wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all reads 
-** are made. All writes are made via [ConcurrentState]`afIoc::ConcurrentState` ensuring 
-** synchronised access. Writing makes a 'rw' copy of the map and is thus a more expensive operation.
+** 'ConcurrentCache' wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all 
+** reads are made. All writes are made on a 'rw' copy of the map, of which an immutable version is 
+** re-set back in in the 'AtomicRef'. Thus writes are a more expensive operation.
 ** 
 ** Note that all objects held in the map have to be immutable.
 ** 
+** See [The Good, The Bad and The Ugly of Const Services]`http://www.fantomfactory.org/articles/good-bad-and-ugly-of-const-services#theBad` for more details.
+** 
 ** @since 1.4.2
 const class ConcurrentCache {
-	private const ConcurrentState 	conState	:= ConcurrentState(|->Obj?| { atomicMap })
-	private const AtomicRef 		atomicMap	:= AtomicRef()
+	private const AtomicRef atomicMap := AtomicRef()
 	
 	new make(|This|? f := null) {
 		f?.call(this)
@@ -29,10 +29,10 @@ const class ConcurrentCache {
 		this.map = map 
 	}
 	
-	** A read-only copy of the cache map.
+	** Returns and sets an immutable / read-only map. This *is* the cache.
 	[Obj:Obj?] map {
 		get { atomicMap.val }
-		private set { atomicMap.val = it.toImmutable }
+		set { atomicMap.val = it.toImmutable }
 	}
 	
 	** Returns the value associated with the given key. If it doesn't exist then it is added from 
@@ -42,9 +42,9 @@ const class ConcurrentCache {
 	** value function could be called twice for the same key.
 	**  
 	** @since 1.4.6
-	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
+	Obj? getOrAdd(Obj key, |Obj key->Obj?| valFunc) {
 		if (!containsKey(key)) {
-			val := valFunc.call()
+			val := valFunc.call(key)
 			set(key, val)
 		}
 		return get(key)
@@ -62,13 +62,11 @@ const class ConcurrentCache {
 	** Though the same key may be overridden. Both the 'key' and 'val' must be immutable. 
 	@Operator
 	Void set(Obj key, Obj? val) {
-		iKey := key.toImmutable
-		iVal := val.toImmutable
-		withState {
-			newMap := map.rw
-			newMap.set(iKey, iVal)
-			map = newMap
-		}.get
+		iKey  := key.toImmutable
+		iVal  := val.toImmutable
+		rwMap := map.rw
+		rwMap[iKey] = iVal
+		map = rwMap
 	}
 
 	** Returns 'true' if the cache contains the given key
@@ -88,9 +86,7 @@ const class ConcurrentCache {
 
 	** Remove all key/value pairs from the map. Return this.
 	This clear() {
-		withState {
-			map = map.rw.clear
-		}.get
+		map = map.rw.clear
 		return this
 	}
 
@@ -98,24 +94,15 @@ const class ConcurrentCache {
 	** from the map and return the value. 
 	** If the key was not mapped then return 'null'.
 	Obj? remove(Obj key) {
-		iKey := key.toImmutable
-		return conState.getState |Obj? x ->Obj?| {
-			newMap := map.rw
-			val := newMap.remove(iKey)
-			map = newMap
-			return val 
-		}
+		rwMap := map.rw
+		oVal  := rwMap.remove(key)
+		map = rwMap
+		return oVal 
 	}
 
-	** Replaces the entire content of the cache with the given map. 
-	** The existing map is returned. 
+	@NoDoc @Deprecated { msg="Use 'map' field instead" }
 	Obj:Obj? replace(Obj:Obj? newMap) {
-		iMap	:= newMap.toImmutable
-		oldMap	:= map
-		withState {
-			map = iMap
-		}.get
-		return oldMap
+		map = newMap
 	}
 	
 	** Return 'true' if size() == 0
@@ -126,9 +113,5 @@ const class ConcurrentCache {
 	** Get the number of key/value pairs in the map.
 	Int size() {
 		map.size
-	}
-	
-	private Future withState(|Obj?| state) {
-		conState.withState(state)
 	}
 }

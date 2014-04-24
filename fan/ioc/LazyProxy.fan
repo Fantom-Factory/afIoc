@@ -43,7 +43,7 @@ internal const class LazyProxyForService : LazyProxy {
 
 	private ServiceMethodInvoker getViaAppScope() {
 		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
+			ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForServiceState state->Obj?| {
 				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
 					return state.getCaller(objLocator, serviceDef).toConst 

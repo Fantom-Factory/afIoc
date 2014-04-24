@@ -1,13 +1,13 @@
 
 ** A helper class that coerces Objs to a given Type via 'fromXXX()' / 'toXXX()' ctors and methods. 
-** This is mainly useful for convertint to and from Strs.
+** This is mainly useful for converting to and from Strs.
 **  
 ** As a lot of repetition of types is expected for each 'TypeCoercer' the conversion methods are 
 ** cached.
 ** 
 ** @since 1.3.8
-class TypeCoercer {
-	private Str:|Obj->Obj|? cache	:= [:]
+const class TypeCoercer {
+	private const ConcurrentCache cache	:= ConcurrentCache()
 	
 	** Returns 'true' if 'fromType' can be coerced to the given 'toType'.
 	Bool canCoerce(Type fromType, Type toType) {
@@ -51,10 +51,10 @@ class TypeCoercer {
 	
 	private |Obj->Obj|? coerceMethod(Type fromType, Type toType) {
 		key	:= "${fromType.qname}->${toType.qname}"
-		return cache.getOrAdd(key) { lookupMethod(fromType, toType)  }
+		return cache.getOrAdd(key) { lookupMethod(fromType, toType) }
 	}
 	
-	private |Obj->Obj|? lookupMethod(Type fromType, Type toType) {
+	private static |Obj->Obj|? lookupMethod(Type fromType, Type toType) {
 
 		// check the basics first!
 		if (fromType.fits(toType))
@@ -69,19 +69,21 @@ class TypeCoercer {
 		// next look for a 'fromXXX()' static / ctor
 		// see http://fantom.org/sidewalk/topic/2154
 		fromName	:= "from${fromType.name}" 
-		fromXxxMeth	:= ReflectUtils.findCtor(toType, fromName, [fromType])
-		if (fromXxxMeth == null)
-			fromXxxMeth = ReflectUtils.findMethod(toType, fromName, [fromType], true)
+		fromXxxMeth	:= ReflectUtils.findMethod(toType, fromName, [fromType], true)
 		if (fromXxxMeth != null)
-			return |Obj val -> Obj| { fromXxxMeth.call(val) }
+			return (|Obj val -> Obj| { fromXxxMeth.call(val) }).toImmutable
+		fromXxxCtor := ReflectUtils.findCtor(toType, fromName, [fromType])
+		if (fromXxxCtor != null)
+			return (|Obj val -> Obj| { fromXxxCtor.call(val) }).toImmutable
 				
 		// one last chance - try 'makeFromXXX()' ctors
-		fromName	= "makeFrom${fromType.name}" 
-		fromXxxMeth	= ReflectUtils.findCtor(toType, fromName, [fromType])
-		if (fromXxxMeth == null)
-			fromXxxMeth = ReflectUtils.findMethod(toType, fromName, [fromType], true)
-		if (fromXxxMeth != null)
-			return |Obj val -> Obj| { fromXxxMeth.call(val) }
+		makefromName	:= "makeFrom${fromType.name}" 
+		makeFromXxxMeth	:= ReflectUtils.findMethod(toType, makefromName, [fromType], true)
+		if (makeFromXxxMeth != null)
+			return |Obj val -> Obj| { makeFromXxxMeth.call(val) }
+		makeFromXxxCtor := ReflectUtils.findCtor(toType, makefromName, [fromType])
+		if (makeFromXxxCtor != null)
+			return |Obj val -> Obj| { makeFromXxxCtor.call(val) }
 		
 		return null
 	}
