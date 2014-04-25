@@ -109,7 +109,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.actorPools
 				it.serviceType 		= ActorPools#
-				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+				it.source			= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
 			}] = null
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)

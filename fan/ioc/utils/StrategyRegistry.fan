@@ -1,9 +1,9 @@
 
 ** A helper class that looks up Objs via Type inheritance search.
 const class StrategyRegistry {	
-	private const ConcurrentCache 	parentCache		:= ConcurrentCache([Type:Obj?][:])
-	private const ConcurrentCache 	childrenCache	:= ConcurrentCache([Type:Obj?[]][:])
-	private const Type:Obj? 		values
+	private const DangerCache 	parentCache		:= DangerCache([Type:Obj?][:])
+	private const DangerCache 	childrenCache	:= DangerCache([Type:Obj?[]][:])
+	private const Type:Obj? 	values
 	
 	** Creates an StrategyRegistry with the given list. All types are coerced to non-nullable types.
 	** An 'Err' is thrown if a duplicate is found in the process. 

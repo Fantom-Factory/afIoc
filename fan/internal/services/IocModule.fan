@@ -16,7 +16,7 @@ internal class IocModule {
 		config.add(logProvider)
 	}
 	
-	@Contribute { serviceType=RegistryShutdownHub# }
+	@Contribute { serviceType=ActorPools# }
 	static Void contributeActorPools(MappedConfig config) {
 		config["afIoc.system"] = ActorPool()
 	}

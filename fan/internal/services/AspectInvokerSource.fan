@@ -1,4 +1,3 @@
-using concurrent::AtomicRef
 
 ** (Service) - Can't be internal since it's used by auto-generated lazy services.
 ** 
@@ -16,14 +15,13 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 //	injected lazy services.
 //	@Inject @ServiceId { id="registry" }
 
-	@Inject
-	const Registry	registry
+	private const Registry	registry
 	private ObjLocator objLocator() { (ObjLocator) registry }
 
 	private const ThreadStash threadStash
 	
-	new make(ThreadStashManager tsm, |This|in) {
-		in(this)
+	new make(ThreadStashManager tsm, Registry registry) {
+		this.registry = registry
 		this.threadStash = tsm.createStash(AspectInvokerSource#.name)
 	}
 
@@ -81,27 +79,3 @@ internal const class ServiceMethodInvoker {
 	}
 }
 
-internal const class ObjectRef {
-	private const AtomicRef? 	atomObj
-	private const ThreadStash?	threadStash
-	
-	new make(ThreadStash threadStash, ServiceScope scope, Obj? obj) {
-		if (scope == ServiceScope.perApplication)
-			this.atomObj = AtomicRef()
-		else
-			this.threadStash = threadStash
-		this.object = obj
-	}
-	
-	Obj? object {
-		get {
-			if (atomObj != null)		return atomObj.val
-			if (threadStash != null)	return threadStash["objectRef"]
-			return null
-		}
-		set { 
-			if (atomObj != null)		atomObj.val = it 
-			if (threadStash != null)	threadStash["objectRef"] = it
-		}
-	}	
-}

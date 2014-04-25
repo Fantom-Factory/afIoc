@@ -7,7 +7,7 @@
 ** 
 ** @since 1.3.8
 const class TypeCoercer {
-	private const ConcurrentCache cache	:= ConcurrentCache()
+	private const DangerCache cache	:= DangerCache()
 	
 	** Returns 'true' if 'fromType' can be coerced to the given 'toType'.
 	Bool canCoerce(Type fromType, Type toType) {
