@@ -23,14 +23,13 @@ const mixin ServiceProxyBuilder {
 
 
 ** @since 1.3.0
-internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
-		
-	private const ConcurrentCache typeCache	:= ConcurrentCache()
+internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder {
+
+	@Inject private const Registry 			registry
+	@Inject	private const PlasticCompiler	plasticCompiler
+			private const DangerCache 		typeCache	:= DangerCache()
 	
-	@Inject private const Registry registry	// FIXME: kill me
-	@Inject	private const PlasticCompiler plasticCompiler
-	
-	new make(|This|di) { di(this) }
+	new make(ActorPools actorPools, |This|di) : super(actorPools["afIoc.system"]) { di(this) }
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
 	override internal Obj createProxyForService(ServiceDef serviceDef) {
@@ -48,7 +47,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
-			builder["afLazyService"] = LazyProxyForMixin(serviceDef, (ObjLocator) registry)
+			builder["afLazyService"] = LazyProxyForMixin((ObjLocator) registry, serviceDef)
 			return builder.makeObj
 		}
 	}
@@ -57,43 +56,53 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		if (typeCache.containsKey(serviceType.qname))
 			return typeCache[serviceType.qname]
 
-		if (!serviceType.isMixin)
-			throw IocErr(IocMessages.onlyMixinsCanBeProxied(serviceType))
-
-		if (!serviceType.isPublic)
-			throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
+		// should this be synchronised to stop 2 threads compiling the same type?
+		// actually, it doesn't really matter as both types will be in different pods.
+		// ...but compilation takes long enough that it's probably worthwhile!
+		return synchronizedGet |->Type| {  
+			if (typeCache.containsKey(serviceType.qname))
+				return typeCache[serviceType.qname]
+			
+			if (!serviceType.isMixin)
+				throw IocErr(IocMessages.onlyMixinsCanBeProxied(serviceType))
 	
-		model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
+			if (!serviceType.isPublic)
+				throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
 		
-		model.extendMixin(serviceType)
-		model.addField(LazyProxy#, "afLazyService")
-
-		serviceType.fields.rw
-			.each |field| {
-				getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
-				setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
-				model.overrideField(field, getBody, setBody)
-			}
-
-		serviceType.methods.rw
-			.findAll { it.isAbstract || it.isVirtual }
-			.exclude { Obj#.methods.contains(it) }
-			.each |method| {
-				params 	:= method.params.join(", ") |param| { param.name }
-				paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
-				body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
-				model.overrideMethod(method, body)
-			}
-
-		Pod? pod
-		code 		:= model.toFantomCode
-		podName		:= plasticCompiler.generatePodName
-		InjectionTracker.track("Compiling Pod '$podName'") |->Obj| {
-			pod 	= plasticCompiler.compileCode(code, podName)
-		}			
-		proxyType 	:= pod.type(model.className)
+			return InjectionTracker.withCtx((ObjLocator) registry, null) |->Obj?| {
+				model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
 				
-		typeCache[serviceType.qname] = proxyType
-		return proxyType
+				model.extendMixin(serviceType)
+				model.addField(LazyProxy#, "afLazyService")
+		
+				serviceType.fields.rw
+					.each |field| {
+						getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
+						setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
+						model.overrideField(field, getBody, setBody)
+					}
+		
+				serviceType.methods.rw
+					.findAll { it.isAbstract || it.isVirtual }
+					.exclude { Obj#.methods.contains(it) }
+					.each |method| {
+						params 	:= method.params.join(", ") |param| { param.name }
+						paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
+						body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
+						model.overrideMethod(method, body)
+					}
+		
+				Pod? pod
+				code 		:= model.toFantomCode
+				podName		:= plasticCompiler.generatePodName
+				InjectionTracker.track("Compiling Pod '$podName'") |->Obj| {
+					pod 	= plasticCompiler.compileCode(code, podName)
+				}			
+				proxyType 	:= pod.type(model.className)
+						
+				typeCache[serviceType.qname] = proxyType
+				return proxyType
+			}
+		}
 	}	
 }

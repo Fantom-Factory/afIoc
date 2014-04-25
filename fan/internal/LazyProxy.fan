@@ -61,10 +61,9 @@ internal const class LazyProxyForService : LazyProxy {
 internal const class LazyProxyForMixin : LazyProxy {
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
-	
 	private const ObjectRef			instanceRef
 
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
+	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
 		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ServiceIds.threadStashManager)
 		threadStash			:= stashManager.createStash(serviceDef.serviceId + "-proxy")
 		this.serviceDef 	= serviceDef

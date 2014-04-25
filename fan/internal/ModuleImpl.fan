@@ -236,7 +236,7 @@ internal const class ModuleState {
 		set { setObj(aProxy, "threadProxies", it) }
 	}
 	
-	private Obj? getObj(AtomicRef ref, Str mapName) {
+	private Obj? getObj(AtomicRef? ref, Str mapName) {
 		if (def.scope == ServiceScope.perApplication)
 			return ref.val
 		if (def.scope == ServiceScope.perThread)
@@ -244,8 +244,8 @@ internal const class ModuleState {
 		return null
 	}
 
-	private Void setObj(AtomicRef ref, Str mapName, Obj? obj) {
-		if (def.scope == ServiceScope.perApplication) 
+	private Void setObj(AtomicRef? ref, Str mapName, Obj? obj) {
+		if (def.scope == ServiceScope.perApplication && ref != null) 
 			ref.val = obj
 		if (def.scope == ServiceScope.perThread)
 			threads(mapName)[def.serviceId] = obj

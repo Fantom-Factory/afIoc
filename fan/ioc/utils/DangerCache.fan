@@ -1,20 +1,17 @@
 using concurrent::AtomicRef
 
 ** A helper class that wraps a 'Map' providing fast reads and synchronised writes between threads.
-** 'ConcurrentCache' works in a similar vein to Java's [CopyOnWriteArrayList]`http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html`
-** and is useful for when *reads* far out number the *writes*.
 ** 
-** 'ConcurrentCache' wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all 
-** reads are made. All writes are made on a 'rw' copy of the map, of which an immutable version is 
-** re-set back in in the 'AtomicRef'. Thus writes are a more expensive operation.
+** Similar to `ConcurrentCache` except this has lightweight 'sets' that are not synchronised by 
+** 'ConcurrentState' - the trade off being the potential to **loose data**!!!
+** For most *cache* situations, this doesn't really matter.
 ** 
 ** Note that all objects held in the map have to be immutable.
 ** 
 ** See [The Good, The Bad and The Ugly of Const Services]`http://www.fantomfactory.org/articles/good-bad-and-ugly-of-const-services#theUgly` for more details.
 ** 
-** @since 1.4.2
-const class ConcurrentCache {
-	// FIXME: re-instate ConcurrentState
+** @since 1.5.6
+const class DangerCache {
 	private const AtomicRef atomicMap := AtomicRef()
 	
 	new make(|This|? f := null) {
@@ -24,8 +21,6 @@ const class ConcurrentCache {
 
 	** Make a 'ConcurrentCache' using the given immutable map. 
 	** Use when you need a case insensitive map.
-	** 
-	** @since 1.4.6
 	new makeWithMap([Obj:Obj?] map) {
 		this.map = map 
 	}
@@ -59,8 +54,9 @@ const class ConcurrentCache {
 		map.get(key, def)
 	}
 
-	** Sets the key / value pair, ensuring no data is lost during multi-threaded race conditions.
-	** Though the same key may be overridden. Both the 'key' and 'val' must be immutable. 
+	** Sets the key / value pair.
+	** This method is **NOT** thread safe. If two actors call this method at the same time, data 
+	** **WILL BE LOST**!!! 
 	@Operator
 	Void set(Obj key, Obj? val) {
 		iKey  := key.toImmutable
@@ -101,11 +97,6 @@ const class ConcurrentCache {
 		return oVal 
 	}
 
-	@NoDoc @Deprecated { msg="Use 'map' field instead" }
-	Obj:Obj? replace(Obj:Obj? newMap) {
-		map = newMap
-	}
-	
 	** Return 'true' if size() == 0
 	Bool isEmpty() {
 		map.isEmpty

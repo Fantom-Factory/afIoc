@@ -317,7 +317,11 @@ v1.5.6 [#1.5.6]
  - New: 'ThreadStash' instances can now be '@Inject'ed thanks to a new 'ThreadStash DependencyProvider'
  - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
  - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
+ - New: Added 'Synchronized' class to ensure serial access to code blocks.
+ - New: Added 'ActorPools' class to keep tabs on ActorPools.
+ - New: Added 'DangerCache', a fast'n'dangerous sibling to 'ConcurrentCache'!
  - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
+ - Chg: Optomised internal concurrent processes - now 20% faster!
  - Chg: Attempting to '@Inject' into a static field will now throw an Err.
  - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
  - Chg: Re-jigged 'RegistryBuilder' logic and API.
