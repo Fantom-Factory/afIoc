@@ -18,7 +18,7 @@ const class ConcurrentCache : Synchronized {
 	private const AtomicRef atomicMap := AtomicRef()
 	
 	** @since 1.5.6
-	new make(ActorPool actorPool) : super(actorPool) {
+	new makeWithPool(ActorPool actorPool) : super.make(actorPool) {
 		this.map = [:]
 	}
 
@@ -26,18 +26,22 @@ const class ConcurrentCache : Synchronized {
 	** Use when you need a case insensitive map.
 	** 
 	** @since 1.5.6
-	new makeWithMap(ActorPool actorPool, [Obj:Obj?] map) : super.make(actorPool) {
+	new makeWithPoolAndMap(ActorPool actorPool, [Obj:Obj?] map) : super.make(actorPool) {
 		this.map = [:]
 	}
-
+	
 	@NoDoc @Deprecated
-	new makeOldSkool() : super.make() {
+	new make(|This|? f := null) : super.make(null) {
+		f?.call(this)
 		this.map = [:]
 	}
 
+	** Make a 'ConcurrentCache' using the given immutable map. 
+	** Use when you need a case insensitive map.
+	** 
 	** @since 1.4.6
 	@NoDoc @Deprecated
-	new makeOldSkoolWithMap([Obj:Obj?] map) : super.make() {
+	new makeWithMap([Obj:Obj?] map) : super.make(null) {
 		this.map = map 
 	}
 	
