@@ -1,8 +1,9 @@
+using concurrent
 
 class TestConcurrentCache : Test {
 	
 	Void testRemove() {
-		cache := ConcurrentCache()
+		cache := ConcurrentCache(ActorPool())
 		cache["wot"] = 1
 		cache["ever"] = 2
 		verifyEq(cache.size, 2)
@@ -14,7 +15,7 @@ class TestConcurrentCache : Test {
 	}
 
 	Void testClear() {
-		cache := ConcurrentCache()
+		cache := ConcurrentCache(ActorPool())
 		cache["wot"] = "ever"
 		verifyEq(cache.size, 1)
 		cache.clear
@@ -22,11 +23,11 @@ class TestConcurrentCache : Test {
 	}
 
 	Void testReplace() {
-		cache := ConcurrentCache()
+		cache := ConcurrentCache(ActorPool())
 		cache["wot"] = 1
 		verifyEq(cache.size, 1)
 		
-		cache.replace(["ever":2])
+		cache.map = ["ever":2]
 		verifyEq(cache["ever"], 2)
 		verifyEq(cache.size, 1)
 	}

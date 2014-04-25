@@ -1,36 +1,47 @@
+using concurrent::ActorPool
 using concurrent::AtomicRef
+using concurrent::Future
 
-** A helper class that wraps a 'Map' providing fast reads and synchronised writes between threads.
-** 'ConcurrentCache' works in a similar vein to Java's [CopyOnWriteArrayList]`http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html`
-** and is useful for when *reads* far out number the *writes*.
+** A helper class that wraps a 'Map' providing fast reads and synchronised writes betweeen threads.
+** It's an application of `ConcurrentState` for use when *reads* far out number the *writes*.
 ** 
-** 'ConcurrentCache' wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all 
-** reads are made. All writes are made on a 'rw' copy of the map, of which an immutable version is 
-** re-set back in in the 'AtomicRef'. Thus writes are a more expensive operation.
+** The cache wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all reads 
+** are made. All writes are made via [ConcurrentState]`afIoc::ConcurrentState` ensuring 
+** synchronised access. Writing makes a 'rw' copy of the map and is thus a more expensive operation.
 ** 
 ** Note that all objects held in the map have to be immutable.
 ** 
 ** See [The Good, The Bad and The Ugly of Const Services]`http://www.fantomfactory.org/articles/good-bad-and-ugly-of-const-services#theUgly` for more details.
 ** 
 ** @since 1.4.2
-const class ConcurrentCache {
-	// FIXME: re-instate ConcurrentState
+const class ConcurrentCache : Synchronized {
 	private const AtomicRef atomicMap := AtomicRef()
 	
-	new make(|This|? f := null) {
-		f?.call(this)
+	** @since 1.5.6
+	new make(ActorPool actorPool) : super(actorPool) {
 		this.map = [:]
 	}
 
 	** Make a 'ConcurrentCache' using the given immutable map. 
 	** Use when you need a case insensitive map.
 	** 
+	** @since 1.5.6
+	new makeWithMap(ActorPool actorPool, [Obj:Obj?] map) : super.make(actorPool) {
+		this.map = [:]
+	}
+
+	@NoDoc @Deprecated
+	new makeOldSkool() : super.make() {
+		this.map = [:]
+	}
+
 	** @since 1.4.6
-	new makeWithMap([Obj:Obj?] map) {
+	@NoDoc @Deprecated
+	new makeOldSkoolWithMap([Obj:Obj?] map) : super.make() {
 		this.map = map 
 	}
 	
-	** Returns and sets an immutable / read-only map. This *is* the cache.
+	** A read-only copy of the cache map.
 	[Obj:Obj?] map {
 		get { atomicMap.val }
 		set { atomicMap.val = it.toImmutable }
@@ -43,9 +54,9 @@ const class ConcurrentCache {
 	** value function could be called twice for the same key.
 	**  
 	** @since 1.4.6
-	Obj? getOrAdd(Obj key, |Obj key->Obj?| valFunc) {
+	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
 		if (!containsKey(key)) {
-			val := valFunc.call(key)
+			val := valFunc.call()
 			set(key, val)
 		}
 		return get(key)
@@ -63,11 +74,13 @@ const class ConcurrentCache {
 	** Though the same key may be overridden. Both the 'key' and 'val' must be immutable. 
 	@Operator
 	Void set(Obj key, Obj? val) {
-		iKey  := key.toImmutable
-		iVal  := val.toImmutable
-		rwMap := map.rw
-		rwMap[iKey] = iVal
-		map = rwMap
+		iKey := key.toImmutable
+		iVal := val.toImmutable
+		synchronized |->| {
+			newMap := map.rw
+			newMap.set(iKey, iVal)
+			map = newMap
+		}
 	}
 
 	** Returns 'true' if the cache contains the given key
@@ -87,7 +100,9 @@ const class ConcurrentCache {
 
 	** Remove all key/value pairs from the map. Return this.
 	This clear() {
-		map = map.rw.clear
+		synchronized |->| {
+			map = map.rw.clear
+		}
 		return this
 	}
 
@@ -95,13 +110,16 @@ const class ConcurrentCache {
 	** from the map and return the value. 
 	** If the key was not mapped then return 'null'.
 	Obj? remove(Obj key) {
-		rwMap := map.rw
-		oVal  := rwMap.remove(key)
-		map = rwMap
-		return oVal 
+		iKey := key.toImmutable
+		return synchronized |->Obj?| {
+			newMap := map.rw
+			val := newMap.remove(iKey)
+			map = newMap
+			return val 
+		}
 	}
 
-	@NoDoc @Deprecated { msg="Use 'map' field instead" }
+	@NoDoc @Deprecated { msg="Use 'map' setter instead" }
 	Obj:Obj? replace(Obj:Obj? newMap) {
 		map = newMap
 	}
@@ -114,5 +132,5 @@ const class ConcurrentCache {
 	** Get the number of key/value pairs in the map.
 	Int size() {
 		map.size
-	}
+	}	
 }

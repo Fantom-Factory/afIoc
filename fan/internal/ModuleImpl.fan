@@ -261,6 +261,6 @@ internal const class ModuleState {
 	}
 	
 	private Str:Obj? threads(Str name) {
-		threadStash.get(name) |->[Str:Obj?]| { Str:Obj?[:] }
+		threadStash.getOrAdd(name) |->[Str:Obj?]| { Str:Obj?[:] }
 	}
 }

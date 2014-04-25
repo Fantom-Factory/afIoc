@@ -49,9 +49,17 @@ const class ThreadStash {
 	}
 	
 	** Get the value for the specified name.
-	// FIXME: make getOrAdd
+	** 
+	** 'defFunc' parameter is deprecated... use 'getOrAdd()' instead.
 	@Operator
 	Obj? get(Str name, |->Obj|? defFunc := null) {
+		getOrAdd(name, defFunc)
+	}
+
+	** Get the value for the specified name, or if it doesn't exist then automatically add it. 
+	** The value function is called to get the value to add, it is only called if the key is not
+	** mapped.
+	Obj? getOrAdd(Str name, |->Obj|? defFunc := null) {
 		val := Actor.locals[key(name)]
 		if (val == null) {
 			if (defFunc != null) {
