@@ -1,3 +1,4 @@
+using concurrent::AtomicRef
 
 ** (Service) - Can't be internal since it's used by auto-generated lazy services.
 ** 
@@ -5,7 +6,7 @@
 @NoDoc
 const mixin AspectInvokerSource {
 	
-	abstract internal ServiceMethodInvokerThread createServiceMethodInvoker(ServiceDef serviceDef)
+	abstract internal ServiceMethodInvoker createServiceMethodInvoker(ServiceDef serviceDef)
 }
 
 ** @since 1.3.0
@@ -19,12 +20,15 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 	const Registry	registry
 	private ObjLocator objLocator() { (ObjLocator) registry }
 
-	new make(|This|in) {
+	private const ThreadStash threadStash
+	
+	new make(ThreadStashManager tsm, |This|in) {
 		in(this)
+		this.threadStash = tsm.createStash(AspectInvokerSource#.name)
 	}
 
 	** Returns `MethodAdvisor`s fully loaded with callbacks
-	override ServiceMethodInvokerThread createServiceMethodInvoker(ServiceDef serviceDef) {
+	override ServiceMethodInvoker createServiceMethodInvoker(ServiceDef serviceDef) {
 
 		// create a MethodAdvisor for each (non-Obj) method to be advised
 		methodAdvisors := (MethodAdvisor[]) serviceDef.serviceType.methods.rw
@@ -53,20 +57,22 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 			adviceMap[it.method] = it.aspects
 		}
 
-		return ServiceMethodInvokerThread {
-			it.service = service
+		return ServiceMethodInvoker {
+			it.service = ObjectRef(threadStash, serviceDef.scope, service)
 			it.aspects = adviceMap.toImmutable
 		}
 	}
 }
 
-internal mixin ServiceMethodInvoker {
-	abstract Obj service()
-	abstract Method:|MethodInvocation invocation -> Obj?|[] aspects()
+internal const class ServiceMethodInvoker {
+	const ObjectRef service
+	const Method:|MethodInvocation invocation -> Obj?|[] aspects
+	
+	new make(|This|in) { in(this) }
 	
 	Obj? invokeMethod(Method method, Obj?[] args) {
 		return MethodInvocation {
-			it.service	= this.service
+			it.service	= this.service.object
 			it.aspects	= this.aspects[method]
 			it.method	= method
 			it.args		= args
@@ -75,22 +81,47 @@ internal mixin ServiceMethodInvoker {
 	}
 }
 
-internal class ServiceMethodInvokerThread : ServiceMethodInvoker {
-	override Obj service
-	override Method:|MethodInvocation invocation -> Obj?|[] aspects
-	new make(|This|in) { in(this) }
-	
-	ServiceMethodInvokerConst toConst() {
-		ServiceMethodInvokerConst {
-			it.service = this.service
-			it.aspects = this.aspects
-		}
-	}
-}
+//internal class ServiceMethodInvokerThread : ServiceMethodInvoker {
+//	override Obj service
+//	override Method:|MethodInvocation invocation -> Obj?|[] aspects
+//	new make(|This|in) { in(this) }
+//	
+//	ServiceMethodInvokerConst toConst() {
+//		ServiceMethodInvokerConst {
+//			it.service = this.service
+//			it.aspects = this.aspects
+//		}
+//	}
+//}
+//
+//** Same as `AspectServiceInvokerThread` just const so it can pass between threads
+//internal const class ServiceMethodInvokerConst : ServiceMethodInvoker {
+//	override const Obj service
+//	override const Method:|MethodInvocation invocation -> Obj?|[] aspects
+//	new make(|This|in) { in(this) }
+//}
 
-** Same as `AspectServiceInvokerThread` just const so it can pass between threads
-internal const class ServiceMethodInvokerConst : ServiceMethodInvoker {
-	override const Obj service
-	override const Method:|MethodInvocation invocation -> Obj?|[] aspects
-	new make(|This|in) { in(this) }
+internal const class ObjectRef {
+	private const AtomicRef? 	atomObj
+	private const ThreadStash?	threadStash
+	
+	new make(ThreadStash threadStash, ServiceScope scope, Obj? obj) {
+		if (scope == ServiceScope.perApplication)
+			this.atomObj = AtomicRef()
+		else
+			this.threadStash = threadStash
+		this.object = obj
+	}
+	
+	Obj? object {
+		get {
+			if (atomObj != null)		return atomObj.val
+			if (threadStash != null)	return threadStash["objectRef"]
+			return null
+		}
+		set { 
+			if (atomObj != null)		atomObj.val = it 
+			if (threadStash != null)	threadStash["objectRef"] = it
+		}
+	}	
 }

@@ -263,10 +263,4 @@ internal const class ModuleState {
 	private Str:Obj? threads(Str name) {
 		threadStash.get(name) |->[Str:Obj?]| { Str:Obj?[:] }
 	}
-	private Str:Obj? threadedProxies() {
-		threadStash.get("threadImpls") |->[Str:Obj?]| { Str:Obj?[:] }
-	}
-	private Str:Obj? threadedLifecycles() {
-		threadStash.get("threadLifecycles") |->[Str:Obj?]| { Str:Obj?[:] }
-	}
 }
