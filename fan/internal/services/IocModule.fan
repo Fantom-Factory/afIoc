@@ -1,3 +1,4 @@
+using concurrent
 
 ** It would be nice to hardcode this contribution in RegistryImpl so we can delete this class - but 
 ** that would require a new ContribitionImpl -> too much work!
@@ -13,5 +14,10 @@ internal class IocModule {
 		config.add(autobuildProvider)
 		config.add(threadStashProvider)
 		config.add(logProvider)
+	}
+	
+	@Contribute { serviceType=RegistryShutdownHub# }
+	static Void contributeActorPools(MappedConfig config) {
+		config["afIoc.system"] = ActorPool()
 	}
 }

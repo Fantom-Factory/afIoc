@@ -1,3 +1,5 @@
+using concurrent::AtomicInt
+using concurrent::AtomicRef
 
 ** (Service) - Holds a list of all the services defined by this IoC.
 ** 
@@ -26,38 +28,34 @@ internal const class ServiceStatsImpl : ServiceStats {
 ** 
 ** @since 1.2.0
 const class ServiceStat {
-	const Str 				serviceId
-	const Type				serviceType
-	const ServiceScope 		scope
-	const Bool				proxyDisabled
-	const ServiceLifecycle	lifecycle
-	const Int				noOfImpls
+	private const AtomicRef		atomLifecycle	:= AtomicRef()
+	private const AtomicInt		atomNoOfImpls	:= AtomicInt()
 
-	@NoDoc @Deprecated { msg="Use 'serviceType' instead." }
-		  Type				type() { serviceType }
-
-	internal new make(|This|? f) { f?.call(this) }
-
-	internal This withLifecyle(ServiceLifecycle newLifecycle) {
-		ServiceStat {
-			it.serviceId	= this.serviceId
-			it.serviceType	= this.serviceType
-			it.scope		= this.scope
-			it.proxyDisabled= this.proxyDisabled
-			it.lifecycle	= newLifecycle
-			it.noOfImpls	= this.noOfImpls
-		}
+	const Str 			serviceId
+	const Type			serviceType
+	const ServiceScope 	scope
+	const Bool			proxyDisabled
+	ServiceLifecycle	lifecycle {
+				 get {	atomLifecycle.val }
+		internal set {	atomLifecycle.val = it}
+	}
+	Int					noOfImpls {
+				 get {	atomNoOfImpls.val }
+		internal set {	atomNoOfImpls.val = it}		
 	}
 
-	internal This withIncImpls() {
-		ServiceStat {
-			it.serviceId	= this.serviceId
-			it.serviceType	= this.serviceType
-			it.scope		= this.scope
-			it.proxyDisabled= this.proxyDisabled
-			it.lifecycle	= this.lifecycle
-			it.noOfImpls	= this.noOfImpls + 1
-		}
+	@NoDoc @Deprecated { msg="Use 'serviceType' instead." }
+	Type type() { serviceType }
+
+	internal new make(|This| f) { f(this) }
+	
+	internal Void incImpls() {
+		atomNoOfImpls.incrementAndGet
+	}
+	
+	internal Void updateLifecycle(ServiceLifecycle newLifecycle) {
+		if (newLifecycle > lifecycle)
+			lifecycle = newLifecycle
 	}
 }
 

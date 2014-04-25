@@ -60,7 +60,7 @@ internal class InjectionTracker {
 					throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).map |ServiceDef sd->Str| { sd.serviceId }))
 			}
 
-			return operation.call()			
+			return operation.call()
 		}
 	}
 

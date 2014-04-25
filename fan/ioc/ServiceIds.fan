@@ -57,4 +57,9 @@ const mixin ServiceIds {
 	** @since 1.5.0
 	static const Str logProvider				:= "afIoc::LogProvider"
 
+	** @see `ActorPools`
+	** 
+	** @since 1.5.6
+	static const Str actorPools					:= "afIoc::ActorPools"
+
 }
