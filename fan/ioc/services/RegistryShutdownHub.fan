@@ -1,7 +1,7 @@
 using concurrent::Future
 
 ** (Service) - Contribute functions to be executed on `Registry` shut down. 
-** All functions need to be immutable, which essentially means it can only reference 'const' classes.
+** All functions need to be immutable, which essentially means they can only reference 'const' classes.
 ** 
 ** Common usage is add listeners in your service ctor:
 ** 
@@ -53,18 +53,25 @@ const mixin RegistryShutdownHub {
 
 internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 		log 		:= Utils.getLog(RegistryShutdownHub#)
-	private const ConcurrentState 	conState	:= ConcurrentState(RegistryShutdownHubState#)
+	private const OneShotLock 		lock		:= OneShotLock(IocMessages.registryShutdown)
+	private const ConcurrentState 	conState
  
+	new make(ActorPools actorPools) {
+		conState = ConcurrentState(RegistryShutdownHubState#) {
+			it.actorPool = actorPools["afIoc.system"]
+		}
+	}
+	
 	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {
 		withState |state| {
-			state.lock.check
+			lock.check
 			state.listeners.addOrdered(id, listener, constraints)
 		}.get
 	}
 
 	override Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener) {
 		withState |state| {
-			state.lock.check
+			lock.check
 			state.preListeners.addOrdered(id, listener, constraints)
 		}.get
 	}
@@ -87,7 +94,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
 	internal Void registryHasShutdown() {
 		withState |state| {
-			state.lock.lock
+			lock.lock
 		}.get
 
 		listeners.each |listener| {
@@ -121,7 +128,6 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 }
 
 internal class RegistryShutdownHubState {
-	OneShotLock lock		:= OneShotLock(IocMessages.registryShutdown)
 	Orderer preListeners	:= Orderer()
 	Orderer listeners		:= Orderer()
 }

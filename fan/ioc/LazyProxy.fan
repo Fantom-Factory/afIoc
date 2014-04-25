@@ -17,6 +17,7 @@ const mixin LazyProxy {
 }
 
 internal const class LazyProxyForService : LazyProxy {
+	// FIXME: can we lazily create this? or use unsafe stuff?
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyProxyForServiceState#)
 	private const ThreadStash		threadStash
 	private const ServiceDef 		serviceDef

@@ -17,12 +17,12 @@ internal mixin Module {
 
 	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
 	
-	** Locates (and builds if necessary) a service given a service id
-	abstract Obj? service(Str serviceId, Bool returnReal)
+	** Locates (and builds if necessary) a service given a service def
+	abstract Obj? service(ServiceDef serviceDef, Bool returnReal)
 
 	abstract Str:ServiceStat serviceStats()
 	
-	abstract Void clear()
+	abstract Void shutdown()
 
 	abstract Bool hasServices()
 }

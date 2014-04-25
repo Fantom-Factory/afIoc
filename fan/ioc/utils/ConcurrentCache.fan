@@ -14,6 +14,7 @@ using concurrent::AtomicRef
 ** 
 ** @since 1.4.2
 const class ConcurrentCache {
+	// FIXME: re-instate ConcurrentState
 	private const AtomicRef atomicMap := AtomicRef()
 	
 	new make(|This|? f := null) {

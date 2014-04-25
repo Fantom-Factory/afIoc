@@ -39,6 +39,18 @@ internal const mixin ServiceDef {
 		return unQualifiedId.equalsIgnoreCase(unqualify(serviceId))
 	}
 	
+	override Str toStr() {
+		serviceId
+	}
+	
+	override Int hash() {
+		serviceId.hash
+	}
+
+	override Bool equals(Obj? obj) {
+		serviceId == (obj as ServiceDef)?.serviceId
+	}
+	
 	static Str unqualify(Str id) {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}

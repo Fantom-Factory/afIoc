@@ -4,7 +4,8 @@ using afPlastic::PlasticCompiler
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 
-	private const ConcurrentState 			conState			:= ConcurrentState(RegistryState#)
+	private const OneShotLock 				startupLock 	:= OneShotLock(IocMessages.registryStarted)
+	private const OneShotLock 				shutdownLock	:= OneShotLock(IocMessages.registryShutdown)
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviderSource?	depProSrc
@@ -39,7 +40,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryShutdownHub
 				it.serviceType 		= RegistryShutdownHub#
-			}] = RegistryShutdownHubImpl()
+				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryShutdownHubImpl#)
+			}] = null
 			
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.ctorItBlockBuilder
@@ -103,6 +105,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceId 		= ServiceIds.logProvider
 				it.serviceType 		= LogProvider#
 			}] = LogProviderImpl()
+
+			services[BuiltInServiceDef() {
+				it.serviceId 		= ServiceIds.actorPools
+				it.serviceType 		= ActorPools#
+				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+			}] = null
 
 			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
 
@@ -174,9 +182,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- Registry Methods ----------------------------------------------------------------------
 
 	override This startup() {
-		withState |state| {
-			state.startupLock.lock
-		}.get
+		startupLock.lock
 
 		// Do dat startup!
 		tracker := OpTracker()
@@ -221,16 +227,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
 
-		withState |state| {
-			state.shutdownLock.lock
-		}.get
+		shutdownLock.lock
 
 		// Registry shutdown complete.
 		shutdownHub.registryHasShutdown
 		
 		// destroy all internal refs
 		threadMan.cleanUpThread
-		modules.each { it.clear }
+		modules.each { it.shutdown }
 		
 		log.info("\"Goodbye!\" from afIoc!")
 		
@@ -239,7 +243,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj serviceById(Str serviceId) {
 		return Utils.stackTraceFilter |->Obj| {
-			shutdownLockCheck
+			shutdownLock.check
 			return InjectionTracker.withCtx(this, null) |->Obj?| {   
 				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj| {
 					return trackServiceById(serviceId)
@@ -250,7 +254,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj? dependencyByType(Type dependencyType, Bool checked := true) {
 		return Utils.stackTraceFilter |->Obj?| {
-			shutdownLockCheck
+			shutdownLock.check
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
 					return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
@@ -265,7 +269,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	** see http://fantom.org/sidewalk/topic/2149
 	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj| {
-			shutdownLockCheck
+			shutdownLock.check
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackAutobuild(type2, ctorArgs, fieldVals)
@@ -275,7 +279,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	
 	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {
-			shutdownLockCheck
+			shutdownLock.check
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
 					return trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
@@ -286,7 +290,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj injectIntoFields(Obj object) {
 		return Utils.stackTraceFilter |->Obj| {
-			shutdownLockCheck
+			shutdownLock.check
 			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackInjectIntoFields(object)
@@ -297,7 +301,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
 		try {
 			return Utils.stackTraceFilter |->Obj?| {
-				shutdownLockCheck
+				shutdownLock.check
 				return InjectionTracker.withCtx(this, null) |->Obj?| {
 					return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
 						return trackCallMethod(method, instance, providedMethodArgs)
@@ -318,6 +322,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			:= serviceDefById(serviceId) 
 			?: throw IocErr(IocMessages.serviceIdNotFound(serviceId))
 		return getService(serviceDef, false)
+	}
+
+	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
+		service := serviceOverrides?.getOverride(serviceDef.serviceId)
+		if (service != null) {
+			InjectionTracker.log("Found override for service '${serviceDef.serviceId}'")
+			return service
+		}
+
+		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
+		return modules[serviceDef.moduleId].service(serviceDef, returnReal)
 	}
 
 	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -445,17 +460,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
-		service := serviceOverrides?.getOverride(serviceDef.serviceId)
-		if (service != null) {
-			InjectionTracker.log("Found override for service '${serviceDef.serviceId}'")
-			return service
-		}
-
-		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		return modules[serviceDef.moduleId].service(serviceDef.serviceId, returnReal)
-	}
-
 	override Void logServiceCreation(Type log, Str msg) {
 		// Option defaults to 'false' as Ioc ideally should run quietly in the background and not 
 		// interfere with the running of your app.
@@ -468,26 +472,5 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
 		modules.each { stats.addAll(it.serviceStats) }
 		return stats
-	}
-	
-	// ---- Helper Methods ------------------------------------------------------------------------	
-
-	private Void shutdownLockCheck() {
-		withState |state| {
-			state.shutdownLock.check
-		}.get
-	}
-
-	private Future withState(|RegistryState| state) {
-		conState.withState(state)
-	}
-
-	private Obj? getState(|RegistryState -> Obj| state) {
-		conState.getState(state)
-	}
-}
-
-internal class RegistryState {
-	OneShotLock startupLock 	:= OneShotLock(IocMessages.registryStarted)
-	OneShotLock shutdownLock	:= OneShotLock(IocMessages.registryShutdown)
+	}	
 }

@@ -1,8 +1,9 @@
+using concurrent::AtomicBool
 
-internal class OneShotLock {
+internal const class OneShotLock {
 	
-	private Str 	because
-	private Bool	lockFlag
+	private const Str 			because
+	private const AtomicBool	lockFlag	:= AtomicBool(false)
 	
 	new make(Str because) {
 		this.because = because
@@ -10,15 +11,15 @@ internal class OneShotLock {
 	
 	Void lock() {
 		check	// you can't lock twice!
-		lockFlag = true
+		lockFlag.val = true
 	}
 	
 	public Void check() {
-		if (lockFlag)
+		if (lockFlag.val)
 			throw IocErr(IocMessages.oneShotLockViolation(because))
 	}
 	
 	override Str toStr() {
-		(lockFlag ? "" : "(un)") + "locked"
+		(lockFlag.val ? "" : "(un)") + "locked"
 	}
 }

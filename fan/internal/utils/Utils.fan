@@ -70,17 +70,17 @@ internal class Utils {
 		return err.cause.typeof.fits(Unwrappable#) ? unwrap((Unwrappable) err.cause) : err.cause
 	}
 	
-//	static Obj cloneObj(Obj obj, |Field:Obj|? overridePlan := null) {
-//		plan := Field:Obj[:]
-//		obj.typeof.fields.each {
-//			value := it.get(obj)
-//			if (value != null)
-//				plan[it] = value
-//		}
-//
-//		overridePlan.call(plan)
-//		
-//		planFunc := Field.makeSetFunc(plan)
-//		return obj.typeof.method("make").call(planFunc)
-//	}
+	static Obj cloneObj(Obj obj, |Field:Obj|? overridePlan := null) {
+		plan := Field:Obj[:]
+		obj.typeof.fields.each {
+			value := it.get(obj)
+			if (value != null)
+				plan[it] = value
+		}
+
+		overridePlan?.call(plan)
+		
+		planFunc := Field.makeSetFunc(plan)
+		return obj.typeof.method("make").call(planFunc)
+	}
 }
