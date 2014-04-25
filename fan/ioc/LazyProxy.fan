@@ -34,7 +34,7 @@ internal const class LazyProxyForService : LazyProxy {
 		serviceInvoker.service.object
 	}
 
-	internal ServiceMethodInvoker serviceInvoker() {
+	private ServiceMethodInvoker serviceInvoker() {
 		if (serviceInvokerRef.val != null) {
 			smi := (ServiceMethodInvoker) serviceInvokerRef.val
 			// make sure the invoker still has a serivce to invoke!
@@ -59,16 +59,17 @@ internal const class LazyProxyForService : LazyProxy {
 
 ** Lazily creates and calls any *instance*, as provided by createProxy() 
 internal const class LazyProxyForMixin : LazyProxy {
-	private const ConcurrentState 	conState	:= ConcurrentState(LazyProxyForMixinState#)
-	private const ThreadStash		threadStash
 	private const ServiceDef 		serviceDef
 	private const ObjLocator		objLocator
+	
+	private const ObjectRef			instanceRef
 
 	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
 		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ServiceIds.threadStashManager)
+		threadStash			:= stashManager.createStash(serviceDef.serviceId + "-proxy")
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
-		this.threadStash	= stashManager.createStash(serviceDef.serviceId + "-proxy")
+		this.instanceRef	= ObjectRef(threadStash, serviceDef.scope, null)
 	}
 
 	override Obj? call(Method method, Obj?[] args) {
@@ -79,41 +80,18 @@ internal const class LazyProxyForMixin : LazyProxy {
 		getInstance
 	}
 
-	internal Obj getInstance() {
-		serviceDef.serviceType.isConst ? getViaAppScope : getViaThreadScope
-	}
-
-	private Obj getViaAppScope() {
-		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
-			return conState.getState |LazyProxyForMixinState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
-					return state.getInstance(objLocator, serviceDef)
-				 }
+	private Obj getInstance() {
+		if (instanceRef.object == null) {
+			instanceRef.object = InjectionTracker.withCtx(objLocator, null) |->Obj?| { 
+				InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+					serviceDef.createServiceBuilder.call
+				}
 			}
 		}
-	}
-
-	private Obj getViaThreadScope() {
-		return ((LazyProxyForMixinState) threadStash.get("state", |->Obj| { LazyProxyForMixinState() })).getInstance(objLocator, serviceDef)
+		return instanceRef.object
 	}
 
 	override Str toStr() {
 		"LazyProxyForMixin for ${serviceDef.serviceId}"
-	}
-}
-
-internal class LazyProxyForMixinState {	
-	private Obj? instance
-
-	Obj getInstance(ObjLocator objLocator, ServiceDef serviceDef) {
-		if (instance != null)
-			return instance
-
-		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			return InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-				return serviceDef.createServiceBuilder.call
-			}
-		}
 	}
 }

@@ -81,26 +81,6 @@ internal const class ServiceMethodInvoker {
 	}
 }
 
-//internal class ServiceMethodInvokerThread : ServiceMethodInvoker {
-//	override Obj service
-//	override Method:|MethodInvocation invocation -> Obj?|[] aspects
-//	new make(|This|in) { in(this) }
-//	
-//	ServiceMethodInvokerConst toConst() {
-//		ServiceMethodInvokerConst {
-//			it.service = this.service
-//			it.aspects = this.aspects
-//		}
-//	}
-//}
-//
-//** Same as `AspectServiceInvokerThread` just const so it can pass between threads
-//internal const class ServiceMethodInvokerConst : ServiceMethodInvoker {
-//	override const Obj service
-//	override const Method:|MethodInvocation invocation -> Obj?|[] aspects
-//	new make(|This|in) { in(this) }
-//}
-
 internal const class ObjectRef {
 	private const AtomicRef? 	atomObj
 	private const ThreadStash?	threadStash
