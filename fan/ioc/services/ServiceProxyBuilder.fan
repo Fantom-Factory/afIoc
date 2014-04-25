@@ -27,11 +27,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		
 	private const ConcurrentCache typeCache	:= ConcurrentCache()
 	
-	@Inject 
-	private const Registry registry
-	
-	@Inject
-	private const PlasticCompiler plasticCompiler
+	@Inject private const Registry registry	// FIXME: kill me
+	@Inject	private const PlasticCompiler plasticCompiler
 	
 	new make(|This|di) { di(this) }
 
@@ -41,7 +38,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
-			builder["afLazyService"] = LazyProxyForService(serviceDef, (ObjLocator) registry)
+			builder["afLazyService"] = LazyProxyForService((ObjLocator) registry, serviceDef)
 			return builder.makeObj
 		}
 	}

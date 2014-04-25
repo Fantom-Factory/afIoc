@@ -49,6 +49,7 @@ const class ThreadStash {
 	}
 	
 	** Get the value for the specified name.
+	// FIXME: make getOrAdd
 	@Operator
 	Obj? get(Str name, |->Obj|? defFunc := null) {
 		val := Actor.locals[key(name)]

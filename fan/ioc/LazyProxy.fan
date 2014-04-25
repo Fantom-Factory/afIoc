@@ -1,7 +1,4 @@
-using concurrent::AtomicBool
 using concurrent::AtomicRef
-using concurrent::Actor
-using afIoc::ConcurrentState
 
 ** Should we add this source to the generated proxy pods, and delete it from afIoc?
 ** For now, no. It'll speed up the compiler, and no-one discovers @NoDoc classes anyway!
@@ -16,18 +13,17 @@ const mixin LazyProxy {
 	abstract Obj service()
 }
 
+** Lazily finds and calls a *service*
 internal const class LazyProxyForService : LazyProxy {
-	// FIXME: can we lazily create this? or use unsafe stuff?
-	private const ConcurrentState 	conState	:= ConcurrentState(LazyProxyForServiceState#)
-	private const ThreadStash		threadStash
-	private const ServiceDef 		serviceDef
-	private const ObjLocator		objLocator
+	private const ObjLocator			objLocator
+	private const AspectInvokerSource	invokerSrc
+	private const ServiceDef 			serviceDef
+	private const AtomicRef				serviceInvokerRef	:= AtomicRef(null)
 
-	internal new make(ServiceDef serviceDef, ObjLocator objLocator) {
-		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ServiceIds.threadStashManager)
-		this.serviceDef 	= serviceDef
+	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
 		this.objLocator 	= objLocator
-		this.threadStash	= stashManager.createStash(serviceDef.serviceId + "-proxy")
+		this.invokerSrc 	= objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
+		this.serviceDef 	= serviceDef
 	}
 
 	override Obj? call(Method method, Obj?[] args) {
@@ -35,26 +31,25 @@ internal const class LazyProxyForService : LazyProxy {
 	}
 
 	override Obj service() {
-		serviceInvoker.service
+		serviceInvoker.service.object
 	}
 
 	internal ServiceMethodInvoker serviceInvoker() {
-		(serviceDef.scope == ServiceScope.perApplication) ? getViaAppScope : getViaThreadScope
-	}
+		if (serviceInvokerRef.val != null) {
+			smi := (ServiceMethodInvoker) serviceInvokerRef.val
+			// make sure the invoker still has a serivce to invoke!
+			// if not (due to use being a diff thread) we'll just make a new one!
+			if (smi.service.object != null)
+				return smi
+		}
 
-	private ServiceMethodInvoker getViaAppScope() {
-		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
-			return conState.getState |LazyProxyForServiceState state->Obj?| {
-				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
-					return state.getCaller(objLocator, serviceDef).toConst 
-				 }
+		serviceInvokerRef.val = InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+			InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+				invokerSrc.createServiceMethodInvoker(serviceDef)
 			}
 		}
-	}
 
-	private ServiceMethodInvoker getViaThreadScope() {
-		return ((LazyProxyForServiceState) threadStash.get("state", |->Obj| { LazyProxyForServiceState() })).getCaller(objLocator, serviceDef)
+		return serviceInvokerRef.val
 	}
 
 	override Str toStr() {
@@ -62,27 +57,7 @@ internal const class LazyProxyForService : LazyProxy {
 	}
 }
 
-** @since 1.3.0
-internal class LazyProxyForServiceState {	
-	private ServiceMethodInvokerThread? invoker
-
-	** this does *actually* return the Thread'ed version of `ServiceMethodInvoker`, the called may 
-	** optionally call .toConst() if needed 
-	ServiceMethodInvokerThread getCaller(ObjLocator objLocator, ServiceDef serviceDef) {
-		if (invoker != null)
-			return invoker
-
-		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			invoker = InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-				invokerSrc 	:= (AspectInvokerSource) objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
-				invoker		:= invokerSrc.createServiceMethodInvoker(serviceDef)
-				return invoker
-			}
-			return invoker
-		}
-	}
-}
-
+** Lazily creates and calls any *instance*, as provided by createProxy() 
 internal const class LazyProxyForMixin : LazyProxy {
 	private const ConcurrentState 	conState	:= ConcurrentState(LazyProxyForMixinState#)
 	private const ThreadStash		threadStash
@@ -110,7 +85,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 
 	private Obj getViaAppScope() {
 		return InjectionTracker.withCtx(objLocator, null) |->Obj?| {
-			Unsafe ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
+			ctxWrapper := Unsafe(InjectionTracker.peek)	// pass ctx into the state thread
 			return conState.getState |LazyProxyForMixinState state->Obj?| {
 				 ThreadStack.pushAndRun(InjectionTracker.trackerId, ctxWrapper.val) |->Obj?| {
 					return state.getInstance(objLocator, serviceDef)
