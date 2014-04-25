@@ -79,7 +79,7 @@ const class ConcurrentState {
 		this.stash			= ThreadStash(ConcurrentState#.name + "." + stateType.name)
 		this.stateActor		= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
 		instanceCount.incrementAndGet
-		Env.cur.err.printLine(Err().traceToStr.splitLines[4])
+//		Env.cur.err.printLine(Err().traceToStr.splitLines[4])
 	}
 
 	new makeWithStateFactory(|->Obj?| stateFactory, |This|? f := null) {
@@ -90,7 +90,7 @@ const class ConcurrentState {
 		this.stash			= ThreadStash(ConcurrentState#.name + ".defaultName")
 		this.stateActor		= Actor(actorPool, |Obj? obj -> Obj?| { receive(obj) })
 		instanceCount.incrementAndGet
-		Env.cur.err.printLine(Err().traceToStr.splitLines[4])
+//		Env.cur.err.printLine(Err().traceToStr.splitLines[4])
 	}
 
 	** Use to access state, effectively wrapping the given func in a Java 'synchronized { ... }' 
