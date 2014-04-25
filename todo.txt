@@ -1,7 +1,7 @@
 
 v1.5.8 Maybe...?
 ----------------
-
+Think of better names for ConcurrentCache...  SyncMap? DangerMap?
 
 Meh... can't be arsed
 ---------------------

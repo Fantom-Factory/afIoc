@@ -59,7 +59,7 @@ internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder
 		// should this be synchronised to stop 2 threads compiling the same type?
 		// actually, it doesn't really matter as both types will be in different pods.
 		// ...but compilation takes long enough that it's probably worthwhile!
-		return synchronizedGet |->Type| {  
+		return synchronized |->Type| {  
 			if (typeCache.containsKey(serviceType.qname))
 				return typeCache[serviceType.qname]
 			
