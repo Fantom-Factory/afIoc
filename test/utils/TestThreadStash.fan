@@ -1,5 +1,5 @@
 
-class TestThreadStash : Test {
+internal class TestThreadStash : Test {
 	
 	Void testDocumentation() {
 		stash1 := ThreadStash("def")

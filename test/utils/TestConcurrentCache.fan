@@ -1,6 +1,6 @@
 using concurrent
 
-class TestConcurrentCache : Test {
+internal class TestConcurrentCache : Test {
 	
 	Void testRemove() {
 		cache := ConcurrentCache(ActorPool())
@@ -30,5 +30,16 @@ class TestConcurrentCache : Test {
 		cache.map = ["ever":2]
 		verifyEq(cache["ever"], 2)
 		verifyEq(cache.size, 1)
+	}
+
+	Void testGetOrAdd() {
+		cache := ConcurrentCache(ActorPool())
+		cache.getOrAdd("wot") { "ever" }
+		verifyEq(cache.size, 1)
+		verifyEq(cache["wot"], "ever")
+		
+		cache.getOrAdd("wot") { "ever" }
+		verifyEq(cache.size, 1)
+		verifyEq(cache["wot"], "ever")
 	}
 }

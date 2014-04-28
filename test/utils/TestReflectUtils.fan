@@ -1,6 +1,6 @@
 
 ** Paradox :: Just what is 'Void?'?
-class TestReflectUtils : Test {
+internal class TestReflectUtils : Test {
 
 	Void testFindField() {
 		field := ReflectUtils.findField(MyReflectTestUtils2#, "int", Int#)

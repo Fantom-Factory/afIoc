@@ -12,6 +12,8 @@ using concurrent
 **   config["myPool"] = ActorPool()
 ** }
 ** <pre  
+** 
+** @since 1.5.6
 const mixin ActorPools {
 
 	** Returns the 'ActorPool' mapped to the given name, or throws a 'NotFoundErr' if it doesn't exist.

@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [38 tests, 224 methods, 573 verifies]'
+  - Extensively tested: - 'All tests passed! [39 tests, 227 methods, 581 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -281,9 +281,11 @@ More! [#more]
 
  - `RegistryStartup`: (Service) Define tasks to execute when the registry starts up.
  - `RegistryShutdownHub`: (Service) Define tasks to execute when the registry shuts down.
- - `ConcurrentState`: Lets your 'const' services hold mutable state, accessible from all threads.
- - `ConcurrentCache`: Shares state across threads providing fast reads and synchronised writes.
  - `ThreadStashManager`: (Service) Keep tabs on threaded state.
+ - `ConcurrentState`: Lets your 'const' services hold mutable state, accessible from all threads.
+ - `Synchronized` : Provides serial access to code blocks.
+ - `ConcurrentCache`: Shares state across threads providing fast reads and synchronised writes.
+ - `DangerCache`: A lightweight version of 'ConcurrentCache'.
  - `TypeCoercer`: Coerce Objs of one type to another via Fantom's 'toXXX()' and 'fromXXX()' methods.
  - `StrategyRegistry`: Holds a map of 'Type:Obj' where values may be looked up by closest matching type.
 
@@ -316,10 +318,10 @@ v1.5.6 [#1.5.6]
  - New: 'Registry.dependencyByType()' now returns services via a type inheritance search.
  - New: 'ThreadStash' instances can now be '@Inject'ed thanks to a new 'ThreadStash DependencyProvider'
  - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
- - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
  - New: Added 'Synchronized' class to ensure serial access to code blocks.
  - New: Added 'ActorPools' class to keep tabs on ActorPools.
  - New: Added 'DangerCache', a fast'n'dangerous sibling to 'ConcurrentCache'!
+ - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
  - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
  - Chg: Optomised internal concurrent processes - now 20% faster!
  - Chg: Attempting to '@Inject' into a static field will now throw an Err.
@@ -327,7 +329,6 @@ v1.5.6 [#1.5.6]
  - Chg: Re-jigged 'RegistryBuilder' logic and API.
  - Chg: Re-jigged 'StrategyRegistry' to add 'findChildren()'.
  - Chg: Exposed 'ActorPool' in 'ConcurrentState'.
- - Chg: 'ConcurrentCache' no longer uses 'ConcurrentState', just an 'AtomicRef'.
  - Chg: 'TypeCoercer' is now 'const'.
  - Bug: 'ConcurrentCache.replace()' wasn't synchronous.
 
