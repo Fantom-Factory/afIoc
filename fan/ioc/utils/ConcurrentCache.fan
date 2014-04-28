@@ -54,16 +54,26 @@ const class ConcurrentCache : Synchronized {
 	** Returns the value associated with the given key. If it doesn't exist then it is added from 
 	** the value function. 
 	** 
-	** This method is **NOT** thread safe. If two actors call this method at the same time, the 
-	** value function could be called twice for the same key.
+	** This method *IS* thread safe. 'valFunc' will not be called twice for the same key.
 	**  
-	** @since 1.4.6
-	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
-		if (!containsKey(key)) {
-			val := valFunc.call()
-			set(key, val)
+	** @since 1.5.6
+	Obj? getOrAdd(Obj key, |Obj key->Obj?| valFunc) {
+		if (containsKey(key))
+			return get(key)
+		
+		iKey := key.toImmutable
+		return synchronized |->Obj?| {
+			// double lock
+			if (containsKey(iKey))
+				return get(iKey)
+
+			val := valFunc.call(key)
+			iVal := val.toImmutable
+			newMap := map.rw
+			newMap.set(iKey, iVal)
+			map = newMap
+			return val
 		}
-		return get(key)
 	}
 	
 	** Returns the value associated with the given key. 

@@ -1,6 +1,4 @@
-using concurrent::Actor
-using concurrent::ActorPool
-using concurrent::Future
+using concurrent
 
 ** A helper class that provides synchronized access to blocks of code. Example usage:
 ** 
@@ -25,10 +23,20 @@ using concurrent::Future
 **   }
 ** }
 ** <pre
+** 
+** @since 1.5.6
 const class Synchronized {
 	private static const Log 	log 	:= Utils.getLog(Synchronized#)
 	
-	private const Actor actor
+	private const Actor 		actor
+	private const ThreadStash	stash	:= ThreadStash(Synchronized#actor.name)
+	private 	  Bool			syncing {
+		get { stash["syncing"] ?: false }
+		set { 
+			if (it)	stash["syncing"] = it 
+			else 	stash.remove("syncing")
+		}
+	}
 
 	** Create a 'Synchronized' class that uses the given 'ActorPool'.
 	new make(ActorPool? actorPool := null) {
@@ -52,6 +60,9 @@ const class Synchronized {
 	** This effectively wraps the given func in a Java 'synchronized { ... }' block and returns a
 	** value. 
 	virtual Obj? synchronized(|->Obj?| f) {
+		if (syncing)
+			throw IocErr(IocMessages.synchronized_nestedNotAllowed)
+
 		// explicit call to .toImmutable() - see http://fantom.org/sidewalk/topic/1798#c12190
 		func	:= f.toImmutable
 		future := actor.send([false, func].toImmutable)
@@ -70,15 +81,19 @@ const class Synchronized {
 		logErr	:= msg[0] as Bool
 		func 	:= msg[1] as |->Obj?|
 
+		syncing = true
 		try {
 			return func.call()
 
 		} catch (Err e) {
 			// if the func has a return type, then an the Err is rethrown on assignment
 			// else we log the Err so the Thread doesn't fail silently
-			if (logErr || func.returns == Void#)
+			if (logErr)
 				log.err("receive()", e)
 			throw e
+
+		} finally {
+			syncing = false
 		}
 	}	
 }

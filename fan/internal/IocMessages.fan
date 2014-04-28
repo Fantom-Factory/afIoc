@@ -251,6 +251,9 @@ internal const class IocMessages {
 		"Can not @Inject into static fields: ${field.qname}"
 	}
 	
+	static Str synchronized_nestedNotAllowed() {
+		"Due to Actor semantics, nested calls to synchronized() result in a Deadlock."
+	}
 	
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------

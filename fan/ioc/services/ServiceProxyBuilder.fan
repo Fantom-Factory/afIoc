@@ -60,6 +60,7 @@ internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder
 		// actually, it doesn't really matter as both types will be in different pods.
 		// ...but compilation takes long enough that it's probably worthwhile!
 		return synchronized |->Type| {  
+			// double lock
 			if (typeCache.containsKey(serviceType.qname))
 				return typeCache[serviceType.qname]
 			
