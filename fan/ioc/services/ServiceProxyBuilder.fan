@@ -23,13 +23,16 @@ const mixin ServiceProxyBuilder {
 
 
 ** @since 1.3.0
-internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder {
+internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 	@Inject private const Registry 			registry
 	@Inject	private const PlasticCompiler	plasticCompiler
-			private const DangerCache 		typeCache	:= DangerCache()
-	
-	new make(ActorPools actorPools, |This|di) : super(actorPools["afIoc.system"]) { di(this) }
+			private const ConcurrentCache 	typeCache
+		
+	new make(ActorPools actorPools, |This|in) {
+		in(this) 
+		typeCache = ConcurrentCache(actorPools["afIoc.system"])
+	}
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
 	override internal Obj createProxyForService(ServiceDef serviceDef) {
@@ -53,17 +56,7 @@ internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder
 	}
 	
 	override Type compileProxyType(Type serviceType) {
-		if (typeCache.containsKey(serviceType.qname))
-			return typeCache[serviceType.qname]
-
-		// should this be synchronised to stop 2 threads compiling the same type?
-		// actually, it doesn't really matter as both types will be in different pods.
-		// ...but compilation takes long enough that it's probably worthwhile!
-		return synchronized |->Type| {  
-			// double lock
-			if (typeCache.containsKey(serviceType.qname))
-				return typeCache[serviceType.qname]
-			
+		typeCache.getOrAdd(serviceType.qname) |->Type| {  
 			if (!serviceType.isMixin)
 				throw IocErr(IocMessages.onlyMixinsCanBeProxied(serviceType))
 	
@@ -101,7 +94,6 @@ internal const class ServiceProxyBuilderImpl : Synchronized, ServiceProxyBuilder
 				}			
 				proxyType 	:= pod.type(model.className)
 						
-				typeCache[serviceType.qname] = proxyType
 				return proxyType
 			}
 		}
