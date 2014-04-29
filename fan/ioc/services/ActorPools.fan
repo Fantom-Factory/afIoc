@@ -2,7 +2,7 @@ using concurrent
 
 ** (Service) - 
 ** Maintains a collection of named 'ActorPools'. Use to keep tabs on your resources, particularly 
-** when creating `ConcurrentState` instances.
+** when creating 'SynchronizedState' instances.
 ** 
 ** IoC uses an 'ActorPool' named 'afIoc.system'. Contribute your own via your 'AppModule':
 ** 

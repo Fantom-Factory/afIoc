@@ -13,7 +13,8 @@ mixin ServiceBindingOptions {
 
 	** Sets the service scope. Note only 'const' classes can be defined as 
 	** `ServiceScope.perApplication`.
-	** (Tip: 'const' services can subclass `ConcurrentState` for easy access to modifiable state.)
+	** 
+	** (Tip: See [afConcurrent]`http://www.fantomfactory.org/pods/afConcurrent` for sharing data between threads.)
 	abstract This withScope(ServiceScope scope)
 
 	** Disables the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
