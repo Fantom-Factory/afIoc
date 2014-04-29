@@ -2,7 +2,7 @@
 v1.6.2 Maybe...?
 ----------------
 Delete all deprecated classes
-Think of a better name for 'StrategyRegistry'...?
+Think of a better name for 'StrategyRegistry'...?  'Fits'??
 
 
 

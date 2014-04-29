@@ -101,9 +101,9 @@ internal class TestStrategyRegistry : IocTest {
 		verifyEq(strategy.findClosestParent(Num#), 2)
 		verifyEq(strategy.findClosestParent(Float#), 2)
 
-		verifyEq(strategy.findChildren(Obj#),   Obj?[1, 2, 3])
-		verifyEq(strategy.findChildren(Num#),   Obj?[2, 3])
-		verifyEq(strategy.findChildren(Float#), Obj?[,])
+		verifyEq(strategy.findAllChildren(Obj#),   Obj?[1, 2, 3])
+		verifyEq(strategy.findAllChildren(Num#),   Obj?[2, 3])
+		verifyEq(strategy.findAllChildren(Float#), Obj?[,])
 	}
 }
 

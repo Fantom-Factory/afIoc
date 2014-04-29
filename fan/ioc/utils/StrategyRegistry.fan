@@ -63,7 +63,7 @@ const class StrategyRegistry {
 	**   strategy.findChildrenOf(Num#)   // --> [2, 3]
 	**   strategy.findChildrenOf(Float#) // --> [,]
 	** <pre
-	Obj?[] findChildren(Type type) {
+	Obj?[] findAllChildren(Type type) {
 		nonNullable := type.toNonNullable
 		return childrenCache.getOrAdd(nonNullable) |->Obj?[]| {
 			values.findAll |val, key| { key.fits(type) }.vals
