@@ -1,4 +1,5 @@
 using concurrent::Future
+using afConcurrent::SynchronizedState
 
 ** (Service) - Contribute functions to be executed on `Registry` shut down. 
 ** All functions need to be immutable, which essentially means they can only reference 'const' classes.
@@ -54,25 +55,25 @@ const mixin RegistryShutdownHub {
 internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const static Log 		log 		:= Utils.getLog(RegistryShutdownHub#)
 	private const OneShotLock 		lock		:= OneShotLock(IocMessages.registryShutdown)
-	private const ConcurrentState 	conState
+	private const SynchronizedState	conState
  
 	new make(ActorPools actorPools) {
-		conState = ConcurrentState(RegistryShutdownHubState#) {
-			it.actorPool = actorPools["afIoc.system"]
-		}
+		conState = SynchronizedState(actorPools["afIoc.system"], RegistryShutdownHubState#)
 	}
 	
 	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {
+		lock.check
+		iHandler := listener.toImmutable
 		withState |state| {
-			lock.check
-			state.listeners.addOrdered(id, listener, constraints)
+			state.listeners.addOrdered(id, iHandler, constraints)
 		}.get
 	}
 
 	override Void addRegistryWillShutdownListener(Str id, Str[] constraints, |->| listener) {
+		lock.check
+		iHandler := listener.toImmutable
 		withState |state| {
-			lock.check
-			state.preListeners.addOrdered(id, listener, constraints)
+			state.preListeners.addOrdered(id, iHandler, constraints)
 		}.get
 	}
 
@@ -80,7 +81,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	internal Void registryWillShutdown() {
 		preListeners.each | |->| listener| {
 			try {
-				listener()
+				listener.call
 			} catch (Err e) {
 				log.err(IocMessages.shutdownListenerError(listener, e))
 			}
@@ -93,9 +94,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 
 	** After the listeners have been invoked, they are discarded to free up any references they may hold.
 	internal Void registryHasShutdown() {
-		withState |state| {
-			lock.lock
-		}.get
+		lock.lock
 
 		listeners.each |listener| {
 			try {

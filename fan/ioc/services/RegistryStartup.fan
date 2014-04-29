@@ -1,3 +1,4 @@
+using afConcurrent::LocalList
 
 ** (Service) - Contribute functions to be executed on `Registry` start up.
 **  
@@ -24,24 +25,18 @@ const mixin RegistryStartup { }
 
 internal const class RegistryStartupImpl : RegistryStartup {
 
-	private const ThreadStash 	stash
+	private const LocalList startups
 	
-	private |->|[]? startups {
-		get { stash["startups"] }
-		set { stash["startups"] = it }
-	}	
-
-	new make(|->|[] startups, ThreadStashManager stashManager) {
-		this.stash		= stashManager.createStash(ServiceIds.registryStartup) 
-		this.startups 	= startups
+	new make(|->|[] startups, ThreadLocalManager localManager) {
+		this.startups = localManager.createList("StartupListeners")
+		this.startups.list = startups
 	}
 
 	internal Void go(OpTracker tracker) {
 		tracker.track("Running Registry Startup contributions") |->| {
-			startups.each { it() }
-			
+			startups.each { ((|->|) it).call }
 			startups.clear
-			stash.clear
+			startups.localRef.cleanUp
 		}
 	}
 }

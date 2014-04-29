@@ -13,7 +13,7 @@ using concurrent
 ** }
 ** <pre  
 ** 
-** @since 1.5.6
+** @since 1.6.0
 const mixin ActorPools {
 
 	** Returns the 'ActorPool' mapped to the given name, or throws a 'NotFoundErr' if it doesn't exist.

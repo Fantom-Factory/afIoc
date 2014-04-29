@@ -64,11 +64,11 @@ internal const class LazyProxyForMixin : LazyProxy {
 	private const ObjectRef			instanceRef
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
-		stashManager 		:= (ThreadStashManager) objLocator.trackServiceById(ServiceIds.threadStashManager)
-		threadStash			:= stashManager.createStash(serviceDef.serviceId + "-proxy")
+		localManager 		:= (ThreadLocalManager) objLocator.trackServiceById(ServiceIds.threadLocalManager)
+		localRef			:= localManager.createRef(serviceDef.serviceId + "-proxy")
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
-		this.instanceRef	= ObjectRef(threadStash, serviceDef.scope, null)
+		this.instanceRef	= ObjectRef(localRef, serviceDef.scope, null)
 	}
 
 	override Obj? call(Method method, Obj?[] args) {

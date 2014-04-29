@@ -18,7 +18,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		this.options					= options
 		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
 		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)		
-		stashManager 					:= ThreadStashManagerImpl()
+		threadLocalManager 				:= ThreadLocalManagerImpl()
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -92,9 +92,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[BuiltInServiceDef() {
+				it.serviceId 		= ServiceIds.threadLocalManager
+				it.serviceType 		= ThreadLocalManager#
+			}] = threadLocalManager
+			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.threadStashManager
 				it.serviceType 		= ThreadStashManager#
-			}] = stashManager
+			}] = threadLocalManager
 
 			services[BuiltInServiceDef() {
 				it.serviceId 		= ServiceIds.registryMeta
@@ -112,7 +116,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.source			= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
 			}] = null
 
-			builtInModule := ModuleImpl(this, stashManager, ServiceIds.builtInModuleId, services)
+			builtInModule := ModuleImpl(this, threadLocalManager, ServiceIds.builtInModuleId, services)
 
 			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule
 			services.keys.each {
@@ -122,7 +126,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
-				module := ModuleImpl(this, stashManager, moduleDef)
+				module := ModuleImpl(this, threadLocalManager, moduleDef)
 				moduleIdToModule[moduleDef.moduleId] = module
 
 				// ensure services aren't defined twice
@@ -222,7 +226,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	
 	override This shutdown() {
 		shutdownHub := (RegistryShutdownHubImpl) serviceById(ServiceIds.registryShutdownHub)
-		threadMan 	:= (ThreadStashManager) serviceById(ServiceIds.threadStashManager)
+		threadMan 	:= (ThreadLocalManager) 	 serviceById(ServiceIds.threadLocalManager)
 
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown

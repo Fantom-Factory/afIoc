@@ -1,3 +1,4 @@
+using afConcurrent::LocalRef
 
 ** (Service) - Can't be internal since it's used by auto-generated lazy services.
 ** 
@@ -18,11 +19,11 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 	private const Registry	registry
 	private ObjLocator objLocator() { (ObjLocator) registry }
 
-	private const ThreadStash threadStash
+	private const ThreadLocalManager	localManager
 	
-	new make(ThreadStashManager tsm, Registry registry) {
-		this.registry = registry
-		this.threadStash = tsm.createStash(AspectInvokerSource#.name)
+	new make(ThreadLocalManager localManager, Registry registry) {
+		this.localManager	= localManager
+		this.registry 		= registry
 	}
 
 	** Returns `MethodAdvisor`s fully loaded with callbacks
@@ -55,8 +56,9 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 			adviceMap[it.method] = it.aspects
 		}
 
+		localRef := localManager.createRef(serviceDef.serviceId + "-invoker")
 		return ServiceMethodInvoker {
-			it.service = ObjectRef(threadStash, serviceDef.scope, service)
+			it.service = ObjectRef(localRef, serviceDef.scope, service)
 			it.aspects = adviceMap.toImmutable
 		}
 	}

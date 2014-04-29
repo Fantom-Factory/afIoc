@@ -51,6 +51,7 @@ using concurrent::Future
 ** [AtomicBool]`concurrent::AtomicBool`, [AtomicInt]`concurrent::AtomicInt` and 
 ** [AtomicRef]`concurrent::AtomicRef`
 ** 
+@NoDoc @Deprecated { msg="Use 'afConcurrent::SynchronizedState' instead" }
 const class ConcurrentState {
 	private static const Log 	log 		:= Utils.getLog(ConcurrentState#)
 	

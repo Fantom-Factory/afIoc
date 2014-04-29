@@ -1,6 +1,8 @@
 using concurrent
 
 ** Little methods to help ease your IoC development.
+@NoDoc // Don't overload the masses
+@Deprecated { msg="This will be deleted in a future release with no replacement" }
 const class IocHelper {
 
 	** Runs the given function with extensive IoC logging turned on. Example usage:

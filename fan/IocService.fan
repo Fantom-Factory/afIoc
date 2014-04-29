@@ -1,4 +1,5 @@
 using concurrent::AtomicRef
+using afConcurrent::LocalMap
 
 **
 ** Wraps an afIoc `Registry` instance as Fantom service.
@@ -7,7 +8,7 @@ using concurrent::AtomicRef
 ** 
 const class IocService : Service {
 	private static const Log 	log 		:= Utils.getLog(IocService#)
-	private const ThreadStash 	stash		:= ThreadStash(IocService#.name)
+	private const LocalMap	 	stash		:= LocalMap(IocService#.name)
 	private const AtomicRef		registryRef	:= AtomicRef()
 
 	private Type[] moduleTypes {

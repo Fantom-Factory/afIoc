@@ -1,6 +1,7 @@
 using compiler
 using afPlastic::IocClassModel
 using afPlastic::PlasticCompiler
+using afConcurrent::SynchronizedMap
 
 ** (Service) - Builds and caches Proxy Types. The Types are cached because:
 **  - as they're already loaded by the VM, we may as well!
@@ -27,11 +28,11 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 
 	@Inject private const Registry 			registry
 	@Inject	private const PlasticCompiler	plasticCompiler
-			private const ConcurrentCache 	typeCache
+			private const SynchronizedMap 	typeCache
 		
 	new make(ActorPools actorPools, |This|in) {
 		in(this) 
-		typeCache = ConcurrentCache(actorPools["afIoc.system"])
+		typeCache = SynchronizedMap(actorPools["afIoc.system"])
 	}
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl

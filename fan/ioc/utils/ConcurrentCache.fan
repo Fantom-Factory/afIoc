@@ -1,150 +1,69 @@
 using concurrent::ActorPool
-using concurrent::AtomicRef
-using concurrent::Future
+using afConcurrent::SynchronizedMap
 
-** A helper class that wraps a 'Map' providing fast reads and synchronised writes betweeen threads.
-** It's an application of `ConcurrentState` for use when *reads* far out number the *writes*.
-** 
-** The cache wraps a map stored in an [AtomicRef]`concurrent::AtomicRef` through which all reads 
-** are made. All writes are made via [ConcurrentState]`afIoc::ConcurrentState` ensuring 
-** synchronised access. Writing makes a 'rw' copy of the map and is thus a more expensive operation.
-** 
-** Note that all objects held in the map have to be immutable.
-** 
-** See [The Good, The Bad and The Ugly of Const Services]`http://www.fantomfactory.org/articles/good-bad-and-ugly-of-const-services#theUgly` for more details.
-** 
-** @since 1.4.2
-const class ConcurrentCache : Synchronized {
-	private const AtomicRef atomicMap := AtomicRef()
+@NoDoc @Deprecated { msg="Use 'afConcurrent::SynchronizedMap' instead" }
+const class ConcurrentCache {
+	private const SynchronizedMap 	sMap
 	
-	** @since 1.5.6
-	new makeWithPool(ActorPool actorPool) : super.make(actorPool) {
-		this.map = [:]
-	}
-
-	** Make a 'ConcurrentCache' using the given immutable map. 
-	** Use when you need a case insensitive map.
-	** 
-	** @since 1.5.6
-	new makeWithPoolAndMap(ActorPool actorPool, [Obj:Obj?] map) : super.make(actorPool) {
-		this.map = [:]
-	}
-	
-	@NoDoc @Deprecated
-	new make(|This|? f := null) : super.make(null) {
+	new make(|This|? f := null) {
 		f?.call(this)
-		this.map = [:]
+		this.sMap = SynchronizedMap(ActorPool())
 	}
 
-	** Make a 'ConcurrentCache' using the given immutable map. 
-	** Use when you need a case insensitive map.
-	** 
-	** @since 1.4.6
-	@NoDoc @Deprecated
-	new makeWithMap([Obj:Obj?] map) : super.make(null) {
-		this.map = map 
+	new makeWithMap([Obj:Obj?] map) {
+		this.sMap = SynchronizedMap(ActorPool())
+		this.sMap.map = map
 	}
 	
-	** A read-only copy of the cache map.
 	[Obj:Obj?] map {
-		get { atomicMap.val }
-		set { atomicMap.val = it.toImmutable }
+		get { sMap.map }
+		private set { sMap.map = it }
 	}
 	
-	** Returns the value associated with the given key. If it doesn't exist then it is added from 
-	** the value function. 
-	** 
-	** This method *IS* thread safe. 'valFunc' will not be called twice for the same key.
-	**  
-	** @since 1.5.6
-	Obj? getOrAdd(Obj key, |Obj key->Obj?| valFunc) {
-		if (containsKey(key))
-			return get(key)
-		
-		iKey := key.toImmutable
-		return synchronized |->Obj?| {
-			// double lock
-			if (containsKey(iKey))
-				return get(iKey)
-
-			val := valFunc.call(key)
-			iVal := val.toImmutable
-			newMap := map.rw
-			newMap.set(iKey, iVal)
-			map = newMap
-			return val
-		}
+	Obj? getOrAdd(Obj key, |->Obj?| valFunc) {
+		sMap.getOrAdd(key, valFunc)
 	}
 	
-	** Returns the value associated with the given key. 
-	** If key is not mapped, then return the value of the 'def' parameter.  
-	** If 'def' is omitted it defaults to 'null'.
 	@Operator
 	Obj? get(Obj key, Obj? def := null) {
-		map.get(key, def)
+		sMap.get(key, def)
 	}
 
-	** Sets the key / value pair, ensuring no data is lost during multi-threaded race conditions.
-	** Though the same key may be overridden. Both the 'key' and 'val' must be immutable. 
 	@Operator
 	Void set(Obj key, Obj? val) {
-		iKey := key.toImmutable
-		iVal := val.toImmutable
-		synchronized |->| {
-			newMap := map.rw
-			newMap.set(iKey, iVal)
-			map = newMap
-		}
+		sMap.set(key, val)
 	}
 
-	** Returns 'true' if the cache contains the given key
 	Bool containsKey(Obj key) {
-		map.containsKey(key)
+		sMap.containsKey(key)
 	}
 	
-	** Returns a list of all the mapped keys.
 	Obj[] keys() {
-		map.keys
+		sMap.keys
 	}
 
-	** Returns a list of all the mapped values.
 	Obj[] vals() {
-		map.vals
+		sMap.vals
 	}
 
-	** Remove all key/value pairs from the map. Return this.
 	This clear() {
-		synchronized |->| {
-			map = map.rw.clear
-		}
+		sMap.clear
 		return this
 	}
 
-	** Remove the key/value pair identified by the specified key
-	** from the map and return the value. 
-	** If the key was not mapped then return 'null'.
 	Obj? remove(Obj key) {
-		iKey := key.toImmutable
-		return synchronized |->Obj?| {
-			newMap := map.rw
-			val := newMap.remove(iKey)
-			map = newMap
-			return val 
-		}
+		sMap.remove(key)
 	}
 
-	@NoDoc @Deprecated { msg="Use 'map' setter instead" }
 	Obj:Obj? replace(Obj:Obj? newMap) {
-		map = newMap
+		sMap.map = newMap
 	}
 	
-	** Return 'true' if size() == 0
 	Bool isEmpty() {
-		map.isEmpty
+		sMap.isEmpty
 	}
 
-	** Get the number of key/value pairs in the map.
 	Int size() {
-		map.size
-	}	
+		sMap.size
+	}
 }
