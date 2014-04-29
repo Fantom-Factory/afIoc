@@ -101,13 +101,13 @@ internal class TestThreadedAccess : IocTest {
 	Void testThreadedServicesAreDestroyedOnThreadCleansUp() {
 		reg := (Registry) RegistryBuilder().addModule(T_MyModule90#).build.startup
 		sta := (ServiceStats) reg.serviceById(ServiceIds.serviceStats)
-		tsm := (ThreadStashManager) reg.serviceById(ServiceIds.threadStashManager)
+		tlm := (ThreadLocalManager) reg.serviceById(ServiceIds.threadLocalManager)
 		
 		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
 		s02a := reg.serviceById("s02")
 		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.CREATED)
 		
-		tsm.cleanUpThread
+		tlm.cleanUpThread
 		
 		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
 		s02b := reg.serviceById("s02")

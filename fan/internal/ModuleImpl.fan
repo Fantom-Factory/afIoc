@@ -1,5 +1,6 @@
 using concurrent::AtomicInt
 using concurrent::AtomicRef
+using afConcurrent::LocalMap
 
 internal const class ModuleImpl : Module {
 
@@ -11,11 +12,11 @@ internal const class ModuleImpl : Module {
 	private  const ObjLocator			objLocator
 	private  const StrategyRegistry		typeToServiceDefs
 
-	new makeBuiltIn(ObjLocator objLocator, ThreadStashManager stashManager, Str moduleId, ServiceDef:Obj? services) {
-		threadStash := stashManager.createStash(ServiceIds.builtInModuleId)
+	new makeBuiltIn(ObjLocator objLocator, ThreadLocalManager localManager, Str moduleId, ServiceDef:Obj? services) {
+		localMap	:= localManager.createMap(ServiceIds.builtInModuleId)
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		services.each |impl, def| {
-			srvState[def.serviceId] = ModuleState(threadStash, def, impl, ServiceLifecycle.BUILTIN)
+			srvState[def.serviceId] = ModuleState(localMap, def, impl, ServiceLifecycle.BUILTIN)
 		}
 
 		this.serviceState 	= srvState
@@ -31,11 +32,11 @@ internal const class ModuleImpl : Module {
 		this.typeToServiceDefs = StrategyRegistry(map)
 	}
 
-	new make(ObjLocator objLocator, ThreadStashManager stashManager, ModuleDef moduleDef) {
-		threadStash := stashManager.createStash(moduleName(moduleDef.moduleId))
+	new make(ObjLocator objLocator, ThreadLocalManager localManager, ModuleDef moduleDef) {
+		localMap := localManager.createMap(moduleName(moduleDef.moduleId))
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		moduleDef.serviceDefs.each |def| {
-			srvState[def.serviceId] = ModuleState(threadStash, def, null, ServiceLifecycle.DEFINED)
+			srvState[def.serviceId] = ModuleState(localMap, def, null, ServiceLifecycle.DEFINED)
 		}
 		
 		this.serviceState 	= srvState		
@@ -196,20 +197,19 @@ internal const class ModuleImpl : Module {
 }
 
 internal const class ModuleState {
-	private const ThreadStash 	threadStash
+	private const LocalMap		localMap
 	private const AtomicRef		aLifecycle	:= AtomicRef(null)
 	private const AtomicInt		aImplCount	:= AtomicInt(0)
 	private const AtomicRef		aImpl		:= AtomicRef(null)
 	private const AtomicRef?	aProxy
-	
 			const ServiceDef	def
 
-	new make(ThreadStash threadStash, ServiceDef def, Obj? impl, ServiceLifecycle lifecycle) {
-		this.def = def
-		this.threadStash = threadStash
+	new make(LocalMap localMap, ServiceDef def, Obj? impl, ServiceLifecycle lifecycle) {
+		this.localMap		= localMap
+		this.def 			= def
 		this.aLifecycle.val = lifecycle
-		this.lifecycle = lifecycle	// set threaded
-		this.aImpl.val = impl
+		this.lifecycle 		= lifecycle	// set threaded
+		this.aImpl.val 		= impl
 		if (impl != null) incImpls
 		if (!def.noProxy) aProxy = AtomicRef(null)
 	}
@@ -226,29 +226,29 @@ internal const class ModuleState {
 	}
 	
 	Obj? service {
-		get { getObj(aImpl, "threadImpls") }
-		set { setObj(aImpl, "threadImpls", it) }
+		get { getObj(aImpl, "impl") }
+		set { setObj(aImpl, "impl", it) }
 	}
 	
 	Obj? proxy {
 		// the lazy proxy may be const, but the mixin it implements may NOT be!
-		get { getObj(aProxy, "threadProxies") }
-		set { setObj(aProxy, "threadProxies", it) }
+		get { getObj(aProxy, "proxy") }
+		set { setObj(aProxy, "proxy", it) }
 	}
 	
-	private Obj? getObj(AtomicRef? ref, Str mapName) {
+	private Obj? getObj(AtomicRef? ref, Str varName) {
 		if (def.scope == ServiceScope.perApplication)
 			return ref.val
 		if (def.scope == ServiceScope.perThread)
-			return threads(mapName)[def.serviceId]
+			return localMap["${def.serviceId}.${varName}"]
 		return null
 	}
 
-	private Void setObj(AtomicRef? ref, Str mapName, Obj? obj) {
+	private Void setObj(AtomicRef? ref, Str varName, Obj? obj) {
 		if (def.scope == ServiceScope.perApplication && ref != null) 
 			ref.val = obj
 		if (def.scope == ServiceScope.perThread)
-			threads(mapName)[def.serviceId] = obj
+			localMap["${def.serviceId}.${varName}"] = obj
 	}
 	
 	Void incImpls() {
@@ -258,9 +258,5 @@ internal const class ModuleState {
 	Void shutdown() {
 		proxy = null
 		service = null
-	}
-	
-	private Str:Obj? threads(Str name) {
-		threadStash.getOrAdd(name) |->[Str:Obj?]| { Str:Obj?[:] }
-	}
+	}	
 }

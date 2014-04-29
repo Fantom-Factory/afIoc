@@ -21,6 +21,8 @@ class Build : BuildPod {
 			"sys 1.0", 
 			"concurrent 1.0", 
 			"compiler 1.0", 
+			
+			"afConcurrent 0+",
 			"afPlastic 1.0.2+"
 		]
 		

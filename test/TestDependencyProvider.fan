@@ -1,3 +1,4 @@
+using afConcurrent::LocalMap
 
 internal class TestDependencyProvider : IocTest {
 	
@@ -89,7 +90,7 @@ internal class T_MyService43 {
 }
 
 internal const class T_DependencyProvider2 : DependencyProvider {
-	const ThreadStash ls := ThreadStash(T_DependencyProvider2#.name)
+	const LocalMap ls := LocalMap(T_DependencyProvider2#.name)
 	override Bool canProvide(InjectionCtx ctx) {
 		ls["ctx"] = ctx
 		ls["type"] = ctx.dependencyType

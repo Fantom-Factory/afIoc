@@ -8,11 +8,15 @@ internal class IocModule {
 	static Void contributeDependencyProviderSource(OrderedConfig config, LogProvider logProvider) {
 		serviceIdProvider	:= config.autobuild(ServiceIdProvider#)
 		autobuildProvider	:= config.autobuild(AutobuildProvider#)
-		threadStashProvider := config.autobuild(ThreadStashProvider#)
+		localRefProvider	:= config.autobuild(LocalRefProvider#)
+		localListProvider	:= config.autobuild(LocalListProvider#)
+		localMapProvider	:= config.autobuild(LocalMapProvider#)
 
 		config.add(serviceIdProvider)
 		config.add(autobuildProvider)
-		config.add(threadStashProvider)
+		config.add(localRefProvider)
+		config.add(localListProvider)
+		config.add(localMapProvider)
 		config.add(logProvider)
 	}
 	

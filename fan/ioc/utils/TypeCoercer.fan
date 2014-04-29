@@ -1,3 +1,4 @@
+using afConcurrent
 
 ** A helper class that coerces Objs to a given Type via 'fromXXX()' / 'toXXX()' ctors and methods. 
 ** This is mainly useful for converting to and from Strs.
@@ -7,7 +8,7 @@
 ** 
 ** @since 1.3.8
 const class TypeCoercer {
-	private const DangerCache cache	:= DangerCache()
+	private const AtomicMap cache	:= AtomicMap()
 	
 	** Returns 'true' if 'fromType' can be coerced to the given 'toType'.
 	Bool canCoerce(Type fromType, Type toType) {

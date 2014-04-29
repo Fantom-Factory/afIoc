@@ -33,6 +33,7 @@ using concurrent::Actor
 ** HTTP web request.
 ** 
 ** @since 1.3.0 (a replacement for 'LocalStash')
+@NoDoc @Deprecated { msg="Use 'afConcurrent::LocalMap' instead" }
 const class ThreadStash {
 
 	** The prefix used to identify all keys used with this stash

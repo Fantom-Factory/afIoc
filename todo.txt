@@ -1,7 +1,10 @@
 
-v1.5.8 Maybe...?
+v1.6.2 Maybe...?
 ----------------
-Think of better names for ConcurrentCache...  SyncMap? DangerMap?
+Delete all deprecated classes
+Think of a better name for 'StrategyRegistry'...?
+
+
 
 Meh... can't be arsed
 ---------------------

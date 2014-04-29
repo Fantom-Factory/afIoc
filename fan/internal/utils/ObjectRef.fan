@@ -1,26 +1,27 @@
 using concurrent::AtomicRef
+using afConcurrent::LocalRef
 
 internal const class ObjectRef {
-	private const AtomicRef? 	atomObj
-	private const ThreadStash?	threadStash
+	private const AtomicRef? 	atomicObj
+	private const LocalRef?		localObj
 	
-	new make(ThreadStash threadStash, ServiceScope scope, Obj? obj) {
+	new make(LocalRef localRef, ServiceScope scope, Obj? obj) {
 		if (scope == ServiceScope.perApplication)
-			this.atomObj = AtomicRef()
+			this.atomicObj = AtomicRef()
 		else
-			this.threadStash = threadStash
+			this.localObj = localRef
 		this.object = obj
 	}
 	
 	Obj? object {
 		get {
-			if (atomObj != null)		return atomObj.val
-			if (threadStash != null)	return threadStash["objectRef"]
+			if (atomicObj != null)	return atomicObj.val
+			if (localObj  != null)	return localObj.val
 			return null
 		}
 		set { 
-			if (atomObj != null)		atomObj.val = it 
-			if (threadStash != null)	threadStash["objectRef"] = it
+			if (atomicObj != null)	atomicObj.val = it 
+			if (localObj  != null)	localObj.val = it
 		}
 	}	
 }
