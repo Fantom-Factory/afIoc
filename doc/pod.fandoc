@@ -324,7 +324,7 @@ v1.6.0 [#1.6.0]
  - Chg: Renamed 'ThreadStashManager' -> 'ThreadLocalManager'
  - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
  - Chg: Re-jigged 'RegistryBuilder' logic and API.
- - Chg: Re-jigged 'StrategyRegistry' to add 'findChildren()'.
+ - Chg: Re-jigged 'StrategyRegistry' to add 'findAllChildren()'.
  - Chg: 'TypeCoercer' is now 'const'.
 
 v1.5.4 [#1.5.4]

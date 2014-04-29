@@ -73,7 +73,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-		typeToServiceDefs.findChildren(serviceType) 
+		typeToServiceDefs.findAllChildren(serviceType) 
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
