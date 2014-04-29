@@ -2,36 +2,23 @@ using concurrent
 using afConcurrent
 
 ** (Service) -
-** Use to create `ThreadStash` instances whose contents can be *cleaned* up. Erm, I mean deleted! 
+** Use to create 'LocalRef' instances whose contents can be *cleaned* up. Erm, I mean deleted! 
 **  
-** This is important in the context of web applications where resources need to be cleaned up at the end of a web 
-** request / thread. 
+** This is particularly important in the context of web applications where resources need to be 
+** *cleaned* up at the end of a web request / thread. 
 ** 
-** Typical usage would be:
-** 
-** pre>
-** class Example {
-**   ThreadStash threadStash
-** 
-**   new make(ThreadStashManager stashManager) {
-**     this.threadStash = stashManager.createStash(this.typeof.name)
-**   }
-** }
-** <pre
-** 
-** Then when 'ThreadStashManager.cleanUp()' is called, all thread local data held in (associated) 
-** 'ThreadStash' instances will be deleted.
-** 
-** With the advent of a ThreadStash `DependencyProvider` in 'IoC 1.5.6' the above example may be 
-** abbreviated to:
+** 'LocalRef' instances may also be injected directed into your classes:
 ** 
 ** pre>
-** class Example {
-**   @Inject ThreadStash threadStash
+** const class Example {
+**   @Inject const LocalMap localMap
 ** 
 **   new make(|This|in) { in(this) }
 ** }
 ** <pre
+** 
+** Then when 'cleanUpThread()' is called, all thread local data created by this manager will be
+** deleted from 'Actor.locals' 
 ** 
 ** @since 1.6.0
 const mixin ThreadLocalManager {
