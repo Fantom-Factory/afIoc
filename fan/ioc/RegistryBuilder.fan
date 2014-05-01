@@ -7,21 +7,30 @@ class RegistryBuilder {
 	private BuildCtx	ctx 		:= BuildCtx("Building IoC Registry")
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
-	private Str:Obj		options
 
-	** Create a 'RegistryBuilder'. 
-	** 
-	** Builder 'options' are reserved for future use. 
-	new make([Str:Obj]? reserved := null) {
-		reserved = reserved?.rw ?: Utils.makeMap(Str#, Obj#)
-		if (!reserved.caseInsensitive)
-			reserved = Utils.makeMap(Str#, Obj#).addAll(reserved)
-		
-		if (!reserved.containsKey("suppressLogging"))
-			reserved.add("suppressLogging", false)
+	** All User and IoC options may be later retrieved from the `RegistryOptions` service. 
+	**  
+	** The following option keys are reserved for use by IoC:
+	**  -  'logServiceCreation': 'Bool' specifies if each service creation should be logged to INFO. 
+	** 		Default is 'false'. Set IoC's log level to debug for extensive info.
+	**  -  'disableProxies': 'Bool' specifies if all proxy generation for mixin fronted services  
+	** 		should be disabled. Default is 'false'.
+	**  -  'suppressStartupServiceList': 'Bool' specifies if the service list should be displayed on 
+	** 		startup. Default is 'false'.
+	**  -  'suppressStartupBanner': 'Bool' specifies if the Alien-Factory banner should be displayed  
+	** 		on startup. Default is 'false'.
+	//  -  'appName': <AppName> startup up in 69ms
+	//  -  'bannerText': For the easter egg.
+	Str:Obj?	options {
+		private set
+	}
+	
+	** Set to 'true' to suppress builder logging.
+	@NoDoc Bool suppressLogging	:= false
 
-		this.options = reserved
-
+	@NoDoc 
+	new make() {
+		options	= Utils.makeMap(Str#, Obj?#)
 		addModule(IocModule#)
 	}
 
@@ -59,7 +68,7 @@ class RegistryBuilder {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
 				lock.check
-				if (!options["suppressLogging"])
+				if (!suppressLogging)
 					logger.info("Adding module definitions from pod '$pod.name'")
 				internalAddModulesFromPod(pod, addDependencies)
 				return this
@@ -82,7 +91,7 @@ class RegistryBuilder {
 			ctx.track("Adding modules from index properties") |->Obj| {
 				lock.check
 
-				if (!options["suppressLogging"])
+				if (!suppressLogging)
 					logger.info("Adding modules from index properties")
 
 				moduleTypeNames := Env.cur.index(IocConstants.podMetaModuleName)
@@ -99,34 +108,23 @@ class RegistryBuilder {
 	}
 	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
-	** for invoking `Registry.startup`
+	** for invoking `Registry.startup`.
 	** 
-	** Options are passed to the registry to specify extra behaviour:
-	**  -  'logServiceCreation': Bool specifies if each service creation should be logged to INFO. 
-	** 		Default is 'false'. For extensive debug info, use 
-	** 		[IocHelper.debugOperation()]`IocHelper.debugOperation`.
-	**  -  'disableProxies': Bool specifies if all proxy generation for mixin fronted services  
-	** 		should be disabled. Default is 'false'.
-	**  -  'suppressStartupServiceList': Bool specifies if the service list should be displayed on 
-	** 		startup. Default is 'false'.
-	**  -  'suppressStartupBanner': Bool specifies if the Alien-Factory banner should be displayed  
-	** 		on startup. Default is 'false'.
-	** 
-	** Other options may also be passed in and can later be retrieved from the `RegistryOptions` 
-	** service. 
-    Registry build([Str:Obj?]? options := null) {
+	** The 'regOptions' parameter is deprecated. Use the 'options' field instead.
+    Registry build([Str:Obj?]? regOptions := null) {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
-
-			options = options?.rw ?: Utils.makeMap(Str#, Obj?#)
-			
+	
+			if (regOptions != null)
+				options.addAll(regOptions)
+				
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"logServiceCreation"		: false,
 				"disableProxies"			: false,
 				"suppressStartupServiceList": false,
 				"suppressStartupBanner"		: false,
 				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
-				"appName"					: "Ioc",				
+				"appName"					: "Ioc"
 			])
 
 			defaults.each |val, key| {
@@ -144,7 +142,7 @@ class RegistryBuilder {
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	private Void internalAddModule(Type moduleType) {
-		if (moduleType != IocModule# && !options["suppressLogging"] && !moduleTypes.contains(moduleType))
+		if (moduleType != IocModule# && !suppressLogging && !moduleTypes.contains(moduleType))
 			logger.info("Adding module definition for $moduleType.qname")
 
 		ctx.withModule(moduleType) |->| {			

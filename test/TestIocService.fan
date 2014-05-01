@@ -114,9 +114,9 @@ internal class TestIocService : IocTest {
 	
 	** see http://fantom.org/sidewalk/topic/2133
 	Void testStartErrsAreRethrown() {
-		iocs := IocService([T_MyModule40#]).start
-			try {
-			verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+		iocs := IocService([T_MyModule101#]).start
+		try {
+			verifyErrMsgAndType(Err#, "Boobies!") { 
 				iocs.registry.serviceById("wotever")
 			}
 			verifyFalse(iocs.isRunning)
@@ -145,6 +145,13 @@ internal class T_MyModule54 {
 		config.add() |->| {
 			(Service.find(IocService#) as IocService).serviceById("s2")
 		}
+	}
+}
+
+internal class T_MyModule101 {
+	@Contribute
+	static Void contributeRegistryStartup(OrderedConfig config) {
+		config.add() |->| { throw Err("Boobies!") }
 	}
 }
 
