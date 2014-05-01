@@ -221,8 +221,8 @@ internal const class ModuleState {
 
 	ServiceLifecycle lifecycle {
 		// will return null if not created, so default to what we were made with
-		get { getObj(aLifecycle, "threadLifecycles") ?: aLifecycle.val }
-		set { setObj(aLifecycle, "threadLifecycles", it) }
+		get { getObj(aLifecycle, "lifecycle") ?: aLifecycle.val }
+		set { setObj(aLifecycle, "lifecycle", it) }
 	}
 	
 	Obj? service {

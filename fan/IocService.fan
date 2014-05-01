@@ -1,48 +1,30 @@
 using concurrent::AtomicRef
 using afConcurrent::LocalMap
+using afConcurrent::LocalRef
 
 **
 ** Wraps an afIoc `Registry` instance as Fantom service.
 ** 
-** A Service for all Services!
+** The Service of Services!
 ** 
 const class IocService : Service {
 	private static const Log 	log 		:= Utils.getLog(IocService#)
-	private const LocalMap	 	stash		:= LocalMap(IocService#.name)
+	private const LocalRef	 	builderRef	:= LocalRef("builder") |->Obj?| { RegistryBuilder() }
+	private const LocalRef	 	startErrRef	:= LocalRef("startErr")
 	private const AtomicRef		registryRef	:= AtomicRef()
 
-	private Type[] moduleTypes {
-		get { stash["moduleTypes"] }
-		set { stash["moduleTypes"] = it }
+	private RegistryBuilder builder {
+		get { builderRef.val }
+		set { builderRef.val = it }
 	}
-
-	private Bool dependencies {
-		get { stash["dependencies"] }
-		set { stash["dependencies"] = it }
-	}
-
-	private Pod dependencyPod {
-		get { stash["dependencyPod"] }
-		set { stash["dependencyPod"] = it }
-	}
-
-	private Bool indexProps {
-		get { stash["indexProps"] }
-		set { stash["indexProps"] = it }
-	}
-
-	private Err? startErr {
-		get { stash["startErr"] }
-		set { stash["startErr"] = it }
-	}
-
+	
 	Registry? registry {
 		// ensure the registry is shared amongst all threads 
 		get { 
 			// rethrow any errs that occurred on startup 
 			// see http://fantom.org/sidewalk/topic/2133
-			if (startErr != null)
-				throw startErr
+			if (startErrRef.isMapped)
+				throw startErrRef.val
 			return registryRef.val 
 		}
 		private set { registryRef.val = it }
@@ -53,36 +35,35 @@ const class IocService : Service {
 	// ---- Public Builder Methods ---------------------------------------------------------------- 
 
 	new make(Type[] moduleTypes := [,]) {
-		this.moduleTypes 	= moduleTypes
-		this.indexProps		= false
-		this.dependencies	= false
+		startErrRef.cleanUp
+		builderRef.cleanUp
+		builder.addModules(moduleTypes)
 	}
 
 	** Convenience for `RegistryBuilder.addModules`
 	This addModules(Type[] moduleTypes) {
 		checkServiceNotStarted
-		this.moduleTypes = this.moduleTypes.addAll(moduleTypes)
+		builder.addModules(moduleTypes)
 		return this
 	}
 	
 	** Convenience for `RegistryBuilder.addModulesFromPod`
-	This addModulesFromPod(Pod pod) {
+	This addModulesFromPod(Pod pod, Bool addDependencies := true) {
 		checkServiceNotStarted
-		dependencies = true
-		dependencyPod = pod
+		builder.addModulesFromPod(pod, addDependencies)
 		return this
 	}
 
 	** Convenience for `RegistryBuilder.addModulesFromIndexProperties`
 	This addModulesFromIndexProperties() {
 		checkServiceNotStarted
-		indexProps = true
+		builder.addModulesFromIndexProperties
 		return this
 	}
 
 	@NoDoc @Deprecated	// for afGenesis
 	This addModulesFromDependencies(Pod dependenciesOf) {
-		addModulesFromPod(dependenciesOf)
+		addModulesFromPod(dependenciesOf, true)
 	}
 
 	
@@ -97,17 +78,9 @@ const class IocService : Service {
 		log.info("Starting IOC...");
 	
 		try {
-			regBuilder := RegistryBuilder()
+			startErrRef.cleanUp
 			
-			if (indexProps)
-				regBuilder.addModulesFromIndexProperties
-			
-			if (dependencies)
-				regBuilder.addModulesFromPod(dependencyPod, true)
-			
-			regBuilder.addModules(moduleTypes)
-			
-			registry = regBuilder.build
+			registry = builder.build
 			
 			registry.startup
 			
@@ -116,11 +89,14 @@ const class IocService : Service {
 			
 			// keep the err so we can rethrow later (as 'Service.start()' swallows it)
 			// see http://fantom.org/sidewalk/topic/2133
-			startErr = e
+			startErrRef.val = e
 			
 			// re throw so Fantom doesn't start the service (since Fantom 1.0.65)
 			// see http://fantom.org/sidewalk/topic/2133
 			throw e
+
+		} finally {
+			builderRef.cleanUp
 		}
 	}
 
