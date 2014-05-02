@@ -1,6 +1,6 @@
 Overview [#overview]
 ********************
-'Ioc' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
+'IoC' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework based on the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
 
@@ -40,15 +40,13 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 
 Install [#install]
 ******************
-Install 'Ioc' with the [Fantom Respository Manager]`http://fantom.org/doc/docFanr/Tool.html#install`:
+Install 'IoC' with the Fantom Repository Manager ( [fanr]`http://fantom.org/doc/docFanr/Tool.html#install` ):
 
   C:\> fanr install -r http://repo.status302.com/fanr/ afIoc
 
-Or to install manually, download the pod from [Status302]`http://repo.status302.com/browse/afIoc` and copy it to '%FAN_HOME%/lib/fan/'.
-
 To use in a Fantom project, add a dependency to its 'build.fan':
 
-  depends = ["sys 1.0", ..., "afIoc 1.5+"]
+  depends = ["sys 1.0", ..., "afIoc 1.6+"]
 
 
 
@@ -115,7 +113,7 @@ A **module** is a class where services and contributions are defined.
 
 Starting the IoC [#loadingModules]
 **********************************
-Use `IocService` to start 'Ioc' as a Fantom service:
+Use `IocService` to start 'IoC' as a Fantom service:
 
     IocService([MyModule#]).start
     ...
@@ -289,7 +287,7 @@ More! [#more]
 
 Tips [#tips]
 ************
-Strive to keep your services 'const', use `ConcurrentState` to hold state and delcare a serialisation ctor to keep '@Inject'ed fields non-nullable:
+Strive to keep your services 'const', delcare a serialisation ctor to keep '@Inject'ed fields non-nullable:
 
   new make(|This| injectInto) { injectInto(this) }
 
@@ -301,9 +299,9 @@ If you have no say in how your classes are created (say, when you're using flux)
 
 When creating GUIs (say, with fwt) then use `Registry.autobuild` to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
 
-IoC gives detailed error reporting should something go wrong, nevertheless should you need more, use `IocHelper.debugOperation` to make IoC give trace level contextual information.
+IoC gives detailed error reporting should something go wrong, nevertheless try turning debug logging on to make IoC give trace level contextual information.
 
-Don't be scared of creating 'const' services! Use `ConcurrentState` to safely store and access mutable state across thread boundaries.
+Don't be scared of creating 'const' services! Use the [afConcurrent]`http://www.fantomfactory.org/pods/afConcurrent` library to safely store and access mutable state across thread boundaries.
 
 
 
