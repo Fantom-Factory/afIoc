@@ -1,7 +1,7 @@
 
 v1.6.2 Maybe...?
 ----------------
-Delete all deprecated classes
+Delete all deprecated classes -> update BedNap first!
 Think of a better name for 'StrategyRegistry'...?  'Fits'??
 
 
