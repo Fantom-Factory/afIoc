@@ -70,11 +70,6 @@ const class StrategyRegistry {
 		}
 	}
 	
-	@NoDoc @Deprecated { msg="Use findClosestParent() instead" }  
-	Obj? findBestFit(Type bestFit, Bool checked := true) {
-		findClosestParent(bestFit, checked)
-	}
-
 	** Clears the lookup caches
 	Void clearCache() {
 		parentCache.clear

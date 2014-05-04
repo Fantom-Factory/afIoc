@@ -6,7 +6,7 @@ internal class BugFixes : IocTest {
 	Void testProxiedServicesAreStillThreadScoped() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
 		
-		stats1	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+		stats1	:= reg.serviceById(ServiceStats#.qname) as ServiceStats
 		
 		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
 		t50_1 := reg.serviceById("t50")
@@ -15,7 +15,7 @@ internal class BugFixes : IocTest {
 		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
 
 		Actor(ActorPool()) |->| {
-			stats2	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats			
+			stats2	:= reg.serviceById(ServiceStats#.qname) as ServiceStats			
 
 			// as we're in a new thread, ensure the service has it's own lifecycle
 			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)

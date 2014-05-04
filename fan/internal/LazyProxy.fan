@@ -22,7 +22,7 @@ internal const class LazyProxyForService : LazyProxy {
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
 		this.objLocator 	= objLocator
-		this.invokerSrc 	= objLocator.trackServiceById(ServiceIds.aspectInvokerSource)
+		this.invokerSrc 	= objLocator.trackServiceById(AspectInvokerSource#.qname)
 		this.serviceDef 	= serviceDef
 	}
 
@@ -64,7 +64,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 	private const ObjectRef			instanceRef
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
-		localManager 		:= (ThreadLocalManager) objLocator.trackServiceById(ServiceIds.threadLocalManager)
+		localManager 		:= (ThreadLocalManager) objLocator.trackServiceById(ThreadLocalManager#.qname)
 		localRef			:= localManager.createRef(serviceDef.serviceId + "-proxy")
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator

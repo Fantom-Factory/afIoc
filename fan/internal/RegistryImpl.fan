@@ -25,26 +25,23 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services := ServiceDef:Obj?[:]
 			
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.registry
 				it.serviceType 		= Registry#
 			}] = this
 
 			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.registryStartup
 				it.serviceType 		= RegistryStartup#
 				it.scope			= ServiceScope.perThread
 				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.registryShutdownHub
 				it.serviceType 		= RegistryShutdownHub#
 				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryShutdownHubImpl#)
 			}] = null
 			
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.ctorItBlockBuilder
+				it.serviceId 		= IocConstants.ctorItBlockBuilder
 				it.serviceType 		= |This|#
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "'$it.serviceId' : Autobuilt. Always."
@@ -54,71 +51,54 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.dependencyProviderSource
 				it.serviceType 		= DependencyProviderSource#
 				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
 			}] = null
  
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.serviceOverride
 				it.serviceType 		= ServiceOverride#
 				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceOverrideImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.serviceStats
 				it.serviceType 		= ServiceStats#
 			}] = ServiceStatsImpl(this)
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.serviceProxyBuilder
 				it.serviceType 		= ServiceProxyBuilder#
-				it.serviceImplType 	= ServiceProxyBuilderImpl#
 				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.plasticCompiler
 				it.serviceType 		= PlasticCompiler#
-				it.serviceImplType 	= PlasticCompiler#
 				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.aspectInvokerSource
 				it.serviceType 		= AspectInvokerSource#
-				it.serviceImplType 	= AspectInvokerSourceImpl#
 				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.threadLocalManager
 				it.serviceType 		= ThreadLocalManager#
-			}] = threadLocalManager
-			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.threadStashManager
-				it.serviceType 		= ThreadStashManager#
 			}] = threadLocalManager
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.registryMeta
-				it.serviceType 		= RegistryOptions#
+				it.serviceType 		= RegistryMeta#
 			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.logProvider
 				it.serviceType 		= LogProvider#
 			}] = LogProviderImpl()
 
 			services[BuiltInServiceDef() {
-				it.serviceId 		= ServiceIds.actorPools
 				it.serviceType 		= ActorPools#
 				it.source			= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
 			}] = null
 
-			builtInModule := ModuleImpl(this, threadLocalManager, ServiceIds.builtInModuleId, services)
+			builtInModule := ModuleImpl(this, threadLocalManager, IocConstants.builtInModuleId, services)
 
-			moduleIdToModule[ServiceIds.builtInModuleId] = builtInModule
+			moduleIdToModule[IocConstants.builtInModuleId] = builtInModule
 			services.keys.each {
 				serviceIdToModule[it.serviceId] = builtInModule			
 			}
@@ -176,8 +156,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
-			depProSrc			= trackServiceById(ServiceIds.dependencyProviderSource)
-			serviceOverrides	= trackServiceById(ServiceIds.serviceOverride)
+			depProSrc			= trackServiceById(DependencyProviderSource#.qname)
+			serviceOverrides	= trackServiceById(ServiceOverride#.qname)
 			return null
 		}
 	}
@@ -190,7 +170,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// Do dat startup!
 		tracker := OpTracker()
-		startup := (RegistryStartupImpl) serviceById(ServiceIds.registryStartup)
+		startup := (RegistryStartupImpl) serviceById(RegistryStartup#.qname)
 		startup.go(tracker)
 		
 		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
@@ -225,8 +205,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
-		shutdownHub := (RegistryShutdownHubImpl) serviceById(ServiceIds.registryShutdownHub)
-		threadMan 	:= (ThreadLocalManager) 	 serviceById(ServiceIds.threadLocalManager)
+		shutdownHub := (RegistryShutdownHubImpl) serviceById(RegistryShutdownHub#.qname)
+		threadMan 	:= (ThreadLocalManager) 	 serviceById(ThreadLocalManager#.qname)
 
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
@@ -390,7 +370,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
-		spb := (ServiceProxyBuilder) trackServiceById(ServiceIds.serviceProxyBuilder)
+		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname)
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
 		mixinT 	:= serviceTypes[0] 

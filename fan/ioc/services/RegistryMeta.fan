@@ -1,8 +1,4 @@
 
-@NoDoc
-@Deprecated { msg="Use RegistryMeta instead" }
-const mixin RegistryOptions : RegistryMeta { }
-
 ** (Service) - Holds meta information as to how the IoC registry was built.
 const mixin RegistryMeta {
 	
@@ -28,7 +24,7 @@ const mixin RegistryMeta {
 	abstract Pod[] modulePods()
 }
 
-internal const class RegistryMetaImpl : RegistryOptions {
+internal const class RegistryMetaImpl : RegistryMeta {
 	
 	override const [Str:Obj?]	options
 	override const Type[] 		moduleTypes
@@ -50,5 +46,4 @@ internal const class RegistryMetaImpl : RegistryOptions {
 	override Pod[] modulePods() {
 		moduleTypes.map { it.pod }.unique
 	}
-	
 }

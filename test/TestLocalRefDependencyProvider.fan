@@ -20,8 +20,6 @@ internal class TestLocalRefDependencyProvider : IocTest {
 		verify(s96.localList.localRef.qname.endsWith(".T_MyService96.localList"))
 		verify(s96.localMap .localRef.qname.endsWith(".T_MyService96.localMap" ))
 
-		IocHelper.locals.each |value, key| { echo("$key = $value") }
-
 		verify(Actor.locals.containsKey(s96			 .localRef.qname))
 		verify(Actor.locals.containsKey(s96.localList.localRef.qname))
 		verify(Actor.locals.containsKey(s96.localMap .localRef.qname))

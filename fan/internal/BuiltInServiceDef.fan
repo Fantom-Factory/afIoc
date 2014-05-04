@@ -14,14 +14,23 @@ internal const class BuiltInServiceDef : ServiceDef {
 			 const Str?			description
 
 	new make(|This| f) { 
-		this.moduleId		= ServiceIds.builtInModuleId
+		this.moduleId		= IocConstants.builtInModuleId
 		this.scope			= ServiceScope.perApplication
 		this.noProxy		= true
-		this.source 		= |->Obj| { 
-			throw IocErr("Can not create BuiltIn BILLL service '$serviceId'") 
-		}
 
 		f(this)
+		
+		if (serviceId == null)
+			serviceId = serviceType.qname
+
+		if (serviceImplType == null && source != null)
+			serviceImplType = Type.find("${serviceType.qname}Impl", false) ?: serviceType
+		
+		if (source == null)
+			source = |->Obj| { 
+				throw IocErr("Can not create BuiltIn service '$serviceId'") 
+			}
+
 		unqualifiedServiceId = unqualify(serviceId)
 	}
 
