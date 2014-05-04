@@ -71,6 +71,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 				model.addField(LazyProxy#, "afLazyService")
 		
 				serviceType.fields.rw
+					.findAll { it.isAbstract || it.isVirtual }
 					.each |field| {
 						getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
 						setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"

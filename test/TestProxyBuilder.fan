@@ -28,13 +28,20 @@ internal class TestProxyBuilder : IocTest {
 		verifyEq(s51->inc(6), 9)
 	}
 	
+	Void testNonVirtualFieldsAreNotOverridden() {
+		s99 := spb.createProxyForService(reg.serviceDefById("s99"))
+		verifyEq(s99->dude, "Don't override me!")
+	}
+	
 	Void testCanBuildMultipleServices() {
 		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
 		spb.createProxyForService(reg.serviceDefById("s50"))
 		spb.createProxyForService(reg.serviceDefById("s50"))
 	}
 
-	Void testVirtualButNotImplementedMethodsAreNotCalled() {
+	Void testVirtualButNotOverriddenMethods() {
+		// bizarrely, we *do* override Virtual methods and call it on the impl, but if they're not
+		// overridden then we end up calling the mixin method!
 		s52 := spb.createProxyForService(reg.serviceDefById("s52"))
 		verifyEq(s52->dude, "Virtual Reality")
 		verifyEq(s52->inc(7), 6)
@@ -110,13 +117,19 @@ internal class T_MyModule76 {
 		binder.bind(PublicTestTypes.type("T_MyService58")).withId("s58")
 		binder.bind(PublicTestTypes.type("T_MyService83")).withId("s83")
 		binder.bind(T_MyService64#).withId("s64").withoutProxy
+		binder.bind(T_MyService99#).withId("s99")
 	}
 }
 
 
-	internal const mixin T_MyService64 {
-		abstract Str dude()
-	}
-	internal const class T_MyService64Impl : T_MyService64 {
-		override Str dude() { "dude"; }
-	}
+internal const mixin T_MyService64 {
+	abstract Str dude()
+}
+internal const class T_MyService64Impl : T_MyService64 {
+	override Str dude() { "dude"; }
+}
+
+const mixin T_MyService99 {
+	static const Str dude := "Don't override me!"
+}
+const class T_MyService99Impl : T_MyService99 { }

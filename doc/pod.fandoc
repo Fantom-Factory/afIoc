@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [36 tests, 219 methods, 566 verifies]'
+  - Extensively tested: - 'All tests passed! [36 tests, 220 methods, 567 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -311,6 +311,7 @@ v1.6.2 [#1.6.2]
 ---------------
  - Chg: Deleted all '@Deprecated' classes and methods.
  - Chg: Discovered 'List.eachRange()'!
+ - Bug: Could not have static fields on proxied mixins.
 
 v1.6.0 [#1.6.0]
 ---------------
