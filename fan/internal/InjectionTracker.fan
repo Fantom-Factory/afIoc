@@ -54,7 +54,7 @@ internal class InjectionTracker {
 
 		return ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
 			// check for recursion
-			ThreadStack.elements(serviceDefId)[0..<-1].each |ServiceDef ele| { 
+			ThreadStack.elements(serviceDefId).eachRange(0..<-1) |ServiceDef ele| { 
 				// the serviceDef may be the same, but if the scope is perInjection, the instances will be different
 				if (ele.serviceId == def.serviceId && def.scope != ServiceScope.perInjection)
 					throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).map |ServiceDef sd->Str| { sd.serviceId }))

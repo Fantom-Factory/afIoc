@@ -307,6 +307,11 @@ Don't be scared of creating 'const' services! Use the [afConcurrent]`http://www.
 
 Release Notes [#releaseNotes]
 *****************************
+v1.6.2 [#1.6.2]
+---------------
+ - Chg: Deleted all '@Deprecated' classes and methods.
+ - Chg: Discovered 'List.eachRange()'!
+
 v1.6.0 [#1.6.0]
 ---------------
  - New: 'Registry.dependencyByType()' now returns services via a type inheritance search.

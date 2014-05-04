@@ -150,7 +150,7 @@ internal class OrderingCtx {
 		nodeStack.push(node)
 
 		// check for recursion
-		nodeStack[0..<-1].each { 
+		nodeStack.eachRange(0..<-1) { 
 			if (it == node)
 				throw IocErr(IocMessages.configRecursion(stackNames))
 		}
