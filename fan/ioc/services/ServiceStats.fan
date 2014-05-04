@@ -44,9 +44,6 @@ const class ServiceStat {
 		internal set {	atomNoOfImpls.val = it}		
 	}
 
-	@NoDoc @Deprecated { msg="Use 'serviceType' instead." }
-	Type type() { serviceType }
-
 	internal new make(|This| f) { f(this) }
 	
 	internal Void incImpls() {

@@ -75,7 +75,7 @@ internal class TestProxyBuilder : IocTest {
 	}
 	
 	Void testWithoutProxy() {
-		stats	:= reg.serviceById(ServiceIds.serviceStats) as ServiceStats
+		stats	:= reg.serviceById(ServiceStats#.qname) as ServiceStats
 		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
 		s64 	:= reg.serviceById("s64") as T_MyService64
 		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
@@ -85,7 +85,7 @@ internal class TestProxyBuilder : IocTest {
 	
 	Void testProxyTypesAreCached() {
 		type	:= PublicTestTypes.type("T_MyService50")
-		bob		:= reg.serviceById(ServiceIds.serviceProxyBuilder) as ServiceProxyBuilder
+		bob		:= reg.serviceById(ServiceProxyBuilder#.qname) as ServiceProxyBuilder
 		pType1	:= bob.compileProxyType(type)
 		pType2	:= bob.compileProxyType(type)
 		verifySame(pType1, pType2)

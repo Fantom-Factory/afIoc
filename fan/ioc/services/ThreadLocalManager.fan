@@ -43,7 +43,7 @@ const mixin ThreadLocalManager {
 }
 
 
-internal const class ThreadLocalManagerImpl : ThreadLocalManager, ThreadStashManager {
+internal const class ThreadLocalManagerImpl : ThreadLocalManager {
 	
 	static	
 	private const AtomicInt	counter	:= AtomicInt(0)
@@ -56,10 +56,6 @@ internal const class ThreadLocalManagerImpl : ThreadLocalManager, ThreadStashMan
 		this.cleanUpHandlers = createList("ThreadLocalManager.cleanupHandlers")
 	}
 
-	override ThreadStash createStash(Str owner) {
-		ThreadStash(prefix + "." + owner)
-	}
-	
 	override LocalRef createRef(Str name, Obj? def := null) {
 		LocalRef("${prefix}.\${id}.${name}", def)
 	}

@@ -28,7 +28,7 @@ internal class TestRegistryBuilder : IocTest {
 	Void testDisabeProxy() {
 		reg := (RegistryImpl) RegistryBuilder().addModule(T_MyModule76#).build(["DISableProxIES":true]).startup
 		
-		stats := (ServiceStats) reg.serviceById(ServiceIds.serviceStats)
+		stats := (ServiceStats) reg.serviceById(ServiceStats#.qname)
 		verifyEq(stats.stats["s50"].lifecycle, ServiceLifecycle.DEFINED)
 		
 		s50 := reg.serviceById("s50")
@@ -41,6 +41,6 @@ internal class TestRegistryBuilder : IocTest {
 	Void testRegistryOptionsBecomeCaseInsensitve() {
 		reg := RegistryBuilder().build(Str:Obj?[:] { it.caseInsensitive=false }.add("wot", "ever"))
 		
-		verifyEq(reg.serviceById(ServiceIds.registryMeta)->get("WOT"), "ever")
+		verifyEq(reg.serviceById(RegistryMeta#.qname)->get("WOT"), "ever")
 	}
 }

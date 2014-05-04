@@ -61,13 +61,6 @@ const class IocService : Service {
 		return this
 	}
 
-	@NoDoc @Deprecated	// for afGenesis
-	This addModulesFromDependencies(Pod dependenciesOf) {
-		addModulesFromPod(dependenciesOf, true)
-	}
-
-	
-
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 
 	** Builds and starts up the registry.

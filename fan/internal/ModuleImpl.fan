@@ -13,7 +13,7 @@ internal const class ModuleImpl : Module {
 	private  const StrategyRegistry		typeToServiceDefs
 
 	new makeBuiltIn(ObjLocator objLocator, ThreadLocalManager localManager, Str moduleId, ServiceDef:Obj? services) {
-		localMap	:= localManager.createMap(ServiceIds.builtInModuleId)
+		localMap	:= localManager.createMap(moduleId)
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		services.each |impl, def| {
 			srvState[def.serviceId] = ModuleState(localMap, def, impl, ServiceLifecycle.BUILTIN)
@@ -180,7 +180,7 @@ internal const class ModuleImpl : Module {
 		}
 		
 		return InjectionTracker.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
-			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceIds.serviceProxyBuilder)
+			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname)
 			proxy			:= proxyBuilder.createProxyForService(def)
 			
 			if (useCache) {

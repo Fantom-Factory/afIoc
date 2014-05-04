@@ -38,10 +38,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
         return this
     }	
 	
-	override ServiceBindingOptions bindImpl(Type serviceType) {
-		bind(serviceType);
-	}
-	
 	// ---- ServiceBindingOptions Methods ---------------------------------------------------------
 
 	override This withId(Str id) {

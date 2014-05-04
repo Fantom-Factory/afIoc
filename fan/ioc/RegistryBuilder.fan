@@ -76,14 +76,6 @@ class RegistryBuilder {
 		}
 	}
 
-
-	** Note that this method now adds pod dependencies, and not just transitive dependencies as it
-	** used to.
-	@NoDoc @Deprecated { msg="Use addModulesFromPod() instead" }
-	This addModulesFromDependencies(Pod pod, Bool addDependencies := true) {
-		addModulesFromPod(pod, addDependencies)
-	}
-
 	** Looks for all index properties of key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
 	This addModulesFromIndexProperties() {
