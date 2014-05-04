@@ -213,7 +213,7 @@ internal class BuildCtx {
 		moduleStack.push(module)
 		try {
 			// check for recursion
-			moduleStack[0..<-1].each { 
+			moduleStack.eachRange(0..<-1) { 
 				if (it == module)
 					throw IocErr(IocMessages.moduleRecursion(moduleStack.map { it.qname }))
 			}			
@@ -229,7 +229,7 @@ internal class BuildCtx {
 			ignore := false
 			
 			// check for recursion
-			podStack[0..<-1].each { 
+			podStack.eachRange(0..<-1) { 
 				if (it == pod) {
 					this.log("Pod '$pod.name' already inspected...ignoring")
 					ignore = true

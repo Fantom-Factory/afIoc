@@ -44,26 +44,20 @@ internal class T_MyModule20 {
 }
 
 internal class T_MyService15 {
-	@Inject
-	T_MyService15? ser
+	@Inject	T_MyService15? ser
 }
 
 internal class T_MyService16 {
-	@Inject
-	T_MyService17? ser
+	@Inject	T_MyService17? ser
 }
 
 internal class T_MyService17 {
-	@Inject
-	T_MyService16 ser
-	
+	@Inject	T_MyService16 ser
 	new make(|This|in) { in(this) }
 }
 
 internal class T_MyService18 {
-	@Inject
-	T_MyService17 ser
-	
+	@Inject	T_MyService17 ser
 	new make(|This|in) { in(this) }
 }
 
