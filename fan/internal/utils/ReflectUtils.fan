@@ -8,9 +8,7 @@ internal class ReflectUtils {
 		return type.fields.find |field| {
 			if (field.name != fieldName) 
 				return false
-			if (!field.type.fits(fieldType))
-				return false				
-			return true 
+			return fits(field.type, fieldType)
 		}
 	}
 	
@@ -21,9 +19,7 @@ internal class ReflectUtils {
 				return false
 			if (method.name != ctorName) 
 				return false
-			if (!paramTypesFitMethodSignature(params, method))
-				return false				
-			return true 
+			return (paramTypesFitMethodSignature(params, method))
 		}
 	}
 
@@ -36,11 +32,9 @@ internal class ReflectUtils {
 				return false
 			if (method.isStatic != isStatic) 
 				return false
-			if (returnType != null && !method.returns.fits(returnType))
+			if (returnType != null && !fits(method.returns, returnType))
 				return false
-			if (!paramTypesFitMethodSignature(params, method))
-				return false				
-			return true 
+			return (paramTypesFitMethodSignature(params, method))
 		}
 	}
 
