@@ -222,6 +222,7 @@ class OrderedConfig {
 			return object
 		}
 
+		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
 		if (object.typeof.fits(listType))
 			return object
 

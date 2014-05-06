@@ -161,6 +161,7 @@ class MappedConfig {
 	}
 
 	private Obj validateKey(Obj key, Bool isOverrideKey) {
+		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
 		if (key.typeof.fits(keyType))
 			return key
 		
@@ -189,6 +190,7 @@ class MappedConfig {
 			return val			
 		}
 
+		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
 		if (val.typeof.fits(valType))
 			return val
 

@@ -64,16 +64,54 @@ internal class TestCallMethod : IocTest {
 		reg.callMethod(#callMeList, this, [69, Str["Dude"]])
 		verifyEq(num, 69)
 		verifyEq(wot, "[Dude]")
+
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Int[]#, Str[]#)) {
+			reg.callMethod(#callMeList2, this, [Int[69]])
+		}
 	}
 
-	Void testEmptyLists() {
+	Void testLenientLists() {
 		reg := RegistryBuilder().build.startup
 		
 		// ensure shorthand notation for empty lists still make it through
-		reg.callMethod(#callMeList2, this, [69, [,]])
-		verifyEq(num, 69)
+		reg.callMethod(#callMeList2, this, [ [,] ])
 		verifyEq(wot, "[,]")
+
+		// test type inference - if it *could* fit, it's allowed
+		reg.callMethod(#callMeList2, this, [ Obj["Str!"] ])
+		verifyEq(wot, "[Str!]")
+		reg.callMethod(#callMeList3, this, [ Num?[62] ])
+		verifyEq(wot, "[62]")
 	}
+
+	Void testMaps() {
+		reg := RegistryBuilder().build.startup
+		reg.callMethod(#callMeMap, this, [69, Str:Str["Du":"de"]])
+		verifyEq(num, 69)
+		verifyEq(wot, "[Du:de]")
+
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Str:Int#, Str:Str#)) {
+			reg.callMethod(#callMeMap2, this, [["Du":2]])
+		}
+		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Int:Str#, Str:Str#)) {
+			reg.callMethod(#callMeMap2, this, [[4:"de"]])
+		}
+	}
+
+	Void testLenientMaps() {
+		reg := RegistryBuilder().build.startup
+		
+		// ensure shorthand notation for empty maps still make it through
+		reg.callMethod(#callMeMap2, this, [ [:] ])
+		verifyEq(wot, "[:]")
+
+		// test type inference - if it *could* fit, it's allowed
+		reg.callMethod(#callMeMap2, this, [ Obj:Obj["Du":"de"] ])
+		verifyEq(wot, "[Du:de]")
+		reg.callMethod(#callMeMap3, this, [ Num:Num?[42:69] ])
+		verifyEq(wot, "[42:69]")
+	}
+
 
 	
 	Void callMe(Int num, Registry registry) {
@@ -94,12 +132,26 @@ internal class TestCallMethod : IocTest {
 		this.num = num
 		this.type = registry.typeof
 	}
+
 	Void callMeList(Int num, Obj[]? objs) {
 		this.num = num
 		this.wot = objs.toStr
 	}
-	Void callMeList2(Int num, Str[] strs) {
+	Void callMeList2(Str[] strs) {
+		this.wot = strs.toStr
+	}
+	Void callMeList3(Int[] strs) {
+		this.wot = strs.toStr
+	}
+
+	Void callMeMap(Int num, Obj:Obj? objs) {
 		this.num = num
+		this.wot = objs.toStr
+	}
+	Void callMeMap2(Str:Str strs) {
+		this.wot = strs.toStr
+	}
+	Void callMeMap3(Int:Int strs) {
 		this.wot = strs.toStr
 	}
 }

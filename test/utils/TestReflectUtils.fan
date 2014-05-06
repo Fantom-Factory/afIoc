@@ -136,7 +136,7 @@ internal class TestReflectUtils : Test {
 	}
 	
 	Void testKnarlyFuncsInParams() {
-		Obj.echo("Func#.fits(|Num?|) -> ${Func#.fits(|Num?|#)}")	// Func#.fits(|Num?|#) -> false
+		Obj.echo("Func#.fits(|Num?|)  -> ${Func#.fits(|Num?|#)}")	// Func#.fits(|Num?|#) -> false
 		Obj.echo("|Num?|#.fits(Func#) -> ${|Num?|#.fits(Func#)}")	// |Num?|#.fits(Func#) -> true
 		
 		// these tests aren't my understanding, they just demonstrate what does and doesn't work!
@@ -153,6 +153,32 @@ internal class TestReflectUtils : Test {
 		verify		(ReflectUtils.paramTypesFitMethodSignature([|Num->Int|#], 	MyReflectTestUtils2#funcy2))
 	}
 	
+	Void testLenientLists() {
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Int []# ], MyReflectTestUtils2#lenientLists))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Int?[]# ], MyReflectTestUtils2#lenientLists))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Num []# ], MyReflectTestUtils2#lenientLists))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Num?[]# ], MyReflectTestUtils2#lenientLists))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Obj []# ], MyReflectTestUtils2#lenientLists))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ Obj?[]# ], MyReflectTestUtils2#lenientLists))
+		verifyFalse	(ReflectUtils.paramTypesFitMethodSignature([ Str []# ], MyReflectTestUtils2#lenientLists))
+		verifyFalse	(ReflectUtils.paramTypesFitMethodSignature([ Str?[]# ], MyReflectTestUtils2#lenientLists))
+	}
+
+	Void testLenientMaps() {
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Int :Num ]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Num ]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Obj :Num ]# ], MyReflectTestUtils2#lenientMaps))
+		verifyFalse	(ReflectUtils.paramTypesFitMethodSignature([ [Str :Num ]# ], MyReflectTestUtils2#lenientMaps))
+
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Int ]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Int?]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Num ]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Num?]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Obj ]# ], MyReflectTestUtils2#lenientMaps))
+		verify		(ReflectUtils.paramTypesFitMethodSignature([ [Num :Obj?]# ], MyReflectTestUtils2#lenientMaps))
+		verifyFalse	(ReflectUtils.paramTypesFitMethodSignature([ [Num :Str ]# ], MyReflectTestUtils2#lenientMaps))
+		verifyFalse	(ReflectUtils.paramTypesFitMethodSignature([ [Num :Str?]# ], MyReflectTestUtils2#lenientMaps))
+	}
 }
 
 
@@ -185,4 +211,7 @@ internal class MyReflectTestUtils2 : MyReflectTestUtils1 {
 	Void funcy2(|Num?->Num| f) { }
 
 	Void nully(Str? x, Int y) { }
+
+	Void lenientLists(Num[] list) { }
+	Void lenientMaps(Num:Num map) { }
 }
