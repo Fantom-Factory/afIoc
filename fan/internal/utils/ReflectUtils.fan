@@ -1,4 +1,5 @@
 
+// in IoC, currently just used for TypeCoercer
 internal class ReflectUtils {
 	private new make() { }
 
@@ -49,9 +50,29 @@ internal class ReflectUtils {
 				return methodParam.hasDefault
 			if (params[i] == null)
 				return methodParam.type.isNullable
-			if (!params[i].fits(methodParam.type))
-				return false
-			return true
+			return fits(params[i], methodParam.type)
 		}
 	}
+		
+	** A replacement for 'Type.fits()' that take into account type inference for Lists and Maps.
+	** 
+	** Returns 'true' if 'typeA' *fits into* 'typeB'.  
+	static Bool fits(Type? typeA, Type? typeB) {
+		if (typeA == typeB)					return true
+		if (typeA == null || typeB == null)	return false
+		
+		if (typeA.name == "List" && typeB.name == "List")
+			return paramFits(typeA, typeB, "V")
+			
+		if (typeA.name == "Map" && typeB.name == "Map")
+			return paramFits(typeA, typeB, "K") && paramFits(typeA, typeB, "V")
+			
+		return typeA.fits(typeB)
+	}
+
+	private static Bool paramFits(Type? typeA, Type? typeB, Str key) {
+		paramTypeA := typeA.params[key] ?: Obj?#
+		paramTypeB := typeB.params[key] ?: Obj?#
+		return (paramTypeA.fits(paramTypeB) || paramTypeB.fits(paramTypeA))
+	}		
 }

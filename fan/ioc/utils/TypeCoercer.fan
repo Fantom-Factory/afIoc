@@ -22,15 +22,37 @@ const class TypeCoercer {
 	**  1. toXXX()
 	**  2. fromXXX()
 	**  3. makeFromXXX() 
-	Obj coerce(Obj value, Type toType) {
+	Obj? coerce(Obj? value, Type toType) {
+		if (value == null) 
+			return toType.isNullable ? null : throw IocErr(IocMessages.typeCoercionNotFound(null, toType))
 
 		if (value.typeof.name == "List" && toType.name == "List") {
 			toListType 	:= toType.params["V"]
-			toList 		:= toListType.emptyList.rw
+			toList 		:= (Obj?[]) toListType.emptyList.rw
 			((List) value).each {
 				toList.add(coerce(it, toListType))
 			}
 			return toList
+		}
+
+		if (value.typeof.name == "Map" && toType.name == "Map") {
+			toKeyType := toType.params["K"]
+			toValType := toType.params["V"]
+			toMap	  := ([Obj:Obj?]?) null
+			
+			if (((Map) value).caseInsensitive && toKeyType.fits(Str#))
+				toMap	 = Map.make(toType) { caseInsensitive = true }
+			if (((Map) value).ordered)
+				toMap	 = Map.make(toType) { ordered = true }
+			if (toMap == null)
+				toMap	 = Map.make(toType)
+
+			((Map) value).each |v1, k1| {
+				k2	:= coerce(k1, toKeyType)
+				v2	:= coerce(v1, toValType)
+				toMap[k2] = v2
+			}
+			return toMap
 		}
 
 		meth := coerceMethod(value.typeof, toType)

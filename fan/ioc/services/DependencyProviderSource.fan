@@ -59,9 +59,9 @@ internal const class DependencyProviderSourceImpl : DependencyProviderSource {
 		
 		if (dependency == null) {
 			if (!ctx.dependencyType.isNullable )
-				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
+				throw IocErr(IocMessages.dependencyDoesNotFit(null, ctx.dependencyType))
 		} else {
-			if (!dependency.typeof.fits(ctx.dependencyType))
+			if (!ReflectUtils.fits(dependency.typeof, ctx.dependencyType))
 				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
 		}
 

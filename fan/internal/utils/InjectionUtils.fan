@@ -111,15 +111,10 @@ internal const class InjectionUtils {
 				ctorFieldVals = ctorFieldVals.map |val, field| {
 					if (!building.fits(field.parent))
 						throw IocErr(IocMessages.injectionUtils_ctorFieldType_wrongType(field, building))
-					if (val == null) {
-						if (!field.type.isNullable)
-							throw IocErr(IocMessages.injectionUtils_ctorFieldType_nullValue(field))
-					} else {
-						// .toNonNullable is a fix for http://fantom.org/sidewalk/topic/2256
-						// it doesn't really matter as we've just dealt with null values
-						if (!val.typeof.toNonNullable.fits(field.type.toNonNullable))
-							throw IocErr(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(val, field))
-					}
+					if (val == null && !field.type.isNullable)
+						throw IocErr(IocMessages.injectionUtils_ctorFieldType_nullValue(field))
+					if (val != null && !ReflectUtils.fits(val.typeof, field.type))
+						throw IocErr(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(val, field))
 					
 					// turn Maps and Lists into their immutable counterparts 
 					return field.isConst ? val.toImmutable : val
@@ -160,21 +155,13 @@ internal const class InjectionUtils {
 				if (index < providedMethodArgs.size) {
 					log("Parameter provided by user")
 					
-					provided := providedMethodArgs[index] 
-					if (provided != null) {
-						
-						// special case for lists - as Str[] does not fit Obj[] 
-						if (provided.typeof.name == "List" && param.type.name == "List") {
-							// if the list is empty, who cares about the types!?
-							if (!(provided as List).isEmpty) {
-								providedListType := provided.typeof.params["V"] 
-								paramListType	 := param.type.params["V"]
-								if (!providedListType.fits(paramListType))
-									throw IocErr(IocMessages.providerMethodArgDoesNotFit(providedListType, paramListType))
-							}
-						} else if (!provided.typeof.fits(param.type)) 
-							throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
-					}
+					provided := providedMethodArgs[index]
+					
+					if (provided == null && !param.type.isNullable)
+						throw IocErr(IocMessages.providerMethodArgDoesNotFit(null, param.type))
+					if (provided != null && !ReflectUtils.fits(provided.typeof, param.type))
+						throw IocErr(IocMessages.providerMethodArgDoesNotFit(provided.typeof, param.type))
+
 					return provided
 				}
 

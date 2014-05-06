@@ -199,16 +199,16 @@ internal const class IocMessages {
 		"Service Id '${serviceId}' of type ${serviceType.signature} does not fit type ${fieldType.signature}"
 	}
 	
-	static Str dependencyDoesNotFit(Type dependencyType, Type fieldType) {
-		"Dependency of type ${dependencyType.signature} does not fit type ${fieldType.signature}"
+	static Str dependencyDoesNotFit(Type? dependencyType, Type fieldType) {
+		"Dependency of type ${dependencyType?.signature} does not fit type ${fieldType.signature}"
 	}
 	
 	static Str onlyOneDependencyProviderAllowed(Type type, Type[] dps) {
 		"Only one Dependency Provider is allowed, but type ${type.signature} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
 	}
 	
-	static Str providerMethodArgDoesNotFit(Type providedArg, Type paramArg) {
-		"Provided autobuild argument of type '$providedArg.signature' does not fit parameter '$paramArg.signature'"
+	static Str providerMethodArgDoesNotFit(Type? providedArg, Type paramArg) {
+		"Provided autobuild argument of type '$providedArg?.signature' does not fit parameter '$paramArg.signature'"
 	}
 	
 	static Str fieldNotSetErr(Str fieldDesc, Method ctor) {
@@ -231,8 +231,8 @@ internal const class IocMessages {
 		"Could not coerce ${from.qname} to ${to.qname}"
 	}
 	
-	static Str typeCoercionNotFound(Type from, Type to) {
-		"Could not find coercion from ${from.qname} to ${to.qname}"
+	static Str typeCoercionNotFound(Type? from, Type to) {
+		"Could not find coercion from ${from?.qname} to ${to.signature}"
 	}
 	
 	static Str injectionUtils_ctorFieldType_wrongType(Field field, Type building) {
