@@ -38,15 +38,21 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 
 
 
-Install [#install]
+Install [#Install]
 ******************
-Install 'IoC' with the Fantom Repository Manager ( [fanr]`http://fantom.org/doc/docFanr/Tool.html#install` ):
+Install '@{project.name}' with the Fantom Repository Manager ( [fanr]`docFanr::Tool.install` ):
 
-  C:\> fanr install -r http://repo.status302.com/fanr/ afIoc
+  C:\> fanr install -r http://repo.status302.com/fanr/ @{pod.name}
 
-To use in a Fantom project, add a dependency to its 'build.fan':
+To use in a [Fantom]`http://fantom.org/` project, add a dependency to 'build.fan':
 
-  depends = ["sys 1.0", ..., "afIoc 1.6+"]
+  depends = ["sys 1.0", ..., "@{pod.name} @{pod.version}+"]
+
+
+
+Documentation [#documentation]
+******************************
+Full API & fandocs are available on the [Status302 repository]`http://repo.status302.com/doc/@{pod.name}/#overview`.
 
 
 
@@ -217,7 +223,7 @@ After object construction and field injection, any extra setup may be performed 
 
 Service Scope [#serviceScope]
 *****************************
-Services are either created once [perApplication]`ServiceScope.perApplication` (singletons) or once [perThread]`ServiceScope.perThread`. Application scoped services *must* be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
+Services are either created once [perApplication]`ServiceScope#perApplication` (singletons) or once [perThread]`ServiceScope#perThread`. Application scoped services *must* be defined as 'const'. If you need mutable state in your const service, try using the `ConcurrentState` class.
 
 (Using proxies) you can even inject a 'perThread' scoped service into a 'perApplication' scoped service! Think about it... you can inject your [http request]`web::WebReq` into any static service you desire!
 
@@ -297,11 +303,11 @@ If you have no say in how your classes are created (say, when you're using flux)
 
   ((IocService) Service.find(IocService#)).injectIntoFields(this)
 
-When creating GUIs (say, with fwt) then use `Registry.autobuild` to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
+When creating GUIs (say, with fwt) then use [Registry.autobuild()]`Registry#autobuild` to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
 
 IoC gives detailed error reporting should something go wrong, nevertheless try turning debug logging on to make IoC give trace level contextual information.
 
-Don't be scared of creating 'const' services! Use the [afConcurrent]`http://www.fantomfactory.org/pods/afConcurrent` library to safely store and access mutable state across thread boundaries.
+Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurrent` library to safely store and access mutable state across thread boundaries.
 
 
 
@@ -324,8 +330,8 @@ v1.6.0 [#1.6.0]
  - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
  - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
  - Chg: Optomised internal concurrent processes - **now 20% faster!**
- - Chg: [afConcurrent]`http://www.fantomfactory.org/pods/afConcurrent` has been broken out into an external dependency.
- - Chg: Deprecated 'ConcurrentState, ConcurrentCache, ThreadStash' in favour of [afConcurrent]`http://www.fantomfactory.org/pods/afConcurrent` classes.
+ - Chg: [Concurrent]`pod:afConcurrent` has been broken out into an external dependency.
+ - Chg: Deprecated 'ConcurrentState, ConcurrentCache, ThreadStash' in favour of [Concurrent]`pod:afConcurrent` classes.
  - Chg: Attempting to '@Inject' into a static field will now throw an Err.
  - Chg: Renamed 'ThreadStashManager' -> 'ThreadLocalManager'
  - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
@@ -377,9 +383,9 @@ v1.4.8 [#1.4.8]
 
 v1.4.6 [#1.4.6]
 ---------------
- - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to `ConcurrentCache`.
+ - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to 'ConcurrentCache'.
  - New: `NotFoundErr` now pretty prints available values.
- - Chg: [afPlastic]`http://repo.status302.com/doc/afPlastic/#overview` has been broken out into an external dependency.
+ - Chg: [Plastic]`pod:afPlastic` has been broken out into an external dependency.
  - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
  - Bug: `DependencyProvider`s could Err when they depended on lazy services (recursion error).
  - Bug: 'ThreadStash' name prefix tidy.
@@ -401,8 +407,8 @@ v1.4.2 [#1.4.2]
 
 v1.4.0 [#1.4.0]
 ---------------
- - New: Added `OrderedConfig.remove` and `MappedConfig.remove`.
- - New: Added `RegistryBuilder.moduleTypes` to return a list of modules types held by the builder.
+ - New: Added 'OrderedConfig.remove()' and 'MappedConfig.remove()'.
+ - New: Added `RegistryBuilder#moduleTypes` to return a list of modules types held by the builder.
  - New: Added 'suppressStartupMsg' build option.
  - Chg: Rejigged the config override argument order. (Breaking Change.)
  - Chg: Deleted '@Deprecated' config methods.
@@ -414,7 +420,7 @@ v1.4.0 [#1.4.0]
 v1.3.10 [#1.3.10]
 -----------------
  - New: Added 'PipelineBuilder' util service.
- - Chg: [Registry.autobuild()]`Registry.autobuild` now looks for a default implementation if passed a mixin.
+ - Chg: [Registry.autobuild()]`Registry#autobuild` now looks for a default implementation if passed a mixin.
  - Chg: Made it clear when service creation fails due to Registry Shutdown.
  - Bug: Proxy Types for lazy services are now cached. Would have caused a memory leak when using creating lots of threaded const services.
  - Bug: Ordered contributions with multiple 'before:' constraints could be added to the config list multiple times.
@@ -449,8 +455,8 @@ v1.3.2 [#v1.3.2]
 ----------------
  - New: IocErr is thrown on startup if module advisor methods don't match any proxyable serivces.
  - New: Module advisor methods may be marked as optional.
- - New: Add thread clean up handlers to `ThreadStashManager`.
- - New: Added `ThreadStash.contains`
+ - New: Add thread clean up handlers to 'ThreadStashManager'.
+ - New: Added 'ThreadStash#contains'
  - Chg: Operations Err trace is now part of the Err msg (and no longer logged to 'sys.err')
  - Chg: 'ConcurrentState.withState()' now returns a 'Future'.
  - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
@@ -459,8 +465,8 @@ v1.3.0 [#v1.3.0]
 ----------------
  - New: Simple Aspect API for advising proxied servies.
  - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
- - New: `ThreadStashManager` now keeps tabs on your `ThreadStash`s so they may be cleanup at the end of, um... say a web request!
- - Chg: Revamped 'LocalStash' into `ThreadStash`
+ - New: 'ThreadStashManager' now keeps tabs on your 'ThreadStashes' so they may be cleanup at the end of, um... say a web request!
+ - Chg: Revamped 'LocalStash' into 'ThreadStash'
  - Chg: Mapped override keys can always be a Str
  - Chg: Removed Ioc frames from stack traces (no more 150+ line stacktraces!)
  - Chg: Reducded INFO logging.
@@ -470,8 +476,8 @@ v1.3.0 [#v1.3.0]
 
 v1.2.2 [#v1.2.2]
 ----------------
- - Chg: `Registry.autobuild` now accepts optional parameters to pass / mix into the ctor.
- - Chg: `ConcurrentState` now accepts a factory method for creating / initialising state.
+ - Chg: `Registry#autobuild` now accepts optional parameters to pass / mix into the ctor.
+ - Chg: 'ConcurrentState' now accepts a factory method for creating / initialising state.
 
 v1.2.0 [#v1.2.0]
 ----------------
@@ -489,14 +495,14 @@ v1.1.0 [#v1.1.0]
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
  - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
- - New: [Ordered configuration]`OrderedConfig.addOrdered` contributions are ordered across modules.
+ - New: [Ordered configuration]`OrderedConfig#addOrdered` contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
 
 v1.0.0 [#v1.0.0]
 ----------------
  - New: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
- - Chg: Multiple instances of `ConcurrentState` can be created with the same state class.
- - Bug: Made public the 'withState()' and 'getState()' methods on `ConcurrentState`.
+ - Chg: Multiple instances of 'ConcurrentState' can be created with the same state class.
+ - Bug: Made public the 'withState()' and 'getState()' methods on 'ConcurrentState'.
  - Bug: NPE could be thrown if ctor depdendency not found.
 
 v0.0.2 [#v0.0.2]
