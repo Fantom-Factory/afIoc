@@ -13,8 +13,12 @@ internal const class OneShotLock {
 		check	// you can't lock twice!
 		lockFlag.val = true
 	}
+
+	Bool locked() {
+		lockFlag.val
+	}
 	
-	public Void check() {
+	Void check() {
 		if (lockFlag.val)
 			throw IocErr(IocMessages.oneShotLockViolation(because))
 	}

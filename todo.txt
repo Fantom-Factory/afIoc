@@ -2,8 +2,14 @@
 v1.6.2 Maybe...?
 ----------------
 Delete all deprecated classes -> update BedNap first!
+
 Think of a better name for 'StrategyRegistry'...?  'Fits'??
 
+ActorPools... stop / kill all pools on shutdown?
+
+Turn Not Found Err into a mixin
+
+Update logo (v. important)
 
 
 Meh... can't be arsed
