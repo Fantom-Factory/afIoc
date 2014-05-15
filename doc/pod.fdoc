@@ -52,7 +52,7 @@ To use in a [Fantom]`http://fantom.org/` project, add a dependency to 'build.fan
 
 Documentation [#documentation]
 ******************************
-Full API & fandocs are available on the [Status302 repository]`http://repo.status302.com/doc/@{pod.name}/#overview`.
+Full API & fandocs are available on the [Status302 repository]`http://repo.status302.com/doc/@{pod.name}/`.
 
 
 
