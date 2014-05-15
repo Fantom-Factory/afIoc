@@ -44,9 +44,11 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
 
     C:\> fanr install -r http://repo.status302.com/fanr/ afIoc
+
 To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan`:
 
     depends = ["sys 1.0", ..., "afIoc 1.6+"]
+
 ## Documentation 
 
 Full API & fandocs are available on the [Status302 repository](http://repo.status302.com/doc/afIoc/#overview).
@@ -59,40 +61,42 @@ Full API & fandocs are available on the [Status302 repository](http://repo.statu
 4. Build and start the registry
 5. Go, go, go!
 
-    class Main {
-      static Void main(Str[] args) {
-        registry := IocService([MyModule#]).start.registry
-    
-        test1 := (MyService1) registry.serviceById("myservice1")        // return a singleton
-        test2 := (MyService1) registry.dependencyByType(MyService1#)    // same instance as test1
-        test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
-        test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
-    
-        test1.service2.kick // --> Ass!
-        test2.service2.kick // --> Ass!
-        test3.service2.kick // --> Ass!
-        test4.service2.kick // --> Ass!
-    
-        Service.find(IocService#).uninstall
-      }
-    }
-    
-    class MyModule {                    // every application needs a module class
-      static Void bind(ServiceBinder binder) {
-        binder.bind(MyService1#)    // define your singletons here
-        binder.bind(MyService2#)
-      }
-    }
-    
-    class MyService1 {
-      @Inject               // you'll use @Inject all the time
-      MyService2? service2  // inject services into services!
-    }
-    
-    class MyService2 {
-      Str kick() { return "Ass!" }
-    }
-    
+```
+class Main {
+  static Void main(Str[] args) {
+    registry := IocService([MyModule#]).start.registry
+
+    test1 := (MyService1) registry.serviceById("myservice1")        // return a singleton
+    test2 := (MyService1) registry.dependencyByType(MyService1#)    // same instance as test1
+    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
+    test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
+
+    test1.service2.kick // --> Ass!
+    test2.service2.kick // --> Ass!
+    test3.service2.kick // --> Ass!
+    test4.service2.kick // --> Ass!
+
+    Service.find(IocService#).uninstall
+  }
+}
+
+class MyModule {                    // every application needs a module class
+  static Void bind(ServiceBinder binder) {
+    binder.bind(MyService1#)    // define your singletons here
+    binder.bind(MyService2#)
+  }
+}
+
+class MyService1 {
+  @Inject               // you'll use @Inject all the time
+  MyService2? service2  // inject services into services!
+}
+
+class MyService2 {
+  Str kick() { return "Ass!" }
+}
+```
+
 ## Terminology 
 
 IoC distinguishes between **Services** and **Dependencies**.
@@ -115,6 +119,7 @@ Use [IocService](http://repo.status302.com/doc/afIoc/IocService.html) to start `
     service := reg.dependencyByType(MyService#)
     ...
     Service.find(IocService#).uninstall
+
 Or use [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html) to manage the [Registry](http://repo.status302.com/doc/afIoc/Registry.html) instance manually;
 
     reg := RegistryBuilder().addModule(MyModule#).build.startup
@@ -122,6 +127,7 @@ Or use [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.htm
     service := reg.dependencyByType(MyService#)
     ...
     reg.shutdown
+
 When [building a registry](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), you declare which modules are to loaded. You may also load modules from dependant pods, in which case, each pod should have declared the following meta:
 
 `"afIoc.module" : "{qname}"`
@@ -136,31 +142,35 @@ Services are defined in Module classes, where each meaningful method is static a
 
 Except the `bind()` method which, does not have a facet but, is declared with a standard signature. The bind method is also the common means to define services. For example:
 
-    class AppModule {
-    
-      static Void bind(ServiceBinder binder) {
-    
-        // has service ID of 'myPod::MyService'
-        binder.bind(MyService#, MyServiceImpl#)
-    
-        // has service ID of 'myPod::myServiceImpl'
-        binder.bind(MyServiceImpl#)
-    
-        // has service ID of 'elephant'
-        binder.bind(MyServiceImpl#).withId("elephant")
-      }
-    }
-    
+```
+class AppModule {
+
+  static Void bind(ServiceBinder binder) {
+
+    // has service ID of 'myPod::MyService'
+    binder.bind(MyService#, MyServiceImpl#)
+
+    // has service ID of 'myPod::myServiceImpl'
+    binder.bind(MyServiceImpl#)
+
+    // has service ID of 'elephant'
+    binder.bind(MyServiceImpl#).withId("elephant")
+  }
+}
+```
+
 Modules may can also define *builder* methods. These are static methods annotated with the `@Build` facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved and injected as such when the method is called. For example, to manually build a service with the Id `penguin`:
 
-    class AppModule {
-    
-      @Build { serviceId="penguin" }
-      static EmailService buildStuff(EmailConfig config) {
-        EmailServiceImpl(config)
-      }
-    }
-    
+```
+class AppModule {
+
+  @Build { serviceId="penguin" }
+  static EmailService buildStuff(EmailConfig config) {
+    EmailServiceImpl(config)
+  }
+}
+```
+
 Services are *not* created until they are referenced or required.
 
 ## Dependency Injection 
@@ -173,23 +183,28 @@ When IoC autobuilds a service it locates a suitable ctor. This is either the one
 
 Field injection happens *after* the object has been created and so fields must be declared as nullable:
 
-    class MyService {
-      @Inject
-      MyService? myService
-    }
-    
+```
+class MyService {
+  @Inject
+  MyService? myService
+}
+```
+
 The exception is if you declare an it-block ctor:
 
-    const class MyService {
-      @Inject
-      const MyService myService
-    
-      new make(|This|? f := null) { f?.call(this) }
-    }
-    
+```
+const class MyService {
+  @Inject
+  const MyService myService
+
+  new make(|This|? f := null) { f?.call(this) }
+}
+```
+
 On calling `f` all injectable fields are set, even fields marked as `const`. The it-block ctor may be abbreviated to:
 
     new make(|This| f) { f(this) }
+
 After object construction and field injection, any extra setup may be performed via methods annotated with `@PostInjection`. These methods may be of any visibility and all parameters are resolved as dependencies.
 
 ## Service Scope 
@@ -202,22 +217,26 @@ Services are either created once [perApplication](http://repo.status302.com/doc/
 
 Services can solicit configuration from modules simply by declaring a list or a map in their ctor or builder method.
 
-    class Example {
-    
-      new make(Str[] mimeTypes) { ... }
-      ...
-    }
-    
+```
+class Example {
+
+  new make(Str[] mimeTypes) { ... }
+  ...
+}
+```
+
 Modules may then contribute to the `Example` service:
 
-    class AppModule {
-    
-      @Contribute { serviceType=Example# }
-      static Void contributeExample(OrderedConfig conf) {
-        conf.add("text/plain")
-      }
-    }
-    
+```
+class AppModule {
+
+  @Contribute { serviceType=Example# }
+  static Void contributeExample(OrderedConfig conf) {
+    conf.add("text/plain")
+  }
+}
+```
+
 The list and map types are inferred from the ctor definition and all contribution types must fit.
 
 If the service declares a map configuration then contribution methods should take a `MappedConfig` object. If the map config uses `Str` as the key, then the created map is `caseInsensitive` otherwise the map is `ordered`.
@@ -253,11 +272,13 @@ See [@Advise](http://repo.status302.com/doc/afIoc/Advise.html) for details
 Strive to keep your services `const`, delcare a serialisation ctor to keep `@Inject`ed fields non-nullable:
 
     new make(|This| injectInto) { injectInto(this) }
+
 Define one main module and declare it in both the pod meta and the pod index props. Use `@SubModule` to reference additional dependant modules in the same pod.
 
 If you have no say in how your classes are created (say, when you're using flux) then use the following line to inject dependencies when needed:
 
     ((IocService) Service.find(IocService#)).injectIntoFields(this)
+
 When creating GUIs (say, with fwt) then use [Registry.autobuild()](http://repo.status302.com/doc/afIoc/Registry#autobuild.html) to create your panels, commands and other objects. These aren't services and should not be declared as such, but they do often make use of services.
 
 IoC gives detailed error reporting should something go wrong, nevertheless try turning debug logging on to make IoC give trace level contextual information.
