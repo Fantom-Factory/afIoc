@@ -23,8 +23,8 @@ using afConcurrent
 ** @since 1.6.0
 const mixin ThreadLocalManager {
 
-	** Creates a `LocalRef` with the given name.
-	abstract LocalRef createRef(Str name, Obj? def := null)
+	** Creates a `LocalRef` with the given default function.
+	abstract LocalRef createRef(Str name, |->Obj?|? defFunc := null)
 
 	** Creates a `LocalList` with the given name.
 	abstract LocalList createList(Str name)
@@ -56,8 +56,8 @@ internal const class ThreadLocalManagerImpl : ThreadLocalManager {
 		this.cleanUpHandlers = createList("ThreadLocalManager.cleanupHandlers")
 	}
 
-	override LocalRef createRef(Str name, Obj? def := null) {
-		LocalRef("${prefix}.\${id}.${name}", def)
+	override LocalRef createRef(Str name, |->Obj?|? defFunc := null) {
+		LocalRef("${prefix}.\${id}.${name}", defFunc)
 	}
 
 	override LocalList createList(Str name) {

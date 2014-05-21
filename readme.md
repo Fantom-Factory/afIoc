@@ -51,7 +51,7 @@ To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan
 
 ## Documentation 
 
-Full API & fandocs are available on the [Status302 repository](http://repo.status302.com/doc/afIoc/#overview).
+Full API & fandocs are available on the [Status302 repository](http://repo.status302.com/doc/afIoc/).
 
 ## Quick Start 
 
