@@ -9,7 +9,6 @@ ActorPools... stop / kill all pools on shutdown?
 
 Turn Not Found Err into a mixin
 
-Update logo (v. important)
 
 
 Meh... can't be arsed
