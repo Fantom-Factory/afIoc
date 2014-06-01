@@ -6,7 +6,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - Ctor injection
 - Distributed service configuration
 - Lazy loading
-- Service advise
+- Service advising
 - Simple API
 
 'IoC' is the modular framework that binds your application together.

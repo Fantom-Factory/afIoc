@@ -1,3 +1,4 @@
+using afBeanUtils::NotFoundErr
 
 ** Indicates the Err has a more interesting cause
 @NoDoc
@@ -35,26 +36,23 @@ const class IocErr : Err, Unwrappable {
 ** A generic helper Err thrown when a value is not found in an expected list of values.
 ** 
 ** This purposely does not extend `IocErr` so it may be freely used by other frameworks
-const class NotFoundErr : Err {
-	const Str[] availableValues
+@NoDoc @Deprecated { msg="Use afBeanUtils::NotFoundErr instead" }
+const class NotFoundErr : Err, NotFoundErr {
+	override const Str[] availableValues
 	
 	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
 		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }.sort
 	}
-
+	
 	override Str toStr() {
-		buf := StrBuf()
-		buf.add("${typeof.qname}: ${msg}\n")
-		buf.add("\nAvailable values:\n")
-		availableValues.each { buf.add("  $it\n")}
-		buf.add("\nStack Trace:")
-		return buf.toStr
+		NotFoundErr.super.toStr		
 	}
 }
 
 ** Thrown when an impossible condition occurs. You know when - we've all written comments like:
 ** 
 ** '// this should never happen...' 
+@NoDoc
 const class WtfErr : Err {
 	new make(Str msg, Err? cause := null) : super(msg, cause) {}
 }

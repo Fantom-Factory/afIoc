@@ -1,10 +1,12 @@
 using concurrent
+using afBeanUtils::NotFoundErr
 
 ** (Service) - 
 ** Maintains a collection of named 'ActorPools'. Use to keep tabs on your resources, particularly 
-** when creating 'SynchronizedState' instances.
+** useful when creating [SynchronizedMap]`afConcurrent::SynchronizedMap` and 
+** [SynchronizedList]`afConcurrent::SynchronizedList` instances.
 ** 
-** IoC uses an 'ActorPool' named 'afIoc.system'. Contribute your own via your 'AppModule':
+** IoC itself uses an 'ActorPool' named 'afIoc.system'. Contribute your own via your 'AppModule':
 ** 
 ** pre>
 ** @Contribute { serviceType=RegistryShutdownHub# }
@@ -42,7 +44,7 @@ internal const class ActorPoolsImpl : ActorPools {
 	
 	@Operator
 	override ActorPool get(Str name) {
-		pool := actorPools[name] ?: throw NotFoundErr("There is no ActorPool with the name: ${name}", actorPools.keys)
+		pool := actorPools[name] ?: throw PoolNotFoundErr("There is no ActorPool with the name: ${name}", actorPools.keys)
 		usageStats[name].incrementAndGet
 		return pool
 	}
@@ -50,5 +52,18 @@ internal const class ActorPoolsImpl : ActorPools {
 	** Returns a map of 'ActorPool' names and the number of times it's been requested. 
 	override Str:Int stats() {
 		usageStats.map { it.val }
+	}
+}
+
+@NoDoc
+const class PoolNotFoundErr : Err, NotFoundErr {
+	override const Str[] availableValues
+	
+	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
+		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }.sort
+	}
+	
+	override Str toStr() {
+		NotFoundErr.super.toStr		
 	}
 }

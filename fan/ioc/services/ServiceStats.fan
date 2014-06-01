@@ -6,7 +6,7 @@ using concurrent::AtomicRef
 ** @since 1.2.0
 const mixin ServiceStats {
 
-	** Returns service stats, keyed by service id.
+	** Returns [service stats]`ServiceStat`, keyed by service id.
 	abstract Str:ServiceStat stats()	
 }
 
@@ -27,6 +27,7 @@ internal const class ServiceStatsImpl : ServiceStats {
 ** As returned by `ServiceStats`. Defines some basic statistics for a service.
 ** 
 ** @since 1.2.0
+@NoDoc	// This is a boring class - and just adds clutter!
 const class ServiceStat {
 	private const AtomicRef		atomLifecycle	:= AtomicRef()
 	private const AtomicInt		atomNoOfImpls	:= AtomicInt()

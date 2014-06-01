@@ -3,7 +3,7 @@ using afConcurrent::LocalMap
 using afConcurrent::LocalRef
 
 **
-** Wraps an afIoc `Registry` instance as Fantom service.
+** Wraps an IoC `Registry` instance as Fantom service.
 ** 
 ** The Service of Services!
 ** 

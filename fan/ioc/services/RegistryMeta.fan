@@ -7,11 +7,11 @@ const mixin RegistryMeta {
 	** Useful for passing external immutable data into services.   
 	abstract [Str:Obj?] options()
 
-	** Return the value for the specified key. 
+	** Returns the 'option' value for the specified key. 
 	@Operator
 	abstract Obj? get(Str key)
 
-	** Returns 'true' if the specified key is mapped. 
+	** Returns 'true' if the specified key is mapped in 'options'.
 	abstract Bool containsKey(Str key)
 	
 	** Returns a list of modules loaded by this IoC

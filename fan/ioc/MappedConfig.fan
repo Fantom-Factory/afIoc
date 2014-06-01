@@ -15,7 +15,7 @@ class MappedConfig {
 	private 	  	ObjLocator 			objLocator
 	private			Obj:Obj?			config
 	private			Obj:MappedOverride	overrides 
-	private			TypeCoercer			typeCoercer
+	private			CachingTypeCoercer	typeCoercer
 	private			Int					overrideCount
 	
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
@@ -29,7 +29,7 @@ class MappedConfig {
 		this.contribType	= contribType
 		this.config 		= Utils.makeMap(keyType, valType)
 		this.overrides		= Utils.makeMap(keyType, MappedOverride#)
-		this.typeCoercer	= TypeCoercer()
+		this.typeCoercer	= CachingTypeCoercer()
 		this.overrideCount	= 1
 	}
 
