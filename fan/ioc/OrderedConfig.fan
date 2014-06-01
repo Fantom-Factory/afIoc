@@ -21,7 +21,7 @@ class OrderedConfig {
 	private			Int					overrideCount
 	private			Str:OrderedOverride	config
 	private			Str:OrderedOverride	overrides
-	private			TypeCoercer			typeCoercer
+	private			CachingTypeCoercer	typeCoercer
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
 		if (contribType.name != "List")
@@ -37,7 +37,7 @@ class OrderedConfig {
 		this.overrideCount	= 1
 		this.overrides		= Utils.makeMap(Str#, OrderedOverride#)
 		this.config			= Utils.makeMap(Str#, OrderedOverride#)
-		this.typeCoercer	= TypeCoercer()
+		this.typeCoercer	= CachingTypeCoercer()
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  

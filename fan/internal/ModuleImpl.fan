@@ -10,7 +10,7 @@ internal const class ModuleImpl : Module {
 	private  const Contribution[]		contributions
 	private  const AdviceDef[]			adviceDefs
 	private  const ObjLocator			objLocator
-	private  const StrategyRegistry		typeToServiceDefs
+	private  const CachingTypeLookup	typeToServiceDefs
 
 	new makeBuiltIn(ObjLocator objLocator, ThreadLocalManager localManager, Str moduleId, ServiceDef:Obj? services) {
 		localMap	:= localManager.createMap(moduleId)
@@ -29,7 +29,7 @@ internal const class ModuleImpl : Module {
 		srvState.each |state, id| {
 			map.getOrAdd(state.def.serviceType) { ServiceDef[,] }.add(state.def)
 		}
-		this.typeToServiceDefs = StrategyRegistry(map)
+		this.typeToServiceDefs = CachingTypeLookup(map)
 	}
 
 	new make(ObjLocator objLocator, ThreadLocalManager localManager, ModuleDef moduleDef) {
@@ -56,7 +56,7 @@ internal const class ModuleImpl : Module {
 		srvState.each |state, id| {
 			map.getOrAdd(state.def.serviceType) { ServiceDef[,] }.add(state.def)
 		}
-		this.typeToServiceDefs = StrategyRegistry(map)		
+		this.typeToServiceDefs = CachingTypeLookup(map)		
 	}
 
 	// ---- Module Methods ----------------------------------------------------
@@ -73,7 +73,7 @@ internal const class ModuleImpl : Module {
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
-		typeToServiceDefs.findAllChildren(serviceType) 
+		typeToServiceDefs.findChildren(serviceType, false)
     }
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {

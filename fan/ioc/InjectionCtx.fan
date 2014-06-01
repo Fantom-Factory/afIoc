@@ -43,17 +43,13 @@ class InjectionCtx {
 
 	** Adds an nested operation description to the 'OpTracker'. This provides contextual 
 	** information in the event of an Err.
-	** 
-	** See `IocHelper.debugOperation`
 	Obj? track(Str description, |->Obj?| operation) {
 		InjectionTracker.track(description, operation)
 	}
 
-	** Logs details via the 'OpTracker'.
-	** 
-	** See `IocHelper.debugOperation`
-	Void log(Str description) {
-		InjectionTracker.log(description)
+	** Logs details via the 'OpTracker'. The message logged at IoC debug level.
+	Void log(Str msg) {
+		InjectionTracker.log(msg)
 	}
 }
 

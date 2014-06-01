@@ -129,7 +129,9 @@ internal const class T_MyService64Impl : T_MyService64 {
 	override Str dude() { "dude"; }
 }
 
+@NoDoc
 const mixin T_MyService99 {
 	static const Str dude := "Don't override me!"
 }
+@NoDoc
 const class T_MyService99Impl : T_MyService99 { }

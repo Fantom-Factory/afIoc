@@ -3,11 +3,12 @@ v1.6.2 Maybe...?
 ----------------
 Delete all deprecated classes -> update BedNap first!
 
-Think of a better name for 'StrategyRegistry'...?  'Fits'??
+ActorPools... stop / kill all pools on shutdown? No, lets users be in charge of that.
 
-ActorPools... stop / kill all pools on shutdown?
-
-Turn Not Found Err into a mixin
+Recursion err with builder methods injection scope 1->2->1
+ - THIS PROBABLY WORKS NOW! Just need to write a test for it...
+ - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion. 
+ - what people do in their builder methods is up to them!
 
 
 
@@ -20,10 +21,6 @@ orderedConfig -> ListConfig ? ConfigList ?
  
 @Inject { optional = true }
  - why would you want to? And what of ctor args? 
-
-Make SyncState - a consistent API for thread and const data
-
-TypeCoercers to be added via index props
 
 service disambiguation via facets 
  - is just another dep pro: map of services keyed by type&facet
@@ -48,12 +45,8 @@ Create PerThreadService
 IocHelper.eagerLoadBuiltInServices
  - I mean, why?
  
-RegShutdown
- - kill the ConcurrentState actor pool 
-   - can't, it's static. t'would affect ALL ConcurrentStates in other IoCs 
- - clean up ALL threads
-   - can't, can only clean up up current thread
-
-recursion err with builder methods injection scope 1->2->1
- - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion 
- - what people do in their builder methods is up to them!
+On RegistryShutdown
+ - kill ALL ActorPools: 
+   - No, lets users be in charge of their own pools.  
+ - clean up ALL threads:
+   - Can't! Can only clean up up current thread.
