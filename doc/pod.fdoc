@@ -315,6 +315,7 @@ Release Notes [#releaseNotes]
 *****************************
 v1.6.2 [#1.6.2]
 ---------------
+ - New: Using [Bean Utils 0.0.2]`pod:afBeanUtils`
  - Chg: Deprecated 'TypeCoercer, StrategyRegistry' and 'NotFoundErr' in favour of new [Bean Utils]`pod:afBeanUtils` library.
  - Chg: Deleted all previous '@Deprecated' classes and methods.
  - Chg: Type checks involving Lists and Maps when calling methods and ctors are more lenient.
