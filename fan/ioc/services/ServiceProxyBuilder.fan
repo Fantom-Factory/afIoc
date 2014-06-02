@@ -2,6 +2,7 @@ using compiler
 using afPlastic::IocClassModel
 using afPlastic::PlasticCompiler
 using afConcurrent::SynchronizedMap
+using afBeanUtils::BeanFactory
 
 ** (Service) - Builds and caches Proxy Types. The Types are cached because:
 **  - as they're already loaded by the VM, we may as well!
@@ -40,9 +41,9 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		InjectionTracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
-			builder		:= CtorPlanBuilder(proxyType)
+			builder		:= BeanFactory(proxyType)
 			builder["afLazyService"] = LazyProxyForService((ObjLocator) registry, serviceDef)
-			return builder.makeObj
+			return builder.create
 		}
 	}
 
@@ -50,9 +51,9 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		InjectionTracker.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
-			builder		:= CtorPlanBuilder(proxyType)
+			builder		:= BeanFactory(proxyType)
 			builder["afLazyService"] = LazyProxyForMixin((ObjLocator) registry, serviceDef)
-			return builder.makeObj
+			return builder.create
 		}
 	}
 	
