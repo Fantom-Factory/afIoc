@@ -41,7 +41,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		InjectionTracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
-			builder		:= BeanFactory(proxyType)
+			builder		:= CtorPlanBuilder(proxyType)
 			builder["afLazyService"] = LazyProxyForService((ObjLocator) registry, serviceDef)
 			return builder.create
 		}
@@ -51,7 +51,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		InjectionTracker.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
-			builder		:= BeanFactory(proxyType)
+			builder		:= CtorPlanBuilder(proxyType)
 			builder["afLazyService"] = LazyProxyForMixin((ObjLocator) registry, serviceDef)
 			return builder.create
 		}
