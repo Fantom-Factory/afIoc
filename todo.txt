@@ -4,15 +4,12 @@ v1.6.2 Maybe...?
 Delete all deprecated classes -> update BedNap first!
 
 ActorPools... stop / kill all pools on shutdown? No, lets users be in charge of that.
+ - shutdown the afIoc actor pool - manually, don't use a shutdown func.
 
 Recursion err with builder methods injection scope 1->2->1
  - THIS PROBABLY WORKS NOW! Just need to write a test for it...
  - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion. 
  - what people do in their builder methods is up to them!
-
-ServiceOverride: Note at present you can not override perThread scoped services and non-const (not immutable) services.
- - is this true???
- - I know! We need to contribute a builder!...
 
 RegistryShutdownHub -> RegistryShutdown
  - what's with that crazy API!?
@@ -20,6 +17,12 @@ RegistryShutdownHub -> RegistryShutdown
 InjectionCtx.injectionType -> rename, it's not a FantomType!
  - InjectionKind?
  - InjectionMode?
+
+
+
+v1.6.4 Maybe...?
+----------------
+ServiceOverride class that takes a builder method
 
 
 

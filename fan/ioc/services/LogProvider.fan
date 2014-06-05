@@ -1,15 +1,17 @@
 using concurrent::AtomicRef
 
 ** (Service) - A `DependencyProvider` that injects 'Log' instances. 
-** By default the Log name is the containing Types's pod name. 
-** If different logger instances are desired, change the `#logCreatorFunc`. 
+** By default, a pod name is used to create the log instance. 
 ** 
-** Change it at registry startup before any Loggers are injected:
+**   |Type type->Log| { return type.pod.log }
+** 
+** If log instances with different names are desired, change the `#logCreatorFunc`. 
+** Do this at registry startup:
 ** 
 ** pre>
 ** class AppModule {
 ** 
-**   @Contribute { serviceTyoe=RegistryStartup# }
+**   @Contribute { serviceType=RegistryStartup# }
 **   static Void changeLoggers(OrderedConfig conf, LogProvider logProvider) {
 **     conf.add |->| {
 **       logProvider.logCreatorFunc = |Type type->Log| { return Log.get(type.name) } 
