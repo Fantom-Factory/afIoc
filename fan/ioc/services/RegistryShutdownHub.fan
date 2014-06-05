@@ -17,6 +17,7 @@ using afConcurrent::SynchronizedState
 ** }
 ** <pre
 ** 
+** Note that Errs thrown by shutdown functions will be logged and ignored.
 const mixin RegistryShutdownHub {
 
 	** Adds a listener that will be notified when the registry shuts down. Note when shutdown 
