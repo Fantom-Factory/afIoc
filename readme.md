@@ -257,16 +257,6 @@ Intercept all calls to services defined by a mixin and wrap them in your own cod
 
 See [@Advise](http://repo.status302.com/doc/afIoc/Advise.html) for details
 
-## More! 
-
-`Ioc` comes bundled with utility classes that cover common use cases:
-
-- [RegistryStartup](http://repo.status302.com/doc/afIoc/RegistryStartup.html): (Service) Define tasks to execute when the registry starts up.
-- [RegistryShutdownHub](http://repo.status302.com/doc/afIoc/RegistryShutdownHub.html): (Service) Define tasks to execute when the registry shuts down.
-- [ThreadLocalManager](http://repo.status302.com/doc/afIoc/ThreadLocalManager.html): (Service) Keep tabs on threaded state.
-- [TypeCoercer](http://repo.status302.com/doc/afIoc/TypeCoercer.html): Coerce Objs of one type to another via Fantom's `toXXX()` and `fromXXX()` methods.
-- [StrategyRegistry](http://repo.status302.com/doc/afIoc/StrategyRegistry.html): Holds a map of `Type:Obj` where values may be looked up by type inheritance search.
-
 ## Tips 
 
 Strive to keep your services `const`, delcare a serialisation ctor to keep `@Inject`ed fields non-nullable:

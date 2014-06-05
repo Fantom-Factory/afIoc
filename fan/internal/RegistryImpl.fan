@@ -9,7 +9,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviders?		depProSrc
-	private const ServiceOverride?			serviceOverrides
+	private const ServiceOverrides?			serviceOverrides
 	private const Duration					startTime
 	override const Str:Obj?					options
 	
@@ -56,8 +56,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
  
 			services[BuiltInServiceDef() {
-				it.serviceType 		= ServiceOverride#
-				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceOverrideImpl#)
+				it.serviceType 		= ServiceOverrides#
+				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceOverridesImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
@@ -157,7 +157,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
 			depProSrc			= trackServiceById(DependencyProviders#.qname)
-			serviceOverrides	= trackServiceById(ServiceOverride#.qname)
+			serviceOverrides	= trackServiceById(ServiceOverrides#.qname)
 			return null
 		}
 	}

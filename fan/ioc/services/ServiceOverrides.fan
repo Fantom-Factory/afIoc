@@ -1,3 +1,9 @@
+using afBeanUtils::NotFoundErr
+
+@NoDoc @Deprecated { msg="Use ServiceOverrides instead" }
+const mixin ServiceOverride {
+	abstract Obj? getOverride(Str serviceId)
+}
 
 ** (Service) - Contribute to override previously defined services. Use to override production services with test 
 ** versions, or to replace 3rd party services with your own implementation. 
@@ -10,8 +16,8 @@
 **     binder.bind(PieAndChips#)
 **   }
 ** 
-**   @Contribute { serviceType=ServiceOverride# }
-**   static Void contributeServiceOverride(MappedConfig conf) {
+**   @Contribute { serviceType=ServiceOverrides# }
+**   static Void contributeServiceOverrides(MappedConfig conf) {
 **     conf["myPod::PieAndChips"] = conf.autobuild(PieAndMash#)
 **   }
 ** <pre
@@ -19,8 +25,8 @@
 ** Or taking advantage of Type Coercion, you can use the Type as the key:
 ** 
 ** pre>
-**   @Contribute { serviceType=ServiceOverride# }
-**   static Void contributeServiceOverride(MappedConfig conf) {
+**   @Contribute { serviceType=ServiceOverrides# }
+**   static Void contributeServiceOverrides(MappedConfig conf) {
 **     conf[PieAndChips#] = conf.autobuild(PieAndMash#)
 **   }
 ** <pre
@@ -33,16 +39,16 @@
 ** @since 1.2
 ** 
 ** @uses MappedConfig of 'Str:Obj' (serviceId:overrideImpl)
-const mixin ServiceOverride {
+const mixin ServiceOverrides : ServiceOverride {
 	
 	@NoDoc
-	abstract Obj? getOverride(Str serviceId)
+	override abstract Obj? getOverride(Str serviceId)
 }
 
 
 
 ** @since 1.2.0
-internal const class ServiceOverrideImpl : ServiceOverride {
+internal const class ServiceOverridesImpl : ServiceOverrides {
 	
 	private const Str:Obj overrides
 	
@@ -50,7 +56,7 @@ internal const class ServiceOverrideImpl : ServiceOverride {
 		overrides.each |service, id| {			
 			existingDef := ((ObjLocator) registry).serviceDefById(id)
 			if (existingDef == null)
-				throw IocErr(IocMessages.serviceOverrideDoesNotExist(id, service.typeof))
+				throw OverrideNotFoundErr(IocMessages.serviceOverrideDoesNotExist(id, service.typeof), overrides.keys)
 
 			if (!service.typeof.fits(existingDef.serviceType))
 				throw IocErr(IocMessages.serviceOverrideDoesNotFitServiceDef(id, service.typeof, existingDef.serviceType))
@@ -63,5 +69,18 @@ internal const class ServiceOverrideImpl : ServiceOverride {
 	
 	override Obj? getOverride(Str serviceId) {
 		overrides[serviceId] ?: overrides[ServiceDef.unqualify(serviceId)] 
+	}
+}
+
+@NoDoc
+const class OverrideNotFoundErr : IocErr, NotFoundErr {
+	override const Str[] availableValues
+	
+	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
+		this.availableValues = availableValues.map { it?.toStr }.sort
+	}
+	
+	override Str toStr() {
+		NotFoundErr.super.toStr		
 	}
 }
