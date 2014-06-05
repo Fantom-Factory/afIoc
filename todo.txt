@@ -17,6 +17,12 @@ ServiceOverride: Note at present you can not override perThread scoped services 
 RegistryShutdownHub -> RegistryShutdown
  - what's with that crazy API!?
 
+InjectionCtx.injectionType -> rename, it's not a FantomType!
+ - InjectionKind?
+ - InjectionMode?
+
+
+
 Meh... can't be arsed
 ---------------------
 MappedConfig  -> MapConfig  ? ConfigMap  ?

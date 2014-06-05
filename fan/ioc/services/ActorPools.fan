@@ -44,7 +44,7 @@ internal const class ActorPoolsImpl : ActorPools {
 	
 	@Operator
 	override ActorPool get(Str name) {
-		pool := actorPools[name] ?: throw PoolNotFoundErr("There is no ActorPool with the name: ${name}", actorPools.keys)
+		pool := actorPools[name] ?: throw ActorPoolNotFoundErr("There is no ActorPool with the name: ${name}", actorPools.keys)
 		usageStats[name].incrementAndGet
 		return pool
 	}
@@ -56,11 +56,11 @@ internal const class ActorPoolsImpl : ActorPools {
 }
 
 @NoDoc
-const class PoolNotFoundErr : Err, NotFoundErr {
-	override const Str[] availableValues
+const class ActorPoolNotFoundErr : IocErr, NotFoundErr {
+	override const Str?[] availableValues
 	
 	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
-		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }.sort
+		this.availableValues = availableValues.map { it?.toStr }.sort
 	}
 	
 	override Str toStr() {

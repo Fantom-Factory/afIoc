@@ -1,5 +1,5 @@
 
-@Deprecated
+// TODO: maybe use afBeanUtils::BeanFactory when it matures
 internal class CtorPlanBuilder {
 	private Type 		type
 	private Field:Obj? 	ctorPlan := [:]

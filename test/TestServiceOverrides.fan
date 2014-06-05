@@ -55,8 +55,8 @@ internal class T_MyModule58 {
 		binder.bind(T_MyService44#)
 		binder.bind(T_MyService90#)
 	}
-	@Contribute
-	private static Void contributeServiceOverride(MappedConfig config) {
+	@Contribute { serviceType=ServiceOverrides# }
+	private static Void contributeServiceOverrides(MappedConfig config) {
 		config.set("s44", config.autobuild(T_MyService44Impl2#))
 		config["T_MyService44"] = T_MyService44Impl2()
 		config[T_MyService90#] = T_MyService90Impl2()
@@ -75,8 +75,8 @@ internal class T_MyModule59 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService45#).withId("s45")
 	}
-	@Contribute
-	private static Void contributeServiceOverride(MappedConfig config) {
+	@Contribute { serviceType=ServiceOverrides# }
+	private static Void contributeServiceOverrides(MappedConfig config) {
 		config.set("s45", config.autobuild(T_MyService45Impl2#))
 	}
 }
@@ -90,15 +90,15 @@ internal class T_MyModule60 {
 		binder.bind(T_MyService44#).withId("s44")
 		binder.bind(T_MyService12#).withId("s12")
 	}
-	@Contribute
-	private static Void contributeServiceOverride(MappedConfig config) {
+	@Contribute { serviceType=ServiceOverrides# }
+	private static Void contributeServiceOverrides(MappedConfig config) {
 		config.set("s44", config.autobuild(T_MyService12#))
 	}
 }
 
 internal class T_MyModule61 {
-	@Contribute
-	private static Void contributeServiceOverride(MappedConfig config) {
+	@Contribute { serviceType=ServiceOverrides# }
+	private static Void contributeServiceOverrides(MappedConfig config) {
 		config.set("s12", config.autobuild(T_MyService12#))
 	}
 }

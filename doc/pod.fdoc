@@ -308,6 +308,7 @@ v1.6.2 [#1.6.2]
  - Chg: Deleted all previous '@Deprecated' classes and methods.
  - Chg: Type checks involving Lists and Maps when calling methods and ctors are more lenient.
  - Chg: Renamed 'DependencyProviderSource' -> 'DependencyProviders'.
+ - Chg: Renamed 'ServiceOverride' -> 'ServiceOverrides'.
  - Chg: Discovered 'List.eachRange()'!
  - Bug: Trying to proxy a mixin with a static field gave an Err.
 
@@ -472,7 +473,7 @@ v1.2.2 [#v1.2.2]
 v1.2.0 [#v1.2.0]
 ----------------
  - New: Browse defined services via `ServiceStats`
- - New: Override defined services with your own implementations via the new powerful `ServiceOverride` feature.
+ - New: Override defined services with your own implementations via the new powerful 'ServiceOverrides' feature.
  - New: Override any existing 'OrderedConfig' contribution with you own, via 'OrderedConfig.addOverride'.
  - New: Override any existing 'MappedConfig' contribution with you own, via 'MappedConfig.addOverride'.
  - New: Ordered configurations may define 'Placeholders'.
