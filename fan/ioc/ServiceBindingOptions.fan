@@ -1,6 +1,6 @@
 
 ** 
-** Returned from 'AppModule.bind()' methods; lets you specify additional service options. Use to override defaults.
+** Returned from 'ServiceBinder.bind()'; lets you specify additional service options. Use to override defaults.
 ** 
 mixin ServiceBindingOptions {
 

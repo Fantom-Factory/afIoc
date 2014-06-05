@@ -1,7 +1,7 @@
 using concurrent::Future
 using afConcurrent::SynchronizedState
 
-** (Service) - Contribute functions to be executed on `Registry` shut down. 
+** (Service) - Contribute functions to be executed on `Registry` shutdown. 
 ** All functions need to be immutable, which essentially means they can only reference 'const' classes.
 ** 
 ** Common usage is add listeners in your service ctor:
@@ -10,7 +10,7 @@ using afConcurrent::SynchronizedState
 ** const class MyService {
 **  
 **   new make(RegistryShutdownHub shutdownHub) {
-**     shutdownHub.addRegistryShutdownListener |->| {
+**     shutdownHub.addRegistryShutdownListener("Stuff", [,]) |->| {
 **       doStuff()
 **     }
 **   }

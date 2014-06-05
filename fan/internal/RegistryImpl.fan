@@ -8,7 +8,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 				shutdownLock	:= OneShotLock(IocMessages.registryShutdown)
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
-	private const DependencyProviderSource?	depProSrc
+	private const DependencyProviders?		depProSrc
 	private const ServiceOverride?			serviceOverrides
 	private const Duration					startTime
 	override const Str:Obj?					options
@@ -51,8 +51,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceType 		= DependencyProviderSource#
-				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProviderSourceImpl#)
+				it.serviceType 		= DependencyProviders#
+				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProvidersImpl#)
 			}] = null
  
 			services[BuiltInServiceDef() {
@@ -156,7 +156,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
-			depProSrc			= trackServiceById(DependencyProviderSource#.qname)
+			depProSrc			= trackServiceById(DependencyProviders#.qname)
 			serviceOverrides	= trackServiceById(ServiceOverride#.qname)
 			return null
 		}
