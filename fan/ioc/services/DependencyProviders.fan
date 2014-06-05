@@ -1,14 +1,21 @@
 using afBeanUtils
 
+@NoDoc @Deprecated { msg="Use DependencyProviders instead" }
+const mixin DependencyProviderSource { 
+	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
+
+	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)	
+}
+
 ** (Service) -
 ** Contribute your `DependencyProvider` implementations to this. 
-** Provide your own dependencies for fields annotated with the 
-** '@Inject' facet. Typically you would augment '@Inject' with your own facet to provide injection 
-** meta. See [@ServiceId]`ServiceId` and [@Autobuild]`Autobuild` for builtin examples. 
+** Provide your own dependencies for fields annotated with the '@Inject' facet. 
+** Typically you would augment '@Inject' with your own facet to provide injection meta. 
+** See [@ServiceId]`ServiceId` and [@Autobuild]`Autobuild` for builtin examples. 
 ** 
 ** pre>
-** @Contribute
-** static Void contributeDependencyProviderSource(OrderedConfig conf) {
+** @Contribute { serviceType=DependencyProviders# }
+** static Void contributeDependencyProviders(OrderedConfig conf) {
 **   serviceIdProvider := conf.autobuild(ServiceIdProvider#)
 **   config.add(serviceIdProvider)
 ** }
@@ -17,16 +24,16 @@ using afBeanUtils
 ** @since 1.1
 ** 
 ** @uses OrderedConfig of `DependencyProvider`
-const mixin DependencyProviderSource {
+@NoDoc	// don't overwhelm the masses
+const mixin DependencyProviders : DependencyProviderSource {
 	
-	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
+	override internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
 
-	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
+	override internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
 }
 
-
 ** @since 1.1.0
-internal const class DependencyProviderSourceImpl : DependencyProviderSource {
+internal const class DependencyProvidersImpl : DependencyProviders {
 	private const DependencyProvider[] dependencyProviders
 
 	new make(DependencyProvider[] dependencyProviders, Registry registry) {

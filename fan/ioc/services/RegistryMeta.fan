@@ -1,5 +1,5 @@
 
-** (Service) - Holds meta information as to how the IoC registry was built.
+** (Service) - Holds meta information on how the IoC registry was built.
 const mixin RegistryMeta {
 	
 	** The options as passed as into [RegistryBuilder.build()]`RegistryBuilder.build`. 

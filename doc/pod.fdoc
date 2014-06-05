@@ -279,18 +279,6 @@ See [@Advise]`Advise` for details
 
 
 
-More! [#more]
-*************
-'Ioc' comes bundled with utility classes that cover common use cases:
-
- - `RegistryStartup`: (Service) Define tasks to execute when the registry starts up.
- - `RegistryShutdownHub`: (Service) Define tasks to execute when the registry shuts down.
- - `ThreadLocalManager`: (Service) Keep tabs on threaded state.
- - `TypeCoercer`: Coerce Objs of one type to another via Fantom's 'toXXX()' and 'fromXXX()' methods.
- - `StrategyRegistry`: Holds a map of 'Type:Obj' where values may be looked up by type inheritance search.
-
-
-
 Tips [#tips]
 ************
 Strive to keep your services 'const', delcare a serialisation ctor to keep '@Inject'ed fields non-nullable:
@@ -319,6 +307,7 @@ v1.6.2 [#1.6.2]
  - Chg: Deprecated 'TypeCoercer, StrategyRegistry' and 'NotFoundErr' in favour of new [Bean Utils]`pod:afBeanUtils` library.
  - Chg: Deleted all previous '@Deprecated' classes and methods.
  - Chg: Type checks involving Lists and Maps when calling methods and ctors are more lenient.
+ - Chg: Renamed 'DependencyProviderSource' -> 'DependencyProviders'.
  - Chg: Discovered 'List.eachRange()'!
  - Bug: Trying to proxy a mixin with a static field gave an Err.
 

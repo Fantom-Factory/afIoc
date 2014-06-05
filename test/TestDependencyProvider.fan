@@ -52,7 +52,7 @@ internal class T_MyModule56 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService40#).withId("s40")
 	}
-	@Contribute
+	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
 		dp := config.autobuild(T_DependencyProvider1#)
 		config.add(dp)
@@ -73,7 +73,7 @@ internal class T_MyModule57 {
 		binder.bind(T_MyService42#).withId("s42")
 		binder.bind(T_MyService43#).withId("s43")
 	}
-	@Contribute
+	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider2 dp) {
 		config.add(dp)
 	}
@@ -108,7 +108,7 @@ internal class T_MyModule88 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService72#).withId("s72")
 	}
-	@Contribute
+	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviderSource(OrderedConfig config) {
 		config.add(config.autobuild(T_DependencyProvider3#))
 	}
@@ -125,7 +125,7 @@ internal class T_MyModule96 {
 		binder.bind(T_MyService84#).withId("s84")
 		binder.bind(T_DependencyProvider4#).withId("dp4")
 	}
-	@Contribute
+	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviderSource(OrderedConfig config, T_DependencyProvider4 dp) {
 		config.add(dp)
 	}

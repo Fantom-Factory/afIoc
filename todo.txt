@@ -10,7 +10,12 @@ Recursion err with builder methods injection scope 1->2->1
  - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion. 
  - what people do in their builder methods is up to them!
 
+ServiceOverride: Note at present you can not override perThread scoped services and non-const (not immutable) services.
+ - is this true???
+ - I know! We need to contribute a builder!...
 
+RegistryShutdownHub -> RegistryShutdown
+ - what's with that crazy API!?
 
 Meh... can't be arsed
 ---------------------

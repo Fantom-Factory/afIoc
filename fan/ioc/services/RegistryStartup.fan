@@ -1,6 +1,6 @@
 using afConcurrent::LocalList
 
-** (Service) - Contribute functions to be executed on `Registry` start up.
+** (Service) - Contribute functions to be executed on `Registry` startup.
 **  
 ** Functions need not be immutable.
 ** 
