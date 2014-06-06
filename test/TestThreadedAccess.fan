@@ -184,8 +184,20 @@ internal class T_MyService14 {
 
 internal class T_MyModule77 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService61")).withId("s61").withScope(ServiceScope.perThread)
-		binder.bind(PublicTestTypes.type("T_MyService62")).withId("s62").withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService61#).withId("s61").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService62#).withId("s62").withScope(ServiceScope.perApplication)
 	}
 }
-
+@NoDoc const mixin T_MyService61 {
+	abstract Void kickIn(Str k)
+	abstract Str kickOut()
+}
+@NoDoc internal const class T_MyService61Impl : T_MyService61 {
+	const AtomicRef kick := AtomicRef("dredd") 
+	override Void kickIn(Str k) { kick.val = k}
+	override Str kickOut() { kick.val } 
+}
+@NoDoc internal const class T_MyService62 {
+	const T_MyService61 s61
+	new make(T_MyService61 s61) { this.s61 = s61 }
+}

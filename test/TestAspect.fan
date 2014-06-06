@@ -15,9 +15,9 @@ internal class TestAspect : IocTest {
 	
 	Void testAdvice() {
 		reg := RegistryBuilder().addModule(T_MyModule78#).build.startup
-		s65 := reg.dependencyByType(PublicTestTypes.type("T_MyService65Aspect"))
-		s66 := reg.dependencyByType(PublicTestTypes.type("T_MyService66Aspect"))
-		s67 := reg.dependencyByType(PublicTestTypes.type("T_MyService67NoMatch"))
+		s65 := reg.dependencyByType(T_MyService65Aspect#)
+		s66 := reg.dependencyByType(T_MyService66Aspect#)
+		s67 := reg.dependencyByType(T_MyService67NoMatch#)
 		
 		verifyEq(s65->meth1, "dredd MUTHA FUKIN ADVISED!")
 		verifyEq(s66->meth2, "anderson MUTHA FUKIN ADVISED!")
@@ -26,9 +26,9 @@ internal class TestAspect : IocTest {
 
 	Void testNestedAdvice() {
 		reg := RegistryBuilder().addModule(T_MyModule81#).build.startup
-		s65 := reg.dependencyByType(PublicTestTypes.type("T_MyService65Aspect"))
-		s66 := reg.dependencyByType(PublicTestTypes.type("T_MyService66Aspect"))
-		s67 := reg.dependencyByType(PublicTestTypes.type("T_MyService67NoMatch"))
+		s65 := reg.dependencyByType(T_MyService65Aspect#)
+		s66 := reg.dependencyByType(T_MyService66Aspect#)
+		s67 := reg.dependencyByType(T_MyService67NoMatch#)
 		
 		verifyEq(s65->meth1, "dredd add1 add2 add3")
 		verifyEq(s66->meth2, "anderson add1 add2 add3")
@@ -62,9 +62,9 @@ internal class TestAspect : IocTest {
 
 internal class T_MyModule78 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
-		binder.bind(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
-		binder.bind(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
+		binder.bind(T_MyService65Aspect#).withId("s65Aspect")
+		binder.bind(T_MyService66Aspect#).withId("s66Aspect")
+		binder.bind(T_MyService67NoMatch#).withId("s67NoMatch")
 	}
 	
 	@Advise { serviceId="*Aspect" }
@@ -90,9 +90,9 @@ internal class T_MyModule80 {
 
 internal class T_MyModule81 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService65Aspect")).withId("s65Aspect")
-		binder.bind(PublicTestTypes.type("T_MyService66Aspect")).withId("s66Aspect")
-		binder.bind(PublicTestTypes.type("T_MyService67NoMatch")).withId("s67NoMatch")
+		binder.bind(T_MyService65Aspect#).withId("s65Aspect")
+		binder.bind(T_MyService66Aspect#).withId("s66Aspect")
+		binder.bind(T_MyService67NoMatch#).withId("s67NoMatch")
 	}
 	
 	@Advise { serviceId="s??*As*" }
@@ -146,4 +146,23 @@ internal class T_MyService69 {
 	Str judge() {
 		"tell it to the"
 	}
+}
+
+@NoDoc mixin T_MyService65Aspect {
+	abstract Str meth1()
+}
+@NoDoc class T_MyService65AspectImpl : T_MyService65Aspect {
+	override Str meth1() { "dredd" }
+}
+@NoDoc mixin T_MyService66Aspect {
+	abstract Str meth2()
+}
+@NoDoc class T_MyService66AspectImpl : T_MyService66Aspect {
+	override Str meth2() { "anderson" }
+}
+@NoDoc mixin T_MyService67NoMatch {
+	abstract Str meth3()
+}
+@NoDoc class T_MyService67NoMatchImpl : T_MyService67NoMatch {
+	override Str meth3() { "death" }
 }

@@ -30,12 +30,21 @@ internal class TestFacetServiceId : IocTest {
 
 internal class T_MyModule53 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService32"), PublicTestTypes.type("T_MyService32Impl1")).withId("impl1")
-		binder.bind(PublicTestTypes.type("T_MyService32"), PublicTestTypes.type("T_MyService32Impl2")).withId("impl2")
+		binder.bind(T_MyService32#, T_MyService32Impl1#).withId("impl1")
+		binder.bind(T_MyService32#, T_MyService32Impl2#).withId("impl2")
 		binder.bind(T_MyService33#)
 		binder.bind(T_MyService34#)
 		binder.bind(T_MyService35#)
 	}
+}
+@NoDoc const mixin T_MyService32 {
+	abstract Str wotcha()
+}
+@NoDoc const class T_MyService32Impl1 : T_MyService32 {
+	override const Str wotcha := "Go1"
+}
+@NoDoc const class T_MyService32Impl2 : T_MyService32 {
+	override const Str wotcha := "Go2"
 }
 
 internal class T_MyService33 {
