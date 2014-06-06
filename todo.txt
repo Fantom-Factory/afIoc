@@ -6,17 +6,8 @@ Delete all deprecated classes -> update BedNap first!
 ActorPools... stop / kill all pools on shutdown? No, lets users be in charge of that.
  - shutdown the afIoc actor pool - manually, don't use a shutdown func.
 
-Recursion err with builder methods injection scope 1->2->1
- - THIS PROBABLY WORKS NOW! Just need to write a test for it...
- - can't diagnose this, any reg.serviceById() creates a new InjectionCtx, so I can't detect recursion. 
- - what people do in their builder methods is up to them!
-
 RegistryShutdownHub -> RegistryShutdown
  - what's with that crazy API!?
-
-InjectionCtx.injectionType -> rename, it's not a FantomType!
- - InjectionKind?
- - InjectionMode?
 
 ServiceOverrides
  - contribute a type...?
@@ -39,6 +30,7 @@ service disambiguation via facets
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById
+ - now that serviceIds are qualified, what's the point?
 
 
 

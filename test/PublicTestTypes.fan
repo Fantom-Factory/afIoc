@@ -10,6 +10,7 @@ Str<|
      using afIoc
      using concurrent
 
+     // for T_MyModule13
      mixin T_MyService10 { }
      class T_MyService10Impl : T_MyService10 { }
 
