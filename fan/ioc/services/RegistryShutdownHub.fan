@@ -59,7 +59,7 @@ internal const class RegistryShutdownHubImpl : RegistryShutdownHub {
 	private const SynchronizedState	conState
  
 	new make(ActorPools actorPools) {
-		conState = SynchronizedState(actorPools["afIoc.system"], RegistryShutdownHubState#)
+		conState = SynchronizedState(actorPools[IocConstants.systemActorPool], RegistryShutdownHubState#)
 	}
 	
 	override Void addRegistryShutdownListener(Str id, Str[] constraints, |->| listener) {
