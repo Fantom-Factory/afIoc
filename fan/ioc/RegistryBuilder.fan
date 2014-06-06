@@ -19,7 +19,6 @@ class RegistryBuilder {
 	** 		startup. Default is 'false'.
 	**  -  'suppressStartupBanner': 'Bool' specifies if the Alien-Factory banner should be displayed  
 	** 		on startup. Default is 'false'.
-	//  -  'appName': <AppName> startup up in 69ms
 	//  -  'bannerText': For the easter egg.
 	Str:Obj?	options {
 		private set
@@ -116,7 +115,6 @@ class RegistryBuilder {
 				"suppressStartupServiceList": false,
 				"suppressStartupBanner"		: false,
 				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
-				"appName"					: "Ioc"
 			])
 
 			defaults.each |val, key| {

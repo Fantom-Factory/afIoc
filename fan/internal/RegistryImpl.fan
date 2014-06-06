@@ -168,12 +168,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override This startup() {
 		startupLock.lock
 
-		// Do dat startup!
-		tracker := OpTracker()
-		startup := (RegistryStartup) serviceById(RegistryStartup#.qname)
-		startup.startup(tracker)
+		buildTime := (Duration.now - startTime).toMillis.toLocale("#,###")
+		then 	:= Duration.now
 		
-		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
+		// Do dat startup!
+		startup := (RegistryStartup) serviceById(RegistryStartup#.qname)
+		startup.startup(OpTracker())
+		startupTime	:= (Duration.now - then).toMillis.toLocale("#,###")
+
 		msg		:= ""
 		
 		if (!options.get("suppressStartupServiceList", false)) {
@@ -193,8 +195,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		if (!options.get("suppressStartupBanner", false)) {
 			title := Utils.banner(options["bannerText"])
-			name  := options["appName"] ?: "Ioc"
-			title += "${name} started up in ${millis}ms\n"
+			title += "IoC built in ${buildTime}ms and started up in ${startupTime}ms\n"
 			msg   += title
 		}
 		
@@ -205,6 +206,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
+		then 		:= Duration.now
 		shutdownHub := (RegistryShutdown)	serviceById(RegistryShutdown#.qname)
 		threadMan 	:= (ThreadLocalManager)	serviceById(ThreadLocalManager#.qname)
 		actorPools	:= (ActorPools) 	 	serviceById(ActorPools#.qname)
@@ -217,6 +219,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		threadMan.cleanUpThread
 		modules.each { it.shutdown }
 		actorPools[IocConstants.systemActorPool].stop.join(10sec)
+		
+		shutdownTime	:= (Duration.now - then).toMillis.toLocale("#,###")
+		log.info("IoC shutdown in ${shutdownTime}ms")
 		
 		log.info("\"Goodbye!\" from afIoc!")
 		
