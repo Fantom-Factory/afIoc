@@ -207,6 +207,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override This shutdown() {
 		shutdownHub := (RegistryShutdownHubImpl) serviceById(RegistryShutdownHub#.qname)
 		threadMan 	:= (ThreadLocalManager) 	 serviceById(ThreadLocalManager#.qname)
+		actorPools	:= (ActorPools) 	 		 serviceById(ActorPools#.qname)
 
 		// Registry shutdown commencing...
 		shutdownHub.registryWillShutdown
@@ -219,6 +220,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// destroy all internal refs
 		threadMan.cleanUpThread
 		modules.each { it.shutdown }
+		actorPools[IocConstants.systemActorPool].stop.join(10sec)
 		
 		log.info("\"Goodbye!\" from afIoc!")
 		

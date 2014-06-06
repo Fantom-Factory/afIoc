@@ -311,6 +311,7 @@ v1.6.2 [#1.6.2]
  - Chg: Renamed 'ServiceOverride' -> 'ServiceOverrides'.
  - Chg: Renamed 'InjectionType' -> 'InjectionKind'.
  - Chg: Discovered 'List.eachRange()'!
+ - Chg: IoC system ActorPool is stopped on shutdown.
  - Bug: Trying to proxy a mixin with a static field gave an Err.
 
 v1.6.0 [#1.6.0]

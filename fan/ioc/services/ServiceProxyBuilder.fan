@@ -33,7 +33,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 		
 	new make(ActorPools actorPools, |This|in) {
 		in(this) 
-		typeCache = SynchronizedMap(actorPools["afIoc.system"])
+		typeCache = SynchronizedMap(actorPools[IocConstants.systemActorPool])
 	}
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl

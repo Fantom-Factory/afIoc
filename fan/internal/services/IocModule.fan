@@ -22,6 +22,6 @@ internal class IocModule {
 	
 	@Contribute { serviceType=ActorPools# }
 	static Void contributeActorPools(MappedConfig config) {
-		config["afIoc.system"] = ActorPool()
+		config[IocConstants.systemActorPool] = ActorPool()
 	}
 }

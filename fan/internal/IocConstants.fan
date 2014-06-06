@@ -1,5 +1,5 @@
 
-internal const mixin IocConstants {
+internal const class IocConstants {
 	
 	static const Str podMetaModuleName		:= "afIoc.module"
 	
@@ -8,5 +8,7 @@ internal const mixin IocConstants {
 	static const Str builtInModuleId		:= "BuiltInModule"
 
 	static const Str ctorItBlockBuilder		:= "afIoc::CtorItBlockBuilder"
+
+	static const Str systemActorPool		:= "afIoc.system"
 
 }
