@@ -18,11 +18,9 @@ InjectionCtx.injectionType -> rename, it's not a FantomType!
  - InjectionKind?
  - InjectionMode?
 
-
-
-v1.6.4 Maybe...?
-----------------
-ServiceOverride class that takes a builder method
+ServiceOverrides
+ - contribute a type...?
+ - contribute a builder func? |->Obj|
 
 
 

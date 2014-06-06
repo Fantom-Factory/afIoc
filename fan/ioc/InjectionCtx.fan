@@ -3,7 +3,7 @@
 class InjectionCtx {
 	
 	** The type of injection.
-	const InjectionType	injectionType
+	const InjectionKind	injectionKind
 	
 	** The 'Type' to be injected
 		  Type			dependencyType { internal set }
@@ -30,11 +30,11 @@ class InjectionCtx {
 		  @NoDoc
 		  [Field:Obj?]?	ctorFieldVals { internal set }
 	
-	internal new makeWithType(InjectionType injectionType, |This|? in := null) {
+	internal new makeWithType(InjectionKind injectionKind, |This|? in := null) {
 		this.fieldFacets	= Facet#.emptyList
 		this.methodFacets	= Facet#.emptyList
 		in?.call(this)
-		this.injectionType	= injectionType
+		this.injectionKind	= injectionKind
 	}
 
 	private new make(|This|? in := null) {
@@ -53,8 +53,8 @@ class InjectionCtx {
 	}
 }
 
-** Used by `InjectionCtx` to inform 'DependencyProviders' what type of injection is occurring.
-enum class InjectionType {
+** Used by `InjectionCtx` to inform 'DependencyProviders' of what kind of injection is occurring.
+enum class InjectionKind {
 	
 	** A direct call to 'Registry.dependencyByType()' 
 	dependencyByType,
@@ -76,3 +76,4 @@ enum class InjectionType {
 		this == fieldInjection || this == fieldInjectionViaItBlock
 	}
 }
+

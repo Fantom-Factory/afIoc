@@ -49,7 +49,7 @@ internal class InjectionTracker {
 
 		// check for allowed scope
 		if (lastDef?.scope == ServiceScope.perApplication && def.scope == ServiceScope.perThread)
-			if (!def.proxiable && injectionCtx.injectionType.isFieldInjection)
+			if (!def.proxiable && injectionCtx.injectionKind.isFieldInjection)
 				throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, def.serviceId))
 
 		return ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
@@ -88,14 +88,14 @@ internal class InjectionTracker {
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 
 	static Obj? doingDependencyByType(Type dependencyType, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionType.dependencyByType) {
+		ctx := InjectionCtx(InjectionKind.dependencyByType) {
 			it.dependencyType = dependencyType
 		}
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
 	static Obj? doingFieldInjection(Obj injectingInto, Field field, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionType.fieldInjection) {
+		ctx := InjectionCtx(InjectionKind.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof
 			it.dependencyType	= field.type
@@ -106,7 +106,7 @@ internal class InjectionTracker {
 	}
 
 	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionType.fieldInjection) {
+		ctx := InjectionCtx(InjectionKind.fieldInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
 			it.field			= field
@@ -116,7 +116,7 @@ internal class InjectionTracker {
 	}
 
 	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionType.methodInjection) {
+		ctx := InjectionCtx(InjectionKind.methodInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= method.parent
 			it.method			= method
@@ -128,7 +128,7 @@ internal class InjectionTracker {
 	}
 
 	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionType.methodInjection) {
+		ctx := InjectionCtx(InjectionKind.methodInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
