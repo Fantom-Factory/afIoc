@@ -5,12 +5,12 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful Dependency Injection (DI) / Inversion Of Control (IoC) framework"
-		version = Version("1.6.1")
+		version = Version("1.6.2")
 
 		meta = [	
 			"proj.name"		: "IoC",
 			"tags"			: "system",
-			"repo.private"	: "true"
+			"repo.private"	: "false"
 		]
 
 		depends = [
@@ -19,7 +19,7 @@ class Build : BuildPod {
 			"compiler 1.0", 
 			
 			"afBeanUtils 0.0.2+",
-			"afConcurrent 1.0.2+",
+			"afConcurrent 1.0.4+",
 			"afPlastic 1.0.2+"
 		]
 		
