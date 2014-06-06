@@ -3,14 +3,10 @@ v1.6.2 Maybe...?
 ----------------
 Delete all deprecated classes -> update BedNap first!
 
-Log Reg startup and shutdown times
-  647 ms to build IoC Registry, 3,812 ms overall.
-
 ServiceOverrides
  - contribute a type...?
  - contribute a builder func? |->Obj|
 
-Public Test Types can GO!
 
 
 Meh... can't be arsed
