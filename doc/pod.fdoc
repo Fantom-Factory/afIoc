@@ -309,6 +309,7 @@ v1.6.2 [#1.6.2]
  - Chg: Type checks involving Lists and Maps when calling methods and ctors are more lenient.
  - Chg: Renamed 'DependencyProviderSource' -> 'DependencyProviders'.
  - Chg: Renamed 'ServiceOverride' -> 'ServiceOverrides'.
+ - Chg: Renamed 'InjectionType' -> 'InjectionKind'.
  - Chg: Discovered 'List.eachRange()'!
  - Bug: Trying to proxy a mixin with a static field gave an Err.
 
