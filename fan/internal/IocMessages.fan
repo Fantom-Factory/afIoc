@@ -163,16 +163,16 @@ internal const class IocMessages {
 		"Configuration Id does not exist - $placeholder"
 	}
 	
-	static Str serviceOverrideNotImmutable(Str serviceId, Type serviceImpl) {
-		"Override for Service '$serviceId (${serviceImpl.qname}) is not immutable"
+	static Str serviceOverrideNotImmutable(Str serviceId) {
+		"Override for Service '$serviceId is not immutable"
 	}
 	
 	static Str serviceOverrideDoesNotFitServiceDef(Str serviceId, Type serOverride, Type serDef) {
 		"Override for service '$serviceId (${serOverride.qname}) does not fit the definition of ${serDef.qname}"
 	}
 	
-	static Str serviceOverrideDoesNotExist(Str serviceId, Type serOverride) {
-		"Overriding service '$serviceId' with ${serOverride.qname} maybe difficult, service '$serviceId' doesn't exist!"
+	static Str serviceOverrideDoesNotExist(Str serviceId) {
+		"Overriding service '$serviceId' maybe difficult as service '$serviceId' doesn't exist!"
 	}
 	
 	static Str contribOverrideDoesNotExist(Str existingKeys, Str overrideKeys) {
@@ -241,6 +241,14 @@ internal const class IocMessages {
 	
 	static Str injectionUtils_fieldIsStatic(Field field) {
 		"Can not @Inject into static fields: ${field.qname}"
+	}
+
+	static Str multipleServicesDefined(Str serviceId) {
+		"Multiple services defined for service id $serviceId"
+	}
+
+	static Str builtinServicesCanNotBeOverridden(Str serviceId) {
+		"Built-in services cannot be overridden: $serviceId"
 	}
 
 

@@ -155,10 +155,10 @@ internal const class ModuleDefImpl : ModuleDef {
 			it.serviceId 	= build.serviceId ?: extractServiceIdFromBuilderMethod(method)
 			it.moduleId 	= this.moduleId
 			it.serviceType	= method.returns
-			it.description	= "'$serviceId' : Builder method $method.qname"
+			it.description	= "$serviceId : Builder method $method.qname"
 			it.scope 		= scope 
-			it.source 		= fromBuildMethod(it, method) 
 			it.noProxy		= build.disableProxy 
+			it.serviceBuilderRef.val = fromBuildMethod(it, method) 
 		}
 		addServiceDef(tracker, serviceDefs, serviceDef)
 	}	

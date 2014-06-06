@@ -81,8 +81,8 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.serviceImplType 	= this.serviceImpl
 			it.scope			= this.scope
 			it.noProxy			= this.noProxy
-			it.description 		= "'$this.serviceId' : Standard Ctor Builder"
-			it.source 			= fromCtorAutobuild(it, this.serviceImpl)
+			it.description 		= "$this.serviceId : Standard Ctor Builder"
+			it.serviceBuilderRef.val = fromCtorAutobuild(it, this.serviceImpl)
 		}
 
 		addServiceDef(serviceDef)

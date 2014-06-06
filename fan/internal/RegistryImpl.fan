@@ -9,7 +9,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviders?		depProSrc
-	private const ServiceOverrides?			serviceOverrides
 	private const Duration					startTime
 	override const Str:Obj?					options
 	
@@ -32,32 +31,32 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[BuiltInServiceDef() {
 				it.serviceType 		= RegistryStartup#
 				it.scope			= ServiceScope.perThread
-				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= RegistryShutdown#
-				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryShutdownImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, RegistryShutdownImpl#)
 			}] = null
 			
 			services[BuiltInServiceDef() {
 				it.serviceId 		= IocConstants.ctorItBlockBuilder
 				it.serviceType 		= |This|#
 				it.scope			= ServiceScope.perInjection
-				it.description 		= "'$it.serviceId' : Autobuilt. Always."
-				it.source			= |->Obj| {
+				it.description 		= "$it.serviceId : Autobuilt. Always."
+				it.serviceBuilder	= |->Obj| {
 					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.building.serviceImplType)
 				}
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= DependencyProviders#
-				it.source			= ServiceDef.fromCtorAutobuild(it, DependencyProvidersImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, DependencyProvidersImpl#)
 			}] = null
  
 			services[BuiltInServiceDef() {
 				it.serviceType 		= ServiceOverrides#
-				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceOverridesImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ServiceOverridesImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
@@ -66,17 +65,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= ServiceProxyBuilder#
-				it.source			= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= PlasticCompiler#
-				it.source			= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
 			}] = null
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= AspectInvokerSource#
-				it.source			= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 
 			services[BuiltInServiceDef() {
@@ -93,7 +92,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 			services[BuiltInServiceDef() {
 				it.serviceType 		= ActorPools#
-				it.source			= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
+				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
 			}] = null
 
 			builtInModule := ModuleImpl(this, threadLocalManager, IocConstants.builtInModuleId, services)
@@ -155,9 +154,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
+
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
-			depProSrc			= trackServiceById(DependencyProviders#.qname)
-			serviceOverrides	= trackServiceById(ServiceOverrides#.qname)
+			tracker.track("Applying service overrides") |->| {
+				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname)).overrides
+				overrides.each |builder, serviceId| {
+					serviceDefById(serviceId).overrideBuilder(builder)
+				}
+			}
+			
+			depProSrc = trackServiceById(DependencyProviders#.qname)
 			return null
 		}
 	}
@@ -195,7 +201,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		if (!options.get("suppressStartupBanner", false)) {
 			title := Utils.banner(options["bannerText"])
-			title += "IoC built in ${buildTime}ms and started up in ${startupTime}ms\n"
+			title += "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms\n"
 			msg   += title
 		}
 		
@@ -312,14 +318,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
-		service := serviceOverrides?.getOverride(serviceDef.serviceId)
-		if (service != null) {
-			InjectionTracker.log("Found override for service '${serviceDef.serviceId}'")
-			return service
-		}
-
 		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		return modules[serviceDef.moduleId].service(serviceDef, returnReal)
+		modules[serviceDef.moduleId].service(serviceDef, returnReal)
 	}
 
 	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -363,8 +363,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceType 		= type
 			it.serviceImplType 	= implType	// the important bit
 			it.scope			= ServiceScope.perInjection
-			it.description 		= "$type.qname Autobuild"
-			it.source			= |->Obj?| { return null }
+			it.description 		= "$type.qname : Autobuild"
+			it.serviceBuilderRef.val = |->Obj?| { return null }.toImmutable
 		}		
 		
 		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
@@ -389,8 +389,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceType 		= mixinT
 			it.serviceImplType 	= implT
 			it.scope			= ServiceScope.perInjection
-			it.description 		= "$mixinT.qname Create Proxy"
-			it.source			= |->Obj?| { autobuild(implT, ctorArgs, fieldVals) }
+			it.description 		= "$mixinT.qname : Create Proxy"
+			it.serviceBuilderRef.val = |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
 		}
 
 		return spb.createProxyForMixin(serviceDef)
@@ -410,15 +410,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (serviceDef != null)
 			return serviceDef
 
-		unqualifiedId := ServiceDef.unqualify(serviceId)
 		serviceDefs := (ServiceDef[]) modulesWithServices.map |module| {
-			module.serviceDefsById(serviceId, unqualifiedId)
+			module.serviceDefsById(serviceId)
 		}.flatten
 
 		if (serviceDefs.size > 1)
-			throw WtfErr("Multiple services defined for service id $serviceId")
+			throw WtfErr(IocMessages.multipleServicesDefined(serviceId))
 		
-		return serviceDefs.isEmpty ? null : serviceDefs[0]
+		return serviceDefs.isEmpty ? null : serviceDefs.first
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {

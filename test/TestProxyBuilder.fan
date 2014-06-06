@@ -68,9 +68,6 @@ internal class TestProxyBuilder : IocTest {
 		}
 	}
 	
-	// Weird shenanigans - const fields aren't allowed. Full stop.
-	// see http://fantom.org/sidewalk/topic/1921
-	// So const mixins can't ever declare fields.
 	Void testPerThreadProxy() {
 		s58 := spb.createProxyForService(reg.serviceDefById("s58")) as T_MyService58
 		verifyEq(s58.dude, "Stella!")
@@ -129,10 +126,10 @@ internal class T_MyModule76 {
 	override Int inc(Int i) { i + 1 }
 }
 
-@NoDoc internal const mixin T_MyService64 {
+@NoDoc const mixin T_MyService64 {
 	abstract Str dude()
 }
-@NoDoc internal const class T_MyService64Impl : T_MyService64 {
+@NoDoc const class T_MyService64Impl : T_MyService64 {
 	override Str dude() { "dude"; }
 }
 
