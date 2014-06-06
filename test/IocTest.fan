@@ -1,6 +1,20 @@
 
 abstract internal class IocTest : Test {
 	
+	override Void setup() {
+//		(1..100).each {
+//			typeName := "T_MyModule" + it.toStr.padl(2, '0')
+//			try Pod.of(this).type(typeName)
+//			catch echo("$typeName is free!")
+//		}
+//		(1..100).each {
+//			typeName := "T_MyService" + it.toStr.padl(2, '0')
+//			try Pod.of(this).type(typeName)
+//			catch echo("$typeName is free!")
+//		}
+//		59, 61, 63, 65, 66, 67, 75, 76, 77, 78, 79
+	}
+	
 	Void verifyErrMsg(Str errMsg, |Obj| func) {
 		verifyErrMsgAndType(IocErr#, errMsg, func)
 	}

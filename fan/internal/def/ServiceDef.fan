@@ -5,7 +5,9 @@
 internal const mixin ServiceDef {
 
 	** Returns a factory func that creates the service implementation
-	abstract |->Obj| createServiceBuilder()
+	abstract |->Obj| serviceBuilder()
+
+	abstract Void overrideBuilder(|->Obj| builder)
 
 	** Returns the service id, which is usually the unqualified service type name.
 	abstract Str serviceId()
@@ -33,10 +35,8 @@ internal const mixin ServiceDef {
 		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
 	}
 	
-	Bool matchesId(Str qualifiedId, Str unQualifiedId) {
-		if (qualifiedId.equalsIgnoreCase(serviceId))
-			return true
-		return unQualifiedId.equalsIgnoreCase(unqualify(serviceId))
+	Bool matchesId(Str serviceId) {
+		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
 	}
 	
 	override Str toStr() {
@@ -51,7 +51,7 @@ internal const mixin ServiceDef {
 		serviceId == (obj as ServiceDef)?.serviceId
 	}
 	
-	static Str unqualify(Str id) {
+	protected static Str unqualify(Str id) {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}
 	
@@ -67,7 +67,7 @@ internal const mixin ServiceDef {
 					return InjectionUtils.callMethod(method, null, Obj#.emptyList)
 				}
 			}
-		}
+		}.toImmutable
 	}
 	
 	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
@@ -85,6 +85,6 @@ internal const mixin ServiceDef {
 					return obj
 				}
 			}			
-		}
+		}.toImmutable
 	}
 }

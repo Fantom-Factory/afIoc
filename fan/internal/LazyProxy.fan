@@ -83,7 +83,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 		if (instanceRef.object == null) {
 			instanceRef.object = InjectionTracker.withCtx(objLocator, null) |->Obj?| { 
 				InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-					serviceDef.createServiceBuilder.call
+					serviceDef.serviceBuilder.call
 				}
 			}
 		}

@@ -7,7 +7,8 @@ internal mixin Module {
 	** Returns the service definitions for the given service id
 	abstract ServiceDef? serviceDefByQualifiedId(Str serviceId)
 
-	abstract ServiceDef[] serviceDefsById(Str serviceId, Str unqualifiedId)
+	** 'serviceId' maybe qualified or unqualified 
+	abstract ServiceDef[] serviceDefsById(Str serviceId)
 
 	** Locates the defs of all services that implement the provided service type, or whose service 
 	** type is assignable to the provided service type (is a super-class or super-mixin).

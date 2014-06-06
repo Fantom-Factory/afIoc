@@ -10,7 +10,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Type?		serviceImplType
 	override const ServiceScope	scope
 	override const Bool			noProxy
-			 const |->Obj|		source
+	override const |->Obj|		serviceBuilder
 			 const Str?			description
 
 	new make(|This| f) { 
@@ -23,23 +23,23 @@ internal const class BuiltInServiceDef : ServiceDef {
 		if (serviceId == null)
 			serviceId = serviceType.qname
 
-		if (serviceImplType == null && source != null)
+		if (serviceImplType == null && serviceBuilder != null)
 			serviceImplType = Type.find("${serviceType.qname}Impl", false) ?: serviceType
 		
-		if (source == null)
-			source = |->Obj| { 
+		if (serviceBuilder == null)
+			serviceBuilder = |->Obj| { 
 				throw IocErr("Can not create BuiltIn service '$serviceId'") 
 			}
 
 		unqualifiedServiceId = unqualify(serviceId)
 	}
 
-	override |->Obj| createServiceBuilder() {
-		source
+	override Void overrideBuilder(|->Obj| builder) {
+		throw IocErr(IocMessages.builtinServicesCanNotBeOverridden(serviceId))
 	}
-	
+
 	override Str toStr() {
 		// serviceId is usually set *after* our defaults in the ctor, so we can't set desc above
-		description ?: "'$serviceId' : Built In Service"
+		description ?: "$serviceId : Built In Service"
 	}	
 }

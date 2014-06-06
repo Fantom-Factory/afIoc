@@ -65,17 +65,16 @@ internal const class ModuleImpl : Module {
 		serviceState[serviceId]?.def
 	}
 
-	override ServiceDef[] serviceDefsById(Str serviceId, Str unqualifiedId) {
-		sIdLower := serviceId.lower
+	override ServiceDef[] serviceDefsById(Str serviceId) {
 		return serviceState.vals.findAll |state| {
-			state.def.matchesId(sIdLower, unqualifiedId)
+			state.def.matchesId(serviceId)
 		}.map { it.def }
 	}
 
     override ServiceDef[] serviceDefsByType(Type serviceType) {
 		typeToServiceDefs.findChildren(serviceType, false)
     }
-
+	
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
 		regShutdown.check
 		return contributions.findAll {
@@ -160,8 +159,7 @@ internal const class ModuleImpl : Module {
 		}
 
 		return InjectionTracker.track("Creating REAL Service '$def.serviceId'") |->Obj| {
-	        creator := def.createServiceBuilder
-	        service := creator.call()
+	        service := def.serviceBuilder.call()
 			serviceState[def.serviceId].incImpls
 			
 			if (useCache) {
