@@ -31,6 +31,13 @@ internal class TestRecursion : IocTest {
 			reg.serviceById("s18") 
 		}
 	}
+
+	Void testBuilderMethodRecursion() {
+		reg := RegistryBuilder().addModule(T_MyModule102#).build.startup
+		verifyErrMsg(IocMessages.serviceRecursion(["s101", "s100", "s101"])) { 
+			reg.serviceById("s101") 
+		}
+	}
 }
 
 
@@ -67,3 +74,12 @@ internal class T_MyModule40 { }
 
 @SubModule { modules=[T_MyModule40#] }
 internal class T_MyModule41 { }
+
+internal class T_MyModule102 {
+	@Build { serviceId="s100" }
+	static T_MyService100 buildS100(T_MyService101 s101) { T_MyService100() }
+	@Build { serviceId="s101" }
+	static T_MyService101 buildS101(T_MyService100 s100) { T_MyService101() }
+}
+internal class T_MyService100 { }
+internal class T_MyService101 { }
