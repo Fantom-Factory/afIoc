@@ -24,4 +24,9 @@ internal class IocModule {
 	static Void contributeActorPools(MappedConfig config) {
 		config[IocConstants.systemActorPool] = ActorPool()
 	}
+	
+	@Contribute { serviceType=RegistryShutdown# }
+	static Void contributeIocShutdownPlaceholder(OrderedConfig config) {
+		config.addPlaceholder("IocShutdown")
+	}
 }

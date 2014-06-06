@@ -36,8 +36,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
 
 			services[BuiltInServiceDef() {
-				it.serviceType 		= RegistryShutdownHub#
-				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryShutdownHubImpl#)
+				it.serviceType 		= RegistryShutdown#
+				it.source			= ServiceDef.fromCtorAutobuild(it, RegistryShutdownImpl#)
 			}] = null
 			
 			services[BuiltInServiceDef() {
@@ -170,8 +170,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// Do dat startup!
 		tracker := OpTracker()
-		startup := (RegistryStartupImpl) serviceById(RegistryStartup#.qname)
-		startup.go(tracker)
+		startup := (RegistryStartup) serviceById(RegistryStartup#.qname)
+		startup.startup(tracker)
 		
 		millis	:= (Duration.now - startTime).toMillis.toLocale("#,000")
 		msg		:= ""
@@ -205,19 +205,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
-		shutdownHub := (RegistryShutdownHubImpl) serviceById(RegistryShutdownHub#.qname)
-		threadMan 	:= (ThreadLocalManager) 	 serviceById(ThreadLocalManager#.qname)
-		actorPools	:= (ActorPools) 	 		 serviceById(ActorPools#.qname)
+		shutdownHub := (RegistryShutdown)	serviceById(RegistryShutdown#.qname)
+		threadMan 	:= (ThreadLocalManager)	serviceById(ThreadLocalManager#.qname)
+		actorPools	:= (ActorPools) 	 	serviceById(ActorPools#.qname)
 
 		// Registry shutdown commencing...
-		shutdownHub.registryWillShutdown
-
+		shutdownHub.shutdown
 		shutdownLock.lock
 
 		// Registry shutdown complete.
-		shutdownHub.registryHasShutdown
-		
-		// destroy all internal refs
 		threadMan.cleanUpThread
 		modules.each { it.shutdown }
 		actorPools[IocConstants.systemActorPool].stop.join(10sec)
