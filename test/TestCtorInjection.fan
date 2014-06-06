@@ -10,7 +10,7 @@ internal class TestCtorInjection : IocTest {
 
 	Void testCorrectErrThrownWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService03#)) {
+		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService02#)) {
 			reg.dependencyByType(T_MyService30#)
 		}
 	}
@@ -161,7 +161,7 @@ internal const class T_MyService26 {
 }
 
 internal const class T_MyService30 {
-	new make(T_MyService03 ser3) { }
+	new make(T_MyService02 s2) { }
 }
 
 internal const class T_MyService38 { }

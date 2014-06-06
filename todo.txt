@@ -3,16 +3,13 @@ v1.6.2 Maybe...?
 ----------------
 Delete all deprecated classes -> update BedNap first!
 
-ActorPools... stop / kill all pools on shutdown? No, lets users be in charge of that.
- - shutdown the afIoc actor pool - manually, don't use a shutdown func.
-
-RegistryShutdownHub -> RegistryShutdown
- - what's with that crazy API!?
+ Log Reg startup and shutdown times
 
 ServiceOverrides
  - contribute a type...?
  - contribute a builder func? |->Obj|
 
+Public Test Types can GO!
 
 
 Meh... can't be arsed
