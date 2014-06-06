@@ -43,9 +43,8 @@ internal class TestContribDefs : IocTest {
 	
 	Void testWhenNoConfigDefined() {
 		reg := RegistryBuilder().addModule(T_MyModule52#).build.startup
-		typ := PublicTestTypes.type("T_MyService31")
-		reg.dependencyByType(typ)
-		reg.serviceById(typ.qname)
+		reg.dependencyByType(T_MyService31#)
+		reg.serviceById(T_MyService31#.qname)
 	}
 }
 
@@ -86,7 +85,10 @@ internal class T_MyModule29 {
 
 internal class T_MyModule52 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService31"))
+		binder.bind(T_MyService31#)
 	}
 }
-
+@NoDoc mixin T_MyService31 { }
+@NoDoc class T_MyService31Impl : T_MyService31 {
+	new make(DependencyProvider[] config) { }
+}

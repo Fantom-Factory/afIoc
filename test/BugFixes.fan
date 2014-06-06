@@ -85,9 +85,9 @@ internal class BugFixes : IocTest {
 
 internal class T_MyModule83 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50").withScope(ServiceScope.perThread)
-		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50-thread").withScope(ServiceScope.perThread)
-		binder.bind(PublicTestTypes.type("T_MyService50")).withId("t50-app").withScope(ServiceScope.perApplication)
+		binder.bind(T_MyService50#).withId("t50").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService50#).withId("t50-thread").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService50#).withId("t50-app").withScope(ServiceScope.perApplication)
 	}
 }
 
