@@ -15,6 +15,8 @@
 ** }
 ** <pre
 ** 
+** Due to 'DependencyProviders' being instantiated before the Registry is fully loaded, 'DependencyProviders' should not be proxied.
+** 
 ** @since 1.1
 const mixin DependencyProvider {
 

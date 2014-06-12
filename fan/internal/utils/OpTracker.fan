@@ -99,6 +99,10 @@ internal class OpTracker {
 		rec := LogRec(DateTime.now, logLevel, logger.name, msg)
 		logger.log(rec)
 	}
+	
+	override Str toStr() {
+		"$operations.size operations deep..."
+	}
 }
 
 internal const class OpTrackerOp {
@@ -106,5 +110,9 @@ internal const class OpTrackerOp {
 	const Duration 	startTime
 	
 	new make(|This|? f := null) { f?.call(this)	}
+	
+	override Str toStr() {
+		description
+	}
 }
 
