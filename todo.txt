@@ -6,6 +6,11 @@ Split DependencyProviders out into seperate pod...
  - afIocAddOns?
  - afIocUtils? (tick)
 
+Proxy default args
+ - null for objs
+ - false for bool
+ - 0 for int
+ - write about proxt limitations
 
 Meh... can't be arsed
 ---------------------
