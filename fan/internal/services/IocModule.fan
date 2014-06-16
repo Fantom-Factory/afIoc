@@ -22,7 +22,7 @@ internal class IocModule {
 	
 	@Contribute { serviceType=ActorPools# }
 	static Void contributeActorPools(MappedConfig config) {
-		config[IocConstants.systemActorPool] = ActorPool()
+		config[IocConstants.systemActorPool] = ActorPool() { it.name = IocConstants.systemActorPool } 
 	}
 	
 	@Contribute { serviceType=RegistryShutdown# }

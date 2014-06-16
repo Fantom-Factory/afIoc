@@ -12,6 +12,10 @@ Proxy default args
  - 0 for int
  - write about proxt limitations
 
+Remove the whole logServiceCreation() and regbuild options
+ - it's not used! (well, I'm not using it!)
+
+
 Meh... can't be arsed
 ---------------------
 MappedConfig  -> MapConfig  ? ConfigMap  ?
