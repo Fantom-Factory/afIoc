@@ -11,9 +11,11 @@ using afBeanUtils::NotFoundErr
 ** pre>
 ** @Contribute { serviceType=RegistryShutdownHub# }
 ** static Void contributeActorPools(MappedConfig config) {
-**   config["myPool"] = ActorPool()
+**   config["myPool"] = ActorPool() { it.name = "MyPool" }
 ** }
 ** <pre  
+** 
+** Note it is always a good idea to name your 'ActorPools' for debugging reasons.
 ** 
 ** @since 1.6.0
 const mixin ActorPools {

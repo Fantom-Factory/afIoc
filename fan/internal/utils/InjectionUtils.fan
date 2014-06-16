@@ -93,7 +93,7 @@ internal const class InjectionUtils {
 			
 			// this is such a common err, we treat it as our own to remove Ioc stack frames
 			} catch (FieldNotSetErr e) {
-				throw IocErr(IocMessages.fieldNotSetErr(e.msg, ctor))
+				throw IocErr(IocMessages.fieldNotSetErr(e.msg, ctor), e)
 			}
 		}
 	}

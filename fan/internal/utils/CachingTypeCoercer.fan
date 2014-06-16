@@ -6,7 +6,7 @@ internal const class CachingTypeCoercer : TypeCoercer {
 	private const AtomicMap cache := AtomicMap()
 
 	** Cache the conversion functions
-	override protected |Obj?->Obj?|? createCoercionFunc(Type fromType, Type toType) {
+	override protected |Obj->Obj?|? createCoercionFunc(Type fromType, Type toType) {
 		key	:= "${fromType.qname}->${toType.qname}"
 		return cache.getOrAdd(key) { doCreateCoercionFunc(fromType, toType) } 
 	}
