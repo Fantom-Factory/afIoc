@@ -301,6 +301,11 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v1.6.4 [#1.6.4]
+---------------
+ - Chg: Changed the default values for some 'Registry' methods to 'null' (from 'Obj#.emptyList').
+ - Chg: Gave the IoC 'ActorPool' a name.
+
 v1.6.2 [#1.6.2]
 ---------------
  - New: Threaded services can be overriden.

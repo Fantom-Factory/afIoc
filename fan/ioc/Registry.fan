@@ -49,14 +49,14 @@ const mixin Registry {
 	** Impl note: A list is used rather than splats so 'nulls' can be passed in. 
 	** 
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
-    abstract Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null)
+    abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.
 	** 
 	** If 'implType' is null then it is assumed to have the same name as the mixin, plus a 'Impl' suffix.
 	** @since 1.5.0
-	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null)
+	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 
 	** Injects services and dependencies into fields (of all visibilities) marked with '@Inject'.
 	** 
@@ -72,5 +72,5 @@ const mixin Registry {
 	** unless they have a default argument, in which case nothing is passed in and the default is used.
 	** 
 	** @since 1.5.0
-	abstract Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList)
+	abstract Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null)
 }

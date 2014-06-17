@@ -2,7 +2,7 @@ using afBeanUtils
 
 internal const class InjectionUtils {
 
-	static Obj autobuild(Type type, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
+	static Obj autobuild(Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		track("Autobuilding $type.qname") |->Obj| {
 			ctor := findAutobuildConstructor(type)
 			obj  := createViaConstructor(ctor, type, ctorArgs, fieldVals)
@@ -29,7 +29,7 @@ internal const class InjectionUtils {
 		return object
 	}
 
-	static Obj? callMethod(Method method, Obj? obj, Obj?[] providedMethodArgs) {
+	static Obj? callMethod(Method method, Obj? obj, Obj?[]? providedMethodArgs) {
 		InjectionTracker.doingMethodInjection(obj, method) |->Obj?| {
 			args := findMethodInjectionParams(method, providedMethodArgs)
 			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
@@ -76,7 +76,7 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Obj createViaConstructor(Method? ctor, Type building, Obj?[] providedCtorArgs, [Field:Obj?]? fieldVals) {
+	static Obj createViaConstructor(Method? ctor, Type building, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
 		if (ctor == null) {
 			return track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
@@ -148,12 +148,12 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj?[] findMethodInjectionParams(Method method, Obj?[] providedMethodArgs) {
+	private static Obj?[] findMethodInjectionParams(Method method, Obj?[]? providedMethodArgs) {
 		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			params := method.params.map |param, index| {
 				
 				log("Parameter ${index+1} = $param.type")
-				if (index < providedMethodArgs.size) {
+				if (index < (providedMethodArgs?.size ?: 0)) {
 					log("Parameter provided by user")
 					
 					provided := providedMethodArgs[index]
