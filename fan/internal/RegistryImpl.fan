@@ -260,7 +260,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	** see http://fantom.org/sidewalk/topic/2149
-	override Obj autobuild(Type type2, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+	override Obj autobuild(Type type2, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
 			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
@@ -270,7 +270,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 	
-	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
@@ -291,7 +291,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
+	override Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null) {
 		try {
 			return Utils.stackTraceFilter |->Obj?| {
 				shutdownLock.check
@@ -347,7 +347,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return checked ? throw IocErr(IocMessages.noDependencyMatchesType(dependencyType)) : null
 	}
 
-	override Obj trackAutobuild(Type type, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
+	override Obj trackAutobuild(Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		Type? implType := type
 		
 		if (implType.isAbstract) {
@@ -372,7 +372,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[] ctorArgs, [Field:Obj?]? fieldVals) {
+	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname)
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
@@ -400,7 +400,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return InjectionUtils.injectIntoFields(object)
 	}
 
-	override Obj? trackCallMethod(Method method, Obj? instance, Obj?[] providedMethodArgs) {
+	override Obj? trackCallMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs) {
 		return InjectionUtils.callMethod(method, instance, providedMethodArgs)
 	}
 
