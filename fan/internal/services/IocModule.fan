@@ -25,8 +25,29 @@ internal class IocModule {
 		config[IocConstants.systemActorPool] = ActorPool() { it.name = IocConstants.systemActorPool } 
 	}
 	
+	@Contribute { serviceType=RegistryStartup# }
+	static Void contributeRegistryStartup(OrderedConfig config, Registry regsitry, RegistryMeta registryMeta) {
+		config.addOrdered("afIoc.showServices") |->| {
+			((RegistryImpl) regsitry).showServices.val = true
+			// TODO: afBedSheet-1.3.10 remove when live
+			if (registryMeta.options.get("suppressStartupServiceList") == true)
+				((RegistryImpl) regsitry).showServices.val = false	
+		}
+
+		config.addOrdered("afIoc.showBanner") |->| {
+			((RegistryImpl) regsitry).showBanner.val = true
+			// TODO: afBedSheet-1.3.10 remove when live
+			if (registryMeta.options.get("suppressStartupBanner") == true)
+				((RegistryImpl) regsitry).showServices.val = false				
+		}
+	}
+
 	@Contribute { serviceType=RegistryShutdown# }
-	static Void contributeIocShutdownPlaceholder(OrderedConfig config) {
-		config.addPlaceholder("IocShutdown")
+	static Void contributeIocShutdownPlaceholder(OrderedConfig config, Registry regsitry) {
+		config.addPlaceholder("afIoc.shutdown")
+		
+		config.addOrdered("afIoc.sayGoodbye") |->| {
+			((RegistryImpl) regsitry).sayGoodbye.val = true
+		}
 	}
 }

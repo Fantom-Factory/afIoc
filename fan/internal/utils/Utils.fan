@@ -1,24 +1,5 @@
 
 internal class Utils {
-
-	static Str banner(Str heading) {
-		title := "\n"
-		title += Str<|   ___    __                 _____        _                  
-		                / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __ 
-		               / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // / 
-		              /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /  
-		              |>
-		first := true
-		while (!heading.isEmpty) {
-			banner := heading.size > 52 ? heading[0..<52] : heading
-			heading = heading[banner.size..-1]
-			banner = first ? (banner.padl(52, ' ') + " /___/   \n") : (banner.padr(52, ' ') + "\n")
-			title += banner
-			first = false
-		}
-		title 	+= "\n"
-		return title
-	}
 	
 	static Obj:Obj? makeMap(Type keyType, Type valType) {
 		mapType := Map#.parameterize(["K":keyType, "V":valType])
