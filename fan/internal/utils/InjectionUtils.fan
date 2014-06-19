@@ -204,7 +204,8 @@ internal const class InjectionUtils {
 	}
 
 	private static Method[] findConstructors(Type type) { 
-		type.methods.findAll |method| { method.isCtor && method.parent == type }
+		// use fits so nullable types == non-nullable types
+		type.methods.findAll |method| { method.isCtor && method.parent.fits(type) }
 	}
 
 	private static Field[] findInjectableFields(Type type, Bool includeConst) {

@@ -263,7 +263,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj autobuild(Type type2, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			logServiceCreation(RegistryImpl#, "Autobuilding $type2.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackAutobuild(type2, ctorArgs, fieldVals)
 			}
@@ -284,7 +283,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj injectIntoFields(Obj object) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			logServiceCreation(RegistryImpl#, "Injecting dependencies into fields of $object.typeof.qname")
 			return InjectionTracker.withCtx(this, null) |->Obj?| {
 				return trackInjectIntoFields(object)
 			}
@@ -444,14 +442,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		modules.vals.map {
 			it.adviceByServiceDef(serviceDef)
 		}.flatten
-	}
-
-	override Void logServiceCreation(Type log, Str msg) {
-		// Option defaults to 'false' as Ioc ideally should run quietly in the background and not 
-		// interfere with the running of your app.
-		if (options["logServiceCreation"] == true)
-			// e could have set afIoc log level to WARN but then we wouldn't get the banner at startup.
-			Utils.getLog(log).info(msg)
 	}
 
 	override Str:ServiceStat stats() {

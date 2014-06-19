@@ -305,6 +305,8 @@ v1.6.4 [#1.6.4]
 ---------------
  - Chg: Changed the default values for some 'Registry' methods to 'null' (from 'Obj#.emptyList').
  - Chg: Gave the IoC 'ActorPool' a name.
+ - Chg: Removed the 'logServiceCreation' RegistryBuilder option.
+ - Bug: Could not autobuild nullable types.
 
 v1.6.2 [#1.6.2]
 ---------------
