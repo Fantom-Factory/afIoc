@@ -1,4 +1,4 @@
-using concurrent::Future
+using concurrent
 using afPlastic::PlasticCompiler
 
 internal const class RegistryImpl : Registry, ObjLocator {
@@ -10,11 +10,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviders?		depProSrc
 	private const Duration					startTime
-	override const Str:Obj?					options
+			const AtomicBool				showServices	:= AtomicBool(false)
+			const AtomicBool				showBanner		:= AtomicBool(false)
+			const AtomicBool				sayGoodbye		:= AtomicBool(false)
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime					= tracker.startTime
-		this.options					= options
 		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
 		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)		
 		threadLocalManager 				:= ThreadLocalManagerImpl()
@@ -174,38 +175,28 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override This startup() {
 		startupLock.lock
 
-		buildTime := (Duration.now - startTime).toMillis.toLocale("#,###")
-		then 	:= Duration.now
+		buildTime	:= (Duration.now - startTime).toMillis.toLocale("#,###")
+		then 		:= Duration.now
 		
 		// Do dat startup!
-		startup := (RegistryStartup) serviceById(RegistryStartup#.qname)
+		startup 	:= (RegistryStartup) serviceById(RegistryStartup#.qname)
 		startup.startup(OpTracker())
 		startupTime	:= (Duration.now - then).toMillis.toLocale("#,###")
 
-		msg		:= ""
+		// We're alive! Shout it out to the world!
+		msg			:= ""
+
+		// we do this here (and not in the contribution) because we want to print last
+		// (to get the most upto date stats)
+		if (showServices.val)
+			msg += startup.printServiceList
 		
-		if (!options.get("suppressStartupServiceList", false)) {
-			stats := this.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
-			srvcs := "\n\n${stats.size} Services:\n\n"
-			maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
-			unreal:= 0
-			stats.each {
-				srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle}\n"
-				if (it.lifecycle == ServiceLifecycle.DEFINED)
-					unreal++
-			}
-			perce := (100d * unreal / stats.size).toLocale("0.00")
-			srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
-			msg   += srvcs
+		if (showBanner.val) {
+			msg += startup.printBanner
+			msg += "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms\n"
 		}
 		
-		if (!options.get("suppressStartupBanner", false)) {
-			title := Utils.banner(options["bannerText"])
-			title += "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms\n"
-			msg   += title
-		}
-		
-		if (!msg.trim.isEmpty)
+		if (!msg.isEmpty)
 			log.info(msg)
 
 		return this
@@ -226,11 +217,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		modules.each { it.shutdown }
 		actorPools[IocConstants.systemActorPool].stop.join(10sec)
 		
-		shutdownTime	:= (Duration.now - then).toMillis.toLocale("#,###")
-		log.info("IoC shutdown in ${shutdownTime}ms")
-		
-		log.info("\"Goodbye!\" from afIoc!")
-		
+		shutdownTime := (Duration.now - then).toMillis.toLocale("#,###")
+		if (sayGoodbye.val) {
+			log.info("IoC shutdown in ${shutdownTime}ms")
+			log.info("\"Goodbye!\" from afIoc!")
+		}
 		return this
 	}
 

@@ -2,22 +2,14 @@
 ** Use to create an IoC `Registry`. Modules may be added manually, defined by 
 ** [meta-data]`sys::Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
 class RegistryBuilder {
-	private const static Log 	logger 		:= Utils.getLog(RegistryBuilder#)
+	private const static Log	logger	:= Utils.getLog(RegistryBuilder#)
 	
 	private BuildCtx	ctx 		:= BuildCtx("Building IoC Registry")
 	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
 	private ModuleDef[]	moduleDefs	:= [,]
 
-	** All User and IoC options may be later retrieved from the `RegistryOptions` service. 
-	**  
-	** The following option keys are reserved for use by IoC:
-	**  -  'disableProxies': 'Bool' specifies if all proxy generation for mixin fronted services  
-	** 		should be disabled. Default is 'false'.
-	**  -  'suppressStartupServiceList': 'Bool' specifies if the service list should be displayed on 
-	** 		startup. Default is 'false'.
-	**  -  'suppressStartupBanner': 'Bool' specifies if the Alien-Factory banner should be displayed  
-	** 		on startup. Default is 'false'.
-	//  -  'bannerText': For the easter egg.
+	** Use options to pass state into the IoC Registry. 
+	** This map may be later retrieved from the `RegistryMeta` service. 
 	Str:Obj?	options {
 		private set
 	}
@@ -96,22 +88,28 @@ class RegistryBuilder {
 		moduleDefs.map { it.moduleType }
 	}
 	
+	** Returns a value from the 'options' map.
+	@Operator
+	Obj? get(Str name) {
+		options[name]
+	}
+
+	** Sets a value in the 'options' map. 
+	** Returns 'this' so it may be used as a builder method.. 
+	@Operator
+	This set(Str name, Obj? value) {
+		options[name] = value
+		return this
+	}
+	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
 	** for invoking `Registry.startup`.
-	** 
-	** The 'regOptions' parameter is deprecated. Use the 'options' field instead.
-    Registry build([Str:Obj?]? regOptions := null) {
+    Registry build() {
 		Utils.stackTraceFilter |->Obj| {
 			lock.lock
 	
-			if (regOptions != null)
-				options.addAll(regOptions)
-				
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
-				"disableProxies"			: false,
-				"suppressStartupServiceList": false,
-				"suppressStartupBanner"		: false,
-				"bannerText"				: "Alien-Factory IoC v$typeof.pod.version",
+				"afIoc.bannerText" : "Alien-Factory IoC v$typeof.pod.version",
 			])
 
 			defaults.each |val, key| {

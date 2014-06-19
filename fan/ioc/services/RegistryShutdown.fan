@@ -20,9 +20,9 @@ const mixin RegistryShutdownHub {
 ** }
 ** <pre
 ** 
-** If the shutdown method of your service depends on other services being available, add a constraint on 'IocShutdown': 
+** If the shutdown method of your service depends on other services being available, add a constraint on 'afIoc.shutdown': 
 ** 
-**   conf.addOrdered("MyServiceShutdown", |->| { myService.shutdown() }, ["BEFORE: IocShutdown"])
+**   conf.addOrdered("MyServiceShutdown", |->| { myService.shutdown() }, ["BEFORE: afIoc.shutdown"])
 ** 
 ** Note that Errs thrown by shutdown functions will be logged and then swallowed.
 ** 

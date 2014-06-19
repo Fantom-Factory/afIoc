@@ -1,13 +1,6 @@
 
 v1.6.4 Maybe...?
 ----------------
-Move banner and service printing into reg startup methods - so they can easily be removed.
-	
-	@Contribute { serviceType=RegistryStartup# }
-	internal static Void contributeRegistryStartup(OrderedConfig config) {
-		config.remove("IocBanner")
-		config.remove("IocServices")
-	}
 
 Split DependencyProviders out into seperate pod...
  - afIocXtra?

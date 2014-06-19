@@ -18,9 +18,9 @@ class Build : BuildPod {
 			"concurrent 1.0", 
 			"compiler 1.0", 
 			
-			"afBeanUtils 0.0.2+",
-			"afConcurrent 1.0.4+",
-			"afPlastic 1.0.2+"
+			"afBeanUtils 0.0.4+",
+			"afConcurrent 1.0.6+",
+			"afPlastic 1.0.12+"
 		]
 		
 		

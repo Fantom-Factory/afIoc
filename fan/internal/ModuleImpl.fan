@@ -143,11 +143,8 @@ internal const class ModuleImpl : Module {
 	private Obj getOrMakeService(ServiceDef def, Bool returnReal, Bool useCache) {
 		if (returnReal)
 			return getOrMakeRealService(def, useCache)
-		if (InjectionTracker.peek(false)?.objLocator?.options?.get("disableProxies") == true)
-			return getOrMakeRealService(def, useCache)
 		if (!def.proxiable)
-			return getOrMakeRealService(def, useCache)
-		
+			return getOrMakeRealService(def, useCache)		
 		return getOrMakeProxyService(def, useCache)
 	}
 
