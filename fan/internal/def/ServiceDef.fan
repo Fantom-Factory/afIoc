@@ -59,7 +59,6 @@ internal const mixin ServiceDef {
 		|->Obj| {
 			InjectionTracker.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
 				objLocator := InjectionTracker.peek.objLocator
-				objLocator.logServiceCreation(ModuleDefImpl#, "Creating Service '$serviceDef.serviceId'")
 				
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
@@ -74,7 +73,6 @@ internal const mixin ServiceDef {
 		|->Obj| {
 			InjectionTracker.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
 				objLocator := InjectionTracker.peek.objLocator
-				objLocator.logServiceCreation(ServiceBinderImpl#, "Creating Service '$serviceDef.serviceId'")
 				ctor := InjectionUtils.findAutobuildConstructor(serviceImplType)
 				
 				// config is a very special method argument, as it's optional and if required, we 

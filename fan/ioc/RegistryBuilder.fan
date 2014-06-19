@@ -11,8 +11,6 @@ class RegistryBuilder {
 	** All User and IoC options may be later retrieved from the `RegistryOptions` service. 
 	**  
 	** The following option keys are reserved for use by IoC:
-	**  -  'logServiceCreation': 'Bool' specifies if each service creation should be logged to INFO. 
-	** 		Default is 'false'. Set IoC's log level to debug for extensive info.
 	**  -  'disableProxies': 'Bool' specifies if all proxy generation for mixin fronted services  
 	** 		should be disabled. Default is 'false'.
 	**  -  'suppressStartupServiceList': 'Bool' specifies if the service list should be displayed on 
@@ -110,7 +108,6 @@ class RegistryBuilder {
 				options.addAll(regOptions)
 				
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
-				"logServiceCreation"		: false,
 				"disableProxies"			: false,
 				"suppressStartupServiceList": false,
 				"suppressStartupBanner"		: false,

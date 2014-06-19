@@ -1,6 +1,14 @@
 
 v1.6.4 Maybe...?
 ----------------
+Move banner and service printing into reg startup methods - so they can easily be removed.
+	
+	@Contribute { serviceType=RegistryStartup# }
+	internal static Void contributeRegistryStartup(OrderedConfig config) {
+		config.remove("IocBanner")
+		config.remove("IocServices")
+	}
+
 Split DependencyProviders out into seperate pod...
  - afIocXtra?
  - afIocAddOns?
@@ -8,12 +16,11 @@ Split DependencyProviders out into seperate pod...
 
 Proxy default args
  - null for objs
- - false for bool
+ - false for bool (true if called checked)
  - 0 for int
+ - use BeanUtils.defaultValue -> toCode
  - write about proxt limitations
 
-Remove the whole logServiceCreation() and regbuild options
- - it's not used! (well, I'm not using it!)
 
 
 Meh... can't be arsed

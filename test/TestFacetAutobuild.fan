@@ -17,6 +17,16 @@ internal class TestFacetAutobuild : IocTest {
 			reg.serviceById("s39")
 		}
 	}
+	
+	Void testAutobuildHandlesNullableTypes() {
+		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
+		
+		// the actual bug
+		reg.autobuild(T_MyService59?#)
+		
+		// the actual usage
+		reg.serviceById("s63")		
+	}
 }
 
 internal class T_MyModule55 {
@@ -25,6 +35,8 @@ internal class T_MyModule55 {
 		binder.bind(T_MyService36#).withId("s36")
 		binder.bind(T_MyService37#).withId("s37")
 		binder.bind(T_MyService39#).withId("s39")
+		binder.bind(T_MyService59#).withId("s59")
+		binder.bind(T_MyService63#).withId("s63")
 	}
 }
 
@@ -44,4 +56,14 @@ internal class T_MyService37 {
 internal class T_MyService39 {
 	@Inject @ServiceId { id="s2" } @Autobuild
 	T_MyService02? ser2	
+}
+
+internal class T_MyService63 {
+	@Inject @Autobuild
+	T_MyService59? auto
+}
+
+internal class T_MyService59 {
+	// BUGFIX: this ctor did break IoC
+	new make(|This|in) { in(this) }
 }

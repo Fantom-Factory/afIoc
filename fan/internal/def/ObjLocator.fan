@@ -34,6 +34,4 @@ internal const mixin ObjLocator {
 	abstract Str:Obj? options()
 	
 	abstract Str:ServiceStat stats()
-	
-	abstract Void logServiceCreation(Type log, Str msg)
 }
