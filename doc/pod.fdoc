@@ -255,7 +255,8 @@ class AppModule {
 
 The list and map types are inferred from the ctor definition and all contribution types must fit.
 
-If the service declares a map configuration then contribution methods should take a 'MappedConfig' object. If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
+If the service declares a map configuration then contribution methods should take a 'MappedConfig' object.
+If the map config uses 'Str' as the key, then the created map is 'caseInsensitive' otherwise the map is 'ordered'.
 
 
 
@@ -263,9 +264,10 @@ Lazy Loading [#lazyLoading]
 ***************************
 Define your service with a mixin and take advantage of true lazy loading!
 
-By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
+By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly.
+The *real* service is only instantiated when you call a method on the proxy.
 
-This means registry startup times can be quicker than ever and circular service dependencies are virtually eliminated!
+This means circular service dependencies are virtually eliminated!
 
 It also allows you to inject 'perThread' scoped services into 'perApplication' scoped services.
 
@@ -273,7 +275,7 @@ It also allows you to inject 'perThread' scoped services into 'perApplication' s
 
 Advise Your Services [#adviseYourServices]
 ******************************************
-Intercept all calls to services defined by a mixin and wrap them in your own code.
+Intercept all method calls to proxied services and wrap them in your own code!
 
 See [@Advise]`Advise` for details
 
@@ -303,6 +305,8 @@ Release Notes [#releaseNotes]
 *****************************
 v1.6.4 [#1.6.4]
 ---------------
+ - New: Methods on proxied services may now have *plain* default values - 'Plastic' will attempt to *guess* what they are!
+ - Chg: Removed deprecated classes 'TypeCoercer, StrategyRegistry' and 'NotFoundErr'.
  - Chg: Changed the default values for some 'Registry' methods to 'null' (from 'Obj#.emptyList').
  - Chg: Moved the startup logging to 'RegistryStartup' contributions so they could easily be removed / overridden.
  - Chg: Removed the 'RegistryBuilder' options 'logServiceCreation, disableProxies, suppressStartupBanner' and 'suppressStartupServiceList'.

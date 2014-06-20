@@ -1,27 +1,19 @@
 
-v1.6.4 Maybe...?
+v1.6.6 Maybe...?
 ----------------
-
-Split DependencyProviders out into seperate pod...
- - afIocXtra?
- - afIocAddOns?
- - afIocUtils? (tick)
-
-Proxy default args
- - null for objs
- - false for bool (true if called checked)
- - 0 for int
- - use BeanUtils.defaultValue -> toCode
- - write about proxt limitations
+Let services get Ordered IDs somehow...?
 
 
 
 Meh... can't be arsed
 ---------------------
+Split DependencyProviders out into separate pod... afIocUtils?
+
 MappedConfig  -> MapConfig  ? ConfigMap  ?
 orderedConfig -> ListConfig ? ConfigList ?
  - What's the point? The orig names aren't that bad!
- - And *everyone* would need to update their code, even if they were deprecated! 
+ - And *everyone* would need to update their code, even if they were deprecated!
+ - Make the constraint Str list just a CSV Str - I don't like dem lists!  
  
 @Inject { optional = true }
  - why would you want to? And what of ctor args? 
