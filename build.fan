@@ -5,12 +5,12 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful Dependency Injection (DI) / Inversion Of Control (IoC) framework"
-		version = Version("1.6.4")
+		version = Version("1.6.5")
 
 		meta = [	
 			"proj.name"		: "IoC",
 			"tags"			: "system",
-			"repo.private"	: "false"
+			"repo.private"	: "true"
 		]
 
 		depends = [
