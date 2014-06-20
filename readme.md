@@ -32,7 +32,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [33 tests, 209 methods, 428 verifies]`
+  - Extensively tested: - `All tests passed! [33 tests, 208 methods, 424 verifies]`
 
 
   > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc)!
@@ -247,13 +247,13 @@ Define your service with a mixin and take advantage of true lazy loading!
 
 By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
 
-This means registry startup times can be quicker than ever and circular service dependencies are virtually eliminated!
+This means circular service dependencies are virtually eliminated!
 
 It also allows you to inject `perThread` scoped services into `perApplication` scoped services.
 
 ## Advise Your Services 
 
-Intercept all calls to services defined by a mixin and wrap them in your own code.
+Intercept all method calls to proxied services and wrap them in your own code!
 
 See [@Advise](http://repo.status302.com/doc/afIoc/Advise.html) for details
 

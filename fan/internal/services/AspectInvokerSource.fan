@@ -69,9 +69,11 @@ internal const class ServiceMethodInvoker {
 	const Method:|MethodInvocation invocation -> Obj?|[] aspects
 	
 	new make(|This|in) { in(this) }
-	
+
 	Obj? invokeMethod(Method method, Obj?[] args) {
 		return MethodInvocation {
+			if (this.service.object == null)
+				throw WtfErr("ObjectRef '${this.service.name}' with scope '${this.service.scope}' is null!???")
 			it.service	= this.service.object
 			it.aspects	= this.aspects[method]
 			it.method	= method

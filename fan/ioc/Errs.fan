@@ -33,22 +33,6 @@ const class IocErr : Err, Unwrappable {
 	}
 }
 
-** A generic helper Err thrown when a value is not found in an expected list of values.
-** 
-** This purposely does not extend `IocErr` so it may be freely used by other frameworks
-@NoDoc @Deprecated { msg="Use afBeanUtils::NotFoundErr instead" }
-const class NotFoundErr : Err, NotFoundErr {
-	override const Str[] availableValues
-	
-	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
-		this.availableValues = availableValues.exclude { it == null }.map { it.toStr }.sort
-	}
-	
-	override Str toStr() {
-		NotFoundErr.super.toStr		
-	}
-}
-
 ** Thrown when an impossible condition occurs. You know when - we've all written comments like:
 ** 
 ** '// this should never happen...' 

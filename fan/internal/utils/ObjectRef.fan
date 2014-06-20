@@ -2,6 +2,8 @@ using concurrent::AtomicRef
 using afConcurrent::LocalRef
 
 internal const class ObjectRef {
+			const Str 			name
+			const ServiceScope	scope
 	private const AtomicRef? 	atomicObj
 	private const LocalRef?		localObj
 	
@@ -11,6 +13,8 @@ internal const class ObjectRef {
 		else
 			this.localObj = localRef
 		this.object = obj
+		this.name	= localRef.name
+		this.scope	= scope
 	}
 	
 	Obj? object {

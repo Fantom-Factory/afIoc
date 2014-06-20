@@ -65,7 +65,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
 		localManager 		:= (ThreadLocalManager) objLocator.trackServiceById(ThreadLocalManager#.qname)
-		localRef			:= localManager.createRef(serviceDef.serviceId + "-proxy")
+		localRef			:= localManager.createRef(serviceDef.serviceId + "-lazyProxy")
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
 		this.instanceRef	= ObjectRef(localRef, serviceDef.scope, null)
