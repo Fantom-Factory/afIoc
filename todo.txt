@@ -1,12 +1,16 @@
 
 v1.6.6 Maybe...?
 ----------------
-Let services get Ordered IDs somehow...?
 
+afIoc.showServices -> afIoc.logServices
+afIoc.showBanner   -> afIoc.logBanner
+
+Let services get Ordered IDs somehow...?
+ - combine MappedConfig & OrderedConfig into one UberConfig??
 
 
 Meh... can't be arsed
----------------------
+--------------------- 
 Split DependencyProviders out into separate pod... afIocUtils?
 
 MappedConfig  -> MapConfig  ? ConfigMap  ?
@@ -14,7 +18,7 @@ orderedConfig -> ListConfig ? ConfigList ?
  - What's the point? The orig names aren't that bad!
  - And *everyone* would need to update their code, even if they were deprecated!
  - Make the constraint Str list just a CSV Str - I don't like dem lists!  
- 
+
 @Inject { optional = true }
  - why would you want to? And what of ctor args? 
 
