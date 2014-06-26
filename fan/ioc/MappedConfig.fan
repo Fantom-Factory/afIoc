@@ -194,10 +194,12 @@ class MappedConfig {
 		if (val.typeof.fits(valType))
 			return val
 
-		if (typeCoercer.canCoerce(val.typeof, valType))
-			return typeCoercer.coerce(val, valType)
-
-		throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		// empty lists and maps can always be converted
+		if (!isEmptyList(val) && !isEmptyMap(val))
+			if (!typeCoercer.canCoerce(val.typeof, valType))
+				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
+		
+		return typeCoercer.coerce(val, valType)
 	}
 
 	private once Type keyType() {
@@ -208,6 +210,15 @@ class MappedConfig {
 		contribType.params["V"]
 	}
 
+	private Bool isEmptyList(Obj val) {
+		(val is List) && (((List) val).isEmpty)
+	}
+	
+	private Bool isEmptyMap(Obj val) {
+		(val is Map) && (((Map) val).isEmpty)
+	}
+	
+	@NoDoc
 	override Str toStr() {
 		"MappedConfig of $contribType"
 	}

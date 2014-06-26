@@ -8,9 +8,13 @@
 facet class Contribute {
 
 	** The id of the service to be configured. 
+	** 
+	** Use either this or 'serviceType', not both.
 	const Str?	serviceId	:= null
 
-	** The type of the service to be configured. 
+	** The type of the service to be configured.
+	**  
+	** Use either this or 'serviceId', not both.
 	const Type?	serviceType	:= null
 
 	** Marks the contribution as optional; no Err is thrown if the service is not found. 

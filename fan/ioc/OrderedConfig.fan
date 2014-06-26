@@ -212,26 +212,37 @@ class OrderedConfig {
 		contribType.params["V"]
 	}
 	
-	private Obj? validateVal(Obj? object) {
-		if (object == Orderer.delete || object == Orderer.placeholder)
-			return object
+	private Obj? validateVal(Obj? val) {
+		if (val == Orderer.delete || val == Orderer.placeholder)
+			return val
 		
-		if (object == null) {
+		if (val == null) {
 			if (!listType.isNullable)
 				throw IocErr(IocMessages.orderedConfigTypeMismatch(null, listType))
-			return object
+			return val
 		}
 
 		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
-		if (object.typeof.fits(listType))
-			return object
+		if (val.typeof.fits(listType))
+			return val
 
-		if (typeCoercer.canCoerce(object.typeof, listType))
-			return typeCoercer.coerce(object, listType)
+		// empty lists and maps can always be converted
+		if (!isEmptyList(val) && !isEmptyMap(val))
+			if (!typeCoercer.canCoerce(val.typeof, listType))
+				throw IocErr(IocMessages.orderedConfigTypeMismatch(val.typeof, listType))
 
-		throw IocErr(IocMessages.orderedConfigTypeMismatch(object.typeof, listType))
+		return typeCoercer.coerce(val, listType)
 	}
 	
+	private Bool isEmptyList(Obj val) {
+		(val is List) && (((List) val).isEmpty)
+	}
+	
+	private Bool isEmptyMap(Obj val) {
+		(val is Map) && (((Map) val).isEmpty)
+	}
+
+	@NoDoc
 	override Str toStr() {
 		"OrderedConfig of $listType"
 	}	
