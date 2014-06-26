@@ -68,7 +68,7 @@ internal class TestMappedConfig : IocTest {
 	Void testEmptyListMapValueCanBeOfTypeObj() {
 		reg := RegistryBuilder().addModule(T_MyModule51#).build.startup
 		s29 := reg.serviceById("s29") as T_MyService29
-		verifyEq(s29.config["key"], Str[,])
+		verifyEq(s29.config["key"], Type[,])
 	}
 
 	Void testStrKeyMapsAreCaseInSensitive() {
@@ -328,13 +328,14 @@ internal class T_MyModule51 {
 	}
 	@Contribute{ serviceId="s29" }
 	static Void cont(MappedConfig config) {
-		config.set("key", [,])
+		config["oop"] = [ServiceBinder#]
+		config["key"] = [,]
 	}
 }
 
 internal class T_MyService29 {
-	Str:Str[] config
-	new make(Str:Str[] config) {
+	Str:Type[] config
+	new make(Str:Type[] config) {
 		this.config = config
 	}
 }

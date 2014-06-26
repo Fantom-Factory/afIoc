@@ -303,6 +303,10 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v1.6.6 [#1.6.6]
+---------------
+ - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
+
 v1.6.4 [#1.6.4]
 ---------------
  - New: Methods on proxied services may now have *plain* default values - 'Plastic' will attempt to *guess* what they are!
