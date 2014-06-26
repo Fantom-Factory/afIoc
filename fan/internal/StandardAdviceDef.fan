@@ -1,7 +1,8 @@
 
 internal const class StandardAdviceDef : AdviceDef {
 	
-	override const Str		serviceIdGlob
+			 const Str		serviceIdGlob
+			 const Type?	serviceType
 	override const Method 	advisorMethod
 	override const Bool 	optional
 
@@ -12,7 +13,15 @@ internal const class StandardAdviceDef : AdviceDef {
 		globMatcher = Regex.glob(serviceIdGlob)
 	}
 	
-	override Bool matchesServiceId(Str serviceId) {
-		globMatcher.matches(serviceId)
+	override Bool matchesService(ServiceDef serviceDef) {
+		(serviceType != null) 
+			? serviceDef.serviceType.fits(serviceType)
+			: globMatcher.matches(serviceDef.serviceId)
+	}
+	
+	override Str errMsg() {
+		(serviceType != null) 
+			? "serviceType of ${serviceType.qname}"
+			: "serviceId glob '${serviceIdGlob}'"
 	}
 }

@@ -147,7 +147,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 					if (adviceDef.optional)
 						return
 					matches := advisableServices.any |serviceId| { 
-						adviceDef.matchesServiceId(serviceId)  
+						adviceDef.matchesService(serviceDefById(serviceId))  
 					}
 					if (!matches)
 						throw IocErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef, advisableServices))

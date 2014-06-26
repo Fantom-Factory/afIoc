@@ -86,7 +86,7 @@ internal const class ModuleImpl : Module {
 	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
 		regShutdown.check
 		return adviceDefs.findAll {
-			it.matchesServiceId(serviceDef.serviceId)
+			it.matchesService(serviceDef)
 		}
 	}
 	
