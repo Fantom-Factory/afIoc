@@ -1,12 +1,6 @@
 
 v1.6.6 Maybe...?
 ----------------
-
-afIoc.showServices -> afIoc.logServices
-afIoc.showBanner   -> afIoc.logBanner
-
-Add @Advise.serviceType (so it's like @Contribute)
-
 Let services get Ordered IDs somehow...?
  - combine MappedConfig & OrderedConfig into one UberConfig??
 
