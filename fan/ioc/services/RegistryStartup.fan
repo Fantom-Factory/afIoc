@@ -64,8 +64,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 	}
 
 	override Str printBanner() {
-		// TODO: afBedSheet-1.3.10 remove 'bannerText' when live
-		heading := (Str?) (meta.options["afIoc.bannerText"] ?: meta.options["bannerText"]) ?: "Err..."
+		heading := (Str) (meta.options["afIoc.bannerText"] ?: "Err...")
 		title := "\n"
 		title += Str<|   ___    __                 _____        _                  
 		                / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __ 

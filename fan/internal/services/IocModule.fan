@@ -27,18 +27,19 @@ internal class IocModule {
 	
 	@Contribute { serviceType=RegistryStartup# }
 	static Void contributeRegistryStartup(OrderedConfig config, Registry regsitry, RegistryMeta registryMeta) {
-		config.addOrdered("afIoc.showServices") |->| {
-			((RegistryImpl) regsitry).showServices.val = true
-			// TODO: afBedSheet-1.3.10 remove when live
-			if (registryMeta.options.get("suppressStartupServiceList") == true)
-				((RegistryImpl) regsitry).showServices.val = false	
+		config.addOrdered("afIoc.logServices") |->| {
+			((RegistryImpl) regsitry).logServices.val = true
+		}
+		config.addOrdered("afIoc.logBanner") |->| {
+			((RegistryImpl) regsitry).logBanner.val = true
 		}
 
+		// TODO: afBedSheet-1.3.12 - remove when live
+		config.addOrdered("afIoc.showServices") |->| {
+			((RegistryImpl) regsitry).showServices.val = true
+		}
 		config.addOrdered("afIoc.showBanner") |->| {
 			((RegistryImpl) regsitry).showBanner.val = true
-			// TODO: afBedSheet-1.3.10 remove when live
-			if (registryMeta.options.get("suppressStartupBanner") == true)
-				((RegistryImpl) regsitry).showServices.val = false				
 		}
 	}
 
