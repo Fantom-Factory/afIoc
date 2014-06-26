@@ -53,8 +53,15 @@ facet class Advise {
 	
 	** The [glob pattern]`sys::Regex.glob` to match against all service ids.
 	** 
+	** Use either this or 'serviceType', not both.
+	** 
 	** Default value is '"*"', that is, match ALL services.
-	const Str serviceId := "*"
+	const Str? serviceId := "*"
+
+	** The type of the service to be advised.
+	**  
+	** Use either this or 'serviceId', not both.
+	const Type?	serviceType	:= null
 
 	** Marks the advice as optional; no Err is thrown if the glob does not match any proxyable services.
 	** 

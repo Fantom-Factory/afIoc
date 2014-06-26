@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [33 tests, 208 methods, 424 verifies]'
+  - Extensively tested: - 'All tests passed! [33 tests, 209 methods, 425 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -305,6 +305,7 @@ Release Notes [#releaseNotes]
 *****************************
 v1.6.6 [#1.6.6]
 ---------------
+ - New: Added '@Advise.serviceType' for advising a single service.
  - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
 
 v1.6.4 [#1.6.4]

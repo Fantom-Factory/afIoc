@@ -40,8 +40,26 @@ internal class TestAspect : IocTest {
 			it.serviceIdGlob	= "*Aspect"
 			it.advisorMethod	= Obj#hash
 		}
-		verify(def.matchesServiceId("T_MyService65Aspect"))
-		verifyFalse(def.matchesServiceId("T_MyService67NoMatch"))
+
+		serviceDef := StandardServiceDef() {
+			it.serviceId 		= "T_MyService65Aspect"
+			it.moduleId			= ""
+			it.serviceType 		= Type#
+			it.serviceImplType 	= Type#
+			it.scope			= ServiceScope.perInjection
+			it.description 		= ""
+		}		
+		verify(def.matchesService(serviceDef))
+		
+		serviceDef = StandardServiceDef() {
+			it.serviceId 		= "T_MyService67NoMatch"
+			it.moduleId			= ""
+			it.serviceType 		= Type#
+			it.serviceImplType 	= Type#
+			it.scope			= ServiceScope.perInjection
+			it.description 		= ""
+		}		
+		verifyFalse(def.matchesService(serviceDef))
 	}
 	
 	Void testAdvisingNonProxy() {
@@ -57,6 +75,12 @@ internal class TestAspect : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule84#).build.startup
 		s69 := (T_MyService69) reg.serviceById("s69")
 		verifyEq(s69.judge, "tell it to the")
+	}
+
+	Void testAdvisingByServiceType() {
+		reg := RegistryBuilder().addModule(T_MyModule81#).build.startup
+		s60 := (T_MyService60) reg.serviceById("s60")
+		verifyEq(s60.meth1, "dredd advised")
 	}
 }
 
@@ -93,6 +117,7 @@ internal class T_MyModule81 {
 		binder.bind(T_MyService65Aspect#).withId("s65Aspect")
 		binder.bind(T_MyService66Aspect#).withId("s66Aspect")
 		binder.bind(T_MyService67NoMatch#).withId("s67NoMatch")
+		binder.bind(T_MyService60#).withId("s60")
 	}
 	
 	@Advise { serviceId="s??*As*" }
@@ -124,6 +149,16 @@ internal class T_MyModule81 {
 			}
 		}
 	}
+
+	@Advise { serviceType=T_MyService60# }
+	static Void adviseByType(MethodAdvisor[] methodAdvisors) {
+		methodAdvisors.each |advisor| {
+			advisor.addAdvice |invocation -> Obj?| {
+				ret := (Str) invocation.invoke
+				return ret + " advised"
+			}
+		}
+	}
 }
 
 internal class T_MyModule11 {
@@ -148,6 +183,12 @@ internal class T_MyService69 {
 	}
 }
 
+@NoDoc mixin T_MyService60 {
+	abstract Str meth1()
+}
+@NoDoc class T_MyService60Impl : T_MyService60 {
+	override Str meth1() { "dredd" }
+}
 @NoDoc mixin T_MyService65Aspect {
 	abstract Str meth1()
 }

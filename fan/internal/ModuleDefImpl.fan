@@ -86,6 +86,7 @@ internal const class ModuleDefImpl : ModuleDef {
 		advise := (Advise) Slot#.method("facet").callOn(method, [Advise#])	// Stoopid F4
 
 		adviceDef := StandardAdviceDef {
+			it.serviceType		= advise.serviceType
 			it.serviceIdGlob	= advise.serviceId
 			it.advisorMethod	= method
 			it.optional			= advise.optional
