@@ -5,7 +5,7 @@
 ** information. That's where the 'OpTracker' comes in.   
 internal class OpTracker {
 	private const static Log 	logger 		:= Utils.getLog(OpTracker#)
-	private OpTrackerOp[]		operations	:= [,]
+	private OpTrackerOp[]		operations	:= List(OpTrackerOp#, 255)
 	private Bool				logged		:= false
 	private LogLevel			logLevel	:= LogLevel.debug
 
