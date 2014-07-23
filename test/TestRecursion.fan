@@ -6,35 +6,35 @@ internal class TestRecursion : IocTest {
 	}
 	
 	Void testModuleRecursion() {
-		verifyErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+		verifyIocErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
 			RegistryBuilder().addModule(T_MyModule40#).build
 		}
 	}
 
 	Void testErrOnRecursiveInjection1() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s15", "s15"])) { 
+		verifyIocErrMsg(IocMessages.serviceRecursion(["s15", "s15"])) { 
 			reg.serviceById("s15") 
 		}
 	}
 
 	Void testErrOnRecursiveInjection2() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s16", "s17", IocConstants.ctorItBlockBuilder, "s16"])) { 
+		verifyIocErrMsg(IocMessages.serviceRecursion(["s16", "s17", IocConstants.ctorItBlockBuilder, "s16"])) { 
 			reg.serviceById("s16") 
 		}
 	}
 
 	Void testErrOnRecursiveInjection3() {
 		reg := RegistryBuilder().addModule(T_MyModule20#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s18", IocConstants.ctorItBlockBuilder, "s17", IocConstants.ctorItBlockBuilder, "s16", "s17"])) { 
+		verifyIocErrMsg(IocMessages.serviceRecursion(["s18", IocConstants.ctorItBlockBuilder, "s17", IocConstants.ctorItBlockBuilder, "s16", "s17"])) { 
 			reg.serviceById("s18") 
 		}
 	}
 
 	Void testBuilderMethodRecursion() {
 		reg := RegistryBuilder().addModule(T_MyModule102#).build.startup
-		verifyErrMsg(IocMessages.serviceRecursion(["s101", "s100", "s101"])) { 
+		verifyIocErrMsg(IocMessages.serviceRecursion(["s101", "s100", "s101"])) { 
 			reg.serviceById("s101") 
 		}
 	}

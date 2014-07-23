@@ -2,37 +2,37 @@
 internal class TestContribDefs : IocTest {
 	
 	Void testContributionMethodMustBeStatic() {
-		verifyErrMsg(IocMessages.contributionMethodMustBeStatic(T_MyModule23#contributeWot)) {
+		verifyIocErrMsg(IocMessages.contributionMethodMustBeStatic(T_MyModule23#contributeWot)) {
 			RegistryBuilder().addModule(T_MyModule23#).build.startup
 		}  
 	}
 
 	Void testContributionMethodMustTakeConfig() {
-		verifyErrMsg(IocMessages.contributionMethodMustTakeConfig(T_MyModule24#contributeWot)) {
+		verifyIocErrMsg(IocMessages.contributionMethodMustTakeConfig(T_MyModule24#contributeWot)) {
 			RegistryBuilder().addModule(T_MyModule24#).build.startup
 		}  
 	}
 
 	Void testContribDoesNotDefineBothServiceIdAndServiceType() {
-		verifyErrMsg(IocMessages.contribitionHasBothIdAndType(T_MyModule25#contributeWot)) {
+		verifyIocErrMsg(IocMessages.contribitionHasBothIdAndType(T_MyModule25#contributeWot)) {
 			RegistryBuilder().addModule(T_MyModule25#).build.startup
 		}  
 	}
 
 	Void testContribDoesNotDefineServiceId() {
-		verifyErrMsg(IocMessages.contributionMethodDoesNotDefineServiceId(T_MyModule26#cont)) {
+		verifyIocErrMsg(IocMessages.contributionMethodDoesNotDefineServiceId(T_MyModule26#cont)) {
 			RegistryBuilder().addModule(T_MyModule26#).build.startup
 		}  
 	}
 
 	Void testErrWhenServiceIdNoExist() {
-		verifyErrMsg(IocMessages.contributionMethodServiceIdDoesNotExist(T_MyModule27#cont, "wotever")) {
+		verifyIocErrMsg(IocMessages.contributionMethodServiceIdDoesNotExist(T_MyModule27#cont, "wotever")) {
 			RegistryBuilder().addModule(T_MyModule27#).build.startup
 		}  
 	}
 
 	Void testErrWhenServiceTypeNoExist() {
-		verifyErrMsg(IocMessages.contributionMethodServiceTypeDoesNotExist(T_MyModule28#cont, Int#)) {
+		verifyIocErrMsg(IocMessages.contributionMethodServiceTypeDoesNotExist(T_MyModule28#cont, Int#)) {
 			RegistryBuilder().addModule(T_MyModule28#).build.startup
 		}  
 	}

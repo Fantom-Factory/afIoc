@@ -27,7 +27,7 @@ internal class TestOrderer : IocTest {
 	Void testOneErr() {
 		orderer := Orderer()
 		addNode(orderer,"1", ["1"])
-		verifyErrMsg(IocMessages.configRecursion(["1", "1"])) {
+		verifyIocErrMsg(IocMessages.configRecursion(["1", "1"])) {
 			orderer.order
 		}
 	}
@@ -43,7 +43,7 @@ internal class TestOrderer : IocTest {
 		orderer := Orderer()
 		addNode(orderer,"1", ["2"])
 		addNode(orderer,"2", ["1"])
-		verifyErrMsg(IocMessages.configRecursion(["1", "2", "1"])) {
+		verifyIocErrMsg(IocMessages.configRecursion(["1", "2", "1"])) {
 			orderer.order
 		}
 	}
@@ -61,7 +61,7 @@ internal class TestOrderer : IocTest {
 		// the cyclic dependency
 		addNode(orderer, "3", ["9"])
 		
-		verifyErrMsg(IocMessages.configRecursion("10 3 9 8 3".split)) {
+		verifyIocErrMsg(IocMessages.configRecursion("10 3 9 8 3".split)) {
 			orderer.order
 		}		
 	}

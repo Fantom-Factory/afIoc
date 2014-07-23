@@ -53,7 +53,7 @@ internal class TestProxyBuilder : IocTest {
 	}
 
 	Void testCannotProxyInternalMixin() {
-		verifyErrMsg(IocMessages.proxiedMixinsMustBePublic(T_MyService55#)) {
+		verifyIocErrMsg(IocMessages.proxiedMixinsMustBePublic(T_MyService55#)) {
 			spb.createProxyForService(reg.serviceDefById("s55"))
 		}
 	}
@@ -63,7 +63,7 @@ internal class TestProxyBuilder : IocTest {
 	}
 	
 	Void testOnlyMixinsAllowed() {
-		verifyErrMsg(IocMessages.onlyMixinsCanBeProxied(T_MyService57#)) {
+		verifyIocErrMsg(IocMessages.onlyMixinsCanBeProxied(T_MyService57#)) {
 			spb.createProxyForService(reg.serviceDefById("s57"))
 		}
 	}

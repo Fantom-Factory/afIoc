@@ -18,14 +18,14 @@ internal class TestAutobuild : IocTest {
 
 	Void testAutobuildWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Str#, Int#)) {			
+		verifyIocErrMsg(IocMessages.providerMethodArgDoesNotFit(Str#, Int#)) {			
 			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
 
 	Void testAutobuildTypeHasToInstantiable() {
 		reg := RegistryBuilder().build.startup
-		verifyErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService81#)) {
+		verifyIocErrMsg(IocMessages.autobuildTypeHasToInstantiable(T_MyService81#)) {
 			reg.autobuild(T_MyService81#)
 		}
 	}
@@ -44,21 +44,21 @@ internal class TestAutobuild : IocTest {
 
 	Void testAutobuildBadFieldVals1() {
 		reg := RegistryBuilder().build.startup
-		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_nullValue(T_MyService94#latex)) {			
+		verifyIocErrMsg(IocMessages.injectionUtils_ctorFieldType_nullValue(T_MyService94#latex)) {			
 			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:null])
 		}
 	}
 
 	Void testAutobuildBadFieldVals2() {
 		reg := RegistryBuilder().build.startup
-		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(666, T_MyService94#latex)) {			
+		verifyIocErrMsg(IocMessages.injectionUtils_ctorFieldType_valDoesNotFit(666, T_MyService94#latex)) {			
 			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:666])
 		}
 	}
 
 	Void testAutobuildBadFieldVals3() {
 		reg := RegistryBuilder().build.startup
-		verifyErrMsg(IocMessages.injectionUtils_ctorFieldType_wrongType(T_MyService47#int, T_MyService94#)) {			
+		verifyIocErrMsg(IocMessages.injectionUtils_ctorFieldType_wrongType(T_MyService47#int, T_MyService94#)) {			
 			reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService47#int:69])
 		}
 	}

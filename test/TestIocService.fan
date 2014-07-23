@@ -6,32 +6,32 @@ internal class TestIocService : IocTest {
 		ioc := IocService()
 		
 		try {
-			verifyErrMsg(IocMessages.serviceNotStarted) {
+			verifyIocErrMsg(IocMessages.serviceNotStarted) {
 				ioc.serviceById("")
 			}
-			verifyErrMsg(IocMessages.serviceNotStarted) {
+			verifyIocErrMsg(IocMessages.serviceNotStarted) {
 				ioc.dependencyByType(Obj#)
 			}
-			verifyErrMsg(IocMessages.serviceNotStarted) {
+			verifyIocErrMsg(IocMessages.serviceNotStarted) {
 				ioc.autobuild(Obj#)
 			}
-			verifyErrMsg(IocMessages.serviceNotStarted) {
+			verifyIocErrMsg(IocMessages.serviceNotStarted) {
 				ioc.injectIntoFields(this)
 			}
 		
 			ioc.start
 	
 			// sys::Service doesn't let us start the service twice
-//			verifyErrMsg(IocMessages.serviceStarted) {
+//			verifyIocErrMsg(IocMessages.serviceStarted) {
 //				ioc.start
 //			}
-			verifyErrMsg(IocMessages.serviceStarted) {
+			verifyIocErrMsg(IocMessages.serviceStarted) {
 				ioc.addModules([,])
 			}
-			verifyErrMsg(IocMessages.serviceStarted) {
+			verifyIocErrMsg(IocMessages.serviceStarted) {
 				ioc.addModulesFromPod(this.typeof.pod)
 			}
-			verifyErrMsg(IocMessages.serviceStarted) {
+			verifyIocErrMsg(IocMessages.serviceStarted) {
 				ioc.addModulesFromIndexProperties
 			}
 		} finally {
@@ -116,7 +116,7 @@ internal class TestIocService : IocTest {
 	Void testStartErrsAreRethrown() {
 		iocs := IocService([T_MyModule101#]).start
 		try {
-			verifyErrMsgAndType(Err#, "Boobies!") { 
+			verifyErrMsg(Err#, "Boobies!") { 
 				iocs.registry.serviceById("wotever")
 			}
 			verifyFalse(iocs.isRunning)

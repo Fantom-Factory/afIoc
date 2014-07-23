@@ -3,7 +3,7 @@ internal class TestOrderedConfig : IocTest {
 	
 	Void testErrIfConfigIsGeneric() {
 		reg := RegistryBuilder().addModule(T_MyModule31#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeIsGeneric(List#, "s20")) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeIsGeneric(List#, "s20")) {
 			reg.serviceById("s20")
 		}
 	}
@@ -28,7 +28,7 @@ internal class TestOrderedConfig : IocTest {
 
 	Void testAddingWrongContrib() {
 		reg := RegistryBuilder().addModule(T_MyModule35#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", Type#, Int#)) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeMismatch("value", Type#, Int#)) {
 			s22 := reg.serviceById("s22") as T_MyService22
 		}
 	}
@@ -80,14 +80,14 @@ internal class TestOrderedConfig : IocTest {
 
 	Void testOverrideMustExist1() {
 		reg := RegistryBuilder().addModule(T_MyModule71#).build.startup
-		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over1")) {
+		verifyIocErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over1")) {
 			reg.serviceById("s23")
 		}
 	}
 
 	Void testOverrideMustExist2() {
 		reg := RegistryBuilder().addModule(T_MyModule72#).build.startup
-		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over2")) {
+		verifyIocErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over2")) {
 			reg.serviceById("s23")
 		}
 	}
@@ -103,7 +103,7 @@ internal class TestOrderedConfig : IocTest {
 
 	Void testNullValueNotAllowed() {
 		reg := RegistryBuilder().addModule(T_MyModule87#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", null, Str#)) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeMismatch("value", null, Str#)) {
 			s19 := (T_MyService28) reg.serviceById("s19")
 		}
 	}

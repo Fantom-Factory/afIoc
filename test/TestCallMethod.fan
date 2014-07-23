@@ -54,7 +54,7 @@ internal class TestCallMethod : IocTest {
 	}
 
 	Void testErrsAreUnwrapped() {
-		verifyErrMsgAndType(ArgErr#, "Poo") {
+		verifyErrMsg(ArgErr#, "Poo") {
 			throw ArgErr("Poo")
 		}
 	}
@@ -65,7 +65,7 @@ internal class TestCallMethod : IocTest {
 		verifyEq(num, 69)
 		verifyEq(wot, "[Dude]")
 
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Int[]#, Str[]#)) {
+		verifyIocErrMsg(IocMessages.providerMethodArgDoesNotFit(Int[]#, Str[]#)) {
 			reg.callMethod(#callMeList2, this, [Int[69]])
 		}
 	}
@@ -90,10 +90,10 @@ internal class TestCallMethod : IocTest {
 		verifyEq(num, 69)
 		verifyEq(wot, "[Du:de]")
 
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Str:Int#, Str:Str#)) {
+		verifyIocErrMsg(IocMessages.providerMethodArgDoesNotFit(Str:Int#, Str:Str#)) {
 			reg.callMethod(#callMeMap2, this, [["Du":2]])
 		}
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(Int:Str#, Str:Str#)) {
+		verifyIocErrMsg(IocMessages.providerMethodArgDoesNotFit(Int:Str#, Str:Str#)) {
 			reg.callMethod(#callMeMap2, this, [[4:"de"]])
 		}
 	}

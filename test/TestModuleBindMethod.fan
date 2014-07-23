@@ -4,17 +4,17 @@ internal class TestModuleBindMethod : IocTest {
 	Void testBindMethodMustBeStatic() {
 		
 		// binder method must be static
-		verifyErrMsg(IocMessages.bindMethodMustBeStatic(T_MyModule08#bind)) {
+		verifyIocErrMsg(IocMessages.bindMethodMustBeStatic(T_MyModule08#bind)) {
 			RegistryBuilder().addModule(T_MyModule08#).build
 		}		
 
 		// binder method must only have the one param
-		verifyErrMsg(IocMessages.bindMethodWrongParams(T_MyModule09#bind)) {
+		verifyIocErrMsg(IocMessages.bindMethodWrongParams(T_MyModule09#bind)) {
 			RegistryBuilder().addModule(T_MyModule09#).build
 		}		
 
 		// binder method param must be type ServiceBinder
-		verifyErrMsg(IocMessages.bindMethodWrongParams(T_MyModule10#bind)) {
+		verifyIocErrMsg(IocMessages.bindMethodWrongParams(T_MyModule10#bind)) {
 			RegistryBuilder().addModule(T_MyModule10#).build
 		}		
 	}
@@ -25,13 +25,13 @@ internal class TestModuleBindMethod : IocTest {
 	}
 
 	Void testBindImplFitsMixin() {
-		verifyErrMsg(IocMessages.bindImplNotClass(T_MyService11Impl#)) {   			
+		verifyIocErrMsg(IocMessages.bindImplNotClass(T_MyService11Impl#)) {   			
 			RegistryBuilder().addModule(T_MyModule14#).build
 		}
 	}
 
 	Void testBindImplFitsMixinErrIfNot() {
-		verifyErrMsg(IocMessages.bindImplDoesNotFit(T_MyService01#, T_MyService02#)) {   			
+		verifyIocErrMsg(IocMessages.bindImplDoesNotFit(T_MyService01#, T_MyService02#)) {   			
 			RegistryBuilder().addModule(T_MyModule15#).build
 		}
 	}

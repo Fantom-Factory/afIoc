@@ -2,13 +2,13 @@
 internal class TestAspect : IocTest {
 	
 	Void testContributionMethodMustBeStatic() {
-		verifyErrMsg(IocMessages.adviseMethodMustBeStatic(T_MyModule79#adviseStuff)) {
+		verifyIocErrMsg(IocMessages.adviseMethodMustBeStatic(T_MyModule79#adviseStuff)) {
 			RegistryBuilder().addModule(T_MyModule79#).build.startup
 		}  
 	}
 
 	Void testContributionMethodMustTakeConfig() {
-		verifyErrMsg(IocMessages.adviseMethodMustTakeMethodAdvisorList(T_MyModule80#adviseStuff)) {
+		verifyIocErrMsg(IocMessages.adviseMethodMustTakeMethodAdvisorList(T_MyModule80#adviseStuff)) {
 			RegistryBuilder().addModule(T_MyModule80#).build.startup
 		}  
 	}
@@ -63,7 +63,7 @@ internal class TestAspect : IocTest {
 	}
 	
 	Void testAdvisingNonProxy() {
-		verifyErrMsg(IocMessages.adviceDoesNotMatchAnyServices(StandardAdviceDef {
+		verifyIocErrMsg(IocMessages.adviceDoesNotMatchAnyServices(StandardAdviceDef {
 			it.advisorMethod = T_MyModule11#addTransactions
 			it.serviceIdGlob = "s69"
 		}, Str[,])) {

@@ -2,7 +2,7 @@
 internal class TestDependencyByType : IocTest {
 	
 	Void testStaticInjectionGivesErr() {
-		verifyErrMsg(IocMessages.injectionUtils_fieldIsStatic(T_MyService97#registry)) {			
+		verifyIocErrMsg(IocMessages.injectionUtils_fieldIsStatic(T_MyService97#registry)) {			
 			RegistryBuilder().build.autobuild(T_MyService97#)
 		}
 	}

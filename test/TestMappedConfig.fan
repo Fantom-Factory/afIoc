@@ -3,7 +3,7 @@ internal class TestMappedConfig : IocTest {
 	
 	Void testErrIfConfigIsGeneric() {
 		reg := RegistryBuilder().addModule(T_MyModule43#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeIsGeneric(Map#, "s27")) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeIsGeneric(Map#, "s27")) {
 			reg.serviceById("s27")
 		}
 	}
@@ -28,14 +28,14 @@ internal class TestMappedConfig : IocTest {
 
 	Void testAddingWrongKeyType() {
 		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeMismatch("key", Int#, Type#)) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeMismatch("key", Int#, Type#)) {
 			s74 := reg.serviceById("s74-a") as T_MyService74
 		}
 	}
 
 	Void testAddingWrongValueType() {
 		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", Int#, Type#)) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeMismatch("value", Int#, Type#)) {
 			s74 := reg.serviceById("s74-b") as T_MyService74
 		}
 	}
@@ -82,14 +82,14 @@ internal class TestMappedConfig : IocTest {
 
 	Void testOverrideMustExist1() {
 		reg := RegistryBuilder().addModule(T_MyModule64#).build.startup
-		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over1")) {
+		verifyIocErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over1")) {
 			reg.serviceById("s28")
 		}
 	}
 
 	Void testOverrideMustExist2() {
 		reg := RegistryBuilder().addModule(T_MyModule65#).build.startup
-		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over2")) {
+		verifyIocErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over2")) {
 			reg.serviceById("s28")
 		}
 	}
@@ -103,28 +103,28 @@ internal class TestMappedConfig : IocTest {
 
 	Void testCannotAddKeyTwice() {
 		reg := RegistryBuilder().addModule(T_MyModule67#).build.startup
-		verifyErrMsg(IocMessages.contributions_configKeyAlreadyDefined(Str#.toStr)) {
+		verifyIocErrMsg(IocMessages.contributions_configKeyAlreadyDefined(Str#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
 
 	Void testCannotOverrideTwice() {
 		reg := RegistryBuilder().addModule(T_MyModule68#).build.startup
-		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyDefined(Str#.toStr, Uri#.toStr)) {
+		verifyIocErrMsg(IocMessages.contributions_configOverrideKeyAlreadyDefined(Str#.toStr, Uri#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
 
 	Void testOverrideCannotReuseKey() {
 		reg := RegistryBuilder().addModule(T_MyModule73#).build.startup
-		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Str#.toStr)) {
+		verifyIocErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Str#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
 
 	Void testOverrideCannotReuseOverrideKey() {
 		reg := RegistryBuilder().addModule(T_MyModule74#).build.startup
-		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Uri#.toStr)) {
+		verifyIocErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Uri#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
@@ -147,7 +147,7 @@ internal class TestMappedConfig : IocTest {
 
 	Void testNullValueNotAllowed() {
 		reg := RegistryBuilder().addModule(T_MyModule02#).build.startup
-		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", null, Str#)) {
+		verifyIocErrMsg(IocMessages.contributions_configTypeMismatch("value", null, Str#)) {
 			s28 := (T_MyService28) reg.serviceById("s28")
 		}
 	}

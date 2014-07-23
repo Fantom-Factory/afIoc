@@ -22,7 +22,7 @@ internal class TestRegistryBuilder : IocTest {
 	Void testRegistryOptionValues() {
 		bob := RegistryBuilder()
 		bob.options["afIoc.bannerText"] = true
-		verifyErrMsg(IocMessages.invalidRegistryValue("afIoc.bannerText", Bool#, Str#)) { 
+		verifyIocErrMsg(IocMessages.invalidRegistryValue("afIoc.bannerText", Bool#, Str#)) { 
 			bob.build
 		}
 	}
