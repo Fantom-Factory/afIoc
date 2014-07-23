@@ -4,19 +4,19 @@ using afBeanUtils
 ** Contribute your `DependencyProvider` implementations to this. 
 ** Provide your own dependencies for fields annotated with the '@Inject' facet. 
 ** Typically you would augment '@Inject' with your own facet to provide injection meta. 
-** See [@ServiceId]`ServiceId` and [@Autobuild]`Autobuild` for builtin examples. 
+** 
+** See [@LogProvider]`LogProvider` for a builtin example. 
 ** 
 ** pre>
 ** @Contribute { serviceType=DependencyProviders# }
-** static Void contributeDependencyProviders(OrderedConfig conf) {
-**   serviceIdProvider := conf.autobuild(ServiceIdProvider#)
-**   config.add(serviceIdProvider)
+** static Void contributeDependencyProviders(Configuration conf) {
+**   conf["myProvider"] = conf.autobuild(MyProvider#)
 ** }
 ** <pre
 ** 
 ** @since 1.1
 ** 
-** @uses OrderedConfig of `DependencyProvider`
+** @uses Configuration of Str:`DependencyProvider`
 @NoDoc	// don't overwhelm the masses
 const mixin DependencyProviders {
 	

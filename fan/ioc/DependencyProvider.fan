@@ -9,9 +9,8 @@
 ** 
 ** pre>
 ** @Contribute { serviceType=DependencyProviders# }
-** static Void contributeDependencyProviders(OrderedConfig conf) {
-**   serviceIdProvider := conf.autobuild(ServiceIdProvider#)
-**   config.add(serviceIdProvider)
+** static Void contributeDependencyProviders(Configuration conf) {
+**   conf["myProvider"] = conf.autobuild(MyProvider#)
 ** }
 ** <pre
 ** 

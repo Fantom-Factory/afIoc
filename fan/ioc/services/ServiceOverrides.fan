@@ -17,7 +17,7 @@ using afBeanUtils::NotFoundErr
 **   }
 ** 
 **   @Contribute { serviceType=ServiceOverrides# }
-**   static Void contributeServiceOverrides(MappedConfig conf) {
+**   static Void contributeServiceOverrides(Configuration conf) {
 **     conf["myPod::PieAndChips"] = PieAndMash()
 **   }
 ** <pre
@@ -34,7 +34,7 @@ using afBeanUtils::NotFoundErr
 ** 
 ** pre>
 **   @Contribute { serviceType=ServiceOverrides# }
-**   static Void contributeServiceOverrides(MappedConfig conf) {
+**   static Void contributeServiceOverrides(Configuration conf) {
 **     conf[PieAndChips#] = PieAndMash()
 **   }
 ** <pre
@@ -42,11 +42,11 @@ using afBeanUtils::NotFoundErr
 ** Note you can only override the implementation, not the definition. 
 ** Meaning you can not change a service's id, scope or proxy settings.
 ** 
-** Also note than using your override Id, someone else can override *your* override!
+** Also note that (using your override Id) someone else can override *your* override!
 ** 
 ** @since 1.2
 ** 
-** @uses MappedConfig of 'Str:Obj' (serviceId:overrideImpl)
+** @uses Configuration of 'Str:Obj' (serviceId:overrideImpl)
 const mixin ServiceOverrides {
 	
 	@NoDoc

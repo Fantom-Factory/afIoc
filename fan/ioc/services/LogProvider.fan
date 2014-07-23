@@ -12,7 +12,7 @@ using concurrent::AtomicRef
 ** class AppModule {
 ** 
 **   @Contribute { serviceType=RegistryStartup# }
-**   static Void changeLoggers(OrderedConfig conf, LogProvider logProvider) {
+**   static Void changeLoggers(Configuration conf, LogProvider logProvider) {
 **     conf.add |->| {
 **       logProvider.logCreatorFunc = |Type type->Log| { return Log.get(type.name) } 
 **     }

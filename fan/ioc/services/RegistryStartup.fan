@@ -1,4 +1,4 @@
-using afConcurrent::LocalList
+using afConcurrent::LocalMap
 
 ** (Service) - Contribute functions to be executed on `Registry` startup.
 **  
@@ -9,13 +9,13 @@ using afConcurrent::LocalList
 ** pre>
 ** class AppModule {
 **     @Contribute { serviceType=RegistryStartup# }
-**     static Void contributeRegistryStartup(OrderedConfig conf, MyService myService) {
+**     static Void contributeRegistryStartup(Configuration conf, MyService myService) {
 **         conf.add |->| { myService.startup() }
 **     }
 ** }
 ** <pre
 ** 
-** @uses OrderedConfig of |->|
+** @uses Configuration of 'Str:|->|'
 const mixin RegistryStartup {
 	internal abstract Void startup(OpTracker tracker)
 	
@@ -29,20 +29,20 @@ const mixin RegistryStartup {
 
 
 internal const class RegistryStartupImpl : RegistryStartup {
-	private const LocalList startups
+	private const LocalMap startups
 	
 	@Inject private const ServiceStats	stats
 	@Inject private const RegistryMeta	meta
 	
-	new make(|->|[] startups, ThreadLocalManager localManager, |This|in) {
+	new make(Str:|->| startups, ThreadLocalManager localManager, |This|in) {
 		in(this)
-		this.startups = localManager.createList("StartupListeners")
-		this.startups.list = startups
+		this.startups = localManager.createMap("afIoc.StartupListeners")
+		this.startups.map = startups
 	}
 
 	override Void startup(OpTracker tracker) {
 		tracker.track("Running Registry Startup contributions") |->| {
-			startups.each { ((|->|) it).call }
+			startups.map.each | |->| val, Str key| { val.call }
 			startups.clear
 			startups.localRef.cleanUp
 		}

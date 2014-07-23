@@ -69,9 +69,9 @@ class Configuration {
 	}
 	
 	** Overrides or replaces a contributed value. 
-	** The original key must exist.
+	** The existing key must exist.
 	** 
-	** An attempt is made to coerce the keys and values to the service's contribution type.
+	** An attempt is made to coerce the new value to the service's contribution type.
 	** 
 	** Note: If 'newKey' is supplied then this override itself may be overridden by other 
 	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
