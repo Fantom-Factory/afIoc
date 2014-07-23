@@ -18,18 +18,17 @@ internal class Orderer {
 	internal static const Str placeholder	:= "AFIOC-PLACEHOLDER"
 	internal static const Str delete		:= "AFIOC-DELETE"
 	internal static const Str NULL			:= "AFIOC-NULL"
-	private Str:OrderedNode nodes			:= Utils.makeMap(Str#, OrderedNode#)
+	private Obj:OrderedNode nodes			:= Utils.makeMap(Obj#, OrderedNode#)
 
-	Void addPlaceholder(Str id, Str? constraints := null) {
+	Void addPlaceholder(Obj id, Str? constraints := null) {
 		addOrdered(id, placeholder, constraints)
 	}
 
-	Void remove(Str id) {
+	Void remove(Obj id) {
 		addOrdered(id, delete)
 	}
 
-	Void addOrdered(Str id, Obj? object, Str? constraints := null) {
-		id = id.trim
+	Void addOrdered(Obj id, Obj? object, Str? constraints := null) {
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
 		getOrAdd(id, object ?: NULL)
@@ -56,7 +55,7 @@ internal class Orderer {
 	}
 
 	Obj?[] toOrderedList() {
-		order().exclude { it.payload === placeholder || it.payload == delete }.map { it.payload === NULL ? null : it.payload }
+		order().exclude { it.payload === placeholder || it.payload === delete }.map { it.payload === NULL ? null : it.payload }
 	}
 
 	Void clear() {
@@ -88,7 +87,7 @@ internal class Orderer {
 		}
 	}
 
-	private Void visit(OrderingCtx ctx, Str:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
+	private Void visit(OrderingCtx ctx, Obj:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
 		// follow the dependencies until we find a node that depends on no-one
 		nodesIn
 			.findAll { 
@@ -111,7 +110,7 @@ internal class Orderer {
 		nodesOut.add(n)
 	}	
 
-	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
+	private OrderedNode getOrAdd(Obj name, Obj? payload := null) {
 		node := nodes.getOrAdd(name) |->Obj| {			
 			return OrderedNode(name, payload)
 		}
@@ -122,11 +121,11 @@ internal class Orderer {
 }
 
 internal class OrderedNode {
-	Str 	name
+	Obj 	name
 	Str[] 	isBefore	:= [,]
 	Obj? 	payload	
 
-	new make(Str name, Obj? payload := null) {
+	new make(Obj name, Obj? payload := null) {
 		this.name 	 = name
 		this.payload = payload
 	}

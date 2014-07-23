@@ -3,7 +3,7 @@ internal class TestMappedConfig : IocTest {
 	
 	Void testErrIfConfigIsGeneric() {
 		reg := RegistryBuilder().addModule(T_MyModule43#).build.startup
-		verifyErrMsg(IocMessages.mappedConfigTypeIsGeneric(Map#, "s27")) {
+		verifyErrMsg(IocMessages.contributions_configTypeIsGeneric(Map#, "s27")) {
 			reg.serviceById("s27")
 		}
 	}
@@ -28,14 +28,14 @@ internal class TestMappedConfig : IocTest {
 
 	Void testAddingWrongKeyType() {
 		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
-		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("key", Int#, Type#)) {
+		verifyErrMsg(IocMessages.contributions_configTypeMismatch("key", Int#, Type#)) {
 			s74 := reg.serviceById("s74-a") as T_MyService74
 		}
 	}
 
 	Void testAddingWrongValueType() {
 		reg := RegistryBuilder().addModule(T_MyModule47#).build.startup
-		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("value", Int#, Type#)) {
+		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", Int#, Type#)) {
 			s74 := reg.serviceById("s74-b") as T_MyService74
 		}
 	}
@@ -57,25 +57,11 @@ internal class TestMappedConfig : IocTest {
 		s28 := reg.serviceById("s28") as T_MyService28
 		verifyEq(s28.config, Str:Str[:])
 	}
-	
-	Void testWrongConfig() {
-		reg := RegistryBuilder().addModule(T_MyModule50#).build.startup
-		verifyErrMsg(IocMessages.providerMethodArgDoesNotFit(MappedConfig#, OrderedConfig#)) {
-			reg.serviceById("s28")
-		}
-	}	
 
 	Void testEmptyListMapValueCanBeOfTypeObj() {
 		reg := RegistryBuilder().addModule(T_MyModule51#).build.startup
 		s29 := reg.serviceById("s29") as T_MyService29
 		verifyEq(s29.config["key"], Type[,])
-	}
-
-	Void testStrKeyMapsAreCaseInSensitive() {
-		reg := RegistryBuilder().addModule(T_MyModule44#).build.startup
-		s28 := reg.serviceById("s28") as T_MyService28
-		verifyEq(s28.config.getOrThrow("WOT"), "ever")
-		verifyEq(s28.config.getOrThrow("WOT2"), "ever2")
 	}
 
 	// ---- test overrides ------------------------------------------------------------------------
@@ -96,14 +82,14 @@ internal class TestMappedConfig : IocTest {
 
 	Void testOverrideMustExist1() {
 		reg := RegistryBuilder().addModule(T_MyModule64#).build.startup
-		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over1")) {
+		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over1")) {
 			reg.serviceById("s28")
 		}
 	}
 
 	Void testOverrideMustExist2() {
 		reg := RegistryBuilder().addModule(T_MyModule65#).build.startup
-		verifyErrMsg(IocMessages.contribOverrideDoesNotExist("non-exist", "over2")) {
+		verifyErrMsg(IocMessages.contributions_overrideDoesNotExist("non-exist", "over2")) {
 			reg.serviceById("s28")
 		}
 	}
@@ -117,7 +103,7 @@ internal class TestMappedConfig : IocTest {
 
 	Void testCannotAddKeyTwice() {
 		reg := RegistryBuilder().addModule(T_MyModule67#).build.startup
-		verifyErrMsg(IocMessages.configMappedKeyAlreadyDefined(Str#.toStr)) {
+		verifyErrMsg(IocMessages.contributions_configKeyAlreadyDefined(Str#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
@@ -161,7 +147,7 @@ internal class TestMappedConfig : IocTest {
 
 	Void testNullValueNotAllowed() {
 		reg := RegistryBuilder().addModule(T_MyModule02#).build.startup
-		verifyErrMsg(IocMessages.mappedConfigTypeMismatch("value", null, Str#)) {
+		verifyErrMsg(IocMessages.contributions_configTypeMismatch("value", null, Str#)) {
 			s28 := (T_MyService28) reg.serviceById("s28")
 		}
 	}
@@ -310,16 +296,6 @@ internal class T_MyModule49 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService28#).withId("s28")
 	}	
-}
-
-internal class T_MyModule50 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService28#).withId("s28")
-	}
-	@Contribute{ serviceId="s28" }
-	static Void cont(OrderedConfig config) {
-		config.add(67)
-	}
 }
 
 internal class T_MyModule51 {

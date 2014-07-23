@@ -19,17 +19,18 @@ const internal class ConfigProvider {
 
 	Obj? provide(Type dependencyType) {
 		objLocator := InjectionTracker.peek.objLocator
-		config := null
-		if (configType.name == "List")
-			config = OrderedConfig(objLocator, serviceDef, configType)
-		if (configType.name == "Map")
-			config = MappedConfig(objLocator, serviceDef, configType)
 
+		contrib := Contributions(objLocator, serviceDef, configType)
 		objLocator.contributionsByServiceDef(serviceDef).each {
-			config->contribute(it)
+			it.contribute(contrib)
 		}
 		
-		return config->getConfig
+		if (configType.name == "List")
+			return contrib.toConfigList
+		if (configType.name == "Map")
+			return contrib.toConfigMap
+
+		throw WtfErr("${configType.name} is neither a List nor a Map")
 	}
 
 	private Type? findConfigType(Method buildMethod) {

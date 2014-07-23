@@ -17,21 +17,21 @@ internal const class ContributionImpl : Contribution {
 			return objLocator.serviceDefByType(serviceType)
 		throw WtfErr("Both serviceId & serviceType are null!?")
 	}
-
-	override Void contributeOrdered(OrderedConfig config) {
-		InjectionTracker.track("Gathering ORDERED configuration of type $config.contribType") |->| {
-			sizeBefore := config.size
+	
+	override Void contribute(Contributions contrib) {
+		contrib.reset
+		
+		InjectionTracker.track("Gathering configuration of type $contrib.contribType") |->| {
+			sizeBefore := contrib.size
+			
+			config := (Obj) contrib
+			if (method.params.first.type == OrderedConfig#)
+				config = OrderedConfig(contrib)
+			if (method.params.first.type == MappedConfig#)
+				config = MappedConfig(contrib)
+			
 			InjectionUtils.callMethod(method, null, [config])
-			sizeAfter := config.size
-			InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
-		}
-	}
-
-	override Void contributeMapped(MappedConfig config) {
-		InjectionTracker.track("Gathering MAPPED configuration of type $config.contribType") |->| {			
-			sizeBefore := config.size
-			InjectionUtils.callMethod(method, null, [config])
-			sizeAfter := config.size
+			sizeAfter := contrib.size
 			InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
 	}

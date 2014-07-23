@@ -10,52 +10,29 @@
 ** ctor or builder method. Contributions must be compatible with the type.
 ** 
 ** @see `TypeCoercer`
+@Deprecated { msg="Use Contributions instead" }
 class OrderedConfig {
 
-	internal const	Type 				contribType
-	private  const 	ServiceDef 			serviceDef
-	private 	  	ObjLocator 			objLocator
-	private			Orderer				orderer
-	private			Int					impliedCount
-	private			Str[]?				impliedConstraint
-	private			Int					overrideCount
-	private			Str:OrderedOverride	config
-	private			Str:OrderedOverride	overrides
-	private			CachingTypeCoercer	typeCoercer
-
-	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
-		if (contribType.name != "List")
-			throw WtfErr("Ordered Contrib Type is NOT list???")
-		if (contribType.isGeneric)
-			throw IocErr(IocMessages.orderedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
-
-		this.objLocator 	= objLocator
-		this.serviceDef 	= serviceDef
-		this.contribType	= contribType
-		this.orderer		= Orderer()
-		this.impliedCount	= 1
-		this.overrideCount	= 1
-		this.overrides		= Utils.makeMap(Str#, OrderedOverride#)
-		this.config			= Utils.makeMap(Str#, OrderedOverride#)
-		this.typeCoercer	= CachingTypeCoercer()
+	private Contributions contrib
+	internal new make(Contributions contrib) {
+		this.contrib = contrib
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		return objLocator.trackAutobuild(type, ctorArgs, fieldVals)
+		contrib.registry.autobuild(type, ctorArgs, fieldVals)
 	}
 
 	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
 	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		objLocator.trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
+		contrib.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** Adds an unordered object to a service's configuration. 
 	** An attempt is made to coerce the object to the contrib type.
 	@Operator
 	This add(Obj object) {
-		id := "Unordered${impliedCount}"
-		addOrdered(id, object)
+		contrib.add(object)
 		return this
 	}
 
@@ -82,21 +59,7 @@ class OrderedConfig {
 	** 
 	** An attempt is made to coerce the object to the contrib type.
 	This addOrdered(Str id, Obj? value, Str[] constraints := Str#.emptyList) {
-		value = validateVal(value)
-		
-		if (constraints.isEmpty) {
-			constraints = impliedConstraint ?: constraints
-			
-			// keep an implied ordering for anything that doesn't have its own constraints
-			impliedCount++
-			impliedConstraint = ["after: $id"]
-		}
-		
-		config[id] = OrderedOverride(id, value, constraints)
-		
-		// this orderer is throwaway, we just use to fail fast on dup key errs
-		orderer.addOrdered(id, value, constraints.join(", "))
-
+		contrib.set(id, value, constraints.join(", "))
 		return this
 	}
 
@@ -112,7 +75,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2.0
 	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		addOrdered(id, Orderer.placeholder, constraints)
+		contrib.placeholder(id, constraints.join(", "))
 		return this
 	}
 
@@ -126,16 +89,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2.0
 	This addOverride(Str existingId, Obj? newValue, Str[] newConstraints := Str#.emptyList, Str? newId := null) {
-		newValue = validateVal(newValue)
-
-		if (overrides.containsKey(existingId))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
-
-		if (newId == null)
-			newId = "Override${overrideCount}"
-
-		overrideCount = overrideCount + 1
-		overrides[existingId] = OrderedOverride(newId, newValue, newConstraints)
+		contrib.replace(existingId, newValue, newConstraints.join(", "), newId)
 		return this
 	}
 
@@ -147,115 +101,7 @@ class OrderedConfig {
 	** 
 	** @since 1.4.0
 	This remove(Str existingId, Str? newId := null) {
-		addOverride(existingId, Orderer.delete, Str#.emptyList, newId)
-	}
-
-	** dynamically invoked
-	internal Void contribute(Contribution contribution) {
-		// implied ordering only per contrib method
-		impliedConstraint = null
-		contribution.contributeOrdered(this)
-	}
-
-	** dynamically invoked
-	internal List getConfig() {
-		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->List| {
-			keys := Utils.makeMap(Str#, Str#)
-			config.each |val, key| { keys[key] = key }
-			
-			// don't alter the class state so getConfig() may be called more than once
-			Str:OrderedOverride config := this.config.dup 
-
-			// normalise keys -> map all keys to orig key and apply overrides
-			Str:OrderedOverride norm := overrides.dup
-			found := true
-			while (!norm.isEmpty && found) {
-				found = false
-				norm = norm.exclude |val, existingKey| {
-					overrideKey := val.key
-					if (keys.containsKey(existingKey)) {
-						keys[overrideKey] = keys[existingKey]
-						found = true
-						
-						InjectionTracker.log("'${overrideKey}' overrides '${existingKey}'")
-						config[keys[existingKey]] = val
-						return true
-					} else {
-						return false
-					}
-				}
-			}
-
-			if (!norm.isEmpty) {
-				overrideKeys := norm.vals.map { it.key.toStr }.join(", ")
-				existingKeys := norm.keys.map { it.toStr }.join(", ")
-				throw IocErr(IocMessages.contribOverrideDoesNotExist(existingKeys, overrideKeys))
-			}
-			
-			orderer := Orderer()
-			config.each |val, key| {
-				orderer.addOrdered(key, val.val, val.con.join(", "))
-			}
-		
-			return InjectionTracker.track("Ordering configuration contributions") |->List| {
-				contribs := orderer.toOrderedList
-				return List.make(listType, contribs.size).addAll(contribs)
-			}
-		}		
-	}
-
-	internal Int size() {
-		config.size
-	}
-
-	private once Type listType() {
-		contribType.params["V"]
-	}
-	
-	private Obj? validateVal(Obj? val) {
-		if (val == Orderer.delete || val == Orderer.placeholder)
-			return val
-		
-		if (val == null) {
-			if (!listType.isNullable)
-				throw IocErr(IocMessages.orderedConfigTypeMismatch(null, listType))
-			return val
-		}
-
-		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
-		if (val.typeof.fits(listType))
-			return val
-
-		// empty lists and maps can always be converted
-		if (!isEmptyList(val) && !isEmptyMap(val))
-			if (!typeCoercer.canCoerce(val.typeof, listType))
-				throw IocErr(IocMessages.orderedConfigTypeMismatch(val.typeof, listType))
-
-		return typeCoercer.coerce(val, listType)
-	}
-	
-	private Bool isEmptyList(Obj val) {
-		(val is List) && (((List) val).isEmpty)
-	}
-	
-	private Bool isEmptyMap(Obj val) {
-		(val is Map) && (((Map) val).isEmpty)
-	}
-
-	@NoDoc
-	override Str toStr() {
-		"OrderedConfig of $listType"
-	}	
-}
-
-internal class OrderedOverride {
-	Str key; Obj? val; Str[] con
-	new make(Str key, Obj? val, Str[] con) {
-		this.key = key
-		this.val = val
-		this.con = con
-	}
-	override Str toStr() {
-		"[$key:$val]"
+		contrib.remove(existingId, newId)
+		return this
 	}
 }

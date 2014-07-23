@@ -176,7 +176,7 @@ internal const class IocMessages {
 	}
 	
 	static Str providerMethodArgDoesNotFit(Type? providedArg, Type paramArg) {
-		"Provided autobuild argument of type '$providedArg?.signature' does not fit parameter '$paramArg.signature'"
+		stripSys("Provided autobuild argument of type '${providedArg?.signature}' does not fit parameter '${paramArg.signature}'")
 	}
 	
 	static Str fieldNotSetErr(Str fieldDesc, Method ctor) {
@@ -287,36 +287,6 @@ internal const class IocMessages {
 		"Cannot override contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
 	}
 
-
-	@Deprecated
-	static Str orderedConfigTypeIsGeneric(Type contribType, Str serviceId) {
-		"Ordered configuration for service '$serviceId' MUST be parameterised - e.g. Str[]"
-	}
-
-	@Deprecated
-	static Str orderedConfigTypeMismatch(Type? objType, Type listType) {
-		"Contribution of type ${objType?.signature} does not match service configuration list type of $listType.signature"
-	}
-
-	@Deprecated
-	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
-		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
-	}
-	
-	@Deprecated
-	static Str mappedConfigTypeMismatch(Str type, Type? objType, Type mapType) {
-		"Contribution of type ${objType?.signature} does not match service configuration $type type of $mapType.signature"
-	}
-
-	@Deprecated
-	static Str contribOverrideDoesNotExist(Str existingKeys, Str overrideKeys) {
-		"Can not override mapped contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
-	}
-	
-	@Deprecated
-	static Str configMappedKeyAlreadyDefined(Str existingKey) {
-		"Key '$existingKey' has already been defined - try overriding it instead"
-	}
 	
 	
 	// ---- Helper Methods ------------------------------------------------------------------------

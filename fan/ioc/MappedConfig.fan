@@ -8,39 +8,22 @@
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
+@Deprecated { msg="Use Contributions instead" }
 class MappedConfig {
 	
-	internal const	Type 				contribType
-	private  const 	ServiceDef 			serviceDef
-	private 	  	ObjLocator 			objLocator
-	private			Obj:Obj?			config
-	private			Obj:MappedOverride	overrides 
-	private			CachingTypeCoercer	typeCoercer
-	private			Int					overrideCount
-	
-	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
-		if (contribType.name != "Map")
-			throw WtfErr("Ordered Contrib Type is NOT map???")
-		if (contribType.isGeneric)
-			throw IocErr(IocMessages.mappedConfigTypeIsGeneric(contribType, serviceDef.serviceId)) 
-		
-		this.objLocator		= objLocator
-		this.serviceDef 	= serviceDef
-		this.contribType	= contribType
-		this.config 		= Utils.makeMap(keyType, valType)
-		this.overrides		= Utils.makeMap(keyType, MappedOverride#)
-		this.typeCoercer	= CachingTypeCoercer()
-		this.overrideCount	= 1
+	private Contributions contrib
+	internal new make(Contributions contrib) {
+		this.contrib = contrib
 	}
 
-	** A helper method to instantiate an object, injecting any dependencies. See `Registry.autobuild`.  
+	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		objLocator.trackAutobuild(type, ctorArgs, fieldVals)
+		contrib.registry.autobuild(type, ctorArgs, fieldVals)
 	}
-	
+
 	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
 	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		objLocator.trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
+		contrib.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
@@ -51,13 +34,7 @@ class MappedConfig {
 	** An attempt is made to coerce the key / value to the map type.
 	@Operator
 	This set(Obj key, Obj? val) {
-		key = validateKey(key, false)
-		val = validateVal(val)
-
-		if (config.containsKey(key))
-			throw IocErr(IocMessages.configMappedKeyAlreadyDefined(key.toStr))
-
-		config[key] = val
+		contrib.set(key, val)
 		return this
 	}
 
@@ -80,24 +57,7 @@ class MappedConfig {
 	** 
 	** @since 1.2.0
 	This setOverride(Obj existingKey, Obj? newValue, Obj? newKey := null) {
-		if (newKey == null)
-			newKey = "OverrideKey${overrideCount}"
-		overrideCount = overrideCount + 1
-		
-		newKey 		= validateKey(newKey, true)
-		existingKey = validateKey(existingKey, true)
-		newValue	= validateVal(newValue)
-
-		if (overrides.containsKey(existingKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
-
-		if (config.containsKey(newKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
-
-		if (overrides.vals.map { it.key }.contains(newKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
-
-		overrides[existingKey] = MappedOverride(newKey, newValue)
+		contrib.replace(existingKey, newValue, null, newKey)
 		return this
 	}
 
@@ -109,128 +69,7 @@ class MappedConfig {
 	** 
 	** @since 1.4.0
 	This remove(Obj existingKey, Obj? newKey := null) {
-		setOverride(existingKey, Orderer.delete, newKey)
-	}
-	
-	** dynamically invoked
-	internal Void contribute(Contribution contribution) {
-		contribution.contributeMapped(this)
-	}
-
-	** dynamically invoked
-	internal Map getConfig() {
-		keys := Utils.makeMap(keyType, keyType)
-		config.each |val, key| { keys[key] = key }
-		
-		// don't alter the class state so getConfig() may be called more than once
-		Obj:Obj? config := this.config.dup
-
-		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
-			// normalise keys -> map all keys to orig key and apply overrides
-			Obj:MappedOverride norm := overrides.dup
-			found := true
-			while (!norm.isEmpty && found) {
-				found = false
-				norm = norm.exclude |val, existingKey| {
-					overrideKey := val.key
-					if (keys.containsKey(existingKey)) {
-						keys[overrideKey] = keys[existingKey]
-						found = true
-						
-						InjectionTracker.log("'${overrideKey}' overrides '${existingKey}'")
-						config[keys[existingKey]] = val.val
-						return true
-					} else {
-						return false
-					}
-				}
-			}
-
-			if (!norm.isEmpty) {
-				overrideKeys := norm.vals.map { it.key.toStr }.join(", ")
-				existingKeys := norm.keys.map { it.toStr }.join(", ")
-				throw IocErr(IocMessages.contribOverrideDoesNotExist(existingKeys, overrideKeys))
-			}
-		}
-
-		return config.exclude |val -> Bool| { val == Orderer.delete }
-	}
-
-	internal Int size() {
-		config.size
-	}
-
-	private Obj validateKey(Obj key, Bool isOverrideKey) {
-		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
-		if (key.typeof.fits(keyType))
-			return key
-		
-		if (isOverrideKey)
-			return key
-
-		if (typeCoercer.canCoerce(key.typeof, keyType))
-			return typeCoercer.coerce(key, keyType)
-
-		// implicit isOverrideKey == true
-		// hmm... looking for an edge case scenario that'll make me un-comment this.
-		// as it is, all tests pass.
-//		if (key.typeof.fits(Str#))
-//			return key
-
-		throw IocErr(IocMessages.mappedConfigTypeMismatch("key", key.typeof, keyType))
-	}
-
-	private Obj? validateVal(Obj? val) {
-		if (val == Orderer.delete)
-			return val
-
-		if (val == null) {
-			if (!valType.isNullable)
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", null, valType))
-			return val			
-		}
-
-		// don't use ReflectUtils.fits() - let TypeCoercer do a proper job.
-		if (val.typeof.fits(valType))
-			return val
-
-		// empty lists and maps can always be converted
-		if (!isEmptyList(val) && !isEmptyMap(val))
-			if (!typeCoercer.canCoerce(val.typeof, valType))
-				throw IocErr(IocMessages.mappedConfigTypeMismatch("value", val.typeof, valType))
-		
-		return typeCoercer.coerce(val, valType)
-	}
-
-	private once Type keyType() {
-		contribType.params["K"]
-	}
-
-	private once Type valType() {
-		contribType.params["V"]
-	}
-
-	private Bool isEmptyList(Obj val) {
-		(val is List) && (((List) val).isEmpty)
-	}
-	
-	private Bool isEmptyMap(Obj val) {
-		(val is Map) && (((Map) val).isEmpty)
-	}
-	
-	@NoDoc
-	override Str toStr() {
-		"MappedConfig of $contribType"
-	}
-}
-
-internal class MappedOverride {
-	Obj key; Obj? val
-	new make(Obj key, Obj? val) {
-		this.key = key
-		this.val = val
-	}
-	override Str toStr() {
-		"[$key:$val]"
+		contrib.remove(existingKey, newKey)
+		return this
 	}
 }
