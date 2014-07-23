@@ -17,8 +17,9 @@ internal const class InjectionUtils {
 			if (!findInjectableFields(object.typeof, true)
 				.reduce(false) |bool, field| {
 					InjectionTracker.doingFieldInjection(object, field) |->Bool| {
-						dependency := findDependencyByType(field.type, true)
-						inject(object, field, dependency)
+						dependency := findDependencyFromInjectFacet(field)
+						if (dependency != null)
+							inject(object, field, dependency)
 						return true
 					}
 				})
@@ -103,8 +104,9 @@ internal const class InjectionUtils {
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
 				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
-					dependency := findDependencyByType(field.type, true)
-					plan[field] = dependency
+					dependency := findDependencyFromInjectFacet(field)
+					if (dependency != null)
+						plan[field] = dependency
 				}
 			}
 			ctorFieldVals := InjectionTracker.injectionCtx.ctorFieldVals 
@@ -182,6 +184,63 @@ internal const class InjectionUtils {
 		}
 	}
 
+	private static Obj? findDependencyFromInjectFacet(Field field) {
+		objLocator	:= InjectionTracker.peek.objLocator
+		inject := (Inject) Slot#.method("facet").callOn(field, [Inject#])	// Stoopid F4
+
+		if (inject.serviceId != null && inject.autobuild) {
+			log("Field has @Inject { serviceId='${inject.serviceId}'; autobuild=true }")
+			serviceDef := objLocator.serviceDefById(inject.serviceId)
+			
+			if (serviceDef == null) {
+				if (inject.optional) {
+					log("Field has @Inject { optional=true }")
+					log("Service not found - failing silently...")
+					return null
+				}
+				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
+			}
+
+			service := objLocator.trackAutobuild(serviceDef.serviceImplType ?: serviceDef.serviceType, null, null)
+			
+			if (!service.typeof.fits(field.type))
+				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
+			return service
+		}
+
+		if (inject.serviceId != null) {
+			log("Field has @Inject { serviceId='${inject.serviceId}' }")
+			serviceDef := objLocator.serviceDefById(inject.serviceId)
+			
+			if (serviceDef == null) {
+				if (inject.optional) {
+					log("Field has @Inject { optional=true }")
+					log("Service not found - failing silently...")
+					return null
+				}
+				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
+			}
+			
+			service := objLocator.getService(serviceDef, false)
+			
+			if (!service.typeof.fits(field.type))
+				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
+			return service
+		}
+
+		if (inject.autobuild) {
+			log("Field has @Inject { autobuild=true }")
+			return objLocator.trackAutobuild(field.type, null, null)
+		}
+
+		dependency := findDependencyByType(field.type, !inject.optional)
+		if (dependency == null && inject.optional) {
+			log("Field has @Inject { optional=true }")
+			log("Dependency not found - failing silently...")
+		}
+		return dependency
+	}
+	
 	private static Obj? findDependencyByType(Type dependencyType, Bool checked) {
 		track("Looking for dependency of type $dependencyType") |->Obj?| {
 			InjectionTracker.peek.objLocator.trackDependencyByType(dependencyType, checked)

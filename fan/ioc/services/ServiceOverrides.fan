@@ -1,8 +1,5 @@
 using afBeanUtils::NotFoundErr
 
-@NoDoc @Deprecated { msg="Use ServiceOverrides instead" }
-const mixin ServiceOverride { }
-
 ** (Service) - Contribute to override previously defined services. Use to override production services with test 
 ** versions, or to replace 3rd party services with your own implementation. 
 ** 
@@ -50,11 +47,10 @@ const mixin ServiceOverride { }
 ** @since 1.2
 ** 
 ** @uses MappedConfig of 'Str:Obj' (serviceId:overrideImpl)
-const mixin ServiceOverrides : ServiceOverride {
+const mixin ServiceOverrides {
 	
 	@NoDoc
 	abstract Str:|->Obj| overrides()
-
 }
 
 
