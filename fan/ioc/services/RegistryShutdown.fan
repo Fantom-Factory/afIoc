@@ -35,9 +35,14 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 	private const static Log 		log 		:= Utils.getLog(RegistryShutdown#)
 	private const OneShotLock 		lock		:= OneShotLock(IocMessages.registryShutdown)
 	private const SynchronizedState	conState
-	private const |->|[] 			shutdownFuncs
+	private const Str:|->|	 		shutdownFuncs
  
-	new make(|->|[] shutdownFuncs,  ActorPools actorPools) {
+	new make(Str:|->| shutdownFuncs,  ActorPools actorPools) {
+		shutdownFuncs.each |val, key| { 
+			try val.toImmutable
+			catch throw NotImmutableErr(IocMessages.shutdownFuncNotImmutable(key))
+		}
+		
 		this.shutdownFuncs = shutdownFuncs
 		conState = SynchronizedState(actorPools[IocConstants.systemActorPool], RegistryShutdownHubState#)
 	}
@@ -48,11 +53,11 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 
 		registryWillShutdown
 		
-		shutdownFuncs.each | |->| listener| {
+		shutdownFuncs.each | |->| listener, Str id| {
 			try {
 				listener.call
 			} catch (Err e) {
-				log.err(IocMessages.shutdownListenerError(listener, e))
+				log.err(IocMessages.shutdownListenerError(id, e))
 			}
 		}
 		
@@ -80,7 +85,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 			try {
 				listener.call
 			} catch (Err e) {
-				log.err(IocMessages.shutdownListenerError(listener, e))
+				log.err(IocMessages.shutdownListenerError(listener.toStr, e))
 			}
 		}
 		conState.withState |RegistryShutdownHubState state| { state.preListeners.clear }
@@ -91,7 +96,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 			try {
 				listener()
 			} catch (Err e) {
-				log.err(IocMessages.shutdownListenerError(listener, e))
+				log.err(IocMessages.shutdownListenerError(listener.toStr, e))
 			}
 		}
 		conState.withState |RegistryShutdownHubState state| { state.listeners.clear }
@@ -106,6 +111,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 	}
 }
 
+@Deprecated
 internal class RegistryShutdownHubState {
 	Orderer preListeners	:= Orderer()
 	Orderer listeners		:= Orderer()

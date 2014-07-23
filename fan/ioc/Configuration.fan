@@ -1,10 +1,102 @@
 
-// FIXME: use interface to hide internals
 ** Passed into module contribution methods to allow the method to, err, contribute!
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
-class Contributions {
+** 
+** @since 1.7.0
+class Configuration {
+	private ConfigurationImpl config
+
+	** By using this wrapped, all the internals are hidden from IDE auto-complete proposals.
+	internal new make(ConfigurationImpl config) {
+		this.config = config
+	}
+	
+	** A convenience method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
+	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+		config.autobuild(type, ctorArgs, fieldVals)
+	}
+
+	** A convenience method that returns the IoC Registry.
+	Registry registry() {
+		config.registry
+	}
+
+	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
+	@Operator 
+	private Obj? get(Obj key) { null }
+
+	** Adds an ordered object to the service's contribution. 
+	** Each object has a unique key that is used by the constraints for ordering. 
+	** Each constraint (a CSV list) must start with the prefix 'BEFORE:' or 'AFTER:'.
+	** 
+	** pre>
+	**   config["Breakfast"] = eggs
+	**   config["Dinner"]    = pie
+	**   config.set("Lunch", ham, "AFTER: breakfast, BEFORE: dinner")
+	** <pre
+	** 
+	** Configuration contributions are ordered across modules. 
+	** 
+	** An attempt is made to coerce the keys and values to the service's contribution type.
+	@Operator
+	This set(Obj key, Obj? value, Str? constraints := null) {
+		config.set(key, value, constraints)
+		return this
+	}
+
+	** Adds an unordered object to the service's configuration. 
+	** An attempt is made to coerce the object to the contrib type.
+	@Operator
+	This add(Obj value, Str? constraints := null) {
+		config.add(value, constraints)
+		return this
+	}
+
+	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
+	** 
+	** pre>
+	**   config.placeholder("End")
+	**   config.set("Wot", ever, ["BEFORE: end"])
+	**   config.set("Last", last, ["AFTER: end"])
+	** <pre
+	** 
+	** Placeholders do not appear in the the resulting configuration. 
+	This placeholder(Obj key, Str? constraints := null) {
+		config.placeholder(key, constraints)
+		return this
+	}
+	
+	** Overrides or replaces a contributed value. 
+	** The original key must exist.
+	** 
+	** An attempt is made to coerce the keys and values to the service's contribution type.
+	** 
+	** Note: If 'newKey' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
+	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
+		config.replace(existingKey, newValue, newConstraints, newKey)
+		return this
+	}
+	
+	** A special kind of override whereby, should this be the last override applied, the value is 
+	** removed from the configuration.
+	** 
+	** Note: If 'newKey' is supplied then this override itself may be overridden by other 
+	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
+	This remove(Obj existingKey, Obj? newKey := null) {
+		config.remove(existingKey, newKey)
+		return this
+	}
+
+	@NoDoc
+	override Str toStr() {
+		config.toStr
+	}	
+}
+
+internal class ConfigurationImpl {
 	
 	internal const	Type 				contribType
 	private  const 	ServiceDef 			serviceDef
@@ -32,17 +124,14 @@ class Contributions {
 		this.typeCoercer	= CachingTypeCoercer()
 	}
 	
-	** A convenience method that returns the IoC Registry.
+	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+		objLocator.trackAutobuild(type, ctorArgs, fieldVals)
+	}
+
 	Registry registry() {
 		(Registry) objLocator
 	}
 
-	
-	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
-	@Operator 
-	private Obj? get(Obj key) { null }
-
-	@Operator
 	This set(Obj key, Obj? value, Str? constraints := null) {
 		key   = validateKey(key, false)
 		value = validateVal(value)
@@ -62,12 +151,11 @@ class Contributions {
 		return this
 	}
 
-	// like set, but don't care about it's placement
-	@Operator
 	This add(Obj value, Str? constraints := null) {
 		if (keyType != Str#)
-			throw Err()	// FIXME: err msg
-		key := "_Unordered-" + impliedCount.toStr.padl(2)
+			throw IocErr(IocMessages.contributions_keyTypeNotKnown(keyType))
+
+		key := "afIoc.unordered-" + impliedCount.toStr.padl(2)
 
 		return set(key, value, constraints)
 	}
@@ -78,7 +166,7 @@ class Contributions {
 	
 	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
 		if (newKey == null)
-			newKey = "_Override-" + overrideCount.toStr.padl(2)
+			newKey = "afIoc.override-" + overrideCount.toStr.padl(2)
 		overrideCount = overrideCount + 1
 
 		newKey 		= validateKey(newKey, true)

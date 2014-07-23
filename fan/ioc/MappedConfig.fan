@@ -8,22 +8,23 @@
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
-@Deprecated { msg="Use Contributions instead" }
+** 
+@Deprecated { msg="Use 'Configuration' instead" }
 class MappedConfig {
-	
-	private Contributions contrib
-	internal new make(Contributions contrib) {
-		this.contrib = contrib
+	private ConfigurationImpl config
+
+	internal new make(ConfigurationImpl config) {
+		this.config = config
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		contrib.registry.autobuild(type, ctorArgs, fieldVals)
+		config.registry.autobuild(type, ctorArgs, fieldVals)
 	}
 
 	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
 	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		contrib.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
+		config.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
@@ -34,7 +35,7 @@ class MappedConfig {
 	** An attempt is made to coerce the key / value to the map type.
 	@Operator
 	This set(Obj key, Obj? val) {
-		contrib.set(key, val)
+		config.set(key, val)
 		return this
 	}
 
@@ -57,7 +58,7 @@ class MappedConfig {
 	** 
 	** @since 1.2.0
 	This setOverride(Obj existingKey, Obj? newValue, Obj? newKey := null) {
-		contrib.replace(existingKey, newValue, null, newKey)
+		config.replace(existingKey, newValue, null, newKey)
 		return this
 	}
 
@@ -69,7 +70,7 @@ class MappedConfig {
 	** 
 	** @since 1.4.0
 	This remove(Obj existingKey, Obj? newKey := null) {
-		contrib.remove(existingKey, newKey)
+		config.remove(existingKey, newKey)
 		return this
 	}
 }

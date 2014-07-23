@@ -112,7 +112,7 @@ internal const class IocMessages {
 	}
 	
 	static Str contributionMethodMustTakeConfig(Method method) {
-		"Contribution method '$method.qname' must take either an ${OrderedConfig#.name} or a ${MappedConfig#.name} as its first parameter"		
+		"Contribution method '$method.qname' must take a '${Configuration#.name}' obj as its first parameter"		
 	}
 	
 	static Str contribitionHasBothIdAndType(Method method) {
@@ -159,8 +159,12 @@ internal const class IocMessages {
 		"Overriding service '$serviceId' maybe difficult as service '$serviceId' doesn't exist!"
 	}
 	
-	static Str shutdownListenerError(Obj listener, Err cause) {
+	static Str shutdownListenerError(Str listener, Err cause) {
 		"Error notifying ${listener} of registry shutdown: ${cause}"
+	}
+
+	static Str shutdownFuncNotImmutable(Str listener) {
+		"Shutdown function '${listener}' is not immutable"
 	}
 	
 	static Str serviceIdDoesNotFit(Str serviceId, Type serviceType, Type fieldType) {
@@ -287,6 +291,10 @@ internal const class IocMessages {
 		"Cannot override contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
 	}
 
+	static Str contributions_keyTypeNotKnown(Type keyType) {
+		stripSys("Can auto generate keys of type '${keyType.signature} - try using config.set() instead")
+	}
+	
 	
 	
 	// ---- Helper Methods ------------------------------------------------------------------------
