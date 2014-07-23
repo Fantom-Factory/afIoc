@@ -10,7 +10,7 @@
 ** ctor or builder method. Contributions must be compatible with the type.
 ** 
 ** @see `TypeCoercer`
-@Deprecated { msg="Use 'Configuration' instead" }
+@NoDoc @Deprecated { msg="Use 'Configuration' instead" }
 class OrderedConfig {
 	private ConfigurationImpl config
 

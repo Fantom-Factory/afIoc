@@ -16,9 +16,9 @@ internal class TestLocalRefDependencyProvider : IocTest {
 		verifyEq(s96.localList[0], 6)
 		verifyEq(s96.localMap [6], 9)
 		
-		verify(s96          .localRef.qname.endsWith(".T_MyService96.localRef" ))
-		verify(s96.localList.localRef.qname.endsWith(".T_MyService96.localList"))
-		verify(s96.localMap .localRef.qname.endsWith(".T_MyService96.localMap" ))
+		verify(s96          .localRef.qname.endsWith(".afIoc.T_MyService96.localRef" ))
+		verify(s96.localList.localRef.qname.endsWith(".afIoc.T_MyService96.localList"))
+		verify(s96.localMap .localRef.qname.endsWith(".afIoc.T_MyService96.localMap" ))
 
 		verify(Actor.locals.containsKey(s96			 .localRef.qname))
 		verify(Actor.locals.containsKey(s96.localList.localRef.qname))

@@ -1,15 +1,14 @@
 
-v1.6.6 Maybe...?
+v1.7.0 Maybe...?
 ----------------
-Let services get Ordered IDs somehow...?
- - combine MappedConfig & OrderedConfig into one UberConfig??
-
 @Inject { optional = true }
  - i.e. if the service don't exist / not defined / don't inject it
  - why would you want to? And what of ctor args? 
 
 Split DependencyProviders out into separate pod... afIocUtils?
- - move into @Inject facet
+ - naa, move into @Inject facet
+
+
 
 Meh... can't be arsed
 --------------------- 

@@ -50,7 +50,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 			}
 
 		service 	:= objLocator.getService(serviceDef, true)
-		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]][:]
+		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]?][:]
 		
 		methodAdvisors.each {
 			adviceMap[it.method] = it.aspects
@@ -66,7 +66,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
 internal const class ServiceMethodInvoker {
 	const ObjectRef service
-	const Method:|MethodInvocation invocation -> Obj?|[] aspects
+	const Method:|MethodInvocation invocation -> Obj?|[]? aspects
 	
 	new make(|This|in) { in(this) }
 
