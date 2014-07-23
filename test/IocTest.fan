@@ -2,6 +2,8 @@
 abstract internal class IocTest : Test {
 	
 	override Void setup() {
+		Log.get("afIoc").level = LogLevel.warn
+		
 //		(1..100).each {
 //			typeName := "T_MyModule" + it.toStr.padl(2, '0')
 //			try Pod.of(this).type(typeName)

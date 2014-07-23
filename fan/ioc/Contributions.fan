@@ -1,6 +1,9 @@
 
 // FIXME: use interface to hide internals
-** aka UberConfig
+** Passed into module contribution methods to allow the method to, err, contribute!
+** 
+** The service defines the *type* of contribution by declaring a parameterised list or map in its 
+** ctor or builder method. Contributions must be compatible with the type.
 class Contributions {
 	
 	internal const	Type 				contribType
@@ -27,16 +30,6 @@ class Contributions {
 		this.overrides		= Utils.makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
 		this.typeCoercer	= CachingTypeCoercer()
-	}
-
-	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
-	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		return objLocator.trackAutobuild(type, ctorArgs, fieldVals)
-	}
-
-	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
-	Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		objLocator.trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 	
 	** A convenience method that returns the IoC Registry.
@@ -123,14 +116,14 @@ class Contributions {
 		config.size
 	}
 
-	internal List getConfigList() {
+	internal List toConfigList() {
 		contribs := orderedContribs
 		config   := (Obj?[]) List.make(valueType, contribs.size)
 		contribs.each { config.add(it.val) }
 		return config
 	}
 
-	internal Map getConfigMap() {
+	internal Map toConfigMap() {
 		mapType := Map#.parameterize(["K":keyType, "V":valueType])
 		config  := (Obj:Obj?) Map.make(mapType) { ordered = true }
 		
