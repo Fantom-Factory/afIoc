@@ -102,7 +102,7 @@ internal const class ModuleDefImpl : ModuleDef {
 	private Void addContribDefFromMethod(OpTracker tracker, ContributionDef[] contribDefs, Method method) {
 		if (!method.isStatic)
 			throw IocErr(IocMessages.contributionMethodMustBeStatic(method))
-		if (method.params.isEmpty || (method.params[0].type != OrderedConfig# && method.params[0].type != MappedConfig#))
+		if (method.params.isEmpty || (method.params[0].type != OrderedConfig# && method.params[0].type != MappedConfig# && method.params[0].type != Configuration#))
 			throw IocErr(IocMessages.contributionMethodMustTakeConfig(method))
 		
 		contribute := (Contribute) Slot#.method("facet").callOn(method, [Contribute#])	// Stoopid F4

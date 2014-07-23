@@ -20,7 +20,7 @@ const internal class ConfigProvider {
 	Obj? provide(Type dependencyType) {
 		objLocator := InjectionTracker.peek.objLocator
 
-		contrib := Contributions(objLocator, serviceDef, configType)
+		contrib := ConfigurationImpl(objLocator, serviceDef, configType)
 		objLocator.contributionsByServiceDef(serviceDef).each {
 			it.contribute(contrib)
 		}

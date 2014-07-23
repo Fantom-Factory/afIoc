@@ -10,29 +10,29 @@
 ** ctor or builder method. Contributions must be compatible with the type.
 ** 
 ** @see `TypeCoercer`
-@Deprecated { msg="Use Contributions instead" }
+@Deprecated { msg="Use 'Configuration' instead" }
 class OrderedConfig {
+	private ConfigurationImpl config
 
-	private Contributions contrib
-	internal new make(Contributions contrib) {
-		this.contrib = contrib
+	internal new make(ConfigurationImpl config) {
+		this.config = config
 	}
 
 	** A helper method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		contrib.registry.autobuild(type, ctorArgs, fieldVals)
+		config.registry.autobuild(type, ctorArgs, fieldVals)
 	}
 
 	** A helper method to create an object proxy. Use to break circular service dependencies. See `Registry.createProxy`.  
 	Obj createProxy(Type mixinType, Type? implType := null, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
-		contrib.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
+		config.registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** Adds an unordered object to a service's configuration. 
 	** An attempt is made to coerce the object to the contrib type.
 	@Operator
 	This add(Obj object) {
-		contrib.add(object)
+		config.add(object)
 		return this
 	}
 
@@ -59,7 +59,7 @@ class OrderedConfig {
 	** 
 	** An attempt is made to coerce the object to the contrib type.
 	This addOrdered(Str id, Obj? value, Str[] constraints := Str#.emptyList) {
-		contrib.set(id, value, constraints.join(", "))
+		config.set(id, value, constraints.join(", "))
 		return this
 	}
 
@@ -75,7 +75,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2.0
 	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		contrib.placeholder(id, constraints.join(", "))
+		config.placeholder(id, constraints.join(", "))
 		return this
 	}
 
@@ -89,7 +89,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2.0
 	This addOverride(Str existingId, Obj? newValue, Str[] newConstraints := Str#.emptyList, Str? newId := null) {
-		contrib.replace(existingId, newValue, newConstraints.join(", "), newId)
+		config.replace(existingId, newValue, newConstraints.join(", "), newId)
 		return this
 	}
 
@@ -101,7 +101,7 @@ class OrderedConfig {
 	** 
 	** @since 1.4.0
 	This remove(Str existingId, Str? newId := null) {
-		contrib.remove(existingId, newId)
+		config.remove(existingId, newId)
 		return this
 	}
 }
