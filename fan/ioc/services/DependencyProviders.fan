@@ -1,12 +1,5 @@
 using afBeanUtils
 
-@NoDoc @Deprecated { msg="Use DependencyProviders instead" }
-const mixin DependencyProviderSource { 
-	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
-
-	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)	
-}
-
 ** (Service) -
 ** Contribute your `DependencyProvider` implementations to this. 
 ** Provide your own dependencies for fields annotated with the '@Inject' facet. 
@@ -25,11 +18,11 @@ const mixin DependencyProviderSource {
 ** 
 ** @uses OrderedConfig of `DependencyProvider`
 @NoDoc	// don't overwhelm the masses
-const mixin DependencyProviders : DependencyProviderSource {
+const mixin DependencyProviders {
 	
-	override internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
+	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
 
-	override internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
+	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
 }
 
 ** @since 1.1.0

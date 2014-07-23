@@ -1,5 +1,5 @@
 
-internal class TestFacetAutobuild : IocTest {
+internal class TestInjectFacetAutobuild : IocTest {
 	
 	Void testFieldInjection() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
@@ -11,11 +11,11 @@ internal class TestFacetAutobuild : IocTest {
 		verifyNotSame(s37.ser2, s37.auto2)
 	}
 
-	Void testOnlyOneDependencyProviderAllowed() {
+	Void testAutoServiceId() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
-		verifyIocErrMsg(IocMessages.onlyOneDependencyProviderAllowed(T_MyService02?#, [ServiceIdProvider#, AutobuildProvider#])) {
-			reg.serviceById("s39")
-		}
+		s39 := (T_MyService39) reg.serviceById("s39")
+		verifyType(s39.ser2, T_MyService02#)
+		verifyNull(s39.ser12)
 	}
 	
 	Void testAutobuildHandlesNullableTypes() {
@@ -41,25 +41,27 @@ internal class T_MyModule55 {
 }
 
 internal class T_MyService36 {
-	@Inject @Autobuild
+	@Inject { autobuild = true }
 	T_MyService02? auto2
 	@Inject
 	T_MyService02? ser2
 }
 internal class T_MyService37 {
-	@Inject @Autobuild
+	@Inject { autobuild = true }
 	T_MyService02? auto2
 	@Inject
 	T_MyService02? ser2
 }
 
 internal class T_MyService39 {
-	@Inject @ServiceId { id="s2" } @Autobuild
+	@Inject { autobuild = true; serviceId = "s2" }
 	T_MyService02? ser2	
+	@Inject { optional = true; serviceId = "s12" }
+	T_MyService12? ser12	
 }
 
 internal class T_MyService63 {
-	@Inject @Autobuild
+	@Inject { autobuild = true }
 	T_MyService59? auto
 }
 

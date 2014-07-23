@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [33 tests, 209 methods, 425 verifies]'
+  - Extensively tested: - 'All tests passed! [34 tests, 207 methods, 423 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -311,6 +311,7 @@ v1.7.0 [#1.7.0]
  - Chg: Deprecated 'OrderedConfig' and 'MappedConfig' in favour of 'Configuration'.
  - Chg: Aspect invoker references 'null' instead of an empty list when holding method advice.
  - Chg: 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' now use the Type's qualified name as the key
+ - Chg: Deleted all existing @Deprecated classes.
  - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
 
 v1.6.4 [#1.6.4]
