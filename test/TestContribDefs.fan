@@ -50,7 +50,7 @@ internal class TestContribDefs : IocTest {
 
 internal class T_MyModule23 {
 	@Contribute
-	Void contributeWot(OrderedConfig config) { }
+	Void contributeWot(Configuration config) { }
 }
 
 internal class T_MyModule24 {
@@ -60,27 +60,27 @@ internal class T_MyModule24 {
 
 internal class T_MyModule25 {
 	@Contribute { serviceId="wotever"; serviceType=T_MyModule25# }
-	static Void contributeWot(OrderedConfig config) { }
+	static Void contributeWot(Configuration config) { }
 }
 
 internal class T_MyModule26 {
 	@Contribute
-	static Void cont(OrderedConfig config) { }
+	static Void cont(Configuration config) { }
 }
 
 internal class T_MyModule27 {
 	@Contribute{serviceId="wotever"}
-	static Void cont(OrderedConfig config) { }
+	static Void cont(Configuration config) { }
 }
 
 internal class T_MyModule28 {
 	@Contribute{serviceType=Int#}
-	static Void cont(OrderedConfig config) { }
+	static Void cont(Configuration config) { }
 }
 
 internal class T_MyModule29 {
 	@Contribute{serviceType=Int#; optional=true}
-	static Void cont(OrderedConfig config) { }
+	static Void cont(Configuration config) { }
 }
 
 internal class T_MyModule52 {

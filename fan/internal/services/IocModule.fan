@@ -43,7 +43,7 @@ internal const class IocModule {
 	static Void contributeIocShutdownPlaceholder(Configuration config) {
 		reg := (RegistryImpl) config.registry
 
-		config.placeholder("afIoc.shutdown")
+		config.addPlaceholder("afIoc.shutdown")
 		config["afIoc.sayGoodbye"] = |->| {
 			reg.sayGoodbye.val = true
 		}

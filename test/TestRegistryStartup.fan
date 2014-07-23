@@ -16,8 +16,8 @@ internal class T_MyModule39 {
 	}
 
 	@Contribute
-	static Void contributeRegistryStartup(OrderedConfig config, T_MyService02 s2) {
-		config.add|->| {
+	static Void contributeRegistryStartup(Configuration config, T_MyService02 s2) {
+		config.add |->| {
 			s2.kick = "Started"
 		}
 	}

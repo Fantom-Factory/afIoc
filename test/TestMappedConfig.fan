@@ -175,17 +175,17 @@ internal class T_MyModule02 {
 		binder.bind(T_MyService10#).withId("s10b")
 	}
 	@Contribute{ serviceId="s10" }
-	static Void cont10(MappedConfig config) {
+	static Void cont10(Configuration config) {
 		config["wot"] = null
 	}	
 	@Contribute{ serviceId="s28" }
-	static Void cont28(MappedConfig config) {
+	static Void cont28(Configuration config) {
 		config.set("wot", null)
 	}	
 	@Contribute{ serviceId="s10b" }
-	static Void cont10b(MappedConfig config) {
+	static Void cont10b(Configuration config) {
 		config.set("wot", "ever")
-		config.setOverride("wot", null, "wot-null")
+		config.replace("wot", null, null, "wot-null")
 	}	
 }
 
@@ -202,7 +202,7 @@ internal class T_MyModule43 {
 	}
 	
 	@Contribute{ serviceId="s27" }
-	static Void cont(MappedConfig config) {
+	static Void cont(Configuration config) {
 		config.set("wot", "ever")
 	}
 }
@@ -216,11 +216,11 @@ internal class T_MyModule44 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config) {
+	static Void cont(Configuration config) {
 		config.set("wot", "ever")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont2(MappedConfig config) {
+	static Void cont2(Configuration config) {
 		config.set("wot2", "ever2")
 	}
 }
@@ -242,11 +242,11 @@ internal class T_MyModule45 {
 		return T_MyService28(str)
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config) {
+	static Void cont(Configuration config) {
 		config.set("wot", "ever")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont2(MappedConfig config) {
+	static Void cont2(Configuration config) {
 		config.set("wot2", "ever2")
 	}
 }
@@ -257,7 +257,7 @@ internal class T_MyModule46 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config, T_MyService02 s2) {
+	static Void cont(Configuration config, T_MyService02 s2) {
 		config.set("wot", s2.kick)
 	}
 }
@@ -269,15 +269,15 @@ internal class T_MyModule47 {
 		binder.bind(T_MyService68#).withId("s68")
 	}
 	@Contribute{ serviceId="s74-a" }
-	static Void cont1(MappedConfig config) {
+	static Void cont1(Configuration config) {
 		config[68] = T_MyModule47#	// wrong key type 
 	}
 	@Contribute{ serviceId="s74-b" }
-	static Void cont2(MappedConfig config) {
+	static Void cont2(Configuration config) {
 		config[T_MyModule47#] = 68	// wrong value type 
 	}
 	@Contribute{ serviceId="s68" }
-	static Void cont3(MappedConfig config) {
+	static Void cont3(Configuration config) {
 		config["68"] = 42	// coerce Int <=> Str 
 	}
 }
@@ -287,7 +287,7 @@ internal class T_MyModule48 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute{ serviceId="s28" }
-	static Void cont(MappedConfig config) {
+	static Void cont(Configuration config) {
 		config.set("judge", config.autobuild(T_MyService02#)->kick)
 	}
 }
@@ -303,7 +303,7 @@ internal class T_MyModule51 {
 		binder.bind(T_MyService29#).withId("s29")
 	}
 	@Contribute{ serviceId="s29" }
-	static Void cont(MappedConfig config) {
+	static Void cont(Configuration config) {
 		config["oop"] = [ServiceBinder#]
 		config["key"] = [,]
 	}
@@ -321,16 +321,16 @@ internal class T_MyModule62 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
-	static Void contributeS28(MappedConfig config) {
+	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.setOverride("key", "value2", "over1")
+		config.replace("key", "value2", null, "over1")
 	}
 }
 
 internal class T_MyModule63 {
 	@Contribute
-	static Void contributeS28(MappedConfig config) {
-		config.setOverride("over1", "value3", "over2")
+	static Void contributeS28(Configuration config) {
+		config.replace("over1", "value3", null, "over2")
 	}
 }
 
@@ -339,9 +339,9 @@ internal class T_MyModule64 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
-	static Void contributeS28(MappedConfig config) {
+	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.setOverride("non-exist", "value2", "over1")
+		config.replace("non-exist", "value2", null, "over1")
 	}
 }
 
@@ -350,10 +350,10 @@ internal class T_MyModule65 {
 		binder.bind(T_MyService28#).withId("s28")
 	}
 	@Contribute
-	static Void contributeS28(MappedConfig config) {
+	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.setOverride("key", "value2", "over1")
-		config.setOverride("non-exist", "value3", "over2")
+		config.replace("key", "value2", null, "over1")
+		config.replace("non-exist", "value3", null, "over2")
 	}
 }
 
@@ -362,10 +362,10 @@ internal class T_MyModule66 {
 		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
-	static Void contributeS46(MappedConfig config) {
+	static Void contributeS46(Configuration config) {
 		config.set(Str#, "value1")
-		config.setOverride(Str#, "value2", Uri#)
-		config.setOverride(Uri#, "value3", File#)
+		config.replace(Str#, "value2", null, Uri#)
+		config.replace(Uri#, "value3", null, File#)
 	}
 }
 
@@ -374,7 +374,7 @@ internal class T_MyModule67 {
 		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
-	static Void contributeS46(MappedConfig config) {
+	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
 		config.set(Str#, "twice")
 	}
@@ -385,10 +385,10 @@ internal class T_MyModule68 {
 		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
-	static Void contributeS46(MappedConfig config) {
+	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.setOverride(Str#, "twice", Uri#)
-		config.setOverride(Str#, "thrice", File#)
+		config.replace(Str#, "twice", null, Uri#)
+		config.replace(Str#, "thrice", null, File#)
 	}
 }
 
@@ -397,10 +397,10 @@ internal class T_MyModule73 {
 		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
-	static Void contributeS46(MappedConfig config) {
+	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.setOverride(Str#, "twice", Uri#)
-		config.setOverride(Uri#, "thrice", Str#)	// attempt to re-use an existing key
+		config.replace(Str#, "twice", null, Uri#)
+		config.replace(Uri#, "thrice", null, Str#)	// attempt to re-use an existing key
 	}
 }
 
@@ -409,10 +409,10 @@ internal class T_MyModule74 {
 		binder.bind(T_MyService46#).withId("s46")
 	}
 	@Contribute
-	static Void contributeS46(MappedConfig config) {
+	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.setOverride(Str#, "twice", Uri#)
-		config.setOverride(Uri#, "thrice", Uri#)	// attempt to re-use an existing override key
+		config.replace(Str#, "twice", null, Uri#)
+		config.replace(Uri#, "thrice", null, Uri#)	// attempt to re-use an existing override key
 	}
 }
 
@@ -428,10 +428,10 @@ internal class T_MyModule82 {
 		binder.bind(T_MyService68#).withId("s68")
 	}
 	@Contribute
-	static Void contributeS68(MappedConfig config) {
+	static Void contributeS68(Configuration config) {
 		config.set(69, "dude")	// use Str override keys
-		config.setOverride(69, "dude dude", "+1")
-		config.setOverride("+1", "crowd", "+2")
+		config.replace(69, "dude dude", null, "+1")
+		config.replace("+1", "crowd", null, "+2")
 	}
 }
 
@@ -452,7 +452,7 @@ internal class T_MyService74 {
 @SubModule{ modules=[T_MyModule62#] }
 internal class T_MyModule95 {
 	@Contribute { serviceType=T_MyService28# }
-	static Void remove(MappedConfig config) {
+	static Void remove(Configuration config) {
 		config.remove("over1", "remove")
 	}
 }

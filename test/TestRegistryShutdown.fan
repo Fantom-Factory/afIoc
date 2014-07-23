@@ -13,7 +13,7 @@ internal class T_MyModule03 {
 	static const AtomicBool called	:= AtomicBool()
 
 	@Contribute { serviceType=RegistryShutdown# }
-	static Void contributeShutdown(OrderedConfig config) {
-		config.addOrdered("TestShutdown", |->| { called.val = true }, ["BEFORE: afIoc.shutdown"])
+	static Void contributeShutdown(Configuration config) {
+		config.set("TestShutdown", |->| { called.val = true }, "BEFORE: afIoc.shutdown")
 	}
 }
