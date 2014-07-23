@@ -63,8 +63,8 @@ class Configuration {
 	** <pre
 	** 
 	** Placeholders do not appear in the the resulting configuration. 
-	This placeholder(Obj key, Str? constraints := null) {
-		config.placeholder(key, constraints)
+	This addPlaceholder(Obj key, Str? constraints := null) {
+		config.addPlaceholder(key, constraints)
 		return this
 	}
 	
@@ -160,7 +160,7 @@ internal class ConfigurationImpl {
 		return set(key, value, constraints)
 	}
 
-	This placeholder(Obj key, Str? constraints := null) {
+	This addPlaceholder(Obj key, Str? constraints := null) {
 		set(key, Orderer.placeholder, constraints)
 	}
 	

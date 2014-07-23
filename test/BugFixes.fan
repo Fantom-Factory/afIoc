@@ -98,9 +98,9 @@ internal class T_MyModule85 {
 	}
 	
 	@Contribute
-	static Void contributeT70(OrderedConfig config) {
+	static Void contributeT70(Configuration config) {
 		config.addPlaceholder("routes")		
-		config.addOrdered("key69", 69, ["before: routes"])
+		config.set("key69", 69, "before: routes")
 	}
 }
 

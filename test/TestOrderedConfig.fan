@@ -202,17 +202,17 @@ internal class T_MyModule87 {
 		binder.bind(T_MyService71#).withId("s71b")
 	}
 	@Contribute{ serviceId="s71" }
-	static Void cont10(OrderedConfig config) {
-		config.addOrdered("wot", null)
+	static Void cont10(Configuration config) {
+		config["wot"] = null
 	}	
 	@Contribute{ serviceId="s19" }
-	static Void cont28(OrderedConfig config) {
-		config.addOrdered("wot", null)
+	static Void cont28(Configuration config) {
+		config["wot"] = null
 	}	
 	@Contribute{ serviceId="s71b" }
-	static Void cont10b(OrderedConfig config) {
-		config.addOrdered("wot", "ever")
-		config.addOverride("wot", null, [,], "wot-null")
+	static Void cont10b(Configuration config) {
+		config["wot"] = "ever"
+		config.replace("wot", null, null, "wot-null")
 	}	
 }
 
@@ -221,11 +221,11 @@ internal class T_MyModule30 {
 		binder.bind(T_MyService19#).withId("s19")
 	}
 	@Contribute{ serviceId="s19" }
-	static Void cont(OrderedConfig config) {
+	static Void cont(Configuration config) {
 		config.add("wot")
 	}
 	@Contribute{ serviceId="s19" }
-	static Void cont2(OrderedConfig config) {
+	static Void cont2(Configuration config) {
 		config.add("ever")
 	}
 }
@@ -243,7 +243,7 @@ internal class T_MyModule31 {
 	}
 	
 	@Contribute{ serviceId="s20" }
-	static Void cont(OrderedConfig config) {
+	static Void cont(Configuration config) {
 		config.add("wot")
 	}
 }
@@ -263,11 +263,11 @@ internal class T_MyModule32 {
 	}
 	
 	@Contribute{ serviceId="s21" }
-	static Void cont(OrderedConfig config) {
+	static Void cont(Configuration config) {
 		config.add("wot")
 	}
 	@Contribute{ serviceId="s21" }
-	static Void cont2(OrderedConfig config) {
+	static Void cont2(Configuration config) {
 		config.add("ever")
 	}
 }
@@ -286,7 +286,7 @@ internal class T_MyModule33 {
 	}
 	
 	@Contribute{ serviceId="s21" }
-	static Void cont(OrderedConfig config, T_MyService02 s2) {
+	static Void cont(Configuration config, T_MyService02 s2) {
 		config.add("wot")
 		config.add(s2.kick)
 	}
@@ -299,11 +299,11 @@ internal class T_MyModule35 {
 	}
 	
 	@Contribute{ serviceId="s22" }
-	static Void cont(OrderedConfig config) {
+	static Void cont(Configuration config) {
 		config.add(T_MyModule35#)	// add fail, need an Int, not Type
 	}
 	@Contribute{ serviceId="s22-b" }
-	static Void cont2(OrderedConfig config) {
+	static Void cont2(Configuration config) {
 		config.add("69")	// gets coerced to Int
 	}
 }
@@ -321,7 +321,7 @@ internal class T_MyModule36 {
 	}
 	
 	@Contribute{ serviceId="s23" }
-	static Void cont(OrderedConfig config) {
+	static Void cont(Configuration config) {
 		config.add(config.autobuild(T_MyService02#)->kick)
 	}
 }
@@ -344,9 +344,9 @@ internal class T_MyModule69 {
 		binder.bind(T_MyService23#).withId("s23")
 	}
 	@Contribute
-	static Void contributeS23(OrderedConfig config) {
-		config.addOrdered("key", "value1")
-		config.addOverride("key", "value2", [,], "over1")
+	static Void contributeS23(Configuration config) {
+		config["key"] = "value1"
+		config.replace("key", "value2", null, "over1")
 	}
 }
 
@@ -355,10 +355,10 @@ internal class T_MyModule70 {
 		binder.bind(T_MyService23#).withId("s23")
 	}
 	@Contribute
-	static Void contributeS23(OrderedConfig config) {
-		config.addOrdered("key", "value1")
-		config.addOverride("key", "value2", [,], "over1")
-		config.addOverride("over1", "value3", [,], "over2")
+	static Void contributeS23(Configuration config) {
+		config["key"] = "value1"
+		config.replace("key", "value2", null, "over1")
+		config.replace("over1", "value3", null, "over2")
 	}
 }
 
@@ -367,9 +367,9 @@ internal class T_MyModule71 {
 		binder.bind(T_MyService23#).withId("s23")
 	}
 	@Contribute
-	static Void contributeS23(OrderedConfig config) {
-		config.addOrdered("key", "value")
-		config.addOverride("non-exist", "value2", [,], "over1")
+	static Void contributeS23(Configuration config) {
+		config["key"] = "value"
+		config.replace("non-exist", "value2", null, "over1")
 	}
 }
 
@@ -378,10 +378,10 @@ internal class T_MyModule72 {
 		binder.bind(T_MyService23#).withId("s23")
 	}
 	@Contribute
-	static Void contributeS23(OrderedConfig config) {
-		config.addOrdered("key", "value")
-		config.addOverride("key", "value2", [,], "over1")
-		config.addOverride("non-exist", "value3", [,], "over2")
+	static Void contributeS23(Configuration config) {
+		config["key"] = "value"
+		config.replace("key", "value2", null, "over1")
+		config.replace("non-exist", "value3", null, "over2")
 	}
 }
 
@@ -390,12 +390,12 @@ internal class T_MyModule86 {
 		binder.bind(T_MyService23#).withId("s23")
 	}
 	@Contribute
-	static Void contributeS23(OrderedConfig config) {		
+	static Void contributeS23(Configuration config) {		
 		config.addPlaceholder("filters")
 		config.addPlaceholder("routes")
 		
-		config.addOrdered("corsFilter", "simple", 	  ["before: routes"])
-		config.addOrdered("corsFilter2", "preflight", ["before: routes"])
+		config.set("corsFilter", "simple", 	  "before: routes")
+		config.set("corsFilter2", "preflight", "before: routes")
 
 		// we would expect these to appear *after* the 2 filters above
 //		config = ,["essays1", "essays2", "index";
@@ -410,7 +410,7 @@ internal class T_MyModule89 {
 		binder.bind(T_MyService73#).withId("s73")
 	}
 	@Contribute
-	static Void contributeS73(OrderedConfig config) {		
+	static Void contributeS73(Configuration config) {		
 		config.add(1)
 		config.add(2)
 		config.add(3)
@@ -440,14 +440,14 @@ internal class T_MyService82 {
 internal class T_MyModule92 {
 	
 	@Contribute { serviceType=T_MyService82# }
-	static Void contributeHttpPipeline1(OrderedConfig config) {
-		config.addOrdered("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#", ["after: BedSheetFilters"])
+	static Void contributeHttpPipeline1(Configuration config) {
+		config.set("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#", "after: BedSheetFilters")
 	}
 
 	@Contribute { serviceType=T_MyService82# }
-	static Void contributeHttpPipeline2(OrderedConfig conf) {
-		conf.addOrdered("HttpCleanupFilter", 	"HttpCleanupFilter#", ["before: BedSheetFilters", "before: HttpErrFilter"])
-		conf.addOrdered("HttpErrFilter", 		"HttpErrFilter#", 	  ["before: BedSheetFilters"])		
+	static Void contributeHttpPipeline2(Configuration conf) {
+		conf.set("HttpCleanupFilter", 	"HttpCleanupFilter#", "before: BedSheetFilters, before: HttpErrFilter")
+		conf.set("HttpErrFilter", 		"HttpErrFilter#", 	  "before: BedSheetFilters")		
 		conf.addPlaceholder("BedSheetFilters")
 	}
 
@@ -460,7 +460,7 @@ internal class T_MyModule92 {
 @SubModule { modules=[T_MyModule92#] }
 internal class T_MyModule93 {
 	@Contribute { serviceType=T_MyService82# }
-	static Void contributeRemoval(OrderedConfig config) {
+	static Void contributeRemoval(Configuration config) {
 		config.remove("HttpErrFilter", "gone")
 	}
 }
@@ -470,11 +470,11 @@ internal class T_MyModule94 {
 		binder.bind(T_MyService82#).withId("s82")
 	}	
 	@Contribute { serviceType=T_MyService82# }
-	static Void contribute(OrderedConfig conf) {
-		conf.addOrdered("A", "A", ["before: C", "before: B"])
-		conf.addOrdered("B", "B", ["before: C"])
+	static Void contribute(Configuration conf) {
+		conf.set("A", "A", "before: C, before: B")
+		conf.set("B", "B", "before: C")
 		conf.addPlaceholder("C")	
-		conf.addOverride("B", "D", [,], "D")
+		conf.replace("B", "D", null, "D")
 	}
 }
 

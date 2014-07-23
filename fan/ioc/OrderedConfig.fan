@@ -75,7 +75,7 @@ class OrderedConfig {
 	** 
 	** @since 1.2.0
 	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		config.placeholder(id, constraints.join(", "))
+		config.addPlaceholder(id, constraints.join(", "))
 		return this
 	}
 

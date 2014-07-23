@@ -141,7 +141,7 @@ internal class T_MyModule54 {
 		binder.bind(T_MyService02#).withId("s2")
 	}
 	@Contribute
-	static Void contributeRegistryStartup(OrderedConfig config) {
+	static Void contributeRegistryStartup(Configuration config) {
 		config.add() |->| {
 			(Service.find(IocService#) as IocService).serviceById("s2")
 		}
@@ -150,7 +150,7 @@ internal class T_MyModule54 {
 
 internal class T_MyModule101 {
 	@Contribute
-	static Void contributeRegistryStartup(OrderedConfig config) {
+	static Void contributeRegistryStartup(Configuration config) {
 		config.add() |->| { throw Err("Boobies!") }
 	}
 }
