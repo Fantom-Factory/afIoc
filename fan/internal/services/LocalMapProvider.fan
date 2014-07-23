@@ -12,7 +12,7 @@ internal const class LocalMapProvider : DependencyProvider {
 	
 	override Obj? provide(InjectionCtx ctx) {
 		ctx.log("Creating LocalMap dependency for ${ctx.injectingIntoType.qname}")
-		name := ctx.injectingIntoType.name
+		name := ctx.injectingIntoType.qname.replace("::", ".")
 		if (ctx.field != null)
 			name += "." + ctx.field.name
 		if (ctx.methodParam != null)

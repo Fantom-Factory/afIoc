@@ -6,7 +6,7 @@
 ** 
 ** @since 1.3.0
 class MethodAdvisor {
-	internal |MethodInvocation invocation -> Obj?|[] aspects	:= [,]
+	internal |MethodInvocation invocation -> Obj?|[]? aspects
 	
 	** The method to advise
 	const Method	method
@@ -17,6 +17,8 @@ class MethodAdvisor {
 	
 	** Add an aspect that will be called when the method is invoked
 	Void addAdvice(|MethodInvocation invocation -> Obj?| aspect) {
+		if (aspects == null)
+			aspects = [,]
 		aspects.add(aspect)
 	}
 
@@ -43,14 +45,14 @@ class MethodInvocation {
 
 	internal Method? method
 	internal Int index
-	internal |MethodInvocation invocation -> Obj?|[] aspects
+	internal |MethodInvocation invocation -> Obj?|[]? aspects
 
 	internal new make(|This|f) { f(this) }
 
 	** Call the next method advice in the pipeline, or the real method - you'll never know which!
 	Obj? invoke() {
 		index++
-		if (index <= aspects.size)
+		if (aspects != null && index <= aspects.size)
 			return aspects[-index].call(this)
 		
 		return method.callOn(service, args)

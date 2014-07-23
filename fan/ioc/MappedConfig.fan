@@ -9,7 +9,7 @@
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
 ** 
-@Deprecated { msg="Use 'Configuration' instead" }
+@NoDoc @Deprecated { msg="Use 'Configuration' instead" }
 class MappedConfig {
 	private ConfigurationImpl config
 
