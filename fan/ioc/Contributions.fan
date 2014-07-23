@@ -1,4 +1,5 @@
 
+// FIXME: use interface to hide internals
 ** aka UberConfig
 class Contributions {
 	
@@ -22,8 +23,8 @@ class Contributions {
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
 		this.impliedCount	= 1
-		this.config			= Utils.makeMap(Str#, Contrib#)
-		this.overrides		= Utils.makeMap(Str#, Contrib#)
+		this.config			= Utils.makeMap(Obj#, Contrib#)
+		this.overrides		= Utils.makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
 		this.typeCoercer	= CachingTypeCoercer()
 	}
@@ -71,18 +72,18 @@ class Contributions {
 	// like set, but don't care about it's placement
 	@Operator
 	This add(Obj value, Str? constraints := null) {
-		if (contribType.name == "Map")
+		if (keyType != Str#)
 			throw Err()	// FIXME: err msg
 		key := "_Unordered-" + impliedCount.toStr.padl(2)
 
 		return set(key, value, constraints)
 	}
 
-	This placeholder(Str key, Str? constraints := null) {
+	This placeholder(Obj key, Str? constraints := null) {
 		set(key, Orderer.placeholder, constraints)
 	}
 	
-	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Str? newKey := null) {
+	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
 		if (newKey == null)
 			newKey = "_Override-" + overrideCount.toStr.padl(2)
 		overrideCount = overrideCount + 1
@@ -104,7 +105,7 @@ class Contributions {
 		return this
 	}
 	
-	This remove(Obj existingKey, Str? newKey := null) {
+	This remove(Obj existingKey, Obj? newKey := null) {
 		replace(existingKey, Orderer.delete, null, newKey)
 	}
 
@@ -113,27 +114,25 @@ class Contributions {
 	// ---- Internal Methods ----------------------------------------------------------------------
 
 	** dynamically invoked - just a reset method
-	internal Void contribute(Contribution contribution) {
+	internal Void reset() {
 		// implied ordering only per contrib method
 		impliedConstraint = null
-		// FIXME
-//		contribution.contributeOrdered(this)
 	}	
-	
 	
 	internal Int size() {
 		config.size
 	}
 
-	** dynamically invoked
 	internal List getConfigList() {
 		contribs := orderedContribs
-		return List.make(valueType, contribs.size).addAll(contribs.map { it.val })
+		config   := (Obj?[]) List.make(valueType, contribs.size)
+		contribs.each { config.add(it.val) }
+		return config
 	}
 
 	internal Map getConfigMap() {
 		mapType := Map#.parameterize(["K":keyType, "V":valueType])
-		config := Map.make(mapType) { ordered = true }
+		config  := (Obj:Obj?) Map.make(mapType) { ordered = true }
 		
 		orderedContribs.each {
 			config[it.key] = it.val
@@ -146,11 +145,11 @@ class Contributions {
 		config.each |val, key| { keys[key] = key }
 		
 		// don't alter the class state so getConfig() may be called more than once
-		Obj:Contrib config := this.config.dup
+		config := (Obj:Contrib) this.config.dup
 
 		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
-			norm := (Obj:Contrib) this.config.dup 
+			norm := (Obj:Contrib) this.overrides.dup 
 			found := true
 			while (!norm.isEmpty && found) {
 				found = false
@@ -161,7 +160,10 @@ class Contributions {
 						found = true
 						
 						InjectionTracker.log("'${overrideKey}' overrides '${existingKey}'")
-						config[keys[existingKey]] = val.val
+						config[keys[existingKey]] = val
+						
+						// dispose of the override key
+						val.key = keys[existingKey]
 						return true
 					} else {
 						return false
@@ -176,10 +178,13 @@ class Contributions {
 			}
 		}			
 			
-		ordered := InjectionTracker.track("Ordering configuration contributions") |->Contrib[]| {
+		ordered := (Contrib[]) InjectionTracker.track("Ordering configuration contributions") |->Contrib[]| {
 			orderer := Orderer()
 			config.each |val, key| {
-				orderer.addOrdered(key.toStr, val, val.con)
+				if (val.val === Orderer.delete || val.val === Orderer.placeholder)
+					orderer.addOrdered(key, val.val, val.con)
+				else
+					orderer.addOrdered(key, val, val.con)
 			}
 			return orderer.toOrderedList
 		}
@@ -206,7 +211,7 @@ class Contributions {
 	}
 
 	private Obj? validateVal(Obj? val) {
-		if (val == Orderer.delete || val == Orderer.placeholder)
+		if (val === Orderer.delete || val === Orderer.placeholder)
 			return val
 		
 		if (val == null) {
@@ -258,5 +263,10 @@ internal class Contrib {
 	}
 	override Str toStr() {
 		"[$key:$val]"
+	}
+	
+	static Void main() {
+		l:=(Str?[]) List.make(Str?#, 3)
+		l.add(null)
 	}
 }
