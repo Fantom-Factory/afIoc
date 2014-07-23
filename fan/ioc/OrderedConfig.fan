@@ -95,7 +95,7 @@ class OrderedConfig {
 		config[id] = OrderedOverride(id, value, constraints)
 		
 		// this orderer is throwaway, we just use to fail fast on dup key errs
-		orderer.addOrdered(id, value, constraints)
+		orderer.addOrdered(id, value, constraints.join(", "))
 
 		return this
 	}
@@ -129,7 +129,7 @@ class OrderedConfig {
 		newValue = validateVal(newValue)
 
 		if (overrides.containsKey(existingId))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
+		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingId.toStr, overrides[existingId].key.toStr))
 
 		if (newId == null)
 			newId = "Override${overrideCount}"
@@ -194,7 +194,7 @@ class OrderedConfig {
 			
 			orderer := Orderer()
 			config.each |val, key| {
-				orderer.addOrdered(key, val.val, val.con)
+				orderer.addOrdered(key, val.val, val.con.join(", "))
 			}
 		
 			return InjectionTracker.track("Ordering configuration contributions") |->List| {

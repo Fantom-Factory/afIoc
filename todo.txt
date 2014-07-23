@@ -4,19 +4,21 @@ v1.6.6 Maybe...?
 Let services get Ordered IDs somehow...?
  - combine MappedConfig & OrderedConfig into one UberConfig??
 
+@Inject { optional = true }
+ - i.e. if the service don't exist / not defined / don't inject it
+ - why would you want to? And what of ctor args? 
+
+Split DependencyProviders out into separate pod... afIocUtils?
+ - move into @Inject facet
 
 Meh... can't be arsed
 --------------------- 
-Split DependencyProviders out into separate pod... afIocUtils?
 
 MappedConfig  -> MapConfig  ? ConfigMap  ?
 orderedConfig -> ListConfig ? ConfigList ?
  - What's the point? The orig names aren't that bad!
  - And *everyone* would need to update their code, even if they were deprecated!
  - Make the constraint Str list just a CSV Str - I don't like dem lists!  
-
-@Inject { optional = true }
- - why would you want to? And what of ctor args? 
 
 service disambiguation via facets 
  - is just another dep pro: map of services keyed by type&facet
