@@ -124,21 +124,21 @@ internal class TestMappedConfig : IocTest {
 
 	Void testCannotOverrideTwice() {
 		reg := RegistryBuilder().addModule(T_MyModule68#).build.startup
-		verifyErrMsg(IocMessages.configOverrideKeyAlreadyDefined(Str#.toStr, Uri#.toStr)) {
+		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyDefined(Str#.toStr, Uri#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
 
 	Void testOverrideCannotReuseKey() {
 		reg := RegistryBuilder().addModule(T_MyModule73#).build.startup
-		verifyErrMsg(IocMessages.configOverrideKeyAlreadyExists(Str#.toStr)) {
+		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Str#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}
 
 	Void testOverrideCannotReuseOverrideKey() {
 		reg := RegistryBuilder().addModule(T_MyModule74#).build.startup
-		verifyErrMsg(IocMessages.configOverrideKeyAlreadyExists(Uri#.toStr)) {
+		verifyErrMsg(IocMessages.contributions_configOverrideKeyAlreadyExists(Uri#.toStr)) {
 			reg.serviceById("s46")
 		}
 	}

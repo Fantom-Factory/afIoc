@@ -89,13 +89,13 @@ class MappedConfig {
 		newValue	= validateVal(newValue)
 
 		if (overrides.containsKey(existingKey))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
+		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
 		if (config.containsKey(newKey))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(newKey.toStr))
+		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
 		if (overrides.vals.map { it.key }.contains(newKey))
-		 	throw IocErr(IocMessages.configOverrideKeyAlreadyExists(newKey.toStr))
+		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
 		overrides[existingKey] = MappedOverride(newKey, newValue)
 		return this

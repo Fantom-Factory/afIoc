@@ -63,7 +63,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 		lock.check
 		iHandler := listener.toImmutable
 		conState.withState |RegistryShutdownHubState state| {
-			state.listeners.addOrdered(id, iHandler, constraints)
+			state.listeners.addOrdered(id, iHandler, constraints.join(", "))
 		}.get
 	}
 
@@ -71,7 +71,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 		lock.check
 		iHandler := listener.toImmutable
 		conState.withState |RegistryShutdownHubState state| {
-			state.preListeners.addOrdered(id, iHandler, constraints)
+			state.preListeners.addOrdered(id, iHandler, constraints.join(", "))
 		}.get
 	}
 

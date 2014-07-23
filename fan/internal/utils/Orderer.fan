@@ -20,7 +20,7 @@ internal class Orderer {
 	internal static const Str NULL			:= "AFIOC-NULL"
 	private Str:OrderedNode nodes			:= Utils.makeMap(Str#, OrderedNode#)
 
-	Void addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
+	Void addPlaceholder(Str id, Str? constraints := null) {
 		addOrdered(id, placeholder, constraints)
 	}
 
@@ -28,29 +28,30 @@ internal class Orderer {
 		addOrdered(id, delete)
 	}
 
-	Void addOrdered(Str id, Obj? object, Str[] constraints := Str#.emptyList) {
+	Void addOrdered(Str id, Obj? object, Str? constraints := null) {
 		id = id.trim
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
 		getOrAdd(id, object ?: NULL)
 
-		constraints.each |constraint| {
+		constraints = (constraints?.trim?.isEmpty ?: true) ? null : constraints
+		constraints?.split(',', true)?.each |constraint| {
 			valid := false
-			eachId("before", constraint) |Str idName| {
+			eachConstraint("before", constraint) |Str idName| {
 				valid = true
 				getOrAdd(idName)	// create placeholder
 				node := getOrAdd(id)
 				if (!node.isBefore.contains(idName))
 					node.isBefore.add(idName)				
 			}
-			eachId("after", constraint) |Str idName| {
+			eachConstraint("after", constraint) |Str idName| {
 				valid = true
 				node := getOrAdd(idName)
 				if (!node.isBefore.contains(id))
 					node.isBefore.add(id)
 			}
 			if (!valid)
-				throw IocErr(IocMessages.configBadPrefix(constraint))
+				throw IocErr(IocMessages.configBadPrefix(constraints))
 		}
 	}
 
@@ -77,17 +78,13 @@ internal class Orderer {
 		return nodesOut
 	}
 
-	internal Void eachId(Str prefix, Str constraint, |Str id| op) {
-		constraint = constraint.trim
+	internal Void eachConstraint(Str prefix, Str? constraint, |Str id| op) {
 		if (constraint.lower.startsWith(prefix.lower)) {
-			idCsv := constraint[prefix.size..-1].trim
-			if (idCsv.startsWith(":") || idCsv.startsWith("-"))
-				idCsv = idCsv[1..-1].trim
-			idNames := idCsv.split(',', true)
-			idNames.each {
-				if (!it.isEmpty)
-					op.call(it)
-			}
+			id := constraint[prefix.size..-1].trim
+			if (id.startsWith(":") || id.startsWith("-"))
+				id = id[1..-1].trim
+			if (!id.isEmpty)
+				op.call(id)
 		}
 	}
 

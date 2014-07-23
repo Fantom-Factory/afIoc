@@ -131,22 +131,6 @@ internal const class IocMessages {
 		"Service does not exist for Type '$serviceType.qname' defined in contribution method ${method.qname}."
 	}
 	
-	static Str orderedConfigTypeIsGeneric(Type contribType, Str serviceId) {
-		"Ordered configuration for service '$serviceId' MUST be parameterised - e.g. Str[]"
-	}
-
-	static Str orderedConfigTypeMismatch(Type? objType, Type listType) {
-		"Contribution of type ${objType?.signature} does not match service configuration list type of $listType.signature"
-	}
-
-	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
-		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
-	}
-	
-	static Str mappedConfigTypeMismatch(Str type, Type? objType, Type mapType) {
-		"Contribution of type ${objType?.signature} does not match service configuration $type type of $mapType.signature"
-	}
-	
 	static Str configRecursion(Str[] nodeNames) {
 		"Configuration ordering recursion! A configuration contribution depends on its self in some way : " + nodeNames.join(" -> ")
 	}
@@ -173,22 +157,6 @@ internal const class IocMessages {
 	
 	static Str serviceOverrideDoesNotExist(Str serviceId) {
 		"Overriding service '$serviceId' maybe difficult as service '$serviceId' doesn't exist!"
-	}
-	
-	static Str contribOverrideDoesNotExist(Str existingKeys, Str overrideKeys) {
-		"Can not override mapped contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
-	}
-	
-	static Str configMappedKeyAlreadyDefined(Str existingKey) {
-		"Key '$existingKey' has already been defined - try overriding it instead"
-	}
-
-	static Str configOverrideKeyAlreadyDefined(Str existingKey, Str overrideKey) {
-		"Override for key '$existingKey' has already been defined - try overriding '$overrideKey' instead"
-	}
-
-	static Str configOverrideKeyAlreadyExists(Str existingKey) {
-		"Override key '$existingKey' has already been defined - use a different override key"
 	}
 	
 	static Str shutdownListenerError(Obj listener, Err cause) {
@@ -289,5 +257,71 @@ internal const class IocMessages {
 
 	static Str serviceDefined() {
 		"Service has already been defined"
+	}
+	
+	
+	
+	// ---- Contributions Messages ----------------------------------------------------------------
+
+	static Str contributions_configTypeIsGeneric(Type contribType, Str serviceId) {
+		stripSys("Configuration for service '$serviceId' MUST be parameterised - e.g. Str[] or [Type:Obj]")
+	}
+
+	static Str contributions_configTypeMismatch(Str type, Type? contribType, Type serviceType) {
+		stripSys("Contribution ${contribType?.signature} does not match service configuration ${type} of ${serviceType.signature}")
+	}
+
+	static Str contributions_configKeyAlreadyDefined(Str existingKey) {
+		"Key '${existingKey}' already exists - try overriding it instead"
+	}
+
+	static Str contributions_configOverrideKeyAlreadyDefined(Str existingKey, Str overrideKey) {
+		"Override for key '$existingKey' has already been defined - try overriding '$overrideKey' instead"
+	}
+
+	static Str contributions_configOverrideKeyAlreadyExists(Str existingKey) {
+		"Override key '$existingKey' has already been defined - use a different override key"
+	}
+
+	static Str contributions_overrideDoesNotExist(Str existingKeys, Str overrideKeys) {
+		"Cannot override contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
+	}
+
+
+	@Deprecated
+	static Str orderedConfigTypeIsGeneric(Type contribType, Str serviceId) {
+		"Ordered configuration for service '$serviceId' MUST be parameterised - e.g. Str[]"
+	}
+
+	@Deprecated
+	static Str orderedConfigTypeMismatch(Type? objType, Type listType) {
+		"Contribution of type ${objType?.signature} does not match service configuration list type of $listType.signature"
+	}
+
+	@Deprecated
+	static Str mappedConfigTypeIsGeneric(Type contribType, Str serviceId) {
+		"Mapped configuration for service '$serviceId' MUST be parameterised - e.g. [Str:Obj]"
+	}
+	
+	@Deprecated
+	static Str mappedConfigTypeMismatch(Str type, Type? objType, Type mapType) {
+		"Contribution of type ${objType?.signature} does not match service configuration $type type of $mapType.signature"
+	}
+
+	@Deprecated
+	static Str contribOverrideDoesNotExist(Str existingKeys, Str overrideKeys) {
+		"Can not override mapped contribution(s) '$existingKeys' with `$overrideKeys` because '$existingKeys' do(es) not exist"
+	}
+	
+	@Deprecated
+	static Str configMappedKeyAlreadyDefined(Str existingKey) {
+		"Key '$existingKey' has already been defined - try overriding it instead"
+	}
+	
+	
+	// ---- Helper Methods ------------------------------------------------------------------------
+	
+	private static Str stripSys(Str str) {
+		str.replace("sys::", "")
 	}
 }
