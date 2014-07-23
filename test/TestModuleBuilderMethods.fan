@@ -2,7 +2,7 @@
 internal class TestModuleBuilderMethods : IocTest {
 	
 	Void testBuilderMethodMustBeStatic() {
-		verifyErrMsg(IocMessages.builderMethodsMustBeStatic(T_MyModule37#buildT1)) {
+		verifyIocErrMsg(IocMessages.builderMethodsMustBeStatic(T_MyModule37#buildT1)) {
 			RegistryBuilder().addModule(T_MyModule37#).build
 		}
 	}
@@ -28,19 +28,19 @@ internal class TestModuleBuilderMethods : IocTest {
 	}
 	
 	Void testBuilderMethodsMustDefineAnId() {
-		verifyErrMsg(IocMessages.buildMethodDoesNotDefineServiceId(T_MyModule07#build)) { 
+		verifyIocErrMsg(IocMessages.buildMethodDoesNotDefineServiceId(T_MyModule07#build)) { 
 			RegistryBuilder().addModule(T_MyModule07#).build 
 		}
 	}
 	
 	Void testWrongScope1() {
-		verifyErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService01#)) { 
+		verifyIocErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService01#)) { 
 			RegistryBuilder().addModule(T_MyModule21#).build
 		}
 	}
 
 	Void testWrongScope2() {
-		verifyErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService01#)) { 
+		verifyIocErrMsg(IocMessages.perAppScopeOnlyForConstClasses(T_MyService01#)) { 
 			RegistryBuilder().addModule(T_MyModule22#).build
 		}
 	}

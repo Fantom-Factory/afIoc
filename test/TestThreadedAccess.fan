@@ -29,7 +29,7 @@ internal class TestThreadedAccess : IocTest {
 		Registry reg := RegistryBuilder().addModule(T_MyModule17#).build.startup
 
 		// can not inject a perThread service into a perApp service
-		verifyErrMsg(IocMessages.threadScopeInAppScope("s13", "s12")) {
+		verifyIocErrMsg(IocMessages.threadScopeInAppScope("s13", "s12")) {
 			s12 := reg.serviceById("s12")	// perThread
 			s13 := reg.serviceById("s13")	// perApp
 		}
@@ -93,7 +93,7 @@ internal class TestThreadedAccess : IocTest {
 
 	Void testErrThrownWhenConstFieldNotSet() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule19#).build.startup
-		verifyErrMsg(IocMessages.cannotSetConstFields(T_MyService14#s12)) {
+		verifyIocErrMsg(IocMessages.cannotSetConstFields(T_MyService14#s12)) {
 			reg.serviceById("s14")
 		}
 	}

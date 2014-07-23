@@ -4,14 +4,14 @@ internal class TestOrderedConfigOrdering : IocTest {
 	Void testIdMustBeUnique() {
 		orderer := Orderer()
 		orderer.addOrdered("unique", 69)
-		verifyErrMsg(IocMessages.configKeyAlreadyAdded("unique")) {
+		verifyIocErrMsg(IocMessages.configKeyAlreadyAdded("unique")) {
 			orderer.addOrdered("unique", 69)
 		}
 	}
 
 	Void testBadPrefix() {
 		orderer := Orderer()
-		verifyErrMsg(IocMessages.configBadPrefix("BAD: id")) {
+		verifyIocErrMsg(IocMessages.configBadPrefix("BAD: id")) {
 			orderer.addOrdered("wotever", 69, "BAD: id")			
 		}
 	}
@@ -50,7 +50,7 @@ internal class TestOrderedConfigOrdering : IocTest {
 		orderer := Orderer()
 		orderer.addOrdered("2", "2", "after 1")
 		orderer.addOrdered("1", "1", "before 2, before 3")
-		verifyErrMsg(IocMessages.configIsPlaceholder("3")) {
+		verifyIocErrMsg(IocMessages.configIsPlaceholder("3")) {
 			orderer.toOrderedList
 		}
 	}
@@ -59,7 +59,7 @@ internal class TestOrderedConfigOrdering : IocTest {
 		orderer := Orderer()
 		orderer.addOrdered("2", "2", "after 1, after 3")
 		orderer.addOrdered("1", "1", "before 2")
-		verifyErrMsg(IocMessages.configIsPlaceholder("3")) {
+		verifyIocErrMsg(IocMessages.configIsPlaceholder("3")) {
 			orderer.toOrderedList
 		}
 	}

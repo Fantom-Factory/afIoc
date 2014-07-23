@@ -4,7 +4,7 @@ internal class TestDependencyProvider : IocTest {
 	
 	Void testDependencyMustMatchType() {
 		reg := RegistryBuilder().addModule(T_MyModule56#).build
-		verifyErrMsg(IocMessages.dependencyDoesNotFit(Int#, Str?#)) {
+		verifyIocErrMsg(IocMessages.dependencyDoesNotFit(Int#, Str?#)) {
 			reg.serviceById("s40")
 		}
 	}

@@ -3,21 +3,21 @@ internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
 		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		verifyErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
+		verifyIocErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
 			reg.dependencyByType(T_MyService04#)
 		}
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		verifyErrMsg(IocMessages.noDependencyMatchesType(T_MyService02#)) {
+		verifyIocErrMsg(IocMessages.noDependencyMatchesType(T_MyService02#)) {
 			reg.dependencyByType(T_MyService30#)
 		}
 	}
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
 		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		verifyErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) { 
+		verifyIocErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) { 
 			reg.dependencyByType(T_MyService05#) 
 		}
 	}
@@ -70,7 +70,7 @@ internal class TestCtorInjection : IocTest {
 	Void testFieldNotSetErrIsConvertedToIocErr() {
 		// this is such a common err we treat it as our own, to remove Ioc stack frames
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		verifyErrMsg(IocMessages.fieldNotSetErr(T_MyService53#judge.qname, T_MyService53#make)) {			
+		verifyIocErrMsg(IocMessages.fieldNotSetErr(T_MyService53#judge.qname, T_MyService53#make)) {			
 			reg.autobuild(T_MyService53#)
 		}
 	}

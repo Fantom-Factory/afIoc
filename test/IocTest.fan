@@ -18,11 +18,11 @@ abstract internal class IocTest : Test {
 ////		60, 65, 66, 67, 75, 76, 77, 78, 79
 	}
 	
-	Void verifyErrMsg(Str errMsg, |Obj| func) {
-		verifyErrMsgAndType(IocErr#, errMsg, func)
+	Void verifyIocErrMsg(Str errMsg, |Obj| func) {
+		verifyErrMsg(IocErr#, errMsg, func)
 	}
 
-	Void verifyErrMsgAndType(Type errType, Str errMsg, |Obj| func) {
+	Void verifyErrMsg(Type errType, Str errMsg, |Obj| func) {
 		try {
 			func(4)
 			fail("$errType not thrown")

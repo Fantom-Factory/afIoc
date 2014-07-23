@@ -16,14 +16,14 @@ internal class TestServiceOverride : IocTest {
 	}
 
 	Void testOverrideWrongType() {
-		verifyErrMsg(IocMessages.serviceOverrideDoesNotFitServiceDef("s44", T_MyService12#, T_MyService44#)) {
+		verifyIocErrMsg(IocMessages.serviceOverrideDoesNotFitServiceDef("s44", T_MyService12#, T_MyService44#)) {
 			reg := RegistryBuilder().addModule(T_MyModule60#).build.startup
 			T_MyService44 s44 := reg.serviceById("s44")
 		}
 	}
 
 	Void testOverrideDoesNotExist() {
-		verifyErrMsg(IocMessages.serviceOverrideDoesNotExist("s12")) {
+		verifyIocErrMsg(IocMessages.serviceOverrideDoesNotExist("s12")) {
 			RegistryBuilder().addModule(T_MyModule61#).build.startup
 		}
 	}
