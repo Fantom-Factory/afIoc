@@ -18,19 +18,20 @@ internal class Orderer {
 	internal static const Str placeholder	:= "AFIOC-PLACEHOLDER"
 	internal static const Str delete		:= "AFIOC-DELETE"
 	internal static const Str NULL			:= "AFIOC-NULL"
-	private Obj:OrderedNode nodes			:= Utils.makeMap(Obj#, OrderedNode#)
+	private Str:OrderedNode nodes			:= Str:OrderedNode[:] { ordered = true }
 
-	Void addPlaceholder(Obj id, Str? constraints := null) {
+	Void addPlaceholder(Str id, Str? constraints := null) {
 		addOrdered(id, placeholder, constraints)
 	}
 
-	Void remove(Obj id) {
+	Void remove(Str id) {
 		addOrdered(id, delete)
 	}
 
-	Void addOrdered(Obj id, Obj? object, Str? constraints := null) {
+	Void addOrdered(Str origId, Obj? object, Str? constraints := null) {
+		id := origId.lower	// because our map is ordered (for easy testing)
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
-			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
+			throw IocErr(IocMessages.configKeyAlreadyAdded(origId))
 		getOrAdd(id, object ?: NULL)
 
 		constraints = (constraints?.trim?.isEmpty ?: true) ? null : constraints
@@ -83,11 +84,11 @@ internal class Orderer {
 			if (id.startsWith(":") || id.startsWith("-"))
 				id = id[1..-1].trim
 			if (!id.isEmpty)
-				op.call(id)
+				op.call(id.lower)
 		}
 	}
 
-	private Void visit(OrderingCtx ctx, Obj:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
+	private Void visit(OrderingCtx ctx, Str:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
 		// follow the dependencies until we find a node that depends on no-one
 		nodesIn
 			.findAll { 
@@ -110,7 +111,7 @@ internal class Orderer {
 		nodesOut.add(n)
 	}	
 
-	private OrderedNode getOrAdd(Obj name, Obj? payload := null) {
+	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
 		node := nodes.getOrAdd(name) |->Obj| {			
 			return OrderedNode(name, payload)
 		}
@@ -121,11 +122,11 @@ internal class Orderer {
 }
 
 internal class OrderedNode {
-	Obj 	name
+	Str 	name
 	Str[] 	isBefore	:= [,]
 	Obj? 	payload	
 
-	new make(Obj name, Obj? payload := null) {
+	new make(Str name, Obj? payload := null) {
 		this.name 	 = name
 		this.payload = payload
 	}
@@ -151,8 +152,10 @@ internal class OrderingCtx {
 				throw IocErr(IocMessages.configRecursion(stackNames))
 		}
 
-		if (node.isPlaceholder)
+		if (node.isPlaceholder) {
+			Env.cur.err.printLine(nodeStack)
 			throw IocErr(IocMessages.configIsPlaceholder(node.name))
+		}
 
 		try {
 			operation.call(node)

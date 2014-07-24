@@ -32,7 +32,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [33 tests, 208 methods, 424 verifies]`
+  - Extensively tested: - `All tests passed! [34 tests, 207 methods, 423 verifies]`
 
 
   > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc)!
@@ -231,7 +231,7 @@ Modules may then contribute to the `Example` service:
 class AppModule {
 
   @Contribute { serviceType=Example# }
-  static Void contributeExample(OrderedConfig conf) {
+  static Void contributeExample(Configuration conf) {
     conf.add("text/plain")
   }
 }
@@ -239,7 +239,7 @@ class AppModule {
 
 The list and map types are inferred from the ctor definition and all contribution types must fit.
 
-If the service declares a map configuration then contribution methods should take a `MappedConfig` object. If the map config uses `Str` as the key, then the created map is `caseInsensitive` otherwise the map is `ordered`.
+Think of `Configuration` as an ordered Map that collects data from *all* the IoC modules. The collected data / Map is then passed to the ctor of the service. If the service ctor takes a List then just the Map values are passed.
 
 ## Lazy Loading 
 

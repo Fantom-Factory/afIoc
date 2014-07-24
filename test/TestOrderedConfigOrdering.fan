@@ -4,8 +4,8 @@ internal class TestOrderedConfigOrdering : IocTest {
 	Void testIdMustBeUnique() {
 		orderer := Orderer()
 		orderer.addOrdered("unique", 69)
-		verifyIocErrMsg(IocMessages.configKeyAlreadyAdded("unique")) {
-			orderer.addOrdered("unique", 69)
+		verifyIocErrMsg(IocMessages.configKeyAlreadyAdded("UniQUe")) {
+			orderer.addOrdered("UniQUe", 69)
 		}
 	}
 

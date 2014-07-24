@@ -64,6 +64,14 @@ internal class TestMappedConfig : IocTest {
 		verifyEq(s29.config["key"], Type[,])
 	}
 
+	Void testLotsOfNonStrKeys() {
+		reg := RegistryBuilder().addModule(T_MyModule74#).build.startup
+		s46 := reg.serviceById("s46-2") as T_MyService46
+		verifyEq(s46.config[Str#], "1")
+		verifyEq(s46.config[Uri#], "2")
+		verifyEq(s46.config[Buf#], "3")
+	}
+
 	// ---- test overrides ------------------------------------------------------------------------
 	
 	Void testOverride1() {
@@ -185,7 +193,7 @@ internal class T_MyModule02 {
 	@Contribute{ serviceId="s10b" }
 	static Void cont10b(Configuration config) {
 		config.set("wot", "ever")
-		config.replace("wot", null, null, "wot-null")
+		config.overrideValue("wot", null, null, "wot-null")
 	}	
 }
 
@@ -323,14 +331,14 @@ internal class T_MyModule62 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.replace("key", "value2", null, "over1")
+		config.overrideValue("key", "value2", null, "over1")
 	}
 }
 
 internal class T_MyModule63 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
-		config.replace("over1", "value3", null, "over2")
+		config.overrideValue("over1", "value3", null, "over2")
 	}
 }
 
@@ -341,7 +349,7 @@ internal class T_MyModule64 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.replace("non-exist", "value2", null, "over1")
+		config.overrideValue("non-exist", "value2", null, "over1")
 	}
 }
 
@@ -352,8 +360,8 @@ internal class T_MyModule65 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.replace("key", "value2", null, "over1")
-		config.replace("non-exist", "value3", null, "over2")
+		config.overrideValue("key", "value2", null, "over1")
+		config.overrideValue("non-exist", "value3", null, "over2")
 	}
 }
 
@@ -364,8 +372,8 @@ internal class T_MyModule66 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "value1")
-		config.replace(Str#, "value2", null, Uri#)
-		config.replace(Uri#, "value3", null, File#)
+		config.overrideValue(Str#, "value2", null, Uri#)
+		config.overrideValue(Uri#, "value3", null, File#)
 	}
 }
 
@@ -387,8 +395,8 @@ internal class T_MyModule68 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.replace(Str#, "twice", null, Uri#)
-		config.replace(Str#, "thrice", null, File#)
+		config.overrideValue(Str#, "twice", null, Uri#)
+		config.overrideValue(Str#, "thrice", null, File#)
 	}
 }
 
@@ -399,20 +407,27 @@ internal class T_MyModule73 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.replace(Str#, "twice", null, Uri#)
-		config.replace(Uri#, "thrice", null, Str#)	// attempt to re-use an existing key
+		config.overrideValue(Str#, "twice", null, Uri#)
+		config.overrideValue(Uri#, "thrice", null, Str#)	// attempt to re-use an existing key
 	}
 }
 
 internal class T_MyModule74 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService46#).withId("s46")
+		binder.bind(T_MyService46#).withId("s46-2")
 	}
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.replace(Str#, "twice", null, Uri#)
-		config.replace(Uri#, "thrice", null, Uri#)	// attempt to re-use an existing override key
+		config.overrideValue(Str#, "twice", null, Uri#)
+		config.overrideValue(Uri#, "thrice", null, Uri#)	// attempt to re-use an existing override key
+	}
+	@Contribute { serviceId="s46-2" }
+	static Void contributeS46_2(Configuration config) {
+		config[Str#] = "1"
+		config[Uri#] = "2"
+		config[Buf#] = "3"
 	}
 }
 
@@ -430,8 +445,8 @@ internal class T_MyModule82 {
 	@Contribute
 	static Void contributeS68(Configuration config) {
 		config.set(69, "dude")	// use Str override keys
-		config.replace(69, "dude dude", null, "+1")
-		config.replace("+1", "crowd", null, "+2")
+		config.overrideValue(69, "dude dude", null, "+1")
+		config.overrideValue("+1", "crowd", null, "+2")
 	}
 }
 

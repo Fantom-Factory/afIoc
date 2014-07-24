@@ -212,7 +212,7 @@ internal class T_MyModule87 {
 	@Contribute{ serviceId="s71b" }
 	static Void cont10b(Configuration config) {
 		config["wot"] = "ever"
-		config.replace("wot", null, null, "wot-null")
+		config.overrideValue("wot", null, null, "wot-null")
 	}	
 }
 
@@ -346,7 +346,7 @@ internal class T_MyModule69 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value1"
-		config.replace("key", "value2", null, "over1")
+		config.overrideValue("key", "value2", null, "over1")
 	}
 }
 
@@ -357,8 +357,8 @@ internal class T_MyModule70 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value1"
-		config.replace("key", "value2", null, "over1")
-		config.replace("over1", "value3", null, "over2")
+		config.overrideValue("key", "value2", null, "over1")
+		config.overrideValue("over1", "value3", null, "over2")
 	}
 }
 
@@ -369,7 +369,7 @@ internal class T_MyModule71 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value"
-		config.replace("non-exist", "value2", null, "over1")
+		config.overrideValue("non-exist", "value2", null, "over1")
 	}
 }
 
@@ -380,8 +380,8 @@ internal class T_MyModule72 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value"
-		config.replace("key", "value2", null, "over1")
-		config.replace("non-exist", "value3", null, "over2")
+		config.overrideValue("key", "value2", null, "over1")
+		config.overrideValue("non-exist", "value3", null, "over2")
 	}
 }
 
@@ -474,7 +474,7 @@ internal class T_MyModule94 {
 		conf.set("A", "A", "before: C, before: B")
 		conf.set("B", "B", "before: C")
 		conf.addPlaceholder("C")	
-		conf.replace("B", "D", null, "D")
+		conf.overrideValue("B", "D", null, "D")
 	}
 }
 
