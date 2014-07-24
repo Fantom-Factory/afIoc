@@ -37,7 +37,7 @@ class MappedConfig {
 	
 	@Deprecated { msg="Use 'Configuration.replace(existingKey, newValue, null, newKey)' instead" }  
 	This setOverride(Obj existingKey, Obj? newValue, Obj? newKey := null) {
-		config.replace(existingKey, newValue, null, newKey)
+		config.overrideValue(existingKey, newValue, null, newKey)
 		return this
 	}
 

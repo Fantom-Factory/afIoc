@@ -46,7 +46,7 @@ class OrderedConfig {
 
 	@Deprecated { msg="Use 'Configuration.replace()' instead" }  
 	This addOverride(Str existingId, Obj? newValue, Str[] newConstraints := Str#.emptyList, Str? newId := null) {
-		config.replace(existingId, newValue, newConstraints.join(", "), newId)
+		config.overrideValue(existingId, newValue, newConstraints.join(", "), newId)
 		return this
 	}
 

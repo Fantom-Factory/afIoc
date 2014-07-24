@@ -20,7 +20,7 @@ using afConcurrent::SynchronizedState
 ** 
 ** Note that Errs thrown by shutdown functions will be logged and then swallowed.
 ** 
-** @uses Configuration of 'Str:|->|'
+** @uses Configuration of '|->| []'
 const mixin RegistryShutdown {
 	internal abstract Void shutdown()
 }

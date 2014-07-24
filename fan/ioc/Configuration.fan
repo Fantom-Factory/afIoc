@@ -1,5 +1,5 @@
 
-** Passed into module contribution methods to allow the method to, err, contribute!
+** Passed into module contribution methods to allow the method to contribute configuration.
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
@@ -27,64 +27,84 @@ class Configuration {
 	@Operator 
 	private Obj? get(Obj key) { null }
 
-	** Adds an ordered object to the service's contribution. 
-	** Each object has a unique key that is used by the constraints for ordering. 
-	** Each constraint (a CSV list) must start with the prefix 'BEFORE:' or 'AFTER:'.
+	** Sets a key / value pair to the service configuration with optional ordering constraints.
+	** 
+	** The constraints string is a CSV list. 
+	** Each value must start with the prefix 'BEFORE:' or 'AFTER:'.
 	** 
 	** pre>
 	**   config["Breakfast"] = eggs
 	**   config["Dinner"]    = pie
 	**   config.set("Lunch", ham, "AFTER: breakfast, BEFORE: dinner")
 	** <pre
-	** 
+	**
+	** If the configuration uses non-Str keys, then use 'key.toStr()' in the constraint strings.
+	**   
+	** If the end service configuration is a List, then the keys are discarded and only the values passed in. 
+	** Typically, 'Str' keys are used in these situations, for ease of use.  
+	**  
 	** Configuration contributions are ordered across modules. 
 	** 
-	** An attempt is made to coerce the keys and values to the service's contribution type.
+	** 'key' and 'value' are coerced to the service's contribution type.
 	@Operator
 	This set(Obj key, Obj? value, Str? constraints := null) {
 		config.set(key, value, constraints)
 		return this
 	}
 
-	** Adds an unordered object to the service's configuration. 
-	** An attempt is made to coerce the object to the contrib type.
+	** Adds a value to the service configuration with optional ordering constraints.
+	** 
+	** Because the keys of *added* values are unknown, they cannot be overridden. 
+	** For that reason it is advised to use 'set()' instead. 
+	**  
+	** 'value' is coerced to the service's contribution type.
 	@Operator
 	This add(Obj value, Str? constraints := null) {
 		config.add(value, constraints)
 		return this
 	}
 
-	** Adds a placeholder. Placeholders are empty configurations used to aid ordering.
+	** Adds a placeholder. Placeholders are empty configurations used to aid ordering of actual values:
 	** 
 	** pre>
-	**   config.placeholder("End")
-	**   config.set("Wot", ever, ["BEFORE: end"])
-	**   config.set("Last", last, ["AFTER: end"])
+	**   config.placeholder("end")
+	**   config.set("wot", ever, ["BEFORE: end"])
+	**   config.set("last", last, ["AFTER: end"])
 	** <pre
 	** 
-	** Placeholders do not appear in the the resulting configuration. 
-	This addPlaceholder(Obj key, Str? constraints := null) {
+	** Placeholders do not appear in the the resulting configuration and is never seen by the end service. 
+	This addPlaceholder(Str key, Str? constraints := null) {
 		config.addPlaceholder(key, constraints)
 		return this
 	}
 	
-	** Overrides or replaces a contributed value. 
+	** Overrides and replaces a contributed value. 
 	** The existing key must exist.
 	** 
-	** An attempt is made to coerce the new value to the service's contribution type.
+	** 'existingKey' is the id / key of the value to be replaced. 
+	** It may have been initially provided by 'set()' or have be the 'newKey' of a previous override.
 	** 
-	** Note: If 'newKey' is supplied then this override itself may be overridden by other 
-	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
-	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
-		config.replace(existingKey, newValue, newConstraints, newKey)
+	** 'newKey' does not appear in the the resulting configuration and is never seen by the end service.
+	** It is only used as reference to this override, so this override itself may be overridden.
+	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
+	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
+	** 
+	** 'newValue' is coerced to the service's contribution type.
+	This overrideValue(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
+		config.overrideValue(existingKey, newValue, newConstraints, newKey)
 		return this
 	}
 	
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
 	** 
-	** Note: If 'newKey' is supplied then this override itself may be overridden by other 
-	** contributions. 3rd party libraries, when overriding, should always supply a 'newKey'.
+	** 'existingKey' is the id / key of the value to be replaced. 
+	** It may have been initially provided by 'set()' or have be the 'newKey' of a previous override.
+	** 
+	** 'newKey' does not appear in the the resulting configuration and is never seen by the end service.
+	** It is only used as reference to this override, so this override itself may be overridden.
+	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
+	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
 	This remove(Obj existingKey, Obj? newKey := null) {
 		config.remove(existingKey, newKey)
 		return this
@@ -113,7 +133,7 @@ internal class ConfigurationImpl {
 			throw WtfErr("Contributions Type is NOT a Map or a List ???")
 		if (contribType.isGeneric)
 			throw IocErr(IocMessages.contributions_configTypeIsGeneric(contribType, serviceDef.serviceId)) 
-		
+
 		this.contribType	= contribType
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
@@ -160,11 +180,11 @@ internal class ConfigurationImpl {
 		return set(key, value, constraints)
 	}
 
-	This addPlaceholder(Obj key, Str? constraints := null) {
+	This addPlaceholder(Str key, Str? constraints := null) {
 		set(key, Orderer.placeholder, constraints)
 	}
 	
-	This replace(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
+	This overrideValue(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
 		if (newKey == null)
 			newKey = "afIoc.override-" + overrideCount.toStr.padl(2)
 		overrideCount = overrideCount + 1
@@ -187,7 +207,7 @@ internal class ConfigurationImpl {
 	}
 	
 	This remove(Obj existingKey, Obj? newKey := null) {
-		replace(existingKey, Orderer.delete, null, newKey)
+		overrideValue(existingKey, Orderer.delete, null, newKey)
 	}
 
 
@@ -259,13 +279,14 @@ internal class ConfigurationImpl {
 			}
 		}			
 			
+		// we need to convert ALL keys to string for ordering because the "before: XXX, after: XXX" constraints are strings.
 		ordered := (Contrib[]) InjectionTracker.track("Ordering configuration contributions") |->Contrib[]| {
 			orderer := Orderer()
 			config.each |val, key| {
 				if (val.val === Orderer.delete || val.val === Orderer.placeholder)
-					orderer.addOrdered(key, val.val, val.con)
+					orderer.addOrdered(key.toStr, val.val, val.con)
 				else
-					orderer.addOrdered(key, val, val.con)
+					orderer.addOrdered(key.toStr, val, val.con)
 			}
 			return orderer.toOrderedList
 		}
@@ -331,7 +352,7 @@ internal class ConfigurationImpl {
 
 	@NoDoc
 	override Str toStr() {
-		"Contributions of ${contribType.signature}".replace("sys::", "")
+		"${contribType.name} Configuration of '${contribType.signature}' for '${serviceDef.serviceId}'".replace("sys::", "")
 	}	
 }
 

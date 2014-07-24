@@ -5,7 +5,7 @@
 ** pre>
 ** class AppModule {
 **     static Void bind(ServiceBinder binder) {
-**         binder.bind(MyServiceImpl#)
+**         binder.bind(MyService#, MyServiceImpl#)
 **     } 
 ** }
 ** <pre

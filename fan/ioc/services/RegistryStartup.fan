@@ -15,7 +15,7 @@ using afConcurrent::LocalMap
 ** }
 ** <pre
 ** 
-** @uses Configuration of 'Str:|->|'
+** @uses Configuration of '|->| []'
 const mixin RegistryStartup {
 	internal abstract Void startup(OpTracker tracker)
 	

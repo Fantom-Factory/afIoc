@@ -16,7 +16,7 @@ using afBeanUtils
 ** 
 ** @since 1.1
 ** 
-** @uses Configuration of Str:`DependencyProvider`
+** @uses Configuration of 'DependencyProvider[]'
 @NoDoc	// don't overwhelm the masses
 const mixin DependencyProviders {
 	
