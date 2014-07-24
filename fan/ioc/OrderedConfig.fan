@@ -27,7 +27,7 @@ class OrderedConfig {
 	@Deprecated { msg="Use 'objects.each |v| { Configuration.add(v) }' instead" }  
 	This addAll(Obj[] objects) {
 		objects.each |obj| {
-			add(obj)
+			config.add(obj)
 		}
 		return this
 	}

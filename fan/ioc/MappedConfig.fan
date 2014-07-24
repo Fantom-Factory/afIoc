@@ -30,7 +30,7 @@ class MappedConfig {
 	@Deprecated { msg="Use 'objects.each |v, k| { Configuration.set(k, v) }' instead" }  
 	This setAll(Obj:Obj? objects) {
 		objects.each |val, key| {
-			set(key, val)
+			config.set(key, val)
 		}
 		return this
 	}
