@@ -35,9 +35,9 @@ class MappedConfig {
 		return this
 	}
 	
-	@Deprecated { msg="Use 'Configuration.replace(existingKey, newValue, null, newKey)' instead" }  
+	@Deprecated { msg="Use 'Configuration.overrideValue(existingKey, newValue, newKey)' instead" }  
 	This setOverride(Obj existingKey, Obj? newValue, Obj? newKey := null) {
-		config.overrideValue(existingKey, newValue, null, newKey)
+		config.overrideValue(existingKey, newValue, newKey)
 		return this
 	}
 
@@ -45,5 +45,9 @@ class MappedConfig {
 	This remove(Obj existingKey, Obj? newKey := null) {
 		config.remove(existingKey, newKey)
 		return this
+	}
+	
+	override Str toStr() {
+		config.toStr
 	}
 }

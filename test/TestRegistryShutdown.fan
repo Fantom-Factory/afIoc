@@ -14,6 +14,6 @@ internal class T_MyModule03 {
 
 	@Contribute { serviceType=RegistryShutdown# }
 	static Void contributeShutdown(Configuration config) {
-		config.set("TestShutdown", |->| { called.val = true }, "BEFORE: afIoc.shutdown")
+		config.set("TestShutdown", |->| { called.val = true }).before("afIoc.shutdown")
 	}
 }

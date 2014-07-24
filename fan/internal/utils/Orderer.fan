@@ -15,49 +15,43 @@
 ** @see `http://en.wikipedia.org/wiki/Topological_sorting`	
 internal class Orderer {
 
-	internal static const Str placeholder	:= "AFIOC-PLACEHOLDER"
-	internal static const Str delete		:= "AFIOC-DELETE"
+	internal static const Str PLACEHOLDER	:= "AFIOC-PLACEHOLDER"
+	internal static const Str DELETE		:= "AFIOC-DELETE"
 	internal static const Str NULL			:= "AFIOC-NULL"
-	private Str:OrderedNode nodes			:= Str:OrderedNode[:] { ordered = true }
+	private Obj:OrderedNode nodes			:= Utils.makeMap(Obj#, OrderedNode#)
 
-	Void addPlaceholder(Str id, Str? constraints := null) {
-		addOrdered(id, placeholder, constraints)
+	Void addPlaceholder(Obj id, Obj[]? before, Obj[]? after) {
+		addOrdered(id, PLACEHOLDER, before, after)
 	}
 
-	Void remove(Str id) {
-		addOrdered(id, delete)
+	Void remove(Obj id) {
+		addOrdered(id, DELETE, null, null)
 	}
 
-	Void addOrdered(Str origId, Obj? object, Str? constraints := null) {
-		// trim keys to prevent Errs when implied constraints can't be found (e.g. like wot I had in BedSheet!) 
-		id := origId.trim.lower	// because our map is ordered (for easy testing)
+	Void addOrdered(Obj id, Obj? object, Obj[]? before, Obj[]? after) {
+		id = normaliseStr(id)
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
-			throw IocErr(IocMessages.configKeyAlreadyAdded(origId))
+			throw IocErr(IocMessages.configKeyAlreadyAdded(id))
 		getOrAdd(id, object ?: NULL)
 
-		constraints = (constraints?.trim?.isEmpty ?: true) ? null : constraints
-		constraints?.split(',', true)?.each |constraint| {
-			valid := false
-			eachConstraint("before", constraint) |Str idName| {
-				valid = true
-				getOrAdd(idName)	// create placeholder
-				node := getOrAdd(id)
-				if (!node.isBefore.contains(idName))
-					node.isBefore.add(idName)				
-			}
-			eachConstraint("after", constraint) |Str idName| {
-				valid = true
-				node := getOrAdd(idName)
-				if (!node.isBefore.contains(id))
-					node.isBefore.add(id)
-			}
-			if (!valid)
-				throw IocErr(IocMessages.configBadPrefix(constraints))
+		before?.each |idName| {
+			idName = normaliseStr(idName)
+			getOrAdd(idName)	// create placeholder
+			node := getOrAdd(id)
+			if (!node.isBefore.contains(idName))
+				node.isBefore.add(idName)				
+		}
+				
+		after?.each |idName| {
+			idName = normaliseStr(idName)
+			node := getOrAdd(idName)
+			if (!node.isBefore.contains(id))
+				node.isBefore.add(id)
 		}
 	}
 
 	Obj?[] toOrderedList() {
-		order().exclude { it.payload === placeholder || it.payload === delete }.map { it.payload === NULL ? null : it.payload }
+		order().exclude { it.payload === PLACEHOLDER || it.payload === DELETE }.map { it.payload === NULL ? null : it.payload }
 	}
 
 	Void clear() {
@@ -79,25 +73,11 @@ internal class Orderer {
 		return nodesOut
 	}
 
-	internal Void eachConstraint(Str prefix, Str? constraint, |Str id| op) {
-		if (constraint.lower.startsWith(prefix.lower)) {
-			id := constraint[prefix.size..-1].trim
-			if (id.startsWith(":") || id.startsWith("-"))
-				id = id[1..-1].trim
-			if (!id.isEmpty)
-				op.call(id.lower)
-		}
-	}
-
-	private Void visit(OrderingCtx ctx, Str:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
+	private Void visit(OrderingCtx ctx, Obj:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
 		// follow the dependencies until we find a node that depends on no-one
 		nodesIn
 			.findAll { 
-				it.isBefore.any |depName| { 
-					// BugFix 1.3.6: we sometimes lower the case of the isBefore ids 
-					// they should be case-insensitive anyway
-					depName.equalsIgnoreCase(n.name)
-				}
+				it.isBefore.any |depName| { depName == n.name }
 			}
 			.each { 
 				ctx.withNode(it) |node| {
@@ -112,7 +92,7 @@ internal class Orderer {
 		nodesOut.add(n)
 	}	
 
-	private OrderedNode getOrAdd(Str name, Obj? payload := null) {
+	private OrderedNode getOrAdd(Obj name, Obj? payload := null) {
 		node := nodes.getOrAdd(name) |->Obj| {			
 			return OrderedNode(name, payload)
 		}
@@ -120,14 +100,18 @@ internal class Orderer {
 			node.payload = payload
 		return node
 	}
+	
+	Obj normaliseStr(Obj obj) {
+		(obj isnot Str) ? obj : ((Str) obj).trim.lower
+	}
 }
 
 internal class OrderedNode {
-	Str 	name
-	Str[] 	isBefore	:= [,]
+	Obj 	name
+	Obj[] 	isBefore	:= [,]
 	Obj? 	payload	
 
-	new make(Str name, Obj? payload := null) {
+	new make(Obj name, Obj? payload := null) {
 		this.name 	 = name
 		this.payload = payload
 	}
@@ -153,10 +137,8 @@ internal class OrderingCtx {
 				throw IocErr(IocMessages.configRecursion(stackNames))
 		}
 
-		if (node.isPlaceholder) {
-			Env.cur.err.printLine(nodeStack)
+		if (node.isPlaceholder)
 			throw IocErr(IocMessages.configIsPlaceholder(node.name))
-		}
 
 		try {
 			operation.call(node)

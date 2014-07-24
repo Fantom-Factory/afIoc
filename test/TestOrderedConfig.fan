@@ -212,7 +212,7 @@ internal class T_MyModule87 {
 	@Contribute{ serviceId="s71b" }
 	static Void cont10b(Configuration config) {
 		config["wot"] = "ever"
-		config.overrideValue("wot", null, null, "wot-null")
+		config.overrideValue("wot", null, "wot-null")
 	}	
 }
 
@@ -346,7 +346,7 @@ internal class T_MyModule69 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value1"
-		config.overrideValue("key", "value2", null, "over1")
+		config.overrideValue("key", "value2", "over1")
 	}
 }
 
@@ -357,8 +357,8 @@ internal class T_MyModule70 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value1"
-		config.overrideValue("key", "value2", null, "over1")
-		config.overrideValue("over1", "value3", null, "over2")
+		config.overrideValue("key", "value2", "over1")
+		config.overrideValue("over1", "value3", "over2")
 	}
 }
 
@@ -369,7 +369,7 @@ internal class T_MyModule71 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value"
-		config.overrideValue("non-exist", "value2", null, "over1")
+		config.overrideValue("non-exist", "value2", "over1")
 	}
 }
 
@@ -380,8 +380,8 @@ internal class T_MyModule72 {
 	@Contribute
 	static Void contributeS23(Configuration config) {
 		config["key"] = "value"
-		config.overrideValue("key", "value2", null, "over1")
-		config.overrideValue("non-exist", "value3", null, "over2")
+		config.overrideValue("key", "value2", "over1")
+		config.overrideValue("non-exist", "value3", "over2")
 	}
 }
 
@@ -394,8 +394,8 @@ internal class T_MyModule86 {
 		config.addPlaceholder("filters")
 		config.addPlaceholder("routes")
 		
-		config.set("corsFilter", "simple", 	  "before: routes")
-		config.set("corsFilter2", "preflight", "before: routes")
+		config.set("corsFilter", "simple").before("routes")
+		config.set("corsFilter2", "preflight").before("routes")
 
 		// we would expect these to appear *after* the 2 filters above
 //		config = ,["essays1", "essays2", "index";
@@ -441,13 +441,13 @@ internal class T_MyModule92 {
 	
 	@Contribute { serviceType=T_MyService82# }
 	static Void contributeHttpPipeline1(Configuration config) {
-		config.set("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#", "after: BedSheetFilters")
+		config.set("IeAjaxCacheBustingFilter", "IeAjaxCacheBustingFilter#").after("BedSheetFilters")
 	}
 
 	@Contribute { serviceType=T_MyService82# }
 	static Void contributeHttpPipeline2(Configuration conf) {
-		conf.set("HttpCleanupFilter", 	"HttpCleanupFilter#", "before: BedSheetFilters, before: HttpErrFilter")
-		conf.set("HttpErrFilter", 		"HttpErrFilter#", 	  "before: BedSheetFilters")		
+		conf.set("HttpCleanupFilter", 	"HttpCleanupFilter#").before("BedSheetFilters").before("HttpErrFilter")
+		conf.set("HttpErrFilter", 		"HttpErrFilter#"	).before("BedSheetFilters")		
 		conf.addPlaceholder("BedSheetFilters")
 	}
 
@@ -471,10 +471,10 @@ internal class T_MyModule94 {
 	}	
 	@Contribute { serviceType=T_MyService82# }
 	static Void contribute(Configuration conf) {
-		conf.set("A", "A", "before: C, before: B")
-		conf.set("B", "B", "before: C")
+		conf.set("A", "A").before("C").before("B")
+		conf.set("B", "B").before("C")
 		conf.addPlaceholder("C")	
-		conf.overrideValue("B", "D", null, "D")
+		conf.overrideValue("B", "D", "D")
 	}
 }
 

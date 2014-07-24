@@ -33,20 +33,20 @@ class OrderedConfig {
 	}
 
 	@Deprecated { msg="Use 'Configuration.set()' instead" }  
-	This addOrdered(Str id, Obj? value, Str[] constraints := Str#.emptyList) {
-		config.set(id, value, constraints.join(", "))
+	This addOrdered(Str key, Obj? value, Str[] constraints := Str#.emptyList) {
+		addConstraints(config.set(key, value), constraints)
 		return this
 	}
 
 	@Deprecated { msg="Use 'Configuration.addPlaceholder()' instead" }  
 	This addPlaceholder(Str id, Str[] constraints := Str#.emptyList) {
-		config.addPlaceholder(id, constraints.join(", "))
+		addConstraints(config.addPlaceholder(id), constraints)
 		return this
 	}
 
-	@Deprecated { msg="Use 'Configuration.replace()' instead" }  
+	@Deprecated { msg="Use 'Configuration.overrideValue()' instead" }  
 	This addOverride(Str existingId, Obj? newValue, Str[] newConstraints := Str#.emptyList, Str? newId := null) {
-		config.overrideValue(existingId, newValue, newConstraints.join(", "), newId)
+		addConstraints(config.overrideValue(existingId, newValue, newId), newConstraints)
 		return this
 	}
 
@@ -54,5 +54,28 @@ class OrderedConfig {
 	This remove(Str existingId, Str? newId := null) {
 		config.remove(existingId, newId)
 		return this
+	}
+	
+	override Str toStr() {
+		config.toStr
+	}
+	
+	private Void addConstraints(Constraints contrib, Str[] constraints) {
+		constraints.each |constraint| {
+			if (constraint.lower.startsWith("before")) {
+				id := constraint["before".size..-1].trim
+				if (id.startsWith(":") || id.startsWith("-"))
+					id = id[1..-1].trim
+				if (!id.isEmpty)
+					contrib.before(id.lower)
+			}
+			if (constraint.lower.startsWith("after")) {
+				id := constraint["after".size..-1].trim
+				if (id.startsWith(":") || id.startsWith("-"))
+					id = id[1..-1].trim
+				if (!id.isEmpty)
+					contrib.before(id.lower)
+			}
+		}
 	}
 }
