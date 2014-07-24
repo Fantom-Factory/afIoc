@@ -193,7 +193,7 @@ internal class T_MyModule02 {
 	@Contribute{ serviceId="s10b" }
 	static Void cont10b(Configuration config) {
 		config.set("wot", "ever")
-		config.overrideValue("wot", null, null, "wot-null")
+		config.overrideValue("wot", null, "wot-null")
 	}	
 }
 
@@ -331,14 +331,14 @@ internal class T_MyModule62 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.overrideValue("key", "value2", null, "over1")
+		config.overrideValue("key", "value2", "over1")
 	}
 }
 
 internal class T_MyModule63 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
-		config.overrideValue("over1", "value3", null, "over2")
+		config.overrideValue("over1", "value3", "over2")
 	}
 }
 
@@ -349,7 +349,7 @@ internal class T_MyModule64 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.overrideValue("non-exist", "value2", null, "over1")
+		config.overrideValue("non-exist", "value2", "over1")
 	}
 }
 
@@ -360,8 +360,8 @@ internal class T_MyModule65 {
 	@Contribute
 	static Void contributeS28(Configuration config) {
 		config.set("key", "value")
-		config.overrideValue("key", "value2", null, "over1")
-		config.overrideValue("non-exist", "value3", null, "over2")
+		config.overrideValue("key", "value2", "over1")
+		config.overrideValue("non-exist", "value3", "over2")
 	}
 }
 
@@ -372,8 +372,8 @@ internal class T_MyModule66 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "value1")
-		config.overrideValue(Str#, "value2", null, Uri#)
-		config.overrideValue(Uri#, "value3", null, File#)
+		config.overrideValue(Str#, "value2", Uri#)
+		config.overrideValue(Uri#, "value3", File#)
 	}
 }
 
@@ -395,8 +395,8 @@ internal class T_MyModule68 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.overrideValue(Str#, "twice", null, Uri#)
-		config.overrideValue(Str#, "thrice", null, File#)
+		config.overrideValue(Str#, "twice", Uri#)
+		config.overrideValue(Str#, "thrice", File#)
 	}
 }
 
@@ -407,8 +407,8 @@ internal class T_MyModule73 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.overrideValue(Str#, "twice", null, Uri#)
-		config.overrideValue(Uri#, "thrice", null, Str#)	// attempt to re-use an existing key
+		config.overrideValue(Str#, "twice", Uri#)
+		config.overrideValue(Uri#, "thrice", Str#)	// attempt to re-use an existing key
 	}
 }
 
@@ -420,8 +420,8 @@ internal class T_MyModule74 {
 	@Contribute
 	static Void contributeS46(Configuration config) {
 		config.set(Str#, "once")
-		config.overrideValue(Str#, "twice", null, Uri#)
-		config.overrideValue(Uri#, "thrice", null, Uri#)	// attempt to re-use an existing override key
+		config.overrideValue(Str#, "twice", Uri#)
+		config.overrideValue(Uri#, "thrice", Uri#)	// attempt to re-use an existing override key
 	}
 	@Contribute { serviceId="s46-2" }
 	static Void contributeS46_2(Configuration config) {
@@ -445,8 +445,8 @@ internal class T_MyModule82 {
 	@Contribute
 	static Void contributeS68(Configuration config) {
 		config.set(69, "dude")	// use Str override keys
-		config.overrideValue(69, "dude dude", null, "+1")
-		config.overrideValue("+1", "crowd", null, "+2")
+		config.overrideValue(69, "dude dude", "+1")
+		config.overrideValue("+1", "crowd", "+2")
 	}
 }
 

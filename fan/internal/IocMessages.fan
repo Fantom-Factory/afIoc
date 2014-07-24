@@ -139,10 +139,6 @@ internal const class IocMessages {
 		"Configuration ordering already has a contribution with ID '$id'"
 	}
 	
-	static Str configBadPrefix(Str constraint) {
-		"Configuration constraints must start with either 'BEFORE:' or 'AFTER:' - $constraint"
-	}
-
 	static Str configIsPlaceholder(Str placeholder) {
 		"Configuration Id does not exist - $placeholder"
 	}

@@ -16,7 +16,7 @@ using afConcurrent::SynchronizedState
 ** 
 ** If the shutdown method of your service depends on other services being available, add a constraint on 'afIoc.shutdown': 
 ** 
-**   conf.set("myShutdownFunc", |->| { myService.shutdown() }, "BEFORE: afIoc.shutdown")
+**   conf.set("myShutdownFunc", |->| { myService.shutdown() }).before("afIoc.shutdown")
 ** 
 ** Note that Errs thrown by shutdown functions will be logged and then swallowed.
 ** 

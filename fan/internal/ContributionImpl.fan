@@ -19,8 +19,6 @@ internal const class ContributionImpl : Contribution {
 	}
 	
 	override Void contribute(ConfigurationImpl config) {
-		config.reset
-		
 		InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
 			sizeBefore := config.size
 			

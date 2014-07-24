@@ -28,28 +28,16 @@ class Configuration {
 	private Obj? get(Obj key) { null }
 
 	** Sets a key / value pair to the service configuration with optional ordering constraints.
-	** 
-	** The constraints string is a CSV list. 
-	** Each value must start with the prefix 'BEFORE:' or 'AFTER:'.
-	** 
-	** pre>
-	**   config["Breakfast"] = eggs
-	**   config["Dinner"]    = pie
-	**   config.set("Lunch", ham, "AFTER: breakfast, BEFORE: dinner")
-	** <pre
 	**
-	** If the configuration uses non-Str keys, then use 'key.toStr()' in the constraint strings.
-	**   
-	** If the end service configuration is a List, then the keys are discarded and only the values passed in. 
-	** Typically, 'Str' keys are used in these situations, for ease of use.  
+	** If the end service configuration is a List, then the keys are discarded and only the values passed use. 
+	** In this case, typically 'Str' keys are used for ease of use when overriding / adding constraints.   
 	**  
 	** Configuration contributions are ordered across modules. 
 	** 
 	** 'key' and 'value' are coerced to the service's contribution type.
 	@Operator
-	This set(Obj key, Obj? value, Str? constraints := null) {
-		config.set(key, value, constraints)
-		return this
+	Constraints set(Obj key, Obj? value) {
+		config.set(key, value)
 	}
 
 	** Adds a value to the service configuration with optional ordering constraints.
@@ -58,24 +46,23 @@ class Configuration {
 	** For that reason it is advised to use 'set()' instead. 
 	**  
 	** 'value' is coerced to the service's contribution type.
-	@Operator
-	This add(Obj value, Str? constraints := null) {
-		config.add(value, constraints)
-		return this
+	Constraints add(Obj value) {
+		config.add(value)
 	}
 
 	** Adds a placeholder. Placeholders are empty configurations used to aid ordering of actual values:
 	** 
 	** pre>
 	**   config.placeholder("end")
-	**   config.set("wot", ever, ["BEFORE: end"])
-	**   config.set("last", last, ["AFTER: end"])
+	**   config.set("wot", ever).before("end")
+	**   config.set("last", last).after("end")
 	** <pre
 	** 
-	** Placeholders do not appear in the the resulting configuration and is never seen by the end service. 
-	This addPlaceholder(Str key, Str? constraints := null) {
-		config.addPlaceholder(key, constraints)
-		return this
+	** While not very useful in the same contribution method, they become very powerful when used across multiple modules and pods.
+	** 
+	** Placeholders do not appear in the the resulting configuration and are never seen by the end service. 
+	Constraints addPlaceholder(Str key) {
+		config.addPlaceholder(key)
 	}
 	
 	** Overrides and replaces a contributed value. 
@@ -90,9 +77,8 @@ class Configuration {
 	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
 	** 
 	** 'newValue' is coerced to the service's contribution type.
-	This overrideValue(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
-		config.overrideValue(existingKey, newValue, newConstraints, newKey)
-		return this
+	Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
+		config.overrideValue(existingKey, newValue, newKey)
 	}
 	
 	** A special kind of override whereby, should this be the last override applied, the value is 
@@ -105,9 +91,8 @@ class Configuration {
 	** It is only used as reference to this override, so this override itself may be overridden.
 	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
 	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
-	This remove(Obj existingKey, Obj? newKey := null) {
+	Void remove(Obj existingKey, Obj? newKey := null) {
 		config.remove(existingKey, newKey)
-		return this
 	}
 
 	@NoDoc
@@ -152,39 +137,33 @@ internal class ConfigurationImpl {
 		(Registry) objLocator
 	}
 
-	This set(Obj key, Obj? value, Str? constraints := null) {
+	Constraints set(Obj key, Obj? value) {
 		key   = validateKey(key, false)
 		value = validateVal(value)
-		
-		if (constraints == null || constraints.isEmpty) {
-			constraints = impliedConstraint ?: Str.defVal
-			
-			// keep an implied ordering for anything that doesn't have its own constraints
-			impliedCount++
-			impliedConstraint = "after: $key"
-		}
 		
 		if (config.containsKey(key))
 			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr))
 
-		config[key] = Contrib(key, value, constraints)
-		return this
+		contrib := Contrib(key, value)
+		config[key] = contrib 
+		return contrib
 	}
 
-	This add(Obj value, Str? constraints := null) {
+	Constraints add(Obj value) {
 		if (keyType != Str#)
 			throw IocErr(IocMessages.contributions_keyTypeNotKnown(keyType))
 
 		key := "afIoc.unordered-" + impliedCount.toStr.padl(2)
+		impliedCount++
 
-		return set(key, value, constraints)
+		return set(key, value)
 	}
 
-	This addPlaceholder(Str key, Str? constraints := null) {
-		set(key, Orderer.placeholder, constraints)
+	Constraints addPlaceholder(Str key) {
+		set(key, Orderer.PLACEHOLDER)
 	}
 	
-	This overrideValue(Obj existingKey, Obj? newValue, Str? newConstraints := null, Obj? newKey := null) {
+	Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
 		if (newKey == null)
 			newKey = "afIoc.override-" + overrideCount.toStr.padl(2)
 		overrideCount = overrideCount + 1
@@ -202,23 +181,18 @@ internal class ConfigurationImpl {
 		if (overrides.vals.map { it.key }.contains(newKey))
 		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
-		overrides[existingKey] = Contrib(newKey, newValue, newConstraints)
-		return this
+		contrib := Contrib(newKey, newValue)
+		overrides[existingKey] = contrib
+		return contrib
 	}
 	
-	This remove(Obj existingKey, Obj? newKey := null) {
-		overrideValue(existingKey, Orderer.delete, null, newKey)
+	Void remove(Obj existingKey, Obj? newKey := null) {
+		overrideValue(existingKey, Orderer.DELETE, newKey)
 	}
 
 
 	
 	// ---- Internal Methods ----------------------------------------------------------------------
-
-	** dynamically invoked - just a reset method
-	internal Void reset() {
-		// implied ordering only per contrib method
-		impliedConstraint = null
-	}	
 	
 	internal Int size() {
 		config.size
@@ -278,15 +252,14 @@ internal class ConfigurationImpl {
 				throw IocErr(IocMessages.contributions_overrideDoesNotExist(existingKeys, overrideKeys))
 			}
 		}			
-			
-		// we need to convert ALL keys to string for ordering because the "before: XXX, after: XXX" constraints are strings.
+		
 		ordered := (Contrib[]) InjectionTracker.track("Ordering configuration contributions") |->Contrib[]| {
+			configKeys := config.keys
 			orderer := Orderer()
 			config.each |val, key| {
-				if (val.val === Orderer.delete || val.val === Orderer.placeholder)
-					orderer.addOrdered(key.toStr, val.val, val.con)
-				else
-					orderer.addOrdered(key.toStr, val, val.con)
+				val.findImplied(key, configKeys)
+				value := (val.val === Orderer.DELETE || val.val === Orderer.PLACEHOLDER) ? val.val : val
+				orderer.addOrdered(key, value, val.befores, val.afters)
 			}
 			return orderer.toOrderedList
 		}
@@ -313,7 +286,7 @@ internal class ConfigurationImpl {
 	}
 
 	private Obj? validateVal(Obj? val) {
-		if (val === Orderer.delete || val === Orderer.placeholder)
+		if (val === Orderer.DELETE || val === Orderer.PLACEHOLDER)
 			return val
 		
 		if (val == null) {
@@ -356,19 +329,67 @@ internal class ConfigurationImpl {
 	}	
 }
 
-internal class Contrib {
-	Obj key; Obj? val; Str? con
-	new make(Obj key, Obj? val, Str? con) {
+** Returned from 'Configuration' methods to add ordering constraints to your contributions.
+** 
+** Constraints are keys of other contributions that this contribution must appear before or after. 
+** 
+** pre>
+**   config["Breakfast"] = eggs
+**   config["Dinner"]    = pie
+**   ...
+**   config.set("Lunch", ham).after("breakfast").before("dinner")
+** <pre
+** 
+** Constraints become very powerful when used across multiple modules and pods.
+mixin Constraints {
+	
+	** Specify a key your contribution should appear *before*.
+	** 
+	** This may be called multiple times to add multiple constraints.
+	abstract This before(Obj key)
+
+	** Specify a key your contribution should appear *after*.
+	** 
+	** This may be called multiple times to add multiple constraints.
+	abstract This after(Obj key)
+}
+
+internal class Contrib : Constraints {
+	Obj key; Obj? val
+
+	Obj[]? befores;	Obj[]? afters
+
+	new make(Obj key, Obj? val) {
 		this.key = key
 		this.val = val
-		this.con = con
-	}
-	override Str toStr() {
-		"[$key:$val]"
 	}
 	
-	static Void main() {
-		l:=(Str?[]) List.make(Str?#, 3)
-		l.add(null)
+	override This before(Obj key) {
+		if (befores == null)
+			befores = [,]
+		befores.add(key)
+		return this
 	}
+
+	override This after(Obj key) {
+		if (afters == null)
+			afters = [,]
+		afters.add(key)
+		return this
+	}
+	
+	Void findImplied(Obj key, Obj[] keys) {
+		if (befores != null || afters != null)
+			return
+		i := keys.index(key)
+		implied := keys[0..<i].reverse.find { it is Str && ((Str) it).startsWith("afIoc.unordered-") }
+		if (afters == null)
+			afters = [,]
+		if (implied != null)
+			afters.add(implied)
+	}
+	
+	override Str toStr() {
+		"[$key:$val]"
+	}	
 }

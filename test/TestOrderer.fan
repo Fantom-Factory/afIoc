@@ -68,9 +68,9 @@ internal class TestOrderer : IocTest {
 
 	Void testPlaceholder() {
 		orderer := Orderer()
-		orderer.addOrdered("s1", "s1", "after end")
-		orderer.addOrdered("s2", "s2", "before end")
-		orderer.addPlaceholder("end")
+		orderer.addOrdered("s1", "s1", null, ["end"])
+		orderer.addOrdered("s2", "s2", ["end"], null)
+		orderer.addPlaceholder("end", null, null)
 		
 		verifyEq(2, orderer.toOrderedList.size)
 		verifyOrder(orderer.order)
@@ -88,16 +88,16 @@ internal class TestOrderer : IocTest {
 
 	Void testUnorderedOrder() {
 		orderer := Orderer()
-		orderer.addOrdered("Un2", 2, "after: Un1")
-		orderer.addOrdered("Un6", 6, "after: Un5")
-		orderer.addOrdered("Un3", 3, "after: Un2")
-		orderer.addOrdered("Un7", 7, "after: Un6")
-		orderer.addOrdered("Un4", 4, "after: Un3")
-		orderer.addOrdered("Un1", 1)
-		orderer.addOrdered("Un5", 5, "after: Un4")
-		orderer.addOrdered("Un8", 8, "after: Un7")
-		orderer.addOrdered("Un9", 9, "after: Un8")
-		orderer.addOrdered("Un10", 10, "after: Un9")
+		orderer.addOrdered("Un2", 2, null, ["Un1"])
+		orderer.addOrdered("Un6", 6, null, ["Un5"])
+		orderer.addOrdered("Un3", 3, null, ["Un2"])
+		orderer.addOrdered("Un7", 7, null, ["Un6"])
+		orderer.addOrdered("Un4", 4, null, ["Un3"])
+		orderer.addOrdered("Un1", 1, null, null)
+		orderer.addOrdered("Un5", 5, null, ["Un4"])
+		orderer.addOrdered("Un8", 8, null, ["Un7"])
+		orderer.addOrdered("Un9", 9, null, ["Un8"])
+		orderer.addOrdered("Un10", 10, null, ["Un9"])
 		list := orderer.toOrderedList
 		verifyEq(1, list[0])
 		verifyEq(2, list[1])
@@ -122,8 +122,8 @@ internal class TestOrderer : IocTest {
 	
 	internal Void addNode(Orderer orderer, Str name, Str[] dependsOn := Str#.emptyList) {
 		if (dependsOn.isEmpty)
-			orderer.addOrdered(name, name)
+			orderer.addOrdered(name, name, null, null)
 		else
-			orderer.addOrdered(name, name, "after "+dependsOn.join(", after "))
+			orderer.addOrdered(name, name, null, dependsOn)
 	}	
 }
