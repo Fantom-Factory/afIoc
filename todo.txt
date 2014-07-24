@@ -1,9 +1,6 @@
 
-v1.7.0 Maybe...?
+v1.7.2 Maybe...?
 ----------------
-@Inject { optional = true }
- - i.e. if the service don't exist / not defined / don't inject it
- - why would you want to? And what of ctor args? 
 
 
 
@@ -11,6 +8,9 @@ Meh... can't be arsed
 --------------------- 
 Service disambiguation via facets 
  - is just another dep pro: map of services keyed by type & facet
+
+Make Js compatible...?
+ - Phew! It's a biggie!
 
 
 

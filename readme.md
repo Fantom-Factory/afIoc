@@ -32,7 +32,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [34 tests, 207 methods, 423 verifies]`
+  - Extensively tested: - `All tests passed! [34 tests, 208 methods, 426 verifies]`
 
 
   > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc)!
@@ -47,7 +47,7 @@ Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/
 
 To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan`:
 
-    depends = ["sys 1.0", ..., "afIoc 1.6+"]
+    depends = ["sys 1.0", ..., "afIoc 1.7+"]
 
 ## Documentation 
 

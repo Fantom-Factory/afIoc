@@ -29,7 +29,8 @@ internal class Orderer {
 	}
 
 	Void addOrdered(Str origId, Obj? object, Str? constraints := null) {
-		id := origId.lower	// because our map is ordered (for easy testing)
+		// trim keys to prevent Errs when implied constraints can't be found (e.g. like wot I had in BedSheet!) 
+		id := origId.trim.lower	// because our map is ordered (for easy testing)
 		if (nodes.containsKey(id) && !nodes[id].isPlaceholder)
 			throw IocErr(IocMessages.configKeyAlreadyAdded(origId))
 		getOrAdd(id, object ?: NULL)
