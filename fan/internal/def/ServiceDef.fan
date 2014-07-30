@@ -55,7 +55,7 @@ internal const mixin ServiceDef {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}
 	
-	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method) {
+	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method, Obj? instance := null, Obj[]? args := null) {
 		|->Obj| {
 			InjectionTracker.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
 				objLocator := InjectionTracker.peek.objLocator
@@ -63,7 +63,7 @@ internal const mixin ServiceDef {
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
 				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
-					return InjectionUtils.callMethod(method, null, Obj#.emptyList)
+					return InjectionUtils.callMethod(method, instance, args)
 				}
 			}
 		}.toImmutable

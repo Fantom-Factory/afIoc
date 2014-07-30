@@ -77,6 +77,11 @@ internal class InjectionTracker {
 		ThreadStack.pushAndRun(confProviderId, provider, operation)
 	}
 
+	static Bool canProvideConfig(Type dependencyType) {
+		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
+		return ctx != null && ctx.canProvide(dependencyType)
+	}
+
 	static Obj? provideConfig(Type dependencyType) {
 		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
 		// jus' passin' thru!
