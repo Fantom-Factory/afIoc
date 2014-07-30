@@ -304,6 +304,10 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v1.7.4 [#1.7.4]
+---------------
+ - Bug: Configuration contributions added via 'set()' did not have any implied ordering constraints.
+
 v1.7.2 [#1.7.2]
 ---------------
  - Chg: Configuration ordering constraints are no longer specified with strings. Use the new 'Constraints' class to pass your Obj keys in.

@@ -13,9 +13,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			const AtomicBool				logServices		:= AtomicBool(false)
 			const AtomicBool				logBanner		:= AtomicBool(false)
 			const AtomicBool				sayGoodbye		:= AtomicBool(false)
-			// TODO: afBedSheet-1.3.12 - remove when live
-			const AtomicBool				showServices	:= AtomicBool(false)
-			const AtomicBool				showBanner		:= AtomicBool(false)
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime					= tracker.startTime
@@ -191,10 +188,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// we do this here (and not in the contribution) because we want to print last
 		// (to get the most upto date stats)
-		if (showServices.val && logServices.val)
+		if (logServices.val)
 			msg += startup.printServiceList
 		
-		if (showBanner.val && logBanner.val) {
+		if (logBanner.val) {
 			msg += startup.printBanner
 			msg += "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms\n"
 		}

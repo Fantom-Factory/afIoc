@@ -31,6 +31,8 @@ internal const class ContributionImpl : Contribution {
 				conf = MappedConfig(config)
 			
 			InjectionUtils.callMethod(method, null, [conf])
+			
+			config.cleanupAfterModule
 			sizeAfter := config.size
 			InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
 		}
