@@ -271,8 +271,8 @@ internal const class IocMessages {
 		stripSys("Contribution ${contribType?.signature} does not match service configuration ${type} of ${serviceType.signature}")
 	}
 
-	static Str contributions_configKeyAlreadyDefined(Str existingKey) {
-		"Key '${existingKey}' already exists - try overriding it instead"
+	static Str contributions_configKeyAlreadyDefined(Str existingKey, Obj value) {
+		"Key '${existingKey}' already exists (try overriding it instead), with value - ${value}"
 	}
 
 	static Str contributions_configOverrideKeyAlreadyDefined(Str existingKey, Str overrideKey) {

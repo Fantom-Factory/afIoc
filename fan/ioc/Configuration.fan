@@ -108,7 +108,8 @@ internal class ConfigurationImpl {
 	private 	  	ObjLocator 			objLocator
 	private			Int					impliedCount
 	private			Str?				impliedConstraint
-	private			Obj:Contrib			config
+	private			Obj:Contrib			allConfig
+	private			Obj:Contrib			modConfig
 	private			Obj:Contrib			overrides
 	private			Int					overrideCount
 	private			CachingTypeCoercer	typeCoercer
@@ -123,7 +124,8 @@ internal class ConfigurationImpl {
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
 		this.impliedCount	= 1
-		this.config			= Utils.makeMap(Obj#, Contrib#)
+		this.allConfig		= Utils.makeMap(Obj#, Contrib#)
+		this.modConfig		= Utils.makeMap(Obj#, Contrib#)
 		this.overrides		= Utils.makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
 		this.typeCoercer	= CachingTypeCoercer()
@@ -141,11 +143,13 @@ internal class ConfigurationImpl {
 		key   = validateKey(key, false)
 		value = validateVal(value)
 		
-		if (config.containsKey(key))
-			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr))
+		if (modConfig.containsKey(key))
+			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr, modConfig[key].val))
+		if (allConfig.containsKey(key))
+			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr, allConfig[key].val))
 
 		contrib := Contrib(key, value)
-		config[key] = contrib 
+		modConfig[key] = contrib 
 		return contrib
 	}
 
@@ -175,7 +179,7 @@ internal class ConfigurationImpl {
 		if (overrides.containsKey(existingKey))
 		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
-		if (config.containsKey(newKey))
+		if (modConfig.containsKey(newKey) || allConfig.containsKey(newKey))
 		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
 		if (overrides.vals.map { it.key }.contains(newKey))
@@ -194,18 +198,24 @@ internal class ConfigurationImpl {
 	
 	// ---- Internal Methods ----------------------------------------------------------------------
 	
+	internal Void cleanupAfterModule() {
+		modConfig.each { it.finalise }
+		modConfig.each { it.findImplied(modConfig) }
+		modConfig.each |v, k| { allConfig[k] = v }
+	}
+	
 	internal Int size() {
-		config.size
+		allConfig.size
 	}
 
-	internal List toConfigList() {
+	internal List toList() {
 		contribs := orderedContribs
 		config   := (Obj?[]) List.make(valueType, contribs.size)
 		contribs.each { config.add(it.val) }
 		return config
 	}
 
-	internal Map toConfigMap() {
+	internal Map toMap() {
 		mapType := Map#.parameterize(["K":keyType, "V":valueType])
 		config  := (Obj:Obj?) Map.make(mapType) { ordered = true }
 		
@@ -217,10 +227,10 @@ internal class ConfigurationImpl {
 
 	private Contrib[] orderedContribs() {
 		keys := Utils.makeMap(keyType, keyType)
-		config.each |val, key| { keys[key] = key }
+		allConfig.each |val, key| { keys[key] = key }
 		
 		// don't alter the class state so getConfig() may be called more than once
-		config := (Obj:Contrib) this.config.dup
+		config := (Obj:Contrib) this.allConfig.dup
 
 		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
 			// normalise keys -> map all keys to orig key and apply overrides
@@ -257,7 +267,6 @@ internal class ConfigurationImpl {
 			configKeys := config.keys
 			orderer := Orderer()
 			config.each |val, key| {
-				val.findImplied(key, configKeys)
 				value := (val.val === Orderer.DELETE || val.val === Orderer.PLACEHOLDER) ? val.val : val
 				orderer.addOrdered(key, value, val.befores, val.afters)
 			}
@@ -356,6 +365,7 @@ mixin Constraints {
 
 internal class Contrib : Constraints {
 	Obj key; Obj? val
+	Bool unordered
 
 	Obj[]? befores;	Obj[]? afters
 
@@ -378,15 +388,20 @@ internal class Contrib : Constraints {
 		return this
 	}
 	
-	Void findImplied(Obj key, Obj[] keys) {
-		if (befores != null || afters != null)
+	Void findImplied(Obj:Contrib contribs) {
+		if (!unordered)
 			return
-		i := keys.index(key)
-		implied := keys[0..<i].reverse.find { it is Str && ((Str) it).startsWith("afIoc.unordered-") }
+		i := contribs.keys.index(key)
+		implied := contribs.vals[0..<i].reverse.find { it.unordered }
+		if (implied == null)
+			return		
 		if (afters == null)
 			afters = [,]
-		if (implied != null)
-			afters.add(implied)
+		afters.add(implied.key)
+	}
+	
+	Void finalise() {
+		unordered = (befores == null && afters == null)
 	}
 	
 	override Str toStr() {

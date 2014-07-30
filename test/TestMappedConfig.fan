@@ -111,7 +111,7 @@ internal class TestMappedConfig : IocTest {
 
 	Void testCannotAddKeyTwice() {
 		reg := RegistryBuilder().addModule(T_MyModule67#).build.startup
-		verifyIocErrMsg(IocMessages.contributions_configKeyAlreadyDefined(Str#.toStr)) {
+		verifyIocErrMsg(IocMessages.contributions_configKeyAlreadyDefined(Str#.toStr, "once")) {
 			reg.serviceById("s46")
 		}
 	}
@@ -436,6 +436,7 @@ internal class T_MyService46 {
 	new make(Type:Str config) {
 		this.config = config
 	}
+	override Str toStr() { "s46" }
 }
 
 internal class T_MyModule82 {

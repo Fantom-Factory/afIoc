@@ -99,6 +99,7 @@ internal const class ModuleImpl : Module {
 			// the actor will block when it eventually messages itself). So...
 			// TODO: A const service could be created twice if there's a race condition between two threads. This is 
 			// only dangerous because Gawd knows what those services do in their ctor or PostInject methods!
+			// TODO: Use concurrent synchronised to avoid the blocking...
 			if (def.scope == ServiceScope.perApplication) {
 				return getOrMakeService(def, returnReal, true)
 			}
