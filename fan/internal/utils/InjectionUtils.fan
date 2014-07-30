@@ -151,14 +151,20 @@ internal const class InjectionUtils {
 	}
 
 	private static Obj?[] findMethodInjectionParams(Method method, Obj?[]? providedMethodArgs) {
+		offset := 0
 		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			params := method.params.map |param, index| {
-				
 				log("Parameter ${index+1} = $param.type")
-				if (index < (providedMethodArgs?.size ?: 0)) {
+
+				// this bit of logic was added mainly for building ActorPools but in general allows
+				// for services to have Config AND provided parameters
+				if (index == 0 && InjectionTracker.canProvideConfig(param.type)) {
+					offset = 1
+
+				} else if ((index-offset) < (providedMethodArgs?.size ?: 0)) {
 					log("Parameter provided by user")
 					
-					provided := providedMethodArgs[index]
+					provided := providedMethodArgs[index-offset]
 					
 					if (provided == null && !param.type.isNullable)
 						throw IocErr(IocMessages.providerMethodArgDoesNotFit(null, param.type))

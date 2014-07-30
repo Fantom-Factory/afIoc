@@ -95,11 +95,16 @@ internal const class ModuleImpl : Module {
 		// we're going deeper!
 		return InjectionTracker.withServiceDef(def) |->Obj?| {
 
-			// Because of recursion (service1 creates service2), you can not create the service inside an actor ('cos 
-			// the actor will block when it eventually messages itself). So...
-			// TODO: A const service could be created twice if there's a race condition between two threads. This is 
-			// only dangerous because Gawd knows what those services do in their ctor or PostInject methods!
-			// TODO: Use concurrent synchronised to avoid the blocking...
+			// Because of recursion (service1 creates service2), you can not create the service 
+			// inside an actor - 'cos the actor will block when it eventually messages itself. So...
+			// We could use afConcurrent::Synchronised to allow re-enterant locks but then threaded 
+			// services would be created and stored in the wrong thread. (We'd also have to copy 
+			// over all the thread stacks.)
+
+			// TODO: A const service could be created twice if there's a race condition between two 
+			// threads - but only one is stored. 
+			// This is ONLY dangerous because gawd knows what those services do in their ctor or 
+			// PostInject methods!
 			if (def.scope == ServiceScope.perApplication) {
 				return getOrMakeService(def, returnReal, true)
 			}
