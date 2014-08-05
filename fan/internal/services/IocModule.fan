@@ -18,7 +18,7 @@ internal const class IocModule {
 	}
 
 	@Contribute { serviceType=RegistryStartup# }
-	static Void contributeRegistryStartup(Configuration config, RegistryMeta registryMeta) {
+	static Void contributeRegistryStartup(Configuration config) {
 		reg := (RegistryImpl) config.registry
 
 		config["afIoc.logServices"] = |->| {
