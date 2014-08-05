@@ -21,12 +21,12 @@ internal class TestRegistry : IocTest {
 
 		reg.shutdown
 
-		verifyErr(IocErr#) { reg.startup }
-		verifyErr(IocErr#) { reg.shutdown }
-		verifyErr(IocErr#) { reg.serviceById("t_myservice01") }
-		verifyErr(IocErr#) { reg.dependencyByType(T_MyService01#) }
-		verifyErr(IocErr#) { reg.autobuild(T_MyService01#) }
-		verifyErr(IocErr#) { reg.injectIntoFields(T_MyService01()) }
+		verifyErr(IocShutdownErr#) { reg.startup }
+		verifyErr(IocShutdownErr#) { reg.shutdown }
+		verifyErr(IocShutdownErr#) { reg.serviceById("t_myservice01") }
+		verifyErr(IocShutdownErr#) { reg.dependencyByType(T_MyService01#) }
+		verifyErr(IocShutdownErr#) { reg.autobuild(T_MyService01#) }
+		verifyErr(IocShutdownErr#) { reg.injectIntoFields(T_MyService01()) }
 	}
 	
 	Void testServiceIdConflict() {

@@ -33,6 +33,10 @@ internal class Utils {
 	static Obj? stackTraceFilter(|->Obj?| func) {
 		try {
 			return func.call
+
+		} catch (IocShutdownErr iocShutdownErr) {
+			throw iocShutdownErr
+
 		} catch (IocErr iocErr) {
 			unwrapped := unwrap(iocErr)
 
