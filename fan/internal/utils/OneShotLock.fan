@@ -2,11 +2,15 @@ using concurrent::AtomicBool
 
 internal const class OneShotLock {
 	
-	private const Str 			because
+	private const |->|			errFunc
 	private const AtomicBool	lockFlag	:= AtomicBool(false)
 	
 	new make(Str because) {
-		this.because = because
+		this.errFunc = |->| { throw IocErr(IocMessages.oneShotLockViolation(because)) }
+	}
+
+	new makeFromFunc(|->| errFunc) {
+		this.errFunc = errFunc
 	}
 	
 	Void lock() {
@@ -20,7 +24,7 @@ internal const class OneShotLock {
 	
 	Void check() {
 		if (lockFlag.val)
-			throw IocErr(IocMessages.oneShotLockViolation(because))
+			errFunc.call
 	}
 	
 	override Str toStr() {

@@ -34,6 +34,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 	@Inject private const ServiceStats	stats
 	@Inject private const RegistryMeta	meta
 	
+	// Map needs to be keyed on Str so IoC can auto-generate keys in add()
 	new make(Str:|->| startups, ThreadLocalManager localManager, |This|in) {
 		in(this)
 		this.startups = localManager.createMap("afIoc.StartupListeners")
@@ -42,7 +43,8 @@ internal const class RegistryStartupImpl : RegistryStartup {
 
 	override Void startup(OpTracker tracker) {
 		tracker.track("Running Registry Startup contributions") |->| {
-			startups.map.each | |->| val, Str key| { val.call }
+			// wrapping errs in an IocErr dosn't give us anything here
+			startups.map.each | |->| func, Str id| { func.call }
 			startups.clear
 			startups.localRef.cleanUp
 		}

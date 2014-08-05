@@ -1,13 +1,7 @@
 using afBeanUtils::NotFoundErr
 
-** Indicates the Err has a more interesting cause
-@NoDoc
-mixin Unwrappable {
-	abstract Err? cause()
-}
-
 ** As thrown by IoC
-const class IocErr : Err, Unwrappable {
+const class IocErr : Err {
 	
 	** A trace of IoC operations that led to the Err. 
 	** A succinct and more informative stack trace if you will.
@@ -33,10 +27,17 @@ const class IocErr : Err, Unwrappable {
 	}
 }
 
+** Thrown when registry methods are invoked after it has been shutdown. 
+** This has a dedicated Err class so it may be catered for explicitly.
+@NoDoc	// Advanced use only
+const class IocShutdownErr : IocErr {
+	new make(Str msg, Err? cause := null) : super(msg, cause) {}
+}
+
 ** Thrown when an impossible condition occurs. You know when - we've all written comments like:
 ** 
 ** '// this should never happen...' 
-@NoDoc
+@NoDoc	// Who cares?
 const class WtfErr : Err {
 	new make(Str msg, Err? cause := null) : super(msg, cause) {}
 }

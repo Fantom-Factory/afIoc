@@ -45,10 +45,10 @@ internal class Utils {
 		}
 	}
 	
-	static Err unwrap(Unwrappable err) {
+	static Err unwrap(IocErr err) {
 		if (err.cause == null)
 			return (Err) err
-		return err.cause.typeof.fits(Unwrappable#) ? unwrap((Unwrappable) err.cause) : err.cause
+		return err.cause.typeof.fits(IocErr#) ? unwrap((IocErr) err.cause) : err.cause
 	}
 	
 	static Obj cloneObj(Obj obj, |Field:Obj|? overridePlan := null) {

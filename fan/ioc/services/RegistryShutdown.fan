@@ -30,6 +30,7 @@ internal const class RegistryShutdownImpl : RegistryShutdown {
 	private const OneShotLock 		lock		:= OneShotLock(IocMessages.registryShutdown)
 	private const Str:|->|	 		shutdownFuncs
  
+	// Map needs to be keyed on Str so IoC can auto-generate keys in add()
 	new make(Str:|->| shutdownFuncs) {
 		shutdownFuncs.each |val, key| { 
 			try val.toImmutable

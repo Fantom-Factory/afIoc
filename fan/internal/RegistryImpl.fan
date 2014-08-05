@@ -5,7 +5,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 
 	private const OneShotLock 				startupLock 	:= OneShotLock(IocMessages.registryStarted)
-	private const OneShotLock 				shutdownLock	:= OneShotLock(IocMessages.registryShutdown)
+	private const OneShotLock 				shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
 	private const DependencyProviders?		depProSrc
@@ -173,6 +173,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- Registry Methods ----------------------------------------------------------------------
 
 	override This startup() {
+		shutdownLock.check
 		startupLock.lock
 
 		buildTime	:= (Duration.now - startTime).toMillis.toLocale("#,###")
@@ -203,6 +204,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 	
 	override This shutdown() {
+		shutdownLock.check
 		then 		:= Duration.now
 		shutdownHub := (RegistryShutdown)	serviceById(RegistryShutdown#.qname)
 		threadMan 	:= (ThreadLocalManager)	serviceById(ThreadLocalManager#.qname)
