@@ -244,19 +244,19 @@ internal const class IocMessages {
 	}
 
 	static Str registryBuilt() {
-		"Registry has already been built"
+		"IoC Registry has already been built"
 	}
 
 	static Str registryStarted() {
-		"Registry has already started"
+		"IoC Registry has already started"
 	}
 
 	static Str registryShutdown() {
-		"Registry has already been shutdown"
+		"IoC Registry has been shutdown"
 	}
 
 	static Str serviceDefined() {
-		"Service has already been defined"
+		"IoC Service has already been defined"
 	}
 	
 	
@@ -288,7 +288,7 @@ internal const class IocMessages {
 	}
 
 	static Str contributions_keyTypeNotKnown(Type keyType) {
-		stripSys("Can auto generate keys of type '${keyType.signature} - try using config.set() instead")
+		stripSys("Can not auto generate keys of type '${keyType.signature} - try using config.set() instead")
 	}
 	
 	

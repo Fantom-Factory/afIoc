@@ -304,6 +304,11 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v1.7.6 [#1.7.6]
+---------------
+ - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.
+ - Chg: Removed the little used 'Unwrappable' Err mixin.
+
 v1.7.4 [#1.7.4]
 ---------------
  - Bug: Configuration contributions added via 'set()' did not have any implied ordering constraints.
