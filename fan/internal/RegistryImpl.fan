@@ -158,13 +158,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
 			tracker.track("Applying service overrides") |->| {
-				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname)).overrides
+				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname, true)).overrides
 				overrides.each |builder, serviceId| {
 					serviceDefById(serviceId).overrideBuilder(builder)
 				}
 			}
 			
-			depProSrc = trackServiceById(DependencyProviders#.qname)
+			depProSrc = trackServiceById(DependencyProviders#.qname, true)
 			return null
 		}
 	}
@@ -227,12 +227,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return this
 	}
 
-	override Obj serviceById(Str serviceId) {
-		return Utils.stackTraceFilter |->Obj| {
+	override Obj? serviceById(Str serviceId, Bool checked := true) {
+		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
 			return InjectionTracker.withCtx(this, null) |->Obj?| {   
-				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj| {
-					return trackServiceById(serviceId)
+				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj?| {
+					return trackServiceById(serviceId, checked)
 				}
 			}
 		}
@@ -301,10 +301,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
-	override Obj trackServiceById(Str serviceId) {
-		serviceDef 
-			:= serviceDefById(serviceId) 
-			?: throw IocErr(IocMessages.serviceIdNotFound(serviceId))
+	override Obj? trackServiceById(Str serviceId, Bool checked) {
+		serviceDef := serviceDefById(serviceId)
+		if (serviceDef == null)
+			return checked ? throw IocErr(IocMessages.serviceIdNotFound(serviceId)) : null
 		return getService(serviceDef, false)
 	}
 
@@ -364,7 +364,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
-		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname)
+		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname, true)
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
 		mixinT 	:= serviceTypes[0] 
