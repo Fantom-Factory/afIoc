@@ -15,8 +15,8 @@ internal const class IocMessages {
 		"IoC Service has already started."		
 	}
 
-	static Str moduleRecursion(Str[] modNames) {
-		"Module recursion! A module references itself in some way: " + modNames.join(" -> ")
+	static Str moduleRecursion(Type[] modNames) {
+		"Module recursion! A module references itself in some way: " + modNames.join(" -> ") { it.qname }
 	}
 	
 	static Str moduleAlreadyAdded(Type module) {

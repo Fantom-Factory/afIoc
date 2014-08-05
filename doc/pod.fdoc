@@ -308,6 +308,7 @@ v1.7.6 [#1.7.6]
 ---------------
  - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.
  - Chg: Removed the little used 'Unwrappable' Err mixin.
+ - Bug: 'RegistryBuilder' could potentially throw an Err when adding both modules and pods.
 
 v1.7.4 [#1.7.4]
 ---------------

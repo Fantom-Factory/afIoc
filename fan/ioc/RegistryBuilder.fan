@@ -203,37 +203,28 @@ internal class BuildCtx {
 	}
 
 	Obj? withModule(Type module, |->Obj?| operation) {
+		if (moduleStack.contains(module))
+			throw IocErr(IocMessages.moduleRecursion(moduleStack.dup.add(module)))
+
 		moduleStack.push(module)
 		try {
-			// check for recursion
-			moduleStack.eachRange(0..<-1) { 
-				if (it == module)
-					throw IocErr(IocMessages.moduleRecursion(moduleStack.map { it.qname }))
-			}			
-			return operation.call()
+			return operation.call
 		} finally {			
 			moduleStack.pop
 		}
 	}	
 
 	Void withPod(Pod pod, |->Obj?| operation) {
+		if (podStack.contains(pod)) {
+			this.log("Pod '$pod.name' already inspected...ignoring")
+			return
+		}
+		
 		podStack.push(pod)
 		try {
-			ignore := false
-			
-			// check for recursion
-			podStack.eachRange(0..<-1) { 
-				if (it == pod) {
-					this.log("Pod '$pod.name' already inspected...ignoring")
-					ignore = true
-				}
-			}
-			
-			if (!ignore)
-				operation.call()
-			
+			operation.call
 		} finally {			
-			moduleStack.pop
+			podStack.pop
 		}
 	}	
 }

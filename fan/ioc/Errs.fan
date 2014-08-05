@@ -31,7 +31,7 @@ const class IocErr : Err {
 ** This has a dedicated Err class so it may be catered for explicitly.
 @NoDoc	// Advanced use only
 const class IocShutdownErr : IocErr {
-	new make(Str msg, Err? cause := null) : super(msg, cause) {}
+	new make(Str msg, Err? cause := null, Str? opTrace := null) : super(msg, cause, opTrace) {}
 }
 
 ** Thrown when an impossible condition occurs. You know when - we've all written comments like:

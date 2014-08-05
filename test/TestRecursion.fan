@@ -6,7 +6,7 @@ internal class TestRecursion : IocTest {
 	}
 	
 	Void testModuleRecursion() {
-		verifyIocErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#].map { it.qname })) { 
+		verifyIocErrMsg(IocMessages.moduleRecursion([T_MyModule40#, T_MyModule41#, T_MyModule40#])) { 
 			RegistryBuilder().addModule(T_MyModule40#).build
 		}
 	}
