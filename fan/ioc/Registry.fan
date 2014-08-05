@@ -13,7 +13,7 @@ const mixin Registry {
 	abstract This shutdown()
 	
 	** Obtains a service via its unique service id. 
-    abstract Obj serviceById(Str serviceId)
+    abstract Obj? serviceById(Str serviceId, Bool checked := true)
 
 	// The search takes into account inheritance of the service mixin, not the service *implementation*.
 	** Locates a dependency of the given type. 
@@ -46,8 +46,6 @@ const mixin Registry {
 	** 
 	** Note: the passed in parameters **must** be first in the ctor parameter list.
 	** 
-	** Impl note: A list is used rather than splats so 'nulls' can be passed in. 
-	** 
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
     abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 
@@ -62,9 +60,8 @@ const mixin Registry {
 	** 
 	** Returns the object passed in for method chaining.
 	** 
-	** *Note usage of this method is discouraged, it is far better practice for the creator to call 'autobuild' 
-	** instead.*  
-	abstract Obj injectIntoFields(Obj service)
+	** *Note: use 'autobuild()' if your fields are const / not-nullable. *  
+	abstract Obj injectIntoFields(Obj instance)
 
 	** Calls the method, dependency injecting the parameters. 'instance' can be 'null' if calling a static method. 
 	** 

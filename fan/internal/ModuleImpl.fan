@@ -181,7 +181,7 @@ internal const class ModuleImpl : Module {
 		}
 		
 		return InjectionTracker.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
-			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname)
+			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
 			proxy			:= proxyBuilder.createProxyForService(def)
 			
 			if (useCache) {

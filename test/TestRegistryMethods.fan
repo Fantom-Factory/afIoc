@@ -6,6 +6,9 @@ internal class TestRegistryMethods : IocTest {
 		T_MyService01 myService1 := reg.serviceById("t_myservice01")
 		verifyEq(myService1.service.kick, "ASS!")
 		verifySame(myService1, reg.serviceById("t_MyService01"))
+
+		oops := reg.serviceById("oops", false)
+		verifyNull(oops)
 	}
 
 	Void testDependencyByType() {
@@ -13,6 +16,9 @@ internal class TestRegistryMethods : IocTest {
 		T_MyService01 myService1 := reg.dependencyByType(T_MyService01#)
 		verifyEq(myService1.service.kick, "ASS!")
 		verifySame(myService1, reg.dependencyByType(T_MyService01#))
+		
+		oops := reg.dependencyByType(Int#, false)
+		verifyNull(oops)
 	}
 
 	Void testAutobuild() {

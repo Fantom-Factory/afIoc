@@ -3,7 +3,7 @@
 internal const mixin ObjLocator {
 
 	** Obtains a service via its unique service id. 
-    abstract Obj trackServiceById(Str serviceId)
+    abstract Obj? trackServiceById(Str serviceId, Bool checked)
 
 	** Locates a service or dependency of the given type. If a service, the search takes into 
 	** account inheritance of the service's defined mixin, not its *implementation*.
