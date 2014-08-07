@@ -32,7 +32,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [34 tests, 206 methods, 416 verifies]`
+  - Extensively tested: - `All tests passed! [34 tests, 206 methods, 418 verifies]`
 
 
   > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc)!

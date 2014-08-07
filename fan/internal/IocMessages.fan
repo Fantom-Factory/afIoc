@@ -268,7 +268,7 @@ internal const class IocMessages {
 	}
 
 	static Str contributions_configTypeMismatch(Str type, Type? contribType, Type serviceType) {
-		stripSys("Contribution ${contribType?.signature} does not match service configuration ${type} of ${serviceType.signature}")
+		stripSys("Contribution '${contribType?.signature}' does not match service configuration ${type} of ${serviceType.signature}")
 	}
 
 	static Str contributions_configKeyAlreadyDefined(Str existingKey, Obj value) {

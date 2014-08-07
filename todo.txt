@@ -12,6 +12,10 @@ Service disambiguation via facets
 Make Js compatible...?
  - Phew! It's a biggie!
 
+Maybe add a means to delete / reset a service lifecycle?
+ - people can create their own service lifecycle.
+ - WHY!???
+ - could fudge it with just a depProvider and autobuild!
 
 
 Just Plain Bad Ideas:
