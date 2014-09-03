@@ -146,18 +146,15 @@ internal const class ModuleDefImpl : ModuleDef {
 		if (!method.isStatic)
 			throw IocErr(IocMessages.builderMethodsMustBeStatic(method))
 
-		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread
-		
+		scope := method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread		
 		build := (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
-		if (build.scope != null)
-			scope = build.scope
-		
+
 		serviceDef	:= StandardServiceDef {
-			it.serviceId 	= build.serviceId ?: extractServiceIdFromBuilderMethod(method)
+			it.serviceId 	= build.serviceId ?: method.returns.qname
 			it.moduleId 	= this.moduleId
 			it.serviceType	= method.returns
 			it.description	= "$serviceId : Builder method $method.qname"
-			it.scope 		= scope 
+			it.scope 		= build.scope ?: scope 
 			it.noProxy		= build.disableProxy 
 			it.serviceBuilderRef.val = fromBuildMethod(it, method) 
 		}
@@ -175,14 +172,6 @@ internal const class ModuleDefImpl : ModuleDef {
 		serviceDefs[serviceDef.serviceId] = serviceDef
     }	
 
-	private Str extractServiceIdFromBuilderMethod(Method method) {
-		serviceId := stripMethodPrefix(method, BUILD_METHOD_NAME_PREFIX)
-
-        if (serviceId.isEmpty)
-            throw IocErr(IocMessages.buildMethodDoesNotDefineServiceId(method))
-		
-		return serviceId
-	}
 
 	
 	// ---- Binder Methods ------------------------------------------------------------------------

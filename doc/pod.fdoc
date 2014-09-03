@@ -304,6 +304,11 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v1.8.0 [#1.8.0]
+---------------
+ - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type.
+ - Chg: Deleted all existing @Deprecated classes.
+
 v1.7.6 [#1.7.6]
 ---------------
  - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.

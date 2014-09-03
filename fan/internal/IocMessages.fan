@@ -87,10 +87,6 @@ internal const class IocMessages {
 		"Builder method $method.qname must be static"
 	}
 	
-	static Str buildMethodDoesNotDefineServiceId(Method method) {
-		"Builder method $method.qname does not define a service ID. Rename it to ${method.qname}XXX where XXX is the service ID."
-	}
-	
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
 		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". \nAutomatic dependency resolution requires that exactly one service implement the interface. \nConsider using the @ServiceId facet."
 	}
