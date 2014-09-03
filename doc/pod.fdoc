@@ -309,6 +309,7 @@ v1.8.0 [#1.8.0]
  - New: Added 'RegistryBuilder.removeModule()'.
  - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type.
  - Chg: Deleted all existing @Deprecated classes.
+ - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
 
 v1.7.6 [#1.7.6]
 ---------------

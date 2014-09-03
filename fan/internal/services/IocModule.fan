@@ -6,10 +6,8 @@ internal const class IocModule {
 
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
-		config["afIoc.localRefProvider"]	= config.autobuild(LocalRefProvider#)
-		config["afIoc.localListProvider"]	= config.autobuild(LocalListProvider#)
-		config["afIoc.localMapProvider"]	= config.autobuild(LocalMapProvider#)
-		config["afIoc.logProvider"]			= logProvider
+		config["afIoc.localProvider"]	= config.autobuild(LocalProvider#)
+		config["afIoc.logProvider"]		= logProvider
 	}	
 
 	@Contribute { serviceType=ActorPools# }
