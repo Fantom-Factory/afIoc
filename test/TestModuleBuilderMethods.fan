@@ -9,7 +9,7 @@ internal class TestModuleBuilderMethods : IocTest {
 	
 	Void testBuilderMethod() {
 		reg := RegistryBuilder().addModule(T_MyModule04#).build.startup
-		T_MyService01 myService1 := reg.serviceById("penguin")
+		T_MyService01 myService1 := reg.serviceById("T_MyService01")
 		verifyEq(myService1.service.kick, "Penguin")
 
 		T_MyService01 myService2 := reg.dependencyByType(T_MyService01#)
@@ -25,12 +25,6 @@ internal class TestModuleBuilderMethods : IocTest {
 		verifyEq(myService2.service.kick, "ASS!")
 
 		verifyNotSame(myService1, myService2)
-	}
-	
-	Void testBuilderMethodsMustDefineAnId() {
-		verifyIocErrMsg(IocMessages.buildMethodDoesNotDefineServiceId(T_MyModule07#build)) { 
-			RegistryBuilder().addModule(T_MyModule07#).build 
-		}
 	}
 	
 	Void testWrongScope1() {
@@ -77,7 +71,7 @@ internal class T_MyModule05 {
 		binder.bind(T_MyService02#)
 	}
 	
-	@Build
+	@Build { serviceId = "penguin" }
 	static T_MyService01 buildPenguin() {
 		ser2 := T_MyService02()
 		ser2.kick = "Penguin"
@@ -86,18 +80,11 @@ internal class T_MyModule05 {
 		return ser1
 	}
 
-	@Build
+	@Build { serviceId = "goose" }
 	static T_MyService01 buildGoose(T_MyService02 ser2) {
 		ser1 := T_MyService01()
 		ser1.service = ser2
 		return ser1
-	}
-}
-
-internal class T_MyModule07 {
-	@Build
-	static T_MyService01 build() {
-		return T_MyService01()
 	}
 }
 
@@ -122,7 +109,7 @@ internal class T_MyModule37 {
 }
 
 internal class T_MyModule91 {
-	@Build
+	@Build { serviceId = "t1" }
 	static T_MyService01 buildT1() {
 		throw Err("Bugger!")
 	}

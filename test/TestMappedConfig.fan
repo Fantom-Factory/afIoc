@@ -16,7 +16,7 @@ internal class TestMappedConfig : IocTest {
 
 	Void testBasicConfigViaBuilder() {
 		reg := RegistryBuilder().addModule(T_MyModule45#).build.startup
-		s28 := reg.serviceById("s28") as T_MyService28
+		s28 := reg.serviceById("T_MyService28") as T_MyService28
 		verifyEq(s28.config, Str:Str["wot":"ever", "wot2":"ever2", "ASS!":"ASS!"])
 	}
 
@@ -249,11 +249,11 @@ internal class T_MyModule45 {
 		str[s2.kick] = s2.kick
 		return T_MyService28(str)
 	}
-	@Contribute{ serviceId="s28" }
+	@Contribute{ serviceId="T_MyService28" }
 	static Void cont(Configuration config) {
 		config.set("wot", "ever")
 	}
-	@Contribute{ serviceId="s28" }
+	@Contribute{ serviceId="T_MyService28" }
 	static Void cont2(Configuration config) {
 		config.set("wot2", "ever2")
 	}

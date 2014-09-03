@@ -257,7 +257,7 @@ internal class T_MyModule32 {
 		binder.bind(T_MyService02#).withId("s2")
 	}
 	
-	@Build
+	@Build { serviceId = "s21" }
 	static T_MyService21 buildS21(Str[] str, T_MyService02 s2) {
 		T_MyService21(str.add(s2.kick))
 	}
