@@ -29,7 +29,7 @@ class RegistryBuilder {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definition for '$moduleType.qname'") |->Obj| {
 				lock.check
-				internalAddModule(moduleType)
+				_addModule(moduleType)
 				return this
 			}
 		}
@@ -41,7 +41,7 @@ class RegistryBuilder {
 			ctx.track("Adding module definitions for '$moduleTypes'") |->Obj| {
 				lock.check
 				moduleTypes.each |moduleType| {
-					internalAddModule(moduleType)
+					_addModule(moduleType)
 				}
 				return this
 			}
@@ -59,7 +59,7 @@ class RegistryBuilder {
 				lock.check
 				if (!suppressLogging)
 					logger.info("Adding module definitions from pod '$pod.name'")
-				internalAddModulesFromPod(pod, addDependencies)
+				_addModulesFromPod(pod, addDependencies)
 				return this
 			}
 		}
@@ -76,7 +76,7 @@ class RegistryBuilder {
 					logger.info("Adding modules from index properties")
 
 				moduleTypeNames := Env.cur.index(IocConstants.podMetaModuleName)
-				addModulesFromTypeNames(moduleTypeNames.join(","))
+				_addModulesFromTypeNames(moduleTypeNames.join(","))
 				
 				return this
 			}
@@ -126,7 +126,7 @@ class RegistryBuilder {
 	
 	// ---- Private Methods -----------------------------------------------------------------------
 
-	private Void internalAddModule(Type moduleType) {
+	private Void _addModule(Type moduleType) {
 		if (moduleType != IocModule# && !suppressLogging && !moduleTypes.contains(moduleType))
 			logger.info("Adding module definition for $moduleType.qname")
 
@@ -153,16 +153,16 @@ class RegistryBuilder {
 		}
 	}
 
-	private Void internalAddModulesFromPod(Pod pod, Bool addDependencies := true) {
+	private Void _addModulesFromPod(Pod pod, Bool addDependencies := true) {
 		ctx.withPod(pod) |->| {
 			moduleTypeNames := pod.meta[IocConstants.podMetaModuleName]
-			addModulesFromTypeNames(moduleTypeNames)
+			_addModulesFromTypeNames(moduleTypeNames)
 
 			if (addDependencies) {
 				mods := ctx.track("Adding dependencies of '${pod.name}'") |->| {
 					pod.depends.each |depend| {
 						dependency := Pod.find(depend.name)
-						internalAddModulesFromPod(dependency)
+						_addModulesFromPod(dependency)
 					}
 				} 
 			} else
@@ -170,7 +170,7 @@ class RegistryBuilder {
 		}
 	}
 	
-	private Void addModulesFromTypeNames(Str? moduleTypeNames) {
+	private Void _addModulesFromTypeNames(Str? moduleTypeNames) {
 		if (moduleTypeNames == null) {
 			ctx.log("No modules found")
 			return
@@ -179,7 +179,7 @@ class RegistryBuilder {
 		moduleTypeNames.split(',', true).each |moduleTypeName| {
 			ctx.track("Found module '${moduleTypeName}'") |->| {
 				moduleType := Type.find(moduleTypeName)
-				internalAddModule(moduleType)
+				_addModule(moduleType)
 			}
 		}		
 	}
