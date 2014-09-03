@@ -23,7 +23,7 @@ class Build : BuildPod {
 			"afPlastic 1.0.16+"
 		]
 		
-		srcDirs = [`test/`, `fan/`, `fan/ioc/`, `fan/ioc/services/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`, `fan/facets/`]
+		srcDirs = [`test/`, `fan/`, `fan/public/`, `fan/public/services/`, `fan/public/facets/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/def/`]
 		resDirs = [`doc/about.fdoc`]
 	}
 }
