@@ -83,6 +83,16 @@ class RegistryBuilder {
 		}
 	}
 
+	** Removes the given module type from this builder. 
+	** Handy if an un-wanted transitive dependency is added unwittingly.
+	** 
+	** Returns 'true' if the given module was removed.
+	Bool removeModule(Type moduleType) {
+		doomed := moduleDefs.find { it.moduleType == moduleType }
+		moduleDefs.remove(doomed)
+		return doomed != null
+	}
+
 	** Returns a list of modules types currently held by this builder.
 	Type[] moduleTypes() {
 		moduleDefs.map { it.moduleType }
