@@ -22,15 +22,7 @@ internal const class ContributionImpl : Contribution {
 		InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
 			sizeBefore := config.size
 			
-			conf := (Obj?) null
-			if (method.params.first.type == Configuration#)
-				conf = Configuration(config)
-			if (method.params.first.type == OrderedConfig#)
-				conf = OrderedConfig(config)
-			if (method.params.first.type == MappedConfig#)
-				conf = MappedConfig(config)
-			
-			InjectionUtils.callMethod(method, null, [conf])
+			InjectionUtils.callMethod(method, null, [Configuration(config)])
 			
 			config.cleanupAfterModule
 			sizeAfter := config.size
