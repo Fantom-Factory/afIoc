@@ -68,7 +68,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 		localRef			:= localManager.createRef(serviceDef.serviceId + "-lazyProxy")
 		this.serviceDef 	= serviceDef
 		this.objLocator 	= objLocator
-		this.instanceRef	= ObjectRef(localRef, serviceDef.scope, null)
+		this.instanceRef	= ObjectRef(localRef, serviceDef.serviceScope, null)
 	}
 
 	override Obj? call(Method method, Obj?[] args) {

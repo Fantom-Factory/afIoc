@@ -4,7 +4,7 @@ internal const class ServiceDef {
 	const Str 			moduleId
 	const Str 			serviceId
 	const Type			serviceType
-	const ServiceScope	scope	// TODO: -> serviceScope
+	const ServiceScope	serviceScope
 	const Bool			noProxy	// FIXME
 	const |->Obj|		serviceBuilder
 	const Str			description
@@ -13,14 +13,14 @@ internal const class ServiceDef {
 
 	new makeStandard(|This| f ) { 
 		f(this)
-		if (scope == ServiceScope.perApplication && !serviceType.isConst)
+		if (serviceScope == ServiceScope.perApplication && !serviceType.isConst)
 			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
 		unqualifiedServiceId = unqualify(serviceId)
 	}
 
 	new makeBuiltIn(|This| f) { 
 		this.moduleId		= IocConstants.builtInModuleId
-		this.scope			= ServiceScope.perApplication
+		this.serviceScope	= ServiceScope.perApplication
 		this.noProxy		= true
 
 		f(this)
@@ -33,7 +33,9 @@ internal const class ServiceDef {
 				throw IocErr("Can not create BuiltIn service '$serviceId'") 
 			}
 
-		description = "$serviceId : BuiltIn Service"
+		if (description == null)
+			description = "$serviceId : BuiltIn Service"
+
 		unqualifiedServiceId = unqualify(serviceId)
 	}
 
@@ -41,7 +43,7 @@ internal const class ServiceDef {
 	Bool proxiable() {
 		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
 		// Yeah, exactly! Just don't allow it.
-		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
+		!noProxy && serviceType.isMixin && (serviceScope != ServiceScope.perInjection)
 	}
 	
 	Bool matchesId(Str serviceId) {
@@ -84,7 +86,7 @@ internal class SrvDef {
 			it.moduleId			= this.moduleId
 			it.serviceId		= this.id
 			it.serviceType		= this.type
-			it.scope			= this.scope
+			it.serviceScope		= this.scope
 			it.noProxy			= proxy == ServiceProxy.never
 			
 			if (buildData is Type) {

@@ -34,7 +34,7 @@ const class ServiceStat {
 
 	const Str 			serviceId
 	const Type			serviceType
-	const ServiceScope 	scope
+	const ServiceScope 	serviceScope
 	const Bool			proxyDisabled
 	ServiceLifecycle	lifecycle {
 				 get {	atomLifecycle.val }

@@ -45,7 +45,7 @@ internal class TestAspect : IocTest {
 			it.serviceId 		= "T_MyService65Aspect"
 			it.moduleId			= ""
 			it.serviceType 		= Type#
-			it.scope			= ServiceScope.perInjection
+			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 6 }
 		}		
@@ -55,7 +55,7 @@ internal class TestAspect : IocTest {
 			it.serviceId 		= "T_MyService67NoMatch"
 			it.moduleId			= ""
 			it.serviceType 		= Type#
-			it.scope			= ServiceScope.perInjection
+			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 9 }
 		}		
