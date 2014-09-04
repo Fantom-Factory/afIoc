@@ -66,21 +66,18 @@ internal const class ServiceDef {
 }
 
 
-internal class ServiceDefMutable {	// TODO: ServiceTempDef
-	Str 			id
-	Type 			type
-	Obj				builderData	// type or method
-	ServiceScope	scope
-	ServiceProxy	proxy
-	Str 			moduleId
+internal class SrvDef {
+	const Str		id
+	const Type?		type
+	const Str 		moduleId
+	Obj?			buildData	// type or method
+	ServiceScope?	scope
+	ServiceProxy?	proxy
 	Bool			overridden
+	Str?			overrideRef
+	Bool			overrideOptional
 
 	new make(|This| in) { in(this) }
-	
-	override Str toStr() {
-		// FIXME: add ctx for err msgs in ModuleDefImpl
-		id
-	}
 	
 	ServiceDef toServiceDef() {
 		ServiceDef.makeStandard {
@@ -90,14 +87,14 @@ internal class ServiceDefMutable {	// TODO: ServiceTempDef
 			it.scope			= this.scope
 			it.noProxy			= proxy == ServiceProxy.never
 			
-			if (builderData is Type) {
-				serviceImplType		:= (Type) builderData
+			if (buildData is Type) {
+				serviceImplType		:= (Type) buildData
 				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, serviceImplType)
 				it.description		= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
 			}
 
-			if (builderData is Method) {
-				builderMethod		:= (Method) builderData
+			if (buildData is Method) {
+				builderMethod		:= (Method) buildData
 				it.serviceBuilder	= ServiceBuilders.fromBuildMethod(it, builderMethod)
 				it.description		= "$serviceId : via Builder Method (${builderMethod.qname})"
 			}
@@ -106,8 +103,28 @@ internal class ServiceDefMutable {	// TODO: ServiceTempDef
 				it.description	+= " (Overridden)"
 		}
 	}
-}
 
+	Void applyOverride(SrvDef serviceOverride) {
+		if (serviceOverride.type != null && !serviceOverride.type.fits(type))
+			throw IocErr(IocMessages.serviceOverrideDoesNotFitServiceDef(id, serviceOverride.type, type))
+
+		if (serviceOverride.buildData is Type && !((Type) serviceOverride.buildData).fits(type))
+			throw IocErr(IocMessages.serviceOverrideDoesNotFitServiceDef(id, serviceOverride.buildData, type))
+		
+		if (serviceOverride.buildData != null)
+			this.buildData = serviceOverride.buildData
+
+		if (serviceOverride.scope != null)
+			this.scope = serviceOverride.scope
+
+		if (serviceOverride.proxy != null)
+			this.proxy = serviceOverride.proxy
+
+		this.overridden = true
+	}
+
+	override Str toStr() { id }
+}
 
 	
 internal const mixin ServiceBuilders {
