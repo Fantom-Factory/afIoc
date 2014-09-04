@@ -103,15 +103,15 @@ internal class TestThreadedAccess : IocTest {
 		sta := (ServiceStats) reg.serviceById(ServiceStats#.qname)
 		tlm := (ThreadLocalManager) reg.serviceById(ThreadLocalManager#.qname)
 		
-		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.defined)
 		s02a := reg.serviceById("s02")
-		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.CREATED)
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.created)
 		
 		tlm.cleanUpThread
 		
-		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.DEFINED)
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.defined)
 		s02b := reg.serviceById("s02")
-		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.CREATED)
+		verifyEq(sta.stats["s02"].lifecycle, ServiceLifecycle.created)
 		
 		assertNotSame(s02a, s02b)
 	}

@@ -8,21 +8,21 @@ internal class BugFixes : IocTest {
 		
 		stats1	:= reg.serviceById(ServiceStats#.qname) as ServiceStats
 		
-		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.defined)
 		t50_1 := reg.serviceById("t50")
-		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.proxied)
 		t50_1->dude
-		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
+		assertEqual(stats1.stats["t50"].lifecycle, ServiceLifecycle.created)
 
 		Actor(ActorPool()) |->| {
 			stats2	:= reg.serviceById(ServiceStats#.qname) as ServiceStats			
 
 			// as we're in a new thread, ensure the service has it's own lifecycle
-			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.DEFINED)
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.defined)
 			t50_2 := reg.serviceById("t50")
-			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.VIRTUAL)
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.proxied)
 			t50_2->dude
-			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.CREATED)
+			assertEqual(stats2.stats["t50"].lifecycle, ServiceLifecycle.created)
 			
 		}.send(null).get
 	}

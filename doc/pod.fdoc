@@ -310,6 +310,8 @@ v1.8.0 [#1.8.0]
  - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type.
  - Chg: Deleted all existing @Deprecated classes.
  - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
+ - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
+ - Bug: '@Inject.autobuild' *services* were just autobuilt and not built via the service builder func.
 
 v1.7.6 [#1.7.6]
 ---------------

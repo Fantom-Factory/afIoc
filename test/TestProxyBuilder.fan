@@ -80,11 +80,11 @@ internal class TestProxyBuilder : IocTest {
 	
 	Void testWithoutProxy() {
 		stats	:= reg.serviceById(ServiceStats#.qname) as ServiceStats
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.DEFINED)
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.defined)
 		s64 	:= reg.serviceById("s64") as T_MyService64
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.created)
 		s64.dude
-		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.CREATED)
+		verifyEq(stats.stats["s64"].lifecycle, ServiceLifecycle.created)
 	}
 	
 	Void testProxyTypesAreCached() {
