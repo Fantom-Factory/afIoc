@@ -16,7 +16,7 @@ internal const class ModuleImpl : Module {
 		localMap	:= localManager.createMap(moduleId)
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		services.each |impl, def| {
-			srvState[def.serviceId] = ModuleState(localMap, def, impl, ServiceLifecycle.BUILTIN)
+			srvState[def.serviceId] = ModuleState(localMap, def, impl, ServiceLifecycle.builtin)
 		}
 
 		this.serviceState 	= srvState
@@ -36,7 +36,7 @@ internal const class ModuleImpl : Module {
 		localMap := localManager.createMap(moduleName(moduleDef.moduleId))
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		moduleDef.serviceDefs.each |def| {
-			srvState[def.serviceId] = ModuleState(localMap, def, null, ServiceLifecycle.DEFINED)
+			srvState[def.serviceId] = ModuleState(localMap, def, null, ServiceLifecycle.defined)
 		}
 		
 		this.serviceState 	= srvState		
@@ -156,7 +156,7 @@ internal const class ModuleImpl : Module {
 			
 			if (useCache) {
 				serviceState[def.serviceId].service = service
-				serviceState[def.serviceId].lifecycle = ServiceLifecycle.CREATED
+				serviceState[def.serviceId].lifecycle = ServiceLifecycle.created
 			}
 			return service
 	    }	
@@ -175,7 +175,7 @@ internal const class ModuleImpl : Module {
 			
 			if (useCache) {
 				serviceState[def.serviceId].proxy = proxy
-				serviceState[def.serviceId].lifecycle = ServiceLifecycle.VIRTUAL
+				serviceState[def.serviceId].lifecycle = ServiceLifecycle.proxied
 			}
 			return proxy
 		}

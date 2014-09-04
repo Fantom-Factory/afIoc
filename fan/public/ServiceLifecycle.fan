@@ -20,17 +20,17 @@
 enum class ServiceLifecycle {
 
 	** The service is defined in a module, but has not yet been referenced.
-	DEFINED,
+	defined,
 
 	** A proxy has been created for the service and may be injected into other services. 
 	** No methods of the proxy have been invoked and the implementation does yet not exist.
-	VIRTUAL,
+	proxied,
 
 	** The service implementation has been created. It lives!
-	CREATED,
+	created,
 
 	// leave this last for compare
 	** Builtin services are internal IoC services. They exist before the `Registry` is constructed.
-	BUILTIN;
+	builtin;
 }
 

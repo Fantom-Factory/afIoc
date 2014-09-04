@@ -8,10 +8,6 @@ internal class ServiceDefMutable {
 	ServiceProxy	proxy
 	Str 			moduleId
 
-	** Only actually needed by the 'ctorItBlockBuilder'!
-	** Will be 'null' if built by a builder method 
-	Type?			serviceImplType
-
 	private Str 	unqualifiedServiceId
 
 	new make(|This| in) { in(this) }
@@ -65,10 +61,6 @@ internal const mixin ServiceDef {
 	
 	** Returns the service type, either the mixin or impl type depending on how it was defined.
 	abstract Type serviceType()
-
-	** Only actually needed by the 'ctorItBlockBuilder'!
-	** Will be 'null' if built by a builder method 
-//	abstract Type? serviceImplType()
 
 	abstract ServiceScope scope()
 
