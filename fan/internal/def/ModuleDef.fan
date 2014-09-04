@@ -1,11 +1,7 @@
 
 internal class ModuleDef {
-	private const static Log 		log := Utils.getLog(ModuleDef#)
+	private const static Log log 			:= Utils.getLog(ModuleDef#)
 	
-	private static const Str 		BUILD_METHOD_NAME_PREFIX 		:= "build"
-	private static const Str 		OVERRIDE_METHOD_NAME_PREFIX 	:= "override"
-	private static const Str 		CONTRIBUTE_METHOD_NAME_PREFIX 	:= "contribute"
-
 	Type 				moduleType
 	ContributionDef[]	contribDefs			:= ContributionDef[,]
 	AdviceDef[]			adviceDefs			:= AdviceDef[,]
@@ -45,20 +41,18 @@ internal class ModuleDef {
 
 		methods.each |method| {
 			if (method.hasFacet(Build#)) {
-				if (method.name.startsWith("override"))
-					tracker.track("Found service override method $method.qname") |->| {
-						addServiceOverrideFromMethod(method)
-					}
-				else
-					tracker.track("Found service builder method $method.qname") |->| {
-						addServiceDefFromMethod(method)
-					}
-			} else { 
-				if (method.name.startsWith("build"))
-					throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))
-				if (method.name.startsWith("override"))
-					throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))				
-			}
+				tracker.track("Found service builder method $method.qname") |->| {
+					addServiceDefFromMethod(method)
+				}
+			} else if (method.name.startsWith("build"))
+				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))
+
+			if (method.hasFacet(Override#)) {
+				tracker.track("Found service override method $method.qname") |->| {
+					addServiceOverrideFromMethod(method)
+				}
+			} else if (method.name.startsWith("override"))
+				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Override#))				
 
 			if (method.hasFacet(Contribute#)) {
 				tracker.track("Found contribution method $method.qname") |->| {					
@@ -133,7 +127,7 @@ internal class ModuleDef {
 		if (contribute.serviceType != null)
 			return null
 		
-		serviceId := stripMethodPrefix(method, CONTRIBUTE_METHOD_NAME_PREFIX)
+		serviceId := stripMethodPrefix(method, "contribute")
 
         if (serviceId.isEmpty)
             throw IocErr(IocMessages.contributionMethodDoesNotDefineServiceId(method))
@@ -155,7 +149,7 @@ internal class ModuleDef {
 			it.id 			= build.serviceId ?: method.returns.qname
 			it.type			= method.returns
 			it.scope 		= build.scope ?: (method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread) 
-			it.proxy		= build.proxy ?: ServiceProxy.ifRequired
+			it.proxy		= build.proxy
 			it.buildData	= method 
 		}
 
@@ -166,17 +160,17 @@ internal class ModuleDef {
 		if (!method.isStatic)
 			throw IocErr(IocMessages.builderMethodsMustBeStatic(method))
 
-		build := (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
+		build := (Override) Slot#.method("facet").callOn(method, [Override#])	// Stoopid F4 
 
 		overrideDef	:= SrvDef {
 			it.moduleId 	= this.moduleId
-			it.id 			= build.serviceId ?: method.returns.qname
+			it.id 			= build.serviceId ?: (build.serviceType?.qname ?: method.returns.qname)
 			it.type			= method.returns
 			it.scope 		= build.scope 
 			it.proxy		= build.proxy
 			it.buildData	= method
-			it.overrideRef	= build.overrideRef ?: method.qname
-			it.overrideOptional	= build.overrideOptional
+			it.overrideRef	= build.overrideId ?: method.qname
+			it.overrideOptional	= build.optional
 		}
 
 		addServiceOverride(overrideDef)

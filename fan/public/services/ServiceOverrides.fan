@@ -71,8 +71,8 @@ internal const class ServiceOverridesImpl : ServiceOverrides {
 	override Str:|->Obj| overrides() {
 		serviceOverrides.map |buildObj, id| {
 			existingDef := ((ObjLocator) registry).serviceDefById(id)
-			if (existingDef == null)
-				throw ServiceNotFoundErr(IocMessages.serviceOverrideDoesNotExist(id), ((RegistryImpl) registry).stats.keys)
+//			if (existingDef == null)
+//				throw ServiceNotFoundErr(IocMessages.serviceOverrideDoesNotExist(id), ((RegistryImpl) registry).stats.keys)
 
 			builder := (|->Obj|?) null
 

@@ -214,11 +214,7 @@ internal const class IocMessages {
 	static Str serviceOverrideDoesNotFitServiceDef(Str serviceId, Type serOverride, Type serDef) {
 		"Override for service '$serviceId (${serOverride.qname}) does not fit the definition of ${serDef.qname}"
 	}
-	
-	static Str serviceOverrideDoesNotExist(Str serviceId) {
-		"Can not override service '$serviceId' it doesn't exist!"
-	}
-	
+		
 
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------

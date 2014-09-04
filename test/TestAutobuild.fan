@@ -108,7 +108,7 @@ internal class T_MyModule75 {
 //		.withScope(ServiceScope scope)
 //		.withProxy(ServiceProxy.asNeeded / never / always)
 //		.withImpl(Type)
-//		.withOverrideRef(Str)
+//		.withOverrideId(Str)
 //		.optional
 //	}
 
