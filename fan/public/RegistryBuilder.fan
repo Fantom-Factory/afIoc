@@ -148,7 +148,7 @@ class RegistryBuilder {
 				return
 			}
 
-			moduleDef := ModuleDefImpl(ctx.tracker, moduleType)
+			moduleDef := ModuleDef(ctx.tracker, moduleType)
 			moduleDefs.add(moduleDef)
 			
 			if (moduleType.hasFacet(SubModule#)) {

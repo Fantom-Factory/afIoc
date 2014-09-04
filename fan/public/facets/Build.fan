@@ -11,12 +11,20 @@ facet class Build {
 	**   static acme::MyService buildPenguin() { ... }
 	** 
 	** defines a service with an id of 'acme::MyService'.
-	const Str? serviceId := null
+	const Str? serviceId
 	
 	** Service scope defaults to 'perApplication' for const classes and 'perThread' for non-const 
 	** classes.
-	const ServiceScope? scope := null
+	** 
+	** If not specified on an 'override' method then the original value is left untouched.
+	const ServiceScope? scope
 	
-	** Disable the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
-	const Bool disableProxy := false
+	** The proxy strategy for the service. Defaults to 'ifRequired'.
+	** 
+	** If not specified on an 'override' method then the original value is left untouched.
+	const ServiceProxy? proxy
+	
+//	const Str? overrideRef	:= null
+//	
+//	const Bool overrideOptional	:= false
 }

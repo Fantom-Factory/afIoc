@@ -1,29 +1,55 @@
 
-internal class ServiceDefMutable {
+** Meta info that defines a service 
+internal const class ServiceDef {	
+	const Str 			moduleId
+	const Str 			serviceId
+	const Type			serviceType
+	const ServiceScope	scope	// TODO: -> serviceScope
+	const Bool			noProxy	// FIXME
+	const |->Obj|		serviceBuilder
+	const Str			description
 
-	Str 			serviceId
-	Type 			serviceType
-	|->Obj|			serviceBuilder
-	ServiceScope	scope
-	ServiceProxy	proxy
-	Str 			moduleId
+	private const Str 	unqualifiedServiceId
 
-	private Str 	unqualifiedServiceId
+	new makeStandard(|This| f ) { 
+		f(this)
+		if (scope == ServiceScope.perApplication && !serviceType.isConst)
+			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
+		unqualifiedServiceId = unqualify(serviceId)
+	}
 
-	new make(|This| in) { in(this) }
-	
-//	Bool proxiable() {
-//		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
-//		// Yeah, exactly! Just don't allow it.
-//		proxy != ServiceProxy.never && serviceType.isMixin && (scope != ServiceScope.perInjection)
-//	}
+	new makeBuiltIn(|This| f) { 
+		this.moduleId		= IocConstants.builtInModuleId
+		this.scope			= ServiceScope.perApplication
+		this.noProxy		= true
+
+		f(this)
+		
+		if (serviceId == null)
+			serviceId = serviceType.qname
+
+		if (serviceBuilder == null)
+			serviceBuilder = |->Obj| { 
+				throw IocErr("Can not create BuiltIn service '$serviceId'") 
+			}
+
+		description = "$serviceId : BuiltIn Service"
+		unqualifiedServiceId = unqualify(serviceId)
+	}
+
+	// FIXME kill me
+	Bool proxiable() {
+		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
+		// Yeah, exactly! Just don't allow it.
+		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
+	}
 	
 	Bool matchesId(Str serviceId) {
 		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
 	}
 	
 	override Str toStr() {
-		serviceId
+		description
 	}
 	
 	override Int hash() {
@@ -36,61 +62,55 @@ internal class ServiceDefMutable {
 	
 	private static Str unqualify(Str id) {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
-	}	
+	}
 }
 
 
+internal class ServiceDefMutable {	// TODO: ServiceTempDef
+	Str 			id
+	Type 			type
+	Obj				builderData	// type or method
+	ServiceScope	scope
+	ServiceProxy	proxy
+	Str 			moduleId
+	Bool			overridden
 
-**
-** Meta info that defines a service 
-** 
-internal const mixin ServiceDef {
-
-	** Returns a factory func that creates the service implementation
-	abstract |->Obj| serviceBuilder()
-
-	abstract Void overrideBuilder(|->Obj| builder)
-
-	** Returns the service id, which is usually the unqualified service type name.
-	abstract Str serviceId()
-
-	abstract Str unqualifiedServiceId()
-
-	** Returns the id of the module this service was defined in
-	abstract Str moduleId()
-	
-	** Returns the service type, either the mixin or impl type depending on how it was defined.
-	abstract Type serviceType()
-
-	abstract ServiceScope scope()
-
-	abstract Bool noProxy()
-
-	Bool proxiable() {
-		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
-		// Yeah, exactly! Just don't allow it.
-		!noProxy && serviceType.isMixin && (scope != ServiceScope.perInjection)
-	}
-	
-	Bool matchesId(Str serviceId) {
-		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
-	}
+	new make(|This| in) { in(this) }
 	
 	override Str toStr() {
-		serviceId
+		// FIXME: add ctx for err msgs in ModuleDefImpl
+		id
 	}
 	
-	override Int hash() {
-		serviceId.hash
-	}
+	ServiceDef toServiceDef() {
+		ServiceDef.makeStandard {
+			it.moduleId			= this.moduleId
+			it.serviceId		= this.id
+			it.serviceType		= this.type
+			it.scope			= this.scope
+			it.noProxy			= proxy == ServiceProxy.never
+			
+			if (builderData is Type) {
+				serviceImplType		:= (Type) builderData
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, serviceImplType)
+				it.description		= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
+			}
 
-	override Bool equals(Obj? obj) {
-		serviceId == (obj as ServiceDef)?.serviceId
+			if (builderData is Method) {
+				builderMethod		:= (Method) builderData
+				it.serviceBuilder	= ServiceBuilders.fromBuildMethod(it, builderMethod)
+				it.description		= "$serviceId : via Builder Method (${builderMethod.qname})"
+			}
+			
+			if (this.overridden)
+				it.description	+= " (Overridden)"
+		}
 	}
+}
+
+
 	
-	protected static Str unqualify(Str id) {
-		id.contains("::") ? id[(id.index("::")+2)..-1] : id
-	}
+internal const mixin ServiceBuilders {
 	
 	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method, Obj? instance := null, Obj[]? args := null) {
 		|->Obj| {
@@ -116,8 +136,7 @@ internal const mixin ServiceDef {
 				// use the param to generate the value
 				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
 					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList, null)
-					InjectionUtils.injectIntoFields(obj)
-					return obj
+					return InjectionUtils.injectIntoFields(obj)
 				}
 			}			
 		}.toImmutable
