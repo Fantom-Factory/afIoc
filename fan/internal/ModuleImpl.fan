@@ -106,7 +106,7 @@ internal const class ModuleImpl : Module {
 			// This is ONLY dangerous because gawd knows what those services do in their ctor and 
 			// @PostInject methods!
 			
-			useCache := !(autobuild ?: def.scope == ServiceScope.perInjection)
+			useCache := !(autobuild ?: def.serviceScope == ServiceScope.perInjection)
 
 			if (returnReal)
 				return getOrMakeRealService(def, useCache)
@@ -123,7 +123,7 @@ internal const class ModuleImpl : Module {
 			ServiceStat {
 				it.serviceId	= state.def.serviceId
 				it.serviceType	= state.def.serviceType
-				it.scope		= state.def.scope
+				it.serviceScope	= state.def.serviceScope
 				it.proxyDisabled= state.def.noProxy
 				it.lifecycle	= state.lifecycle
 				it.noOfImpls	= state.implCount
@@ -227,17 +227,17 @@ internal const class ModuleState {
 	}
 	
 	private Obj? getObj(AtomicRef? ref, Str varName) {
-		if (def.scope == ServiceScope.perApplication)
+		if (def.serviceScope == ServiceScope.perApplication)
 			return ref.val
-		if (def.scope == ServiceScope.perThread)
+		if (def.serviceScope == ServiceScope.perThread)
 			return localMap["${def.serviceId}.${varName}"]
 		return null
 	}
 
 	private Void setObj(AtomicRef? ref, Str varName, Obj? obj) {
-		if (def.scope == ServiceScope.perApplication && ref != null) 
+		if (def.serviceScope == ServiceScope.perApplication && ref != null) 
 			ref.val = obj
-		if (def.scope == ServiceScope.perThread)
+		if (def.serviceScope == ServiceScope.perThread)
 			localMap["${def.serviceId}.${varName}"] = obj
 	}
 	

@@ -31,7 +31,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
 			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= RegistryStartup#
-				it.scope			= ServiceScope.perThread
+				it.serviceScope		= ServiceScope.perThread
 				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
@@ -43,7 +43,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services[ServiceDef.makeBuiltIn() {
 				it.serviceId 		= IocConstants.ctorItBlockBuilder
 				it.serviceType 		= |This|#
-				it.scope			= ServiceScope.perInjection
+				it.serviceScope		= ServiceScope.perInjection
 				it.description 		= "$it.serviceId : Autobuilt. Always."
 				it.serviceBuilder	= |->Obj| {
 					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.injectionCtx.injectingIntoType)
@@ -378,7 +378,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.moduleId			= ""
 			it.serviceType 		= type
-			it.scope			= ServiceScope.perInjection
+			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= "$type.qname : Autobuild"
 			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
 		}		
@@ -403,7 +403,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.moduleId			= ""
 			it.serviceType 		= mixinT
-			it.scope			= ServiceScope.perInjection
+			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= "$mixinT.qname : Create Proxy"
 			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
 		}

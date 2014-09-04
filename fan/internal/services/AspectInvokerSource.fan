@@ -58,7 +58,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
 		localRef := localManager.createRef(serviceDef.serviceId + "-invoker")
 		return ServiceMethodInvoker {
-			it.service = ObjectRef(localRef, serviceDef.scope, service)
+			it.service = ObjectRef(localRef, serviceDef.serviceScope, service)
 			it.aspects = adviceMap.toImmutable
 		}
 	}
