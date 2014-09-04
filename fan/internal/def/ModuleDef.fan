@@ -6,11 +6,11 @@ internal class ModuleDef {
 	private static const Str 		OVERRIDE_METHOD_NAME_PREFIX 	:= "override"
 	private static const Str 		CONTRIBUTE_METHOD_NAME_PREFIX 	:= "contribute"
 
-	Type 					moduleType
-	ContributionDef[]		contribDefs		:= ContributionDef[,]
-	AdviceDef[]				adviceDefs		:= AdviceDef[,]
-	Str:ServiceDefMutable	serviceDefs		:= Str:ServiceDefMutable[:] { caseInsensitive = true }
-//	ServiceDef[]			serviceOverrides
+	Type 				moduleType
+	ContributionDef[]	contribDefs			:= ContributionDef[,]
+	AdviceDef[]			adviceDefs			:= AdviceDef[,]
+	Str:SrvDef			serviceDefs			:= Str:SrvDef[:] { caseInsensitive = true }
+	SrvDef[]			serviceOverrides	:= [,]
 
 	private OpTracker tracker
 
@@ -45,11 +45,20 @@ internal class ModuleDef {
 
 		methods.each |method| {
 			if (method.hasFacet(Build#)) {
-				tracker.track("Found builder method $method.qname") |->| {
-					addServiceDefFromMethod(method)
-				}
-			} else if (method.name.startsWith("build"))
-				throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))
+				if (method.name.startsWith("override"))
+					tracker.track("Found service override method $method.qname") |->| {
+						addServiceOverrideFromMethod(method)
+					}
+				else
+					tracker.track("Found service builder method $method.qname") |->| {
+						addServiceDefFromMethod(method)
+					}
+			} else { 
+				if (method.name.startsWith("build"))
+					throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))
+				if (method.name.startsWith("override"))
+					throw IocErr(IocMessages.moduleMethodWithNoFacet(method, Build#))				
+			}
 
 			if (method.hasFacet(Contribute#)) {
 				tracker.track("Found contribution method $method.qname") |->| {					
@@ -141,29 +150,38 @@ internal class ModuleDef {
 
 		build := (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
 
-		serviceDef	:= ServiceDefMutable {
+		serviceDef	:= SrvDef {
 			it.moduleId 	= this.moduleId
 			it.id 			= build.serviceId ?: method.returns.qname
 			it.type			= method.returns
 			it.scope 		= build.scope ?: (method.returns.isConst ? ServiceScope.perApplication : ServiceScope.perThread) 
 			it.proxy		= build.proxy ?: ServiceProxy.ifRequired
-			it.builderData	= method 
+			it.buildData	= method 
 		}
 
 		addServiceDef(serviceDef)
 	}	
 
-    private Void addServiceDef(ServiceDefMutable serviceDef) {
-		tracker.log("Adding service definition for service '$serviceDef.id' -> ${serviceDef.type.qname}")
-		
-		if (serviceDefs.containsKey(serviceDef.id))
-			throw IocErr(IocMessages.buildMethodConflict(serviceDef.id, serviceDef.toStr, serviceDefs[serviceDef.id].toStr))
-		
-		serviceDefs[serviceDef.id] = serviceDef
-    }	
+	private Void addServiceOverrideFromMethod(Method method) {
+		if (!method.isStatic)
+			throw IocErr(IocMessages.builderMethodsMustBeStatic(method))
 
+		build := (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
 
-	
+		overrideDef	:= SrvDef {
+			it.moduleId 	= this.moduleId
+			it.id 			= build.serviceId ?: method.returns.qname
+			it.type			= method.returns
+			it.scope 		= build.scope 
+			it.proxy		= build.proxy
+			it.buildData	= method
+			it.overrideRef	= build.overrideRef ?: method.qname
+			it.overrideOptional	= build.overrideOptional
+		}
+
+		addServiceOverride(overrideDef)
+	}	
+
 	// ---- Binder Methods ------------------------------------------------------------------------
 
 	private Void bind() {
@@ -180,7 +198,7 @@ internal class ModuleDef {
 			if (bindMethod.params.size != 1 || !bindMethod.params[0].type.fits(ServiceBinder#))
 				throw IocErr(IocMessages.bindMethodWrongParams(bindMethod))
 
-			binder := ServiceBinderImpl(bindMethod, this) |ServiceDefMutable serviceDef| {
+			binder := ServiceBinderImpl(bindMethod, this) |SrvDef serviceDef| {
 				addServiceDef(serviceDef)
 			}
 
@@ -196,6 +214,23 @@ internal class ModuleDef {
 		}
 	}
 
+	// ---- Private Methods ------------------------------------------------------------------------
+
+    private Void addServiceDef(SrvDef serviceDef) {
+		tracker.log("Adding service definition for service '$serviceDef.id' -> ${serviceDef.type.qname}")
+		
+		if (serviceDefs.containsKey(serviceDef.id))
+			throw IocErr(IocMessages.buildMethodConflict(serviceDef.id, serviceDef.buildData->qname, serviceDefs[serviceDef.id].buildData->qname))
+		
+		serviceDefs[serviceDef.id] = serviceDef
+    }	
+
+    private Void addServiceOverride(SrvDef overrideDef) {
+		tracker.log("Adding service override for service '$overrideDef.id'")
+		
+		serviceOverrides.add(overrideDef)
+    }	
+	
 	private static Str stripMethodPrefix(Method method, Str prefix) {
 		if (method.name.lower.startsWith(prefix.lower))
 			return method.name[prefix.size..-1]

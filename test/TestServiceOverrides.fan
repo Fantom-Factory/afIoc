@@ -4,15 +4,15 @@ internal class TestServiceOverride : IocTest {
 	Void testAppOverrideById() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s44 := (T_MyService44) reg.serviceById("s44")
-		verify(s44 is T_MyService44Impl2)		
-		verifyEq(s44.judge, "dredd")		
+		verify(s44 is T_MyService44Impl2)
+		verifyEq(s44.judge, "dredd")
 	}
 
 	Void testAppOverrideByType() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s44 := (T_MyService44) reg.dependencyByType(T_MyService44#)
 		verify(s44 is T_MyService44Impl2)
-		verifyEq(s44.judge, "dredd")		
+		verifyEq(s44.judge, "dredd")
 	}
 
 	Void testOverrideWrongType() {
@@ -64,9 +64,14 @@ internal class T_MyModule58 {
 		binder.bind(T_MyService45#).withId("s45-func").withScope(ServiceScope.perThread)
 	}
 
+	@Build { serviceId = "s44" }
+	static T_MyService44 overrideById(Registry reg) {
+		reg.autobuild(T_MyService44Impl2#)
+	}
+	
 	@Contribute { serviceType=ServiceOverrides# }
 	private static Void contributeServiceOverrides(Configuration config) {
-		config["s44"] = config.autobuild(T_MyService44Impl2#)
+//		config["s44"] = config.autobuild(T_MyService44Impl2#)
 		config["T_MyService44"] = T_MyService44Impl2()
 		config[T_MyService90#] = T_MyService90Impl2()
 		

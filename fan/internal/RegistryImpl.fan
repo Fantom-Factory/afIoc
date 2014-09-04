@@ -104,6 +104,52 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
+		tracker.track("Applying service overrides") |->| {
+			serviceDefs  := (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
+			overrideDefs := (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
+//			moduleDefs.each |moduleDef| {
+//				moduleDef.serviceOverrides.each |serviceOverride| {
+//					matched := serviceDefs.findAll { it.matchesId(serviceOverride.id) }
+//					if (matched.size > 1)
+//						throw IocErr(IocMessages.multipleServicesDefined(serviceOverride.id, matched.map { it.id }))
+//					matched.first.applyOverride(serviceOverride)
+//				}
+//			}
+			
+			// normalise keys -> map all keys to orig key and apply overrides
+			// code nabbed from Configuration
+			keys		:= Utils.makeMap(Str#, Str#)
+			serviceDefs.each { keys[it.id] = it.id }
+			services	:= Str:SrvDef[:].addList(serviceDefs ) { it.id }	// TODO: nice error on dups
+			overrides	:= Str:SrvDef[:].addList(overrideDefs) { it.id }	// TODO: nice error on dups
+			found		:= true
+			while (!overrides.isEmpty && found) {
+				found = false
+				overrides = overrides.exclude |over, existingKey| {
+					overrideKey := over.overrideRef
+					if (keys.containsKey(existingKey)) {
+						keys[overrideKey] = keys[existingKey]	// TODO: nice error on dups
+						found = true
+						
+						tracker.log("'${overrideKey}' overrides '${existingKey}'")
+						srvDef := services[keys[existingKey]]						
+						srvDef.applyOverride(over)
+
+						return true
+					} else {
+						return false
+					}
+				}
+			}
+
+			overrides = overrides.exclude { it.overrideOptional }
+
+			if (!overrides.isEmpty) {
+				keysNotFound := overrides.keys.join(", ")
+				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(keysNotFound), services.keys)
+			}
+		}
+		
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
 				module := ModuleImpl(this, threadLocalManager, moduleDef)
@@ -306,7 +352,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? trackServiceById(Str serviceId, Bool checked) {
 		serviceDef := serviceDefById(serviceId)
 		if (serviceDef == null)
-			return checked ? throw IocErr(IocMessages.serviceIdNotFound(serviceId)) : null
+			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), stats.keys) : null
 		return getService(serviceDef, false, null)
 	}
 
@@ -407,7 +453,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 
 		if (serviceDefs.size > 1)
-			throw WtfErr(IocMessages.multipleServicesDefined(serviceId))
+			throw IocErr(IocMessages.multipleServicesDefined(serviceId, serviceDefs.map { it.serviceId }))
 		
 		return serviceDefs.isEmpty ? null : serviceDefs.first
 	}

@@ -24,7 +24,7 @@ facet class Build {
 	** If not specified on an 'override' method then the original value is left untouched.
 	const ServiceProxy? proxy
 	
-//	const Str? overrideRef	:= null
-//	
-//	const Bool overrideOptional	:= false
+	const Str? overrideRef	:= null
+	
+	const Bool overrideOptional	:= false
 }

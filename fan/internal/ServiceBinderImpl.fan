@@ -5,7 +5,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	
 	private ModuleDef		moduleDef
 	private Method 			bindMethod
-	|ServiceDefMutable serviceDef| addServiceDef
+	|SrvDef serviceDef|		addServiceDef
 
 	private Str? 			serviceId
 	private Type? 			serviceMixin
@@ -15,7 +15,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
-	new make(Method bindMethod, ModuleDef moduleDef, |ServiceDefMutable serviceDef| addServiceDef) {
+	new make(Method bindMethod, ModuleDef moduleDef, |SrvDef serviceDef| addServiceDef) {
 		this.addServiceDef = addServiceDef
 		this.bindMethod = bindMethod
 		this.moduleDef = moduleDef
@@ -74,13 +74,13 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 
 		setDefaultScope
 
-		serviceDef := ServiceDefMutable() {
+		serviceDef := SrvDef() {
 			it.id 			= this.serviceId
 			it.moduleId		= this.moduleDef.moduleId
 			it.type 		= this.serviceMixin
 			it.scope		= this.scope
 			it.proxy		= this.noProxy ? ServiceProxy.never : ServiceProxy.always
-			it.builderData	= this.serviceImpl
+			it.buildData	= this.serviceImpl
 		}
 
 		addServiceDef(serviceDef)

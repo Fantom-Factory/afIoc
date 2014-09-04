@@ -28,7 +28,7 @@ internal const class IocMessages {
 	}
 	
     static Str buildMethodConflict(Str serviceId, Str conflict, Str existing) {
-        "Service ${serviceId} (defined by ${conflict}) conflicts with previously defined service defined by ${existing}."
+        "Service ${serviceId} (${conflict}) conflicts with previously defined service (${existing})"
     }
 	
 	static Str bindMethodMustBeStatic(Method method) {
@@ -72,7 +72,7 @@ internal const class IocMessages {
 	}
 	
 	static Str serviceIdNotFound(Str serviceId) {
-		"Service id '${serviceId}' is not defined by any module."
+		"Service id '${serviceId}' is not defined."
 	}
 
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {
@@ -143,14 +143,6 @@ internal const class IocMessages {
 		"Override for Service '$serviceId is not immutable"
 	}
 	
-	static Str serviceOverrideDoesNotFitServiceDef(Str serviceId, Type serOverride, Type serDef) {
-		"Override for service '$serviceId (${serOverride.qname}) does not fit the definition of ${serDef.qname}"
-	}
-	
-	static Str serviceOverrideDoesNotExist(Str serviceId) {
-		"Overriding service '$serviceId' maybe difficult as service '$serviceId' doesn't exist!"
-	}
-	
 	static Str shutdownListenerError(Str listener, Err cause) {
 		"Error notifying ${listener} of registry shutdown: ${cause}"
 	}
@@ -207,14 +199,26 @@ internal const class IocMessages {
 		"Can not @Inject into static fields: ${field.qname}"
 	}
 
-	static Str multipleServicesDefined(Str serviceId) {
-		"Multiple services defined for service id $serviceId"
+	static Str multipleServicesDefined(Str serviceId, Str[] serviceIds) {
+		"Service ID '${serviceId}' matches multiple services -> " + serviceIds.join(", ")
 	}
 
 	static Str builtinServicesCanNotBeOverridden(Str serviceId) {
 		"Built-in services cannot be overridden: $serviceId"
 	}
 
+
+
+	// ---- Service Override Messages -------------------------------------------------------------
+
+	static Str serviceOverrideDoesNotFitServiceDef(Str serviceId, Type serOverride, Type serDef) {
+		"Override for service '$serviceId (${serOverride.qname}) does not fit the definition of ${serDef.qname}"
+	}
+	
+	static Str serviceOverrideDoesNotExist(Str serviceId) {
+		"Can not override service '$serviceId' it doesn't exist!"
+	}
+	
 
 	
 	// ---- Proxy Service Messages ----------------------------------------------------------------

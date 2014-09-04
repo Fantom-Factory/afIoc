@@ -198,7 +198,7 @@ internal const class InjectionUtils {
 					log("Service not found - failing silently...")
 					return null
 				}
-				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
+				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.stats.keys)
 			}
 
 			service := objLocator.getService(serviceDef, false, true)
@@ -218,7 +218,7 @@ internal const class InjectionUtils {
 					log("Service not found - failing silently...")
 					return null
 				}
-				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
+				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.stats.keys)
 			}
 			
 			service := objLocator.getService(serviceDef, false, null)

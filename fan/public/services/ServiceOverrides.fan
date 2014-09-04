@@ -47,6 +47,7 @@ using afBeanUtils::NotFoundErr
 ** @since 1.2
 ** 
 ** @uses Configuration of 'Str:Obj' (serviceId:overrideImpl)
+@Deprecated
 const mixin ServiceOverrides {
 	
 	@NoDoc
@@ -71,14 +72,14 @@ internal const class ServiceOverridesImpl : ServiceOverrides {
 		serviceOverrides.map |buildObj, id| {
 			existingDef := ((ObjLocator) registry).serviceDefById(id)
 			if (existingDef == null)
-				throw OverrideNotFoundErr(IocMessages.serviceOverrideDoesNotExist(id), ((RegistryImpl) registry).stats.keys)
+				throw ServiceNotFoundErr(IocMessages.serviceOverrideDoesNotExist(id), ((RegistryImpl) registry).stats.keys)
 
 			builder := (|->Obj|?) null
-			
+
 			if (buildObj is |->Obj|) {
 				builder = buildObj
 			}
-			
+
 			if (buildObj is Type) {
 				overrideType := (Type) buildObj	
 				if (!overrideType.fits(existingDef.serviceType))
@@ -96,18 +97,5 @@ internal const class ServiceOverridesImpl : ServiceOverrides {
 			catch	throw IocErr(IocMessages.serviceOverrideNotImmutable(id))
 			return	builder.toImmutable
 		}
-	}
-}
-
-@NoDoc
-const class OverrideNotFoundErr : IocErr, NotFoundErr {
-	override const Str[] availableValues
-	
-	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
-		this.availableValues = availableValues.map { it?.toStr }.sort
-	}
-	
-	override Str toStr() {
-		NotFoundErr.super.toStr		
 	}
 }
