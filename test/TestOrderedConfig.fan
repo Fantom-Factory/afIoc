@@ -451,7 +451,7 @@ internal class T_MyModule92 {
 		conf.addPlaceholder("BedSheetFilters")
 	}
 
-	@Build { serviceId="s82"; disableProxy=true }
+	@Build { serviceId="s82"; proxy=ServiceProxy.never }
 	static T_MyService82 buildHttpPipeline(Str[] filters) {
 		return T_MyService82(filters)
 	}	

@@ -36,32 +36,34 @@ internal class TestAspect : IocTest {
 	}
 	
 	Void testGlobMatching() {
-		def := StandardAdviceDef {
+		def := AdviceDef {
 			it.serviceIdGlob	= "*Aspect"
 			it.advisorMethod	= Obj#hash
 		}
 
-		serviceDef := StandardServiceDef() {
+		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "T_MyService65Aspect"
 			it.moduleId			= ""
 			it.serviceType 		= Type#
 			it.scope			= ServiceScope.perInjection
 			it.description 		= ""
+			it.serviceBuilder	= |->Obj| { 6 }
 		}		
 		verify(def.matchesService(serviceDef))
 		
-		serviceDef = StandardServiceDef() {
+		serviceDef = ServiceDef.makeStandard() {
 			it.serviceId 		= "T_MyService67NoMatch"
 			it.moduleId			= ""
 			it.serviceType 		= Type#
 			it.scope			= ServiceScope.perInjection
 			it.description 		= ""
+			it.serviceBuilder	= |->Obj| { 9 }
 		}		
 		verifyFalse(def.matchesService(serviceDef))
 	}
 	
 	Void testAdvisingNonProxy() {
-		verifyIocErrMsg(IocMessages.adviceDoesNotMatchAnyServices(StandardAdviceDef {
+		verifyIocErrMsg(IocMessages.adviceDoesNotMatchAnyServices(AdviceDef {
 			it.advisorMethod = T_MyModule11#addTransactions
 			it.serviceIdGlob = "s69"
 		}, Str[,])) {

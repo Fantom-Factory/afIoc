@@ -36,14 +36,14 @@ internal const class ModuleImpl : Module {
 		localMap := localManager.createMap(moduleName(moduleDef.moduleId))
 		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
 		moduleDef.serviceDefs.each |def| {
-			srvState[def.serviceId] = ModuleState(localMap, def, null, ServiceLifecycle.defined)
+			srvState[def.id] = ModuleState(localMap, def.toServiceDef, null, ServiceLifecycle.defined)
 		}
 		
 		this.serviceState 	= srvState		
 		this.moduleId		= moduleDef.moduleId
 		this.objLocator 	= objLocator
 		this.adviceDefs		= moduleDef.adviceDefs
-		this.contributions	= moduleDef.contributionDefs.map |contrib| { 
+		this.contributions	= moduleDef.contribDefs.map |contrib| { 
 			ContributionImpl {
 				it.serviceId 	= contrib.serviceId
 				it.serviceType 	= contrib.serviceType

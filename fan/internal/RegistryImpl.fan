@@ -24,23 +24,23 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		tracker.track("Defining Built-In services") |->| {
 			services := ServiceDef:Obj?[:]
 			
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= Registry#
 			}] = this
 
 			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= RegistryStartup#
 				it.scope			= ServiceScope.perThread
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, RegistryStartupImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, RegistryStartupImpl#)
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= RegistryShutdown#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, RegistryShutdownImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, RegistryShutdownImpl#)
 			}] = null
 			
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceId 		= IocConstants.ctorItBlockBuilder
 				it.serviceType 		= |This|#
 				it.scope			= ServiceScope.perInjection
@@ -50,50 +50,50 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= DependencyProviders#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, DependencyProvidersImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, DependencyProvidersImpl#)
 			}] = null
  
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ServiceOverrides#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ServiceOverridesImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ServiceOverridesImpl#)
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ServiceStats#
 			}] = ServiceStatsImpl(this)
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ServiceProxyBuilder#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= PlasticCompiler#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, PlasticCompiler#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, PlasticCompiler#)
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= AspectInvokerSource#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
 			}] = null
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ThreadLocalManager#
 			}] = threadLocalManager
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= RegistryMeta#
 			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= LogProvider#
 			}] = LogProviderImpl()
 
-			services[BuiltInServiceDef() {
+			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ActorPools#
-				it.serviceBuilder	= ServiceDef.fromCtorAutobuild(it, ActorPoolsImpl#)
+				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ActorPoolsImpl#)
 			}] = null
 
 			builtInModule := ModuleImpl(this, threadLocalManager, IocConstants.builtInModuleId, services)
@@ -127,7 +127,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
-				it.contributionDefs.each {
+				it.contribDefs.each {
 					if (!it.optional) {	// no warnings / errors for optional contributions
 						if (it.serviceId != null)
 							if (serviceDefById(it.serviceId) == null)
@@ -156,13 +156,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 
-		InjectionTracker.withCtx(this, tracker) |->Obj?| {   
-			tracker.track("Applying service overrides") |->| {
-				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname, true)).overrides
-				overrides.each |builder, serviceId| {
-					serviceDefById(serviceId).overrideBuilder(builder)
-				}
-			}
+		InjectionTracker.withCtx(this, tracker) |->Obj?| {
+
+			// FIXME override services
+//			tracker.track("Applying service overrides") |->| {
+//				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname, true)).overrides
+//				overrides.each |builder, serviceId| {
+//					serviceDefById(serviceId).overrideBuilder(builder)
+//				}
+//			}
 			
 			depProSrc = trackServiceById(DependencyProviders#.qname, true)
 			return null
@@ -349,13 +351,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 		
 		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
-		serviceDef := StandardServiceDef() {
+		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.moduleId			= ""
 			it.serviceType 		= type
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$type.qname : Autobuild"
-			it.serviceBuilderRef.val = |->Obj?| { return null }.toImmutable
+			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
 		}		
 		
 		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
@@ -374,13 +376,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			throw IocErr(IocMessages.bindMixinIsNot(mixinT))
 
 		// create a dummy serviceDef
-		serviceDef := StandardServiceDef() {
+		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.moduleId			= ""
 			it.serviceType 		= mixinT
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$mixinT.qname : Create Proxy"
-			it.serviceBuilderRef.val = |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
+			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
 		}
 
 		return spb.createProxyForMixin(serviceDef)

@@ -1,12 +1,27 @@
 
-internal const mixin AdviceDef {
-
-	abstract Method advisorMethod()
-
-	** if true, do not throw err on startup if this does not match any services 
-	abstract Bool optional()
+internal const class AdviceDef {
 	
-	abstract Bool matchesService(ServiceDef serviceDef)
+	const Str		serviceIdGlob
+	const Type?		serviceType
+	const Method 	advisorMethod
+	const Bool	 	optional
+
+	private const Regex 	globMatcher
 	
-	abstract Str errMsg()
+	new make(|This|? f := null) { 
+		f?.call(this)
+		globMatcher = Regex.glob(serviceIdGlob)
+	}
+	
+	Bool matchesService(ServiceDef serviceDef) {
+		(serviceType != null) 
+			? serviceDef.serviceType.fits(serviceType)
+			: globMatcher.matches(serviceDef.serviceId)
+	}
+	
+	Str errMsg() {
+		(serviceType != null) 
+			? "serviceType of ${serviceType.qname}"
+			: "serviceId glob '${serviceIdGlob}'"
+	}
 }
