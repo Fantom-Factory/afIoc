@@ -201,7 +201,7 @@ internal const class InjectionUtils {
 				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
 			}
 
-			service := objLocator.trackAutobuild(serviceDef.serviceImplType ?: serviceDef.serviceType, null, null)
+			service := objLocator.getService(serviceDef, false, true)
 			
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
@@ -221,7 +221,7 @@ internal const class InjectionUtils {
 				throw IocErr(IocMessages.serviceIdNotFound(inject.serviceId))
 			}
 			
-			service := objLocator.getService(serviceDef, false)
+			service := objLocator.getService(serviceDef, false, null)
 			
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))

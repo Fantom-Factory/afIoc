@@ -78,7 +78,6 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.serviceId 		= this.serviceId
 			it.moduleId 		= this.moduleDef.moduleId
 			it.serviceType 		= this.serviceMixin
-			it.serviceImplType 	= this.serviceImpl
 			it.scope			= this.scope
 			it.noProxy			= this.noProxy
 			it.description 		= "$this.serviceId : Standard Ctor Builder"

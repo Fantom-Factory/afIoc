@@ -6,7 +6,7 @@ internal const class StandardServiceDef : ServiceDef {
 	override const Str 			serviceId
 	override const Str 			unqualifiedServiceId
 	override const Type			serviceType
-	override const Type?		serviceImplType
+//	override const Type?		serviceImplType
 	override const ServiceScope	scope
 	override const Bool			noProxy
 			 const AtomicRef	serviceBuilderRef

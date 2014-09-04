@@ -1,4 +1,50 @@
 
+internal class ServiceDefMutable {
+
+	Str 			serviceId
+	Type 			serviceType
+	|->Obj|			serviceBuilder
+	ServiceScope	scope
+	ServiceProxy	proxy
+	Str 			moduleId
+
+	** Only actually needed by the 'ctorItBlockBuilder'!
+	** Will be 'null' if built by a builder method 
+	Type?			serviceImplType
+
+	private Str 	unqualifiedServiceId
+
+	new make(|This| in) { in(this) }
+	
+//	Bool proxiable() {
+//		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
+//		// Yeah, exactly! Just don't allow it.
+//		proxy != ServiceProxy.never && serviceType.isMixin && (scope != ServiceScope.perInjection)
+//	}
+	
+	Bool matchesId(Str serviceId) {
+		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
+	}
+	
+	override Str toStr() {
+		serviceId
+	}
+	
+	override Int hash() {
+		serviceId.hash
+	}
+
+	override Bool equals(Obj? obj) {
+		serviceId == (obj as ServiceDef)?.serviceId
+	}
+	
+	private static Str unqualify(Str id) {
+		id.contains("::") ? id[(id.index("::")+2)..-1] : id
+	}	
+}
+
+
+
 **
 ** Meta info that defines a service 
 ** 
@@ -17,13 +63,12 @@ internal const mixin ServiceDef {
 	** Returns the id of the module this service was defined in
 	abstract Str moduleId()
 	
-	** Returns the service type, either the mixin or implementation type depending on how it was 
-	** defined.
+	** Returns the service type, either the mixin or impl type depending on how it was defined.
 	abstract Type serviceType()
 
 	** Only actually needed by the 'ctorItBlockBuilder'!
 	** Will be 'null' if built by a builder method 
-	abstract Type? serviceImplType()
+//	abstract Type? serviceImplType()
 
 	abstract ServiceScope scope()
 
