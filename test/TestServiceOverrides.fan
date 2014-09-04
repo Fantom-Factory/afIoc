@@ -23,7 +23,7 @@ internal class TestServiceOverride : IocTest {
 	}
 
 	Void testOverrideDoesNotExist() {
-		verifyIocErrMsg(IocMessages.serviceOverrideDoesNotExist("s12")) {
+		verifyIocErrMsg(IocMessages.serviceIdNotFound("s12")) {
 			RegistryBuilder().addModule(T_MyModule61#).build.startup
 		}
 	}
@@ -43,15 +43,10 @@ internal class TestServiceOverride : IocTest {
 	}
 
 	Void testOverrideByType() {
+//		override in service defs
 		reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s45 := (T_MyService45) reg.serviceById("s45-type")
 		verifyEq(s45.dude, "auto")
-	}
-
-	Void testOverrideByFunc() {
-		reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
-		s45 := (T_MyService45) reg.serviceById("s45-func")
-		verifyEq(s45.dude, "funcy")
 	}
 }
 
@@ -64,22 +59,19 @@ internal class T_MyModule58 {
 		binder.bind(T_MyService45#).withId("s45-func").withScope(ServiceScope.perThread)
 	}
 
-	@Build { serviceId = "s44" }
+	@Override { serviceId = "s44" }
 	static T_MyService44 overrideById(Registry reg) {
 		reg.autobuild(T_MyService44Impl2#)
 	}
-	
-	@Contribute { serviceType=ServiceOverrides# }
-	private static Void contributeServiceOverrides(Configuration config) {
-//		config["s44"] = config.autobuild(T_MyService44Impl2#)
-		config["T_MyService44"] = T_MyService44Impl2()
-		config[T_MyService90#] = T_MyService90Impl2()
-		
-		// override with type
-		config["s45-type"] = T_MyService45Impl2#
-		
-		// override with func
-		config["s45-func"] = |->Obj| { s := T_MyService45Impl2(); s.dude = "funcy"; return s }
+
+	@Override
+	static T_MyService44 overrideByType(Registry reg) {
+		reg.autobuild(T_MyService44Impl2#)
+	}
+
+	@Override { serviceType=T_MyService90# }
+	static T_MyService90 overrideUsingTypeAsKey(Registry reg) {
+		reg.autobuild(T_MyService90Impl2#)
 	}
 }
 
@@ -108,15 +100,16 @@ internal class T_MyModule60 {
 		binder.bind(T_MyService44#).withId("s44")
 		binder.bind(T_MyService12#).withId("s12")
 	}
-	@Contribute { serviceType=ServiceOverrides# }
-	private static Void contributeServiceOverrides(Configuration config) {
-		config.set("s44", config.autobuild(T_MyService12#))
-	}
+
+	@Override { serviceId="s44" }
+	private static T_MyService12 overrideWotever() {
+		(Obj) 69
+	}	
 }
 
 internal class T_MyModule61 {
-	@Contribute { serviceType=ServiceOverrides# }
-	private static Void contributeServiceOverrides(Configuration config) {
-		config.set("s12", config.autobuild(T_MyService12#))
+	@Override { serviceId="s12" }
+	static T_MyService12 overrideWotever() {
+		(Obj) 69
 	}
 }
