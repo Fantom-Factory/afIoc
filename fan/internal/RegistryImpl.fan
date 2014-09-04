@@ -56,11 +56,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}] = null
  
 			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= ServiceOverrides#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ServiceOverridesImpl#)
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ServiceStats#
 			}] = ServiceStatsImpl(this)
 
@@ -107,14 +102,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		tracker.track("Applying service overrides") |->| {
 			serviceDefs  := (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
 			overrideDefs := (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
-//			moduleDefs.each |moduleDef| {
-//				moduleDef.serviceOverrides.each |serviceOverride| {
-//					matched := serviceDefs.findAll { it.matchesId(serviceOverride.id) }
-//					if (matched.size > 1)
-//						throw IocErr(IocMessages.multipleServicesDefined(serviceOverride.id, matched.map { it.id }))
-//					matched.first.applyOverride(serviceOverride)
-//				}
-//			}
 			
 			// normalise keys -> map all keys to orig key and apply overrides
 			// code nabbed from Configuration
@@ -200,18 +187,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}
 		}
-		
 
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {
-
-			// FIXME override services
-//			tracker.track("Applying service overrides") |->| {
-//				overrides := ((ServiceOverrides) trackServiceById(ServiceOverrides#.qname, true)).overrides
-//				overrides.each |builder, serviceId| {
-//					serviceDefById(serviceId).overrideBuilder(builder)
-//				}
-//			}
-			
 			depProSrc = trackServiceById(DependencyProviders#.qname, true)
 			return null
 		}
