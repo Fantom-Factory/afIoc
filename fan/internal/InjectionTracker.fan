@@ -2,10 +2,10 @@ using concurrent::Actor
 
 internal class InjectionTracker {
 
-	static const Str 			trackerId		:= "afIoc.injectionTracker"
-	static const Str 			serviceDefId	:= "afIoc.serviceDef"
-	static const Str 			confProviderId	:= "afIoc.configProvider"
-	static const Str 			injectionCtxId	:= "afIoc.injectionCtx"
+	private static const Str 	trackerId		:= "afIoc.injectionTracker"
+	private static const Str 	serviceDefId	:= "afIoc.serviceDef"
+	private static const Str 	confProviderId	:= "afIoc.configProvider"
+	private static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
 	
 	private OpTracker 			tracker
 			ObjLocator?			objLocator
@@ -62,13 +62,6 @@ internal class InjectionTracker {
 
 			return operation.call()
 		}
-	}
-
-	static ServiceDef? building() {
-		def := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
-		if (def?.scope == ServiceScope.perInjection)
-			def = ThreadStack.peekParent(serviceDefId, false)
-		return def
 	}
 
 	// ---- Config Providing -------------------------------------------------------------------------------------------

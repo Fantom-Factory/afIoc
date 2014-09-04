@@ -79,6 +79,39 @@ internal class TestAutobuild : IocTest {
 }
 
 internal class T_MyModule75 {
+	
+//	It's all about creating and modifying ServiceDefs
+// add overrideRef to @Build
+	
+//	@Build
+//  static IocEnv overrideIocEnv() { ... }
+	
+//	static Void defineServices(ServiceDefs defs) ...?
+	
+//	static Void serviceDefinitions(ServiceDefs defs) {
+//		defs.add(T_MyService02#).withProxy
+//		//defs.add(T_MyService02#).withProxy.withImpl
+//
+//		defs.overrideService(T_MyService02#).withImpl(MyService02Impl#)
+//		
+//		defs.overrideService(T_MyService03#).withBuildFunc |->Obj| { MyService03Impl()  }
+//		
+//		
+//		Norm:
+//		.withId(Str id)
+//		.withImplId		-> fully qualified
+//		.withScope(ServiceScope scope)
+//		.withProxy(ServiceProxy.asNeeded / never / always)
+//		
+//		Override
+//		override(Str serviceId)
+//		.withScope(ServiceScope scope)
+//		.withProxy(ServiceProxy.asNeeded / never / always)
+//		.withImpl(Type)
+//		.withOverrideRef(Str)
+//		.optional
+//	}
+
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService02#).withId("s2")
 		binder.bind(T_MyService48#)

@@ -46,7 +46,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.scope			= ServiceScope.perInjection
 				it.description 		= "$it.serviceId : Autobuilt. Always."
 				it.serviceBuilder	= |->Obj| {
-					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.building.serviceImplType)
+					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.injectionCtx.injectingIntoType)
 				}
 			}] = null
 
@@ -305,12 +305,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefById(serviceId)
 		if (serviceDef == null)
 			return checked ? throw IocErr(IocMessages.serviceIdNotFound(serviceId)) : null
-		return getService(serviceDef, false)
+		return getService(serviceDef, false, null)
 	}
 
-	override Obj getService(ServiceDef serviceDef, Bool returnReal) {
-		// thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		modules[serviceDef.moduleId].service(serviceDef, returnReal)
+	override Obj getService(ServiceDef serviceDef, Bool returnReal, Bool? autobuild) {
+		// FIXME: thinking of extending serviceDef to return the service with a 'makeOrGet' func
+		// then have autobuild as a new func, like newInstance()
+		modules[serviceDef.moduleId].service(serviceDef, returnReal, autobuild)
 	}
 
 	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -326,7 +327,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			InjectionTracker.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
-			return getService(serviceDef, false)			
+			return getService(serviceDef, false, null)			
 		}
 
 		config := InjectionTracker.provideConfig(dependencyType)
@@ -352,7 +353,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.moduleId			= ""
 			it.serviceType 		= type
-			it.serviceImplType 	= implType	// the important bit
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$type.qname : Autobuild"
 			it.serviceBuilderRef.val = |->Obj?| { return null }.toImmutable
@@ -378,7 +378,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.moduleId			= ""
 			it.serviceType 		= mixinT
-			it.serviceImplType 	= implT
 			it.scope			= ServiceScope.perInjection
 			it.description 		= "$mixinT.qname : Create Proxy"
 			it.serviceBuilderRef.val = |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable

@@ -19,7 +19,7 @@ internal mixin Module {
 	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
 	
 	** Locates (and builds if necessary) a service given a service def
-	abstract Obj? service(ServiceDef serviceDef, Bool returnReal)
+	abstract Obj? service(ServiceDef serviceDef, Bool returnReal, Bool? autobuild)
 
 	abstract Str:ServiceStat serviceStats()
 	

@@ -74,7 +74,7 @@ class Configuration {
 	** 'newKey' does not appear in the the resulting configuration and is never seen by the end service.
 	** It is only used as reference to this override, so this override itself may be overridden.
 	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
-	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
+	** 'newKey' may be any 'Obj' instance but sane and intelligent people will *always* pass in a 'Str'.  
 	** 
 	** 'newValue' is coerced to the service's contribution type.
 	Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
@@ -90,7 +90,7 @@ class Configuration {
 	** 'newKey' does not appear in the the resulting configuration and is never seen by the end service.
 	** It is only used as reference to this override, so this override itself may be overridden.
 	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
-	** 'newKey' may be defined as 'Obj' but sane and level headed people will *always* pass in a 'Str'.  
+	** 'newKey' may be any 'Obj' instance but sane and intelligent people will *always* pass in a 'Str'.  
 	Void remove(Obj existingKey, Obj? newKey := null) {
 		config.remove(existingKey, newKey)
 	}

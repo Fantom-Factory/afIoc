@@ -90,7 +90,7 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
-	override Obj? service(ServiceDef def, Bool returnReal) {
+	override Obj? service(ServiceDef def, Bool returnReal, Bool? autobuild) {
 		regShutdown.check
 		// we're going deeper!
 		return InjectionTracker.withServiceDef(def) |->Obj?| {
@@ -103,21 +103,18 @@ internal const class ModuleImpl : Module {
 
 			// TODO: A const service could be created twice if there's a race condition between two 
 			// threads - but only one is stored. 
-			// This is ONLY dangerous because gawd knows what those services do in their ctor or 
-			// PostInject methods!
-			if (def.scope == ServiceScope.perApplication) {
-				return getOrMakeService(def, returnReal, true)
-			}
+			// This is ONLY dangerous because gawd knows what those services do in their ctor and 
+			// @PostInject methods!
 			
-			if (def.scope == ServiceScope.perThread) {
-				return getOrMakeService(def, returnReal, true)
-			}
-			
-			if (def.scope == ServiceScope.perInjection) {
-				return getOrMakeService(def, returnReal, false)
-			}
-			
-			throw WtfErr("What scope is {$def.scope}???")
+			useCache := !(autobuild ?: def.scope == ServiceScope.perInjection)
+
+			if (returnReal)
+				return getOrMakeRealService(def, useCache)
+
+			if (!def.proxiable)
+				return getOrMakeRealService(def, useCache)
+
+			return getOrMakeProxyService(def, useCache)
 		}
 	}
 	
@@ -145,14 +142,6 @@ internal const class ModuleImpl : Module {
 	}
 	
 	// ---- Private Methods ----------------------------------------------------
-
-	private Obj getOrMakeService(ServiceDef def, Bool returnReal, Bool useCache) {
-		if (returnReal)
-			return getOrMakeRealService(def, useCache)
-		if (!def.proxiable)
-			return getOrMakeRealService(def, useCache)		
-		return getOrMakeProxyService(def, useCache)
-	}
 
 	private Obj getOrMakeRealService(ServiceDef def, Bool useCache) {
 		if (useCache) {

@@ -7,7 +7,7 @@ internal const class BuiltInServiceDef : ServiceDef {
 	override const Str 			serviceId
 	override const Str 			unqualifiedServiceId
 	override const Type			serviceType
-	override const Type?		serviceImplType
+//	override const Type?		serviceImplType
 	override const ServiceScope	scope
 	override const Bool			noProxy
 	override const |->Obj|		serviceBuilder
@@ -23,8 +23,8 @@ internal const class BuiltInServiceDef : ServiceDef {
 		if (serviceId == null)
 			serviceId = serviceType.qname
 
-		if (serviceImplType == null && serviceBuilder != null)
-			serviceImplType = Type.find("${serviceType.qname}Impl", false) ?: serviceType
+//		if (serviceImplType == null && serviceBuilder != null)
+//			serviceImplType = Type.find("${serviceType.qname}Impl", false) ?: serviceType
 		
 		if (serviceBuilder == null)
 			serviceBuilder = |->Obj| { 
