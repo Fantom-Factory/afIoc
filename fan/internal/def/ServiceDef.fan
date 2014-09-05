@@ -9,12 +9,13 @@ internal const class ServiceDef {
 	const |->Obj|		serviceBuilder
 	const Str			description
 
-	private const Str 			unqualifiedServiceId
-	private const Type 			serviceTypeNonNull
+	private const Str 	unqualifiedServiceId
+	private const Type 	serviceTypeNonNull
 	
 	// -- null for BareBones ctor --
 	private const ObjLocator?	objLocator
 			const AdviceDef[]?	adviceDefs
+			const Method[]?		contribMethods
 	private const AtomicInt?	implCountRef	:= AtomicInt(0)
 	private const ObjectRef?	lifecycleRef
 	private const ObjectRef?	serviceImplRef
@@ -28,15 +29,13 @@ internal const class ServiceDef {
 	}
 		
 	new make(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
-		// FIXME
-//		if (def.hasProxy != ServiceProxy.never) aProxy = AtomicRef(null)
-		
 		this.objLocator		= objLocator
 		this.serviceId		= srvDef.id
 		this.serviceType	= srvDef.type
 		this.serviceScope	= srvDef.scope
 		this.serviceProxy	= srvDef.proxy
 		this.adviceDefs		= srvDef.adviceDefs
+		this.contribMethods	= srvDef.contribMeths
 		this.description	= "wotever"
 		
 		if (srvDef.buildData is Type) {
@@ -74,6 +73,28 @@ internal const class ServiceDef {
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
 		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope, null)
 	}
+	
+	Bool matchesId(Str serviceId) {
+		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
+	}
+
+	Bool matchesType(Type serviceType) {
+		serviceTypeNonNull.fits(serviceType.toNonNullable)
+	}
+
+	Void contribute(ConfigurationImpl config) {
+		contribMethods?.each |method| {
+			InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
+				sizeBefore := config.size
+				
+				InjectionUtils.callMethod(method, null, [Configuration(config)])
+				
+				config.cleanupAfterModule
+				sizeAfter := config.size
+				InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
+			}
+		}
+	}	
 
 	Obj getService() {
 		service(this, false, null)
@@ -90,14 +111,6 @@ internal const class ServiceDef {
 		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
 		// Yeah, exactly! Just don't allow it.
 		serviceProxy != ServiceProxy.never && serviceType.isMixin && (serviceScope != ServiceScope.perInjection)
-	}
-	
-	Bool matchesId(Str serviceId) {
-		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
-	}
-
-	Bool matchesType(Type serviceType) {
-		serviceTypeNonNull.fits(serviceType.toNonNullable)
 	}
 	
 	ServiceDefinition toServiceDefinition() {
@@ -226,15 +239,37 @@ internal class SrvDef {
 	Str?			desc
 	
 	AdviceDef[]?	adviceDefs
+	Method[]?		contribMeths
 
-	new make(|This| in) { in(this) }
+	private const Str 	unqualifiedId
+	private const Type?	typeNonNull
+
+	new make(|This| in) {
+		in(this) 
+		unqualifiedId 	= unqualify(id)
+		typeNonNull		= type?.toNonNullable
+	}
 	
 	Void addAdviceDef(AdviceDef adviceDef) {
 		if (adviceDefs == null)
 			adviceDefs = AdviceDef[,]
 		adviceDefs.add(adviceDef)
 	}
+
+	Void addContribDef(ContributionDef contribDef) {
+		if (contribMeths == null)
+			contribMeths = Method[,]
+		contribMeths.add(contribDef.method)
+	}
 	
+	Bool matchesId(Str serviceId) {
+		this.id.equalsIgnoreCase(serviceId) || this.unqualifiedId.equalsIgnoreCase(unqualify(serviceId))
+	}
+
+	Bool matchesType(Type serviceType) {
+		typeNonNull.fits(serviceType.toNonNullable)
+	}
+
 	ServiceDef toServiceDef(ObjLocator objLocator, ThreadLocalManager localManager, Obj? impl) {
 		if (builtIn) {
 			proxy = ServiceProxy.never
@@ -269,5 +304,9 @@ internal class SrvDef {
 	}
 
 	override Str toStr() { id }
+	
+	private static Str unqualify(Str id) {
+		id.contains("::") ? id[(id.index("::")+2)..-1] : id
+	}
 }
 

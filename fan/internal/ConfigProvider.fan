@@ -21,9 +21,7 @@ const internal class ConfigProvider {
 		objLocator := InjectionTracker.peek.objLocator
 
 		config := ConfigurationImpl(objLocator, serviceDef, configType)
-		objLocator.contributionsByServiceDef(serviceDef).each {
-			it.contribute(config)
-		}
+		serviceDef.contribute(config)
 		
 		if (configType.name == "List")
 			return config.toList

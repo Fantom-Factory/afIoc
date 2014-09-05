@@ -26,13 +26,13 @@ internal class TestContribDefs : IocTest {
 	}
 
 	Void testErrWhenServiceIdNoExist() {
-		verifyIocErrMsg(IocMessages.contributionMethodServiceIdDoesNotExist(T_MyModule27#cont, "wotever")) {
+		verifyIocErrMsg(IocMessages.contributionServiceNotFound(T_MyModule27#cont, "wotever")) {
 			RegistryBuilder().addModule(T_MyModule27#).build.startup
 		}  
 	}
 
 	Void testErrWhenServiceTypeNoExist() {
-		verifyIocErrMsg(IocMessages.contributionMethodServiceTypeDoesNotExist(T_MyModule28#cont, Int#)) {
+		verifyIocErrMsg(IocMessages.contributionServiceNotFound(T_MyModule28#cont, "sys::Int")) {
 			RegistryBuilder().addModule(T_MyModule28#).build.startup
 		}  
 	}

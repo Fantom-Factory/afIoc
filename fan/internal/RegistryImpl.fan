@@ -7,7 +7,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 			startupLock 	:= OneShotLock(IocMessages.registryStarted)
 	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:ServiceDef		serviceDefs
-			const Contribution[] 		contributions
 	private const DependencyProviders?	depProSrc
 	private const Duration				startTime
 			const AtomicBool			logServices		:= AtomicBool(false)
@@ -17,9 +16,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime	= tracker.startTime
 		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
-		contributions	:= Contribution[,]
 		threadLocalMgr 	:= ThreadLocalManagerImpl()
 		builtInModuleDef:= (ModuleDef?) null
+
 		readyMade 		:= [
 			Registry#			: this,
 			RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
@@ -44,11 +43,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			moduleDefs.add(builtInModuleDef)	// so we can override LogProvider			
 		}
 
+		srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
+		ovrDefs	:= (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
+		
 		// this IoC trace makes more sense when we throw dup id errs
 		tracker.track("Consolidating service definitions") |->| {
-			srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
-			ovrDefs	:= (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
-			
 			// we could use Map.addList(), but do it the long way round so we get a nice error on dups
 			services	:= Str:SrvDef[:] { caseInsensitive = true}
 			srvDefs.each {
@@ -93,7 +92,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 						}
 					}
 				}
-	
+
 				overrides = overrides.exclude { it.overrideOptional }
 	
 				if (!overrides.isEmpty) {
@@ -103,8 +102,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
+		tracker.track("Compiling service configuration methods") |->| {
+			moduleDefs.each |moduleDef| {
+				moduleDef.contribDefs.each |contribDef| {
+					matches := srvDefs.findAll |def| { 
+						contribDef.matchesSvrDef(def)
+					}
+					// should only really ever be the one match!
+					matches.each { it.addContribDef(contribDef) }
+					
+					if (!contribDef.optional && matches.isEmpty)
+						throw ServiceNotFoundErr(IocMessages.contributionServiceNotFound(contribDef.method, contribDef.srvId), srvDefs)
+				}
+			}
+		}
+
 		tracker.track("Validating advice definitions") |->| {
-			srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
 			advisableServices := srvDefs.findAll { it.proxy != ServiceProxy.never }
 			moduleDefs.each {
 				it.adviceDefs.each |adviceDef| {
@@ -118,44 +131,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
-		tracker.track("Consolidating module definitions") |->| {			
-			moduleDefs.each |moduleDef| {				
+		tracker.track("Solidifying service definitions") |->| {
+			moduleDefs.each |moduleDef| {
 				moduleDef.serviceDefs.each |def| {
 					impl := readyMade.get(def.type)
 					sdef := def.toServiceDef(this, threadLocalMgr, impl)
 					serviceDefs[sdef.serviceId] = sdef
 				}
-
-				moduleDef.contribDefs.each |contribDef| { 
-					contrib := ContributionImpl {
-						it.serviceId 	= contribDef.serviceId
-						it.serviceType 	= contribDef.serviceType
-						it.method		= contribDef.method
-						it.objLocator 	= this
-					}
-					contributions.add(contrib)
-				}				
 			}
 		}		
 
-		// set before we validate the contributions
-		this.serviceDefs	= serviceDefs
-		this.contributions	= contributions
-		
-		tracker.track("Validating contribution definitions") |->| {
-			moduleDefs.each {
-				it.contribDefs.each {
-					if (!it.optional) {	// no warnings / errors for optional contributions
-						if (it.serviceId != null)
-							if (serviceDefById(it.serviceId) == null)
-								throw IocErr(IocMessages.contributionMethodServiceIdDoesNotExist(it.method, it.serviceId))
-						if (it.serviceType != null)
-							if (serviceDefByType(it.serviceType) == null)
-								throw IocErr(IocMessages.contributionMethodServiceTypeDoesNotExist(it.method, it.serviceType))
-					}
-				}
-			}
-		}
+		this.serviceDefs = serviceDefs
 
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {
 			depProSrc = trackServiceById(DependencyProviders#.qname, true)
@@ -411,13 +397,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		return serviceDefs.isEmpty ? null : serviceDefs[0]
-	}
-
-	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
-		contributions.findAll {
-			// service def maybe null if contribution is optional
-			it.serviceDef?.serviceId == serviceDef.serviceId
-		}
 	}
 	
 	override Str[] serviceIds() {
