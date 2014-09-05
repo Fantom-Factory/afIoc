@@ -145,7 +145,11 @@ const class IocService : Service {
 		return registry.callMethod(method, instance, providedMethodArgs)
 	}
 
-
+	** Convenience for `Registry#serviceDefinitions`
+	Str:ServiceDefinition serviceDefinitions() {
+		checkServiceStarted
+		return registry.serviceDefinitions		
+	}
 
 	// ---- Private Methods -----------------------------------------------------------------------
 

@@ -8,17 +8,19 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 				shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:Module				modules
 	private const Module[]					modulesWithServices	// a cache for performance reasons
+	private const Str:ServiceDef			serviceDefs		:= Utils.makeMap(Str#, ServiceDef#) 
 	private const DependencyProviders?		depProSrc
 	private const Duration					startTime
 			const AtomicBool				logServices		:= AtomicBool(false)
 			const AtomicBool				logBanner		:= AtomicBool(false)
-			const AtomicBool				sayGoodbye		:= AtomicBool(false)
+			const AtomicBool				sayGoodbye		:= AtomicBool(false)	
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
-		this.startTime					= tracker.startTime
-		Str:Module serviceIdToModule 	:= Utils.makeMap(Str#, Module#)
-		Str:Module moduleIdToModule		:= Utils.makeMap(Str#, Module#)		
-		threadLocalManager 				:= ThreadLocalManagerImpl()
+		this.startTime		= tracker.startTime
+		serviceIdToModule 	:= (Str:Module)		Utils.makeMap(Str#, Module#)
+		serviceIdToService	:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
+		moduleIdToModule	:= (Str:Module)		Utils.makeMap(Str#, Module#)		
+		threadLocalManager 	:= ThreadLocalManagerImpl()
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -55,10 +57,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, DependencyProvidersImpl#)
 			}] = null
  
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= ServiceStats#
-			}] = ServiceStatsImpl(this)
-
 			services[ServiceDef.makeBuiltIn() {
 				it.serviceType 		= ServiceProxyBuilder#
 				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
@@ -108,7 +106,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			services	:= Str:SrvDef[:] { caseInsensitive = true}
 			serviceDefs.each {
 				if (services.containsKey(it.id))
-					throw IocErr(IocMessages.serviceAlreadyDefined(it.id, it.buildData->qname, services[it.id].buildData->qname))
+					throw IocErr(IocMessages.serviceAlreadyDefined(it.id, it, services[it.id]))
 				services[it.id] = it
 			}
 
@@ -116,8 +114,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			overrides	:= Str:SrvDef[:] { caseInsensitive = true}
 			overrideDefs.each {
 				if (overrides.containsKey(it.id))
-					// FIXME change err msg
-					throw IocErr(IocMessages.overrideAlreadyDefined(it.id, it.buildData->qname, overrides[it.id].buildData->qname))
+					throw IocErr(IocMessages.onlyOneOverrideAllowed(it.id, it, overrides[it.id]))
 				overrides[it.id] = it
 			}
 			
@@ -134,7 +131,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 						overrideKey := over.overrideRef
 						if (keys.containsKey(existingKey)) {
 							if (keys.containsKey(overrideKey))
-								throw IocErr(IocMessages.overrideAlreadyDefined(over.overrideRef, over.buildData->qname, services[keys[existingKey]].buildData->qname))
+								throw IocErr(IocMessages.overrideAlreadyDefined(over.overrideRef, over, services[keys[existingKey]]))
 
 							keys[overrideKey] = keys[existingKey]	// TODO: nice error on dups
 							found = true
@@ -208,6 +205,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			depProSrc = trackServiceById(DependencyProviders#.qname, true)
 			return null
 		}
+		
+		serviceDefinitions := serviceIdToService
 	}
 
 
@@ -340,12 +339,18 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
+	override Str:ServiceDefinition serviceDefinitions() {
+		stats := Str:ServiceDefinition[:]	{ caseInsensitive = true }
+		modules.each { stats.addAll(it.serviceStats) }
+		return stats
+	}	
+
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj? trackServiceById(Str serviceId, Bool checked) {
 		serviceDef := serviceDefById(serviceId)
 		if (serviceDef == null)
-			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), stats.keys) : null
+			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds) : null
 		return getService(serviceDef, false, null)
 	}
 
@@ -476,10 +481,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.adviceByServiceDef(serviceDef)
 		}.flatten
 	}
-
-	override Str:ServiceDefinition stats() {
-		stats := Str:ServiceDefinition[:]	{ caseInsensitive = true }
-		modules.each { stats.addAll(it.serviceStats) }
-		return stats
-	}	
+	
+	override Str[] serviceIds() {
+		serviceDefs.keys
+	}
 }

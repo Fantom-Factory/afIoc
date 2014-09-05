@@ -127,6 +127,7 @@ internal const class ModuleImpl : Module {
 				it.proxyDisabled= state.def.noProxy
 				it.lifecycle	= state.lifecycle
 				it.noOfImpls	= state.implCount
+				it.toStr		= state.def.description
 			}
 		}
 	}

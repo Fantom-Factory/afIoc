@@ -31,7 +31,7 @@ const mixin RegistryStartup {
 internal const class RegistryStartupImpl : RegistryStartup {
 	private const LocalMap startups
 	
-	@Inject private const ServiceStats	stats
+	@Inject private const Registry		registry
 	@Inject private const RegistryMeta	meta
 	
 	// Map needs to be keyed on Str so IoC can auto-generate keys in add()
@@ -51,7 +51,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 	}
 	
 	override Str printServiceList() {
-		stats := this.stats.stats.vals.sort |s1, s2| { s1.serviceId <=> s2.serviceId }
+		stats := registry.serviceDefinitions.vals
 		srvcs := "\n\n${stats.size} Services:\n\n"
 		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
 		unreal:= 0
