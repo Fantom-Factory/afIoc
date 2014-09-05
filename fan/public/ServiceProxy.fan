@@ -1,4 +1,5 @@
 
+// FIXME: fandoc ServiceProxy
 enum class ServiceProxy {
 	
 	always,

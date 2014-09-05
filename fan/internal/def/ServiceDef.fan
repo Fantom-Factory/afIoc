@@ -1,6 +1,7 @@
 using concurrent
 
-** Meta info that defines a service 
+** Meta info that defines a service
+// TODO: rename to ServiceMeta? ServiceWrapper 
 internal const class ServiceDef {	
 	const Str 			serviceId
 	const Type			serviceType
@@ -14,7 +15,7 @@ internal const class ServiceDef {
 	
 	// -- null for BareBones ctor --
 	private const ObjLocator?	objLocator
-			const AdviceDef[]?	adviceDefs
+			const Method[]?		adviceMethods
 			const Method[]?		contribMethods
 	private const AtomicInt?	implCountRef	:= AtomicInt(0)
 	private const ObjectRef?	lifecycleRef
@@ -34,7 +35,7 @@ internal const class ServiceDef {
 		this.serviceType	= srvDef.type
 		this.serviceScope	= srvDef.scope
 		this.serviceProxy	= srvDef.proxy
-		this.adviceDefs		= srvDef.adviceDefs
+		this.adviceMethods	= srvDef.adviceMeths
 		this.contribMethods	= srvDef.contribMeths
 		this.description	= "wotever"
 		
@@ -223,6 +224,7 @@ internal const class ServiceDef {
 	}
 }
 
+// TODO: rename to ServiceDef
 internal class SrvDef {
 	Str				id
 	Type?			type
@@ -238,7 +240,7 @@ internal class SrvDef {
 	Bool			builtIn
 	Str?			desc
 	
-	AdviceDef[]?	adviceDefs
+	Method[]?		adviceMeths
 	Method[]?		contribMeths
 
 	private const Str 	unqualifiedId
@@ -251,9 +253,9 @@ internal class SrvDef {
 	}
 	
 	Void addAdviceDef(AdviceDef adviceDef) {
-		if (adviceDefs == null)
-			adviceDefs = AdviceDef[,]
-		adviceDefs.add(adviceDef)
+		if (adviceMeths == null)
+			adviceMeths = Method[,]
+		adviceMeths.add(adviceDef.advisorMethod)
 	}
 
 	Void addContribDef(ContributionDef contribDef) {
