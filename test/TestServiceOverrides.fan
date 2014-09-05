@@ -2,20 +2,47 @@
 internal class TestServiceOverride : IocTest {
 
 	Void testDupServiceIds() {
-		verifyErrMsg(IocErr#, IocMessages.serviceAlreadyDefined("s44", "afIoc::T_MyModule07_b.buildAgain", "afIoc::T_MyService44Impl")) {
+		confDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = "wotever"
+			it.buildData = T_MyModule07_b#buildAgain
+		}
+		existDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = T_MyModule07#.qname
+		}
+		verifyErrMsg(IocErr#, IocMessages.serviceAlreadyDefined("s44", confDef, existDef)) {
 			RegistryBuilder().addModule(T_MyModule07#).addModule(T_MyModule07_b#).build
 		}
 	}
 
-	Void testDupServiceOverrides() {
-		verifyErrMsg(IocErr#, IocMessages.overrideAlreadyDefined("s44", "afIoc::T_MyModule50.overrideS44Again", "afIoc::T_MyModule50.overrideS44")) {
+	Void testOverrideSameServiceTwice() {
+		confDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = "wotever"
+			it.buildData = T_MyModule50#overrideS44Again
+		}
+		existDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = "wotever"
+			it.buildData = T_MyModule50#overrideS44
+		}
+		verifyErrMsg(IocErr#, IocMessages.onlyOneOverrideAllowed("s44", confDef, existDef)) {
 			RegistryBuilder().addModule(T_MyModule50#).build
 		}
 	}
 
 	Void testDupOverrideIds() {
-			RegistryBuilder().addModule(T_MyModule59#).build
-		verifyErrMsg(IocErr#, IocMessages.overrideAlreadyDefined("s44", "afIoc::T_MyModule50.overrideS44Again", "afIoc::T_MyModule50.overrideS44")) {
+		confDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = "wotever"
+			it.buildData = T_MyModule59#overrideS44
+		}
+		existDef := SrvDef() {
+			it.id 		= "wotever"
+			it.moduleId = T_MyModule59#.qname
+		}
+		verifyErrMsg(IocErr#, IocMessages.overrideAlreadyDefined("taken", confDef, existDef)) {
 			RegistryBuilder().addModule(T_MyModule59#).build
 		}
 	}

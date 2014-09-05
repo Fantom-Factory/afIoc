@@ -70,4 +70,10 @@ const mixin Registry {
 	** 
 	** @since 1.5.0
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null)
+	
+	** Returns a map of all service definitions (keyed by service id) held by this IoC.
+	** Useful for the inquisitive.
+	**  
+	** @since 1.8.0
+	abstract Str:ServiceDefinition serviceDefinitions()
 }

@@ -27,12 +27,22 @@ internal const class IocMessages {
 		"Module method $method.qname should be annotated with the @${facetType.name} facet"
 	}
 	
-    static Str serviceAlreadyDefined(Str overrideId, Str conflict, Str existing) {
-        "Service Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
+    static Str serviceAlreadyDefined(Str overrideId, SrvDef conflictDef, SrvDef existingDef) {
+		conflict := conflictDef.buildData is Method ? "${conflictDef.buildData->qname}()" : "Service Definition in ${conflictDef.moduleId}"
+		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
+        return "Service Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
     }
 	
-    static Str overrideAlreadyDefined(Str overrideId, Str conflict, Str existing) {
-        "Override Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
+    static Str overrideAlreadyDefined(Str overrideId, SrvDef conflictDef, SrvDef existingDef) {
+		conflict := conflictDef.buildData is Method ? "${conflictDef.buildData->qname}()" : "Service Definition in ${conflictDef.moduleId}"
+		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
+        return "Override Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
+    }
+	
+    static Str onlyOneOverrideAllowed(Str serviceId, SrvDef conflictDef, SrvDef existingDef) {
+		conflict := conflictDef.buildData is Method ? "${conflictDef.buildData->qname}()" : "Service Definition in ${conflictDef.moduleId}"
+		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
+        return "Can not override service '${serviceId}' twice! '${conflict}' vs '${existing}'. One override must override the other override."
     }
 	
 	static Str bindMethodMustBeStatic(Method method) {

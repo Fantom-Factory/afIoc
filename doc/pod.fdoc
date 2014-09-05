@@ -309,12 +309,14 @@ v1.8.0 [#1.8.0]
  - New: '@Override' facet for defining service override methods in 'AppModule'.
  - New: Added 'RegistryBuilder.removeModule()'.
  - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type.
- - Chg: Deleted 'ServiceOverides' service in favour of service '@Override' methods. (Breaking change.)
+ - Chg: Deleted 'ServiceOverrides' service in favour of service '@Override' methods. (Breaking change.)
+ - Chg: Deleted 'ServiceStats' service in favour of method 'Registry.serviceDefinitions()'. (Breaking change.)
  - Chg: Deleted all existing @Deprecated classes. (Breaking change.)
  - Chg: Reanmed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
- - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
  - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
+ - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
  - Bug: '@Inject.autobuild' *services* were just autobuilt and not built via the service builder func.
+ - Bug: 'IocService' methods now more closely follow those of 'Registry'.
 
 v1.7.6 [#1.7.6]
 ---------------
