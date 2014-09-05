@@ -12,18 +12,10 @@ const mixin AspectInvokerSource {
 ** @since 1.3.0
 internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
-// 	As clean as this is, we can't use it, because we get recursion from DepProviders who require
-//	injected lazy services.
-//	@Inject @ServiceId { id="registry" }
-
-	private const Registry	registry
-	private ObjLocator objLocator() { (ObjLocator) registry }
-
 	private const ThreadLocalManager	localManager
 	
-	new make(ThreadLocalManager localManager, Registry registry) {
+	new make(ThreadLocalManager localManager) {
 		this.localManager	= localManager
-		this.registry 		= registry
 	}
 
 	** Returns `MethodAdvisor`s fully loaded with callbacks
@@ -36,7 +28,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 		
 		// find all module @Advise methods
 		adviceDefs := (AdviceDef[]) InjectionTracker.track("Gathering advisors for service '$serviceDef.serviceId'") |->AdviceDef[]| {
-			ads := objLocator.adviceByServiceDef(serviceDef)
+			ads := serviceDef.adviceDefs ?: AdviceDef#.emptyList
 			InjectionTracker.log("Found $ads.size method(s)")
 			return ads
 		}

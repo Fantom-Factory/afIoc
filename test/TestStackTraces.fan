@@ -6,13 +6,6 @@ internal class TestStackTraces : IocTest {
 			RegistryBuilder().addModule(T_MyModule40#).build
 		}
 	}
-
-	Void testServiceById() {
-		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup
-		verifyReducedStack {
-			reg.serviceById("s1")
-		}
-	}
 	
 	Void testDependencyByType() {
 		reg := RegistryBuilder().addModule(T_MyModule01#).build.startup

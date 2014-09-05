@@ -8,5 +8,4 @@ internal const class ContributionDef {
 	const Method 	method
 	
 	new make(|This| f) { f(this) }
-	
 }

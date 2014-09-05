@@ -58,8 +58,8 @@ internal class TestIocService : IocTest {
 			assertNotSame(app1, app2)
 			assertNotSame(the1, the2)
 			
-			verifyErr(IocErr#) { ioc3.serviceById("app") }
-			verifyErr(IocErr#) { ioc3.serviceById("the") }
+			verifyErr(ServiceNotFoundErr#) { ioc3.serviceById("app") }
+			verifyErr(ServiceNotFoundErr#) { ioc3.serviceById("the") }
 			
 		} finally {
 			ioc1?.uninstall
