@@ -225,6 +225,9 @@ internal const class InjectionUtils {
 
 		if (inject.autobuild) {
 			log("Field has @Inject { autobuild=true }")
+			// FIXME: what if type is a service? - rethink the meaning / reword autobuild
+			// maybe new-instance for services only
+			// revert back to having a seperate @Autobuild? (would rather not)
 			return objLocator.trackAutobuild(field.type, null, null)
 		}
 
