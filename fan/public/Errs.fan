@@ -12,16 +12,27 @@ const class IocErr : Err {
 	}
 	
 	override Str toStr() {
+		opTrace := causeStr
+		opTrace += opTraceStr
+		opTrace += "Stack Trace:"
+		return opTrace
+	}
+	
+	protected Str causeStr() {
 		opTrace := (cause == null) 
 				? "${typeof.qname}: " 
 				: (cause is IocErr ? "" : "${cause.typeof.qname}: ")
-		opTrace += msg
+		opTrace += msg		
+		return opTrace
+	}
+
+	protected Str opTraceStr() {
+		opTrace := ""
 		if (operationTrace != null && !operationTrace.isEmpty) {
 			opTrace += "\nIoc Operation Trace:\n"
 			operationTrace.splitLines.each |op, i| { 
 				opTrace += ("  [${(i+1).toStr.justr(2)}] $op\n")
 			}
-			opTrace += "Stack Trace:"
 		}
 		return opTrace
 	}
@@ -38,12 +49,24 @@ const class IocShutdownErr : IocErr {
 const class ServiceNotFoundErr : IocErr, NotFoundErr {
 	override const Str[] availableValues
 	
-	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {
+	new make(Str msg, Obj?[] availableValues, Err? cause := null, Str? opTrace := null) : super(msg, cause, opTrace) {
 		this.availableValues = availableValues.map { it?.toStr }.sort
 	}
 	
 	override Str toStr() {
-		NotFoundErr.super.toStr		
+		opTrace := causeStr
+		opTrace += opTraceStr
+		opTrace += availStr
+		opTrace += "Stack Trace:"
+		return opTrace				
+	}
+	
+	protected Str availStr() {
+		buf := StrBuf()
+		buf.add("\n${valueMsg}\n")
+		availableValues.each { buf.add("  $it\n")}
+		buf.add("\n")
+		return buf.toStr
 	}
 }
 

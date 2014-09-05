@@ -312,6 +312,7 @@ v1.8.0 [#1.8.0]
  - Chg: Deleted 'ServiceOverrides' service in favour of service '@Override' methods. (Breaking change.)
  - Chg: Deleted 'ServiceStats' service in favour of method 'Registry.serviceDefinitions()'. (Breaking change.)
  - Chg: Deleted all existing @Deprecated classes. (Breaking change.)
+ - Chg: 'LogProvider' service may be overridden to ensure it provides *all* injected 'Log' instances. (Breaking change.)
  - Chg: Reanmed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
  - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
  - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.

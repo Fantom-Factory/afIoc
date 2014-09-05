@@ -13,6 +13,12 @@ internal const class AdviceDef {
 		globMatcher = Regex.glob(serviceIdGlob)
 	}
 	
+	Bool matchesSvrDef(SrvDef svrDef) {
+		(serviceType != null) 
+			? svrDef.type.fits(serviceType)
+			: globMatcher.matches(svrDef.id)
+	}
+
 	Bool matchesService(ServiceDef serviceDef) {
 		(serviceType != null) 
 			? serviceDef.serviceType.fits(serviceType)
