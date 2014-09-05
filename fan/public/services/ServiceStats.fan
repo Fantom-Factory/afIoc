@@ -7,7 +7,7 @@ using concurrent::AtomicRef
 const mixin ServiceStats {
 
 	** Returns [service stats]`ServiceStat`, keyed by service id.
-	abstract Str:ServiceStat stats()	
+	abstract Str:ServiceDefinition stats()	
 }
 
 ** @since 1.2.0
@@ -19,7 +19,7 @@ internal const class ServiceStatsImpl : ServiceStats {
 		this.objLocator = (ObjLocator) registry
 	}
 	
-	override Str:ServiceStat stats() {
+	override Str:ServiceDefinition stats() {
 		objLocator.stats
 	}
 }
@@ -27,8 +27,7 @@ internal const class ServiceStatsImpl : ServiceStats {
 ** As returned by `ServiceStats`. Defines some basic statistics for a service.
 ** 
 ** @since 1.2.0
-@NoDoc	// This is a boring class - and just adds clutter!
-const class ServiceStat {
+const class ServiceDefinition {
 	private const AtomicRef		atomLifecycle	:= AtomicRef()
 	private const AtomicInt		atomNoOfImpls	:= AtomicInt()
 

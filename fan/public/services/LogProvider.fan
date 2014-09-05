@@ -29,6 +29,7 @@ const mixin LogProvider : DependencyProvider {
 
 internal const class LogProviderImpl : LogProvider {
 
+	// FIXME: LogProvider need to override service def but keep it a mixin...!? Maybe @NoDoc the Impl
 	private const AtomicRef logCreatorFuncRef	:= AtomicRef()
 	
 	override |Type->Log| logCreatorFunc {

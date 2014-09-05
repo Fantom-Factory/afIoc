@@ -110,39 +110,39 @@ const class IocService : Service {
 	// ---- Registry Methods ----------------------------------------------------------------------
 	
 	** Convenience for `Registry#serviceById`
-	Obj serviceById(Str serviceId) {
+	Obj serviceById(Str serviceId, Bool checked := true) {
 		checkServiceStarted
-		return registry.serviceById(serviceId)
+		return registry.serviceById(serviceId, checked)
 	}
 	
 	** Convenience for `Registry#dependencyByType`
-	Obj dependencyByType(Type serviceType) {
+	Obj dependencyByType(Type serviceType, Bool checked := true) {
 		checkServiceStarted
-		return registry.dependencyByType(serviceType)
+		return registry.dependencyByType(serviceType, checked)
 	}
 
 	** Convenience for `Registry#autobuild`
-	Obj autobuild(Type type, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		checkServiceStarted
 		return registry.autobuild(type, ctorArgs, fieldVals)
 	}
 	
 	** Convenience for `Registry#createProxy`
-	Obj createProxy(Type mixinType, Type implType, Obj?[] ctorArgs := Obj#.emptyList, [Field:Obj?]? fieldVals := null) {
+	Obj createProxy(Type mixinType, Type implType, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		checkServiceStarted
 		return registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 	
 	** Convenience for `Registry#injectIntoFields`
-	Obj injectIntoFields(Obj service) {
+	Obj injectIntoFields(Obj instance) {
 		checkServiceStarted
-		return registry.injectIntoFields(service)
+		return registry.injectIntoFields(instance)
 	}
 	
 	** Convenience for `Registry#callMethod`
-	Obj? callMethod(Method method, Obj? instance, Obj?[] providedMethodArgs := Obj#.emptyList) {
+	Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null) {
 		checkServiceStarted
-		return registry.callMethod(method, instance, providedMethodArgs)		
+		return registry.callMethod(method, instance, providedMethodArgs)
 	}
 
 

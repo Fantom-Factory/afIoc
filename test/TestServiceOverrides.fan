@@ -1,6 +1,25 @@
 
 internal class TestServiceOverride : IocTest {
 
+	Void testDupServiceIds() {
+		verifyErrMsg(IocErr#, IocMessages.serviceAlreadyDefined("s44", "afIoc::T_MyModule07_b.buildAgain", "afIoc::T_MyService44Impl")) {
+			RegistryBuilder().addModule(T_MyModule07#).addModule(T_MyModule07_b#).build
+		}
+	}
+
+	Void testDupServiceOverrides() {
+		verifyErrMsg(IocErr#, IocMessages.overrideAlreadyDefined("s44", "afIoc::T_MyModule50.overrideS44Again", "afIoc::T_MyModule50.overrideS44")) {
+			RegistryBuilder().addModule(T_MyModule50#).build
+		}
+	}
+
+	Void testDupOverrideIds() {
+			RegistryBuilder().addModule(T_MyModule59#).build
+		verifyErrMsg(IocErr#, IocMessages.overrideAlreadyDefined("s44", "afIoc::T_MyModule50.overrideS44Again", "afIoc::T_MyModule50.overrideS44")) {
+			RegistryBuilder().addModule(T_MyModule59#).build
+		}
+	}
+
 	Void testAppOverrideById() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s44 := (T_MyService44) reg.serviceById("s44")
@@ -47,6 +66,44 @@ internal class TestServiceOverride : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s45 := (T_MyService45) reg.serviceById("s45-type")
 		verifyEq(s45.dude, "auto")
+	}
+}
+
+internal class T_MyModule07 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService44#).withId("s44")
+	}
+}
+internal class T_MyModule07_b {
+	@Build { serviceId="s44" }
+	static T_MyService44 buildAgain() {
+		T_MyService44Impl()
+	}
+}
+
+internal class T_MyModule50 {
+	@Override { serviceId="s44" }
+	static T_MyService44 overrideS44() {
+		T_MyService44Impl()
+	}
+	@Override { serviceId="s44" }
+	static T_MyService44 overrideS44Again() {
+		T_MyService44Impl()
+	}
+}
+
+internal class T_MyModule59 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService44#).withId("s44")
+		binder.bind(T_MyService45#).withId("s45")
+	}
+	@Override { serviceId="s44"; overrideId="taken" }
+	static T_MyService44 overrideS44() {
+		T_MyService44Impl()
+	}
+	@Override { serviceId="s45"; overrideId="taken"  }
+	static T_MyService45 overrideS45() {
+		T_MyService45Impl()
 	}
 }
 

@@ -9,7 +9,7 @@ abstract internal class IocTest : Test {
 //			try Pod.of(this).type(typeName)
 //			catch echo("$typeName is free!")
 //		}
-////		50, 59
+////		gone!
 //		(1..100).each {
 //			typeName := "T_MyService" + it.toStr.padl(2, '0')
 //			try Pod.of(this).type(typeName)

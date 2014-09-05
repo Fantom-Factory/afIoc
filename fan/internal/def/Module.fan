@@ -21,7 +21,7 @@ internal mixin Module {
 	** Locates (and builds if necessary) a service given a service def
 	abstract Obj? service(ServiceDef serviceDef, Bool returnReal, Bool? autobuild)
 
-	abstract Str:ServiceStat serviceStats()
+	abstract Str:ServiceDefinition serviceStats()
 	
 	abstract Void shutdown()
 
