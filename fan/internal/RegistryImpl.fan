@@ -19,11 +19,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
 		modules			:= Module[,]		
 		threadLocalMgr 	:= ThreadLocalManagerImpl()
+		ModuleDef? builtInModuleDef
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
 			
-			builtInModuleDef := ModuleDef(tracker, IocModule#)
+			builtInModuleDef = ModuleDef(tracker, IocModule#)
 			builtInModuleDef.serviceDefs[IocConstants.ctorItBlockBuilder] = SrvDef {
 				it.moduleId		= IocModule#.qname
 				it.id 			= IocConstants.ctorItBlockBuilder
@@ -35,15 +36,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}
 			builtInModuleDef.serviceDefs.each { it.builtIn = true }
-			
-			readyMade := [
-				Registry#			: this,
-				RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
-				ThreadLocalManager#	: threadLocalMgr
-			]
-			
-			builtInModule := ModuleImpl(this, threadLocalMgr, builtInModuleDef, readyMade)
-			modules.add(builtInModule)
+			moduleDefs.add(builtInModuleDef)	// so we can override LogProvider			
 		}
 
 		// this IoC trace makes more sense when we throw dup id errs
@@ -106,10 +99,20 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 		
 		tracker.track("Consolidating module definitions") |->| {
-			moduleDefs.each |moduleDef| {
+			// build the builtin module here so we can override LogProvider
+			readyMade := [
+				Registry#			: this,
+				RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
+				ThreadLocalManager#	: threadLocalMgr
+			]
+			builtInModule := ModuleImpl(this, threadLocalMgr, builtInModuleDef, readyMade)
+			modules.add(builtInModule)
+			
+			moduleDefs.exclude { it.moduleType == IocModule# }.each |moduleDef| {
 				module := ModuleImpl(this, threadLocalMgr, moduleDef, null)
 				modules.add(module)
 			}
+
 			// loop here to include the BuiltIn IocModule
 			modules.each |module| {
 				module.serviceDefs.each |def| {

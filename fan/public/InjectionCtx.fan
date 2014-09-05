@@ -51,6 +51,11 @@ class InjectionCtx {
 	Void log(Str msg) {
 		InjectionTracker.log(msg)
 	}
+	
+	@NoDoc
+	override Str toStr() {
+		"Injecting into ${injectingIntoType.qname}"
+	}
 }
 
 ** Used by `InjectionCtx` to inform 'DependencyProviders' of what kind of injection is occurring.
