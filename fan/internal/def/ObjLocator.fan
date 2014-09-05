@@ -25,8 +25,6 @@ internal const mixin ObjLocator {
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType) 
 	
-	abstract Obj getService(ServiceDef serviceDef, Bool returnReal, Bool? autobuild)
-
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 
 	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)

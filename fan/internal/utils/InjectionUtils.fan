@@ -201,7 +201,7 @@ internal const class InjectionUtils {
 				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.serviceIds)
 			}
 
-			service := objLocator.getService(serviceDef, false, true)
+			service := serviceDef.newInstance
 			
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
@@ -221,7 +221,7 @@ internal const class InjectionUtils {
 				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.serviceIds)
 			}
 			
-			service := objLocator.getService(serviceDef, false, null)
+			service := serviceDef.getService(false)
 			
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))

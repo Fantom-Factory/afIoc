@@ -4,107 +4,56 @@ using afPlastic::PlasticCompiler
 internal const class RegistryImpl : Registry, ObjLocator {
 	private const static Log log := Utils.getLog(RegistryImpl#)
 
-	private const OneShotLock 				startupLock 	:= OneShotLock(IocMessages.registryStarted)
-	private const OneShotLock 				shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
-	private const Str:Module				modules
-	private const Module[]					modulesWithServices	// a cache for performance reasons
-	private const Str:ServiceDef			serviceDefs		:= Utils.makeMap(Str#, ServiceDef#) 
-	private const DependencyProviders?		depProSrc
-	private const Duration					startTime
-			const AtomicBool				logServices		:= AtomicBool(false)
-			const AtomicBool				logBanner		:= AtomicBool(false)
-			const AtomicBool				sayGoodbye		:= AtomicBool(false)	
+	private const OneShotLock 			startupLock 	:= OneShotLock(IocMessages.registryStarted)
+	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
+	private const Module[]				modules
+	private const Str:ServiceDef		serviceDefs		:= Utils.makeMap(Str#, ServiceDef#) 
+	private const DependencyProviders?	depProSrc
+	private const Duration				startTime
+			const AtomicBool			logServices		:= AtomicBool(false)
+			const AtomicBool			logBanner		:= AtomicBool(false)
+			const AtomicBool			sayGoodbye		:= AtomicBool(false)	
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
-		this.startTime		= tracker.startTime
-		serviceIdToModule 	:= (Str:Module)		Utils.makeMap(Str#, Module#)
-		serviceIdToService	:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
-		moduleIdToModule	:= (Str:Module)		Utils.makeMap(Str#, Module#)		
-		threadLocalManager 	:= ThreadLocalManagerImpl()
+		this.startTime	= tracker.startTime
+		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
+		modules			:= Module[,]		
+		threadLocalMgr 	:= ThreadLocalManagerImpl()
 		
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
-			services := ServiceDef:Obj?[:]
 			
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= Registry#
-			}] = this
-
-			// RegistryStartup needs to be perThread so non-const listeners can be injected into it
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= RegistryStartup#
-				it.serviceScope		= ServiceScope.perThread
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, RegistryStartupImpl#)
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= RegistryShutdown#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, RegistryShutdownImpl#)
-			}] = null
-			
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceId 		= IocConstants.ctorItBlockBuilder
-				it.serviceType 		= |This|#
-				it.serviceScope		= ServiceScope.perInjection
-				it.description 		= "$it.serviceId : Autobuilt. Always."
-				it.serviceBuilder	= |->Obj| {
+			builtInModuleDef := ModuleDef(tracker, IocModule#)
+			builtInModuleDef.serviceDefs[IocConstants.ctorItBlockBuilder] = SrvDef {
+				it.moduleId		= IocModule#.qname
+				it.id 			= IocConstants.ctorItBlockBuilder
+				it.type 		= |This|#
+				it.scope		= ServiceScope.perInjection
+				it.desc 		= "$it.id : Autobuilt. Always."
+				it.buildData	= |->Obj| {
 					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.injectionCtx.injectingIntoType)
 				}
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= DependencyProviders#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, DependencyProvidersImpl#)
-			}] = null
- 
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= ServiceProxyBuilder#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ServiceProxyBuilderImpl#)
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= PlasticCompiler#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, PlasticCompiler#)
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= AspectInvokerSource#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, AspectInvokerSourceImpl#)
-			}] = null
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= ThreadLocalManager#
-			}] = threadLocalManager
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= RegistryMeta#
-			}] = RegistryMetaImpl(options, moduleDefs.map { it.moduleType })
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= LogProvider#
-			}] = LogProviderImpl()
-
-			services[ServiceDef.makeBuiltIn() {
-				it.serviceType 		= ActorPools#
-				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, ActorPoolsImpl#)
-			}] = null
-
-			builtInModule := ModuleImpl(this, threadLocalManager, IocConstants.builtInModuleId, services)
-
-			moduleIdToModule[IocConstants.builtInModuleId] = builtInModule
-			services.keys.each {
-				serviceIdToModule[it.serviceId] = builtInModule			
 			}
+			builtInModuleDef.serviceDefs.each { it.builtIn = true }
+			
+			readyMade := [
+				Registry#			: this,
+				RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
+				ThreadLocalManager#	: threadLocalMgr
+			]
+			
+			builtInModule := ModuleImpl(this, threadLocalMgr, builtInModuleDef, readyMade)
+			modules.add(builtInModule)
 		}
 
 		// this IoC trace makes more sense when we throw dup id errs
 		tracker.track("Consolidating service definitions") |->| {
-			serviceDefs  := (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
-			overrideDefs := (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
+			srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
+			ovrDefs	:= (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
 			
 			// we could use Map.addList(), but do it the long way round so we get a nice error on dups
 			services	:= Str:SrvDef[:] { caseInsensitive = true}
-			serviceDefs.each {
+			srvDefs.each {
 				if (services.containsKey(it.id))
 					throw IocErr(IocMessages.serviceAlreadyDefined(it.id, it, services[it.id]))
 				services[it.id] = it
@@ -112,12 +61,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 			// we could use Map.addList(), but do it the long way round so we get a nice error on dups
 			overrides	:= Str:SrvDef[:] { caseInsensitive = true}
-			overrideDefs.each {
+			ovrDefs.each {
 				if (overrides.containsKey(it.id))
 					throw IocErr(IocMessages.onlyOneOverrideAllowed(it.id, it, overrides[it.id]))
 				overrides[it.id] = it
 			}
-			
+
 			tracker.track("Applying service overrides") |->| {
 				keys := Utils.makeMap(Str#, Str#)
 				services.keys.each { keys[it] = it }
@@ -133,7 +82,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 							if (keys.containsKey(overrideKey))
 								throw IocErr(IocMessages.overrideAlreadyDefined(over.overrideRef, over, services[keys[existingKey]]))
 
-							keys[overrideKey] = keys[existingKey]	// TODO: nice error on dups
+							keys[overrideKey] = keys[existingKey]
 							found = true
 							
 							tracker.log("'${overrideKey}' overrides '${existingKey}'")
@@ -158,18 +107,20 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		tracker.track("Consolidating module definitions") |->| {
 			moduleDefs.each |moduleDef| {
-				module := ModuleImpl(this, threadLocalManager, moduleDef)
-				moduleIdToModule[moduleDef.moduleId] = module
-
-				moduleDef.serviceDefs.keys.each |serviceId| {
-					serviceIdToModule[serviceId] = module
-				}				
+				module := ModuleImpl(this, threadLocalMgr, moduleDef, null)
+				modules.add(module)
+			}
+			// loop here to include the BuiltIn IocModule
+			modules.each |module| {
+				module.serviceDefs.each |def| {
+					serviceDefs[def.serviceId] = def
+				}
 			}
 		}		
 
 		// set before we validate the contributions
-		this.modules = moduleIdToModule
-		this.modulesWithServices = modules.vals.findAll |module| { module.hasServices }
+		this.modules 		= modules
+		this.serviceDefs	= serviceDefs
 		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
@@ -187,16 +138,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 
 		tracker.track("Validating advice definitions") |->| {
-			advisableServices := serviceIdToModule.keys.findAll { serviceDefById(it).proxiable }
+			advisableServices := serviceDefs.vals.findAll { it.proxiable }
 			moduleDefs.each {
 				it.adviceDefs.each |adviceDef| {
 					if (adviceDef.optional)
 						return
-					matches := advisableServices.any |serviceId| { 
-						adviceDef.matchesService(serviceDefById(serviceId))  
+					matches := advisableServices.any |def| { 
+						adviceDef.matchesService(def)  
 					}
 					if (!matches)
-						throw IocErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef, advisableServices))
+						throw IocErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef, advisableServices.map { it.serviceId }))
 				}
 			}
 		}
@@ -204,9 +155,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		InjectionTracker.withCtx(this, tracker) |->Obj?| {
 			depProSrc = trackServiceById(DependencyProviders#.qname, true)
 			return null
-		}
-		
-		serviceDefinitions := serviceIdToService
+		}		
 	}
 
 
@@ -351,13 +300,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefById(serviceId)
 		if (serviceDef == null)
 			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds) : null
-		return getService(serviceDef, false, null)
-	}
-
-	override Obj getService(ServiceDef serviceDef, Bool returnReal, Bool? autobuild) {
-		// FIXME: thinking of extending serviceDef to return the service with a 'makeOrGet' func
-		// then have autobuild as a new func, like newInstance()
-		modules[serviceDef.moduleId].service(serviceDef, returnReal, autobuild)
+		return serviceDef.getService(false)
 	}
 
 	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -373,7 +316,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			InjectionTracker.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
-			return getService(serviceDef, false, null)			
+			return serviceDef.getService(false)
 		}
 
 		config := InjectionTracker.provideConfig(dependencyType)
@@ -397,7 +340,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
 		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "${type.name}Autobuild"
-			it.moduleId			= ""
 			it.serviceType 		= type
 			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= "$type.qname : Autobuild"
@@ -422,7 +364,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// create a dummy serviceDef
 		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
-			it.moduleId			= ""
 			it.serviceType 		= mixinT
 			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= "$mixinT.qname : Create Proxy"
@@ -442,14 +383,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override ServiceDef? serviceDefById(Str serviceId) {
 		// attempt a qualified search first
-		serviceDef := modulesWithServices.eachWhile { it.serviceDefByQualifiedId(serviceId) }
+		serviceDef := serviceDefs[serviceId]
 		if (serviceDef != null)
 			return serviceDef
 
-		serviceDefs := (ServiceDef[]) modulesWithServices.map |module| {
-			module.serviceDefsById(serviceId)
-		}.flatten
-
+		serviceDefs := serviceDefs.vals.findAll { it.matchesId(serviceId) }
 		if (serviceDefs.size > 1)
 			throw IocErr(IocMessages.multipleServicesDefined(serviceId, serviceDefs.map { it.serviceId }))
 		
@@ -457,9 +395,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
-		serviceDefs := (ServiceDef[]) modulesWithServices.map |module| {
-			module.serviceDefsByType(serviceType)
-		}.flatten
+		serviceDefs := serviceDefs.vals.findAll { it.matchesType(serviceType) }
 
 		if (serviceDefs.size > 1) {
 			// if exists, return the default service, the one with the qname as its serviceId 
@@ -471,13 +407,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
-		modules.vals.map {
+		modules.map {
 			it.contributionsByServiceDef(serviceDef)
 		}.flatten
 	}
 
 	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
-		modules.vals.map {
+		modules.map {
 			it.adviceByServiceDef(serviceDef)
 		}.flatten
 	}

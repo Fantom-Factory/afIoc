@@ -49,7 +49,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 				}
 			}
 
-		service 	:= objLocator.getService(serviceDef, true, null)
+		service 	:= serviceDef.getService(true)
 		adviceMap	:= [Method:|MethodInvocation invocation -> Obj?|[]?][:]
 		
 		methodAdvisors.each {
