@@ -27,7 +27,5 @@ internal const mixin ObjLocator {
 	
 	abstract Contribution[] contributionsByServiceDef(ServiceDef serviceDef)
 
-	abstract AdviceDef[] adviceByServiceDef(ServiceDef serviceDef)
-	
 	abstract Str[] serviceIds()
 }

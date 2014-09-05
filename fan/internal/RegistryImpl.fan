@@ -6,8 +6,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	private const OneShotLock 			startupLock 	:= OneShotLock(IocMessages.registryStarted)
 	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
-	private const Module[]				modules
-	private const Str:ServiceDef		serviceDefs		:= Utils.makeMap(Str#, ServiceDef#) 
+	private const Str:ServiceDef		serviceDefs
+			const Contribution[] 		contributions
 	private const DependencyProviders?	depProSrc
 	private const Duration				startTime
 			const AtomicBool			logServices		:= AtomicBool(false)
@@ -17,10 +17,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime	= tracker.startTime
 		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
-		modules			:= Module[,]		
+		contributions	:= Contribution[,]
 		threadLocalMgr 	:= ThreadLocalManagerImpl()
-		ModuleDef? builtInModuleDef
-		
+		builtInModuleDef:= (ModuleDef?) null
+		readyMade 		:= [
+			Registry#			: this,
+			RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
+			ThreadLocalManager#	: threadLocalMgr
+		]
+
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
 			
@@ -113,32 +118,29 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
-		tracker.track("Consolidating module definitions") |->| {
-			// build the builtin module here so we can override LogProvider
-			readyMade := [
-				Registry#			: this,
-				RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
-				ThreadLocalManager#	: threadLocalMgr
-			]
-			builtInModule := ModuleImpl(this, threadLocalMgr, builtInModuleDef, readyMade)
-			modules.add(builtInModule)
-			
-			moduleDefs.exclude { it.moduleType == IocModule# }.each |moduleDef| {
-				module := ModuleImpl(this, threadLocalMgr, moduleDef, null)
-				modules.add(module)
-			}
-
-			// loop here to include the BuiltIn IocModule
-			modules.each |module| {
-				module.serviceDefs.each |def| {
-					serviceDefs[def.serviceId] = def
+		tracker.track("Consolidating module definitions") |->| {			
+			moduleDefs.each |moduleDef| {				
+				moduleDef.serviceDefs.each |def| {
+					impl := readyMade.get(def.type)
+					sdef := def.toServiceDef(this, threadLocalMgr, impl)
+					serviceDefs[sdef.serviceId] = sdef
 				}
+
+				moduleDef.contribDefs.each |contribDef| { 
+					contrib := ContributionImpl {
+						it.serviceId 	= contribDef.serviceId
+						it.serviceType 	= contribDef.serviceType
+						it.method		= contribDef.method
+						it.objLocator 	= this
+					}
+					contributions.add(contrib)
+				}				
 			}
 		}		
 
 		// set before we validate the contributions
-		this.modules 		= modules
 		this.serviceDefs	= serviceDefs
+		this.contributions	= contributions
 		
 		tracker.track("Validating contribution definitions") |->| {
 			moduleDefs.each {
@@ -208,7 +210,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// Registry shutdown complete.
 		threadMan.cleanUpThread
-		modules.each { it.shutdown }
+		serviceDefs.each { it.shutdown }
 		actorPools[IocConstants.systemActorPool].stop.join(10sec)
 		
 		shutdownTime := (Duration.now - then).toMillis.toLocale("#,###")
@@ -412,15 +414,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
-		modules.map {
-			it.contributionsByServiceDef(serviceDef)
-		}.flatten
-	}
-
-	override AdviceDef[] adviceByServiceDef(ServiceDef serviceDef) {
-		modules.map {
-			it.adviceByServiceDef(serviceDef)
-		}.flatten
+		contributions.findAll {
+			// service def maybe null if contribution is optional
+			it.serviceDef?.serviceId == serviceDef.serviceId
+		}
 	}
 	
 	override Str[] serviceIds() {
