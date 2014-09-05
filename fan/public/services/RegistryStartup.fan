@@ -56,7 +56,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.serviceId.size) }
 		unreal:= 0
 		stats.each {
-			srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle}\n"
+			srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle.name.toDisplayName}\n"
 			if (it.lifecycle == ServiceLifecycle.defined)
 				unreal++
 		}

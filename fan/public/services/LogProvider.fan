@@ -5,39 +5,31 @@ using concurrent::AtomicRef
 ** 
 **   |Type type->Log| { return type.pod.log }
 ** 
-** If log instances with different names are desired, change the `#logCreatorFunc`. 
-** Do this at registry startup:
+** If log instances with different names are desired, override the 'LogProvider' service:
 ** 
 ** pre>
 ** class AppModule {
 ** 
-**   @Contribute { serviceType=RegistryStartup# }
-**   static Void changeLoggers(Configuration conf, LogProvider logProvider) {
-**     conf.add |->| {
-**       logProvider.logCreatorFunc = |Type type->Log| { return Log.get(type.name) } 
+**     @Override
+**     static LogProvider overrideLogProvider() {
+**         LogProvider.withLogFunc |Type type->Log| { Log.get(type.name) } 
 **     }
-**   }
 ** } 
 ** <pre
 const mixin LogProvider : DependencyProvider {
 	
-	** The func that creates log instances from a given type. Change it at will!
-	** 
-	** Defaults to '|Type type->Log| { return type.pod.log }'
-	abstract |Type->Log| logCreatorFunc
+	** Creates a 'LogProvider' with the given log creation func.
+	static LogProvider withLogFunc(|Type->Log| func) {
+		LogProviderImpl {
+			it.logCreatorFunc = func
+		}
+	}
 }
 
 internal const class LogProviderImpl : LogProvider {
-
-	// FIXME: LogProvider need to override service def but keep it a mixin...!? Maybe @NoDoc the Impl
-	private const AtomicRef logCreatorFuncRef	:= AtomicRef()
+	const |Type->Log| logCreatorFunc
 	
-	override |Type->Log| logCreatorFunc {
-		get { logCreatorFuncRef.val }
-		set { logCreatorFuncRef.val = it }
-	}	
-
-	internal new make(|This|? in := null) { 
+	new make(|This|? in := null) {
 		logCreatorFunc = |Type type->Log| { return type.pod.log }
 		in?.call(this)
 	}
