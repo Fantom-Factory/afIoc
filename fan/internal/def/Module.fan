@@ -10,10 +10,5 @@ internal const mixin Module {
 
 	abstract ServiceDef[] serviceDefs()
 	
-	** Locates (and builds if necessary) a service given a service def
-	abstract Obj? service(ServiceDef serviceDef, Bool returnReal, Bool? autobuild)
-
-	abstract Str:ServiceDefinition serviceStats()
-	
 	abstract Void shutdown()
 }

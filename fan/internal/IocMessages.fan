@@ -237,8 +237,8 @@ internal const class IocMessages {
 		"Proxied mixins must be public - '$mixinType.qname'"
 	}
 	
-	static Str adviceDoesNotMatchAnyServices(AdviceDef adviceDef, Str[] advisableServiceIds) {
-		"Advisor method '${adviceDef.advisorMethod.qname} with ${adviceDef.errMsg} does NOT match any proxy services. Advisable services: " + advisableServiceIds.join(", ")
+	static Str adviceDoesNotMatchAnyServices(AdviceDef adviceDef) {
+		"Advisor method '${adviceDef.advisorMethod.qname} with ${adviceDef.errMsg} does NOT match any proxy services."
 	}
 	
 	

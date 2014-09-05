@@ -41,19 +41,21 @@ internal class TestAspect : IocTest {
 			it.advisorMethod	= Obj#hash
 		}
 
-		serviceDef := ServiceDef.makeStandard() {
+		serviceDef := ServiceDef() {
 			it.serviceId 		= "T_MyService65Aspect"
 			it.serviceType 		= Type#
 			it.serviceScope		= ServiceScope.perInjection
+			it.serviceProxy		= ServiceProxy.always
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 6 }
 		}		
 		verify(def.matchesService(serviceDef))
 		
-		serviceDef = ServiceDef.makeStandard() {
+		serviceDef = ServiceDef() {
 			it.serviceId 		= "T_MyService67NoMatch"
 			it.serviceType 		= Type#
 			it.serviceScope		= ServiceScope.perInjection
+			it.serviceProxy		= ServiceProxy.always
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 9 }
 		}		
@@ -64,14 +66,14 @@ internal class TestAspect : IocTest {
 		verifyIocErrMsg(IocMessages.adviceDoesNotMatchAnyServices(AdviceDef {
 			it.advisorMethod = T_MyModule11#addTransactions
 			it.serviceIdGlob = "s69"
-		}, Str[,])) {
-			reg := RegistryBuilder().addModule(T_MyModule11#).build.startup
+		})) {
+			RegistryBuilder().addModule(T_MyModule11#).build.startup
 		}
 	}
 
 	Void testAdvisingOptionalNonProxy() {
 		reg := RegistryBuilder().addModule(T_MyModule84#).build.startup
-		s69 := (T_MyService69) reg.serviceById("s69")
+		s69 := (T_MyService69) reg.serviceById("s69-bingo")
 		verifyEq(s69.judge, "tell it to the")
 	}
 
@@ -161,7 +163,7 @@ internal class T_MyModule81 {
 
 internal class T_MyModule11 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService69#).withId("s69")
+		binder.bind(T_MyService69#).withId("s69-bingo")
 	}	
 	@Advise { serviceId="s69" }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }
@@ -169,7 +171,7 @@ internal class T_MyModule11 {
 
 internal class T_MyModule84 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService69#).withId("s69")
+		binder.bind(T_MyService69#).withId("s69-bingo")
 	}	
 	@Advise { serviceId="s69"; optional=true }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }

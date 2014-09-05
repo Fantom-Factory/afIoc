@@ -1,3 +1,4 @@
+using afBeanUtils
 
 internal class Utils {
 	
@@ -39,6 +40,10 @@ internal class Utils {
 
 		} catch (IocErr iocErr) {
 			unwrapped := unwrap(iocErr)
+
+			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 
+			if (unwrapped is NotFoundErr)
+				throw ServiceNotFoundErr(iocErr.msg, ((NotFoundErr) unwrapped).availableValues, null, iocErr.operationTrace)
 
 			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 
 			if (unwrapped is IocErr)

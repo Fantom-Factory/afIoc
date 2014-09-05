@@ -3,13 +3,13 @@
 ** A service lifecycle looks like:
 ** 
 ** pre>
-** DEFINED - the service is defined in a module
+** Defined - the service is defined in a module
 **   ||
 **   \/
-** VIRTUAL - a proxy has been created and the service may be injected
+** Proxied - a proxy has been created and the service may be injected
 **   ||
 **   \/
-** CREATED - the implementation has been created and the service is live
+** Created - the implementation has been created and the service is live
 ** <pre
 ** 
 ** The service implementation is created on demand when methods on the proxy are called.
@@ -33,4 +33,3 @@ enum class ServiceLifecycle {
 	** Builtin services are internal IoC services. They exist before the `Registry` is constructed.
 	builtin;
 }
-

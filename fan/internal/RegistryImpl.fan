@@ -97,7 +97,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				}
 			}
 		}
-		
+
+		tracker.track("Validating advice definitions") |->| {
+			srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
+			advisableServices := srvDefs.findAll { it.proxy != ServiceProxy.never }
+			moduleDefs.each {
+				it.adviceDefs.each |adviceDef| {
+					matches := advisableServices.findAll |def| { 
+						adviceDef.matchesSvrDef(def)  
+					}
+					if (matches.isEmpty && !adviceDef.optional)
+						throw ServiceNotFoundErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef), advisableServices)
+					matches.each { it.addAdviceDef(adviceDef) }
+				}
+			}
+		}
+
 		tracker.track("Consolidating module definitions") |->| {
 			// build the builtin module here so we can override LogProvider
 			readyMade := [
@@ -136,21 +151,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 							if (serviceDefByType(it.serviceType) == null)
 								throw IocErr(IocMessages.contributionMethodServiceTypeDoesNotExist(it.method, it.serviceType))
 					}
-				}
-			}
-		}
-
-		tracker.track("Validating advice definitions") |->| {
-			advisableServices := serviceDefs.vals.findAll { it.proxiable }
-			moduleDefs.each {
-				it.adviceDefs.each |adviceDef| {
-					if (adviceDef.optional)
-						return
-					matches := advisableServices.any |def| { 
-						adviceDef.matchesService(def)  
-					}
-					if (!matches)
-						throw IocErr(IocMessages.adviceDoesNotMatchAnyServices(adviceDef, advisableServices.map { it.serviceId }))
 				}
 			}
 		}
@@ -292,9 +292,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Str:ServiceDefinition serviceDefinitions() {
-		stats := Str:ServiceDefinition[:]	{ caseInsensitive = true }
-		modules.each { stats.addAll(it.serviceStats) }
-		return stats
+		defs := Str:ServiceDefinition[:] { ordered = true }
+		serviceDefs.keys.sort.each { defs[it] = serviceDefs[it].toServiceDefinition }
+		return defs
 	}	
 
 	// ---- ObjLocator Methods --------------------------------------------------------------------
@@ -303,7 +303,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefById(serviceId)
 		if (serviceDef == null)
 			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds) : null
-		return serviceDef.getService(false)
+		return serviceDef.getService
 	}
 
 	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -319,7 +319,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := serviceDefByType(dependencyType)
 		if (serviceDef != null) {
 			InjectionTracker.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
-			return serviceDef.getService(false)
+			return serviceDef.getService
 		}
 
 		config := InjectionTracker.provideConfig(dependencyType)
@@ -341,13 +341,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 		
 		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
-		serviceDef := ServiceDef.makeStandard() {
+		serviceDef := ServiceDef() {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.serviceType 		= type
 			it.serviceScope		= ServiceScope.perInjection
+			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
 			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
-		}		
+		}
 		
 		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
 			return InjectionUtils.autobuild(implType, ctorArgs, fieldVals)
@@ -365,10 +366,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			throw IocErr(IocMessages.bindMixinIsNot(mixinT))
 
 		// create a dummy serviceDef
-		serviceDef := ServiceDef.makeStandard() {
+		serviceDef := ServiceDef() {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.serviceType 		= mixinT
 			it.serviceScope		= ServiceScope.perInjection
+			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$mixinT.qname : Create Proxy"
 			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
 		}

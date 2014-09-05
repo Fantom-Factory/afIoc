@@ -210,18 +210,13 @@ internal const class InjectionUtils {
 
 		if (inject.serviceId != null) {
 			log("Field has @Inject { serviceId='${inject.serviceId}' }")
-			serviceDef := objLocator.serviceDefById(inject.serviceId)
-			
-			if (serviceDef == null) {
-				if (inject.optional) {
-					log("Field has @Inject { optional=true }")
-					log("Service not found - failing silently...")
-					return null
-				}
-				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.serviceIds)
-			}
-			
-			service := serviceDef.getService(false)
+
+			service := objLocator.trackServiceById(inject.serviceId, !inject.optional)
+			if (service == null && inject.optional) {
+				log("Field has @Inject { optional=true }")
+				log("Service not found - failing silently...")
+				return null
+			}			
 			
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))

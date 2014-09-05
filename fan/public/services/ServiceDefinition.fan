@@ -8,7 +8,7 @@ const class ServiceDefinition {
 	const Str 				serviceId
 	const Type				serviceType
 	const ServiceScope 		serviceScope
-	const Bool				proxyDisabled
+	const ServiceProxy		serviceProxy
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls		
 
