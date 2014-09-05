@@ -20,7 +20,6 @@ class RegistryBuilder {
 	@NoDoc 
 	new make() {
 		options	= Utils.makeMap(Str#, Obj?#)
-		addModule(IocModule#)
 	}
 
 	** Adds a module to the registry. 
@@ -137,7 +136,7 @@ class RegistryBuilder {
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	private Void _addModule(Type moduleType) {
-		if (moduleType != IocModule# && !suppressLogging && !moduleTypes.contains(moduleType))
+		if (!suppressLogging && !moduleTypes.contains(moduleType))
 			logger.info("Adding module definition for $moduleType.qname")
 
 		ctx.withModule(moduleType) |->| {			

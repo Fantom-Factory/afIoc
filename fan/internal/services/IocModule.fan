@@ -1,9 +1,23 @@
 using concurrent
+using afPlastic
 
-** It would be nice to hardcode these contributions in RegistryImpl so we can delete this class - but 
-** that would require a new ContribitionImpl -> too much work!
 internal const class IocModule {
 
+	static Void bind(ServiceBinder binder) {
+		binder.bind(Registry#) 
+		binder.bind(RegistryMeta#) 
+		binder.bind(RegistryStartup#).withScope(ServiceScope.perThread)	// for non-const listeners 
+		binder.bind(RegistryShutdown#)
+		
+		binder.bind(ActorPools#)
+		binder.bind(AspectInvokerSource#)
+		binder.bind(DependencyProviders#)
+		binder.bind(LogProvider#)
+		binder.bind(PlasticCompiler#)
+		binder.bind(ServiceProxyBuilder#)
+		binder.bind(ThreadLocalManager#) 
+	}
+	
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
 		config["afIoc.localProvider"]	= config.autobuild(LocalProvider#)

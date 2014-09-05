@@ -43,7 +43,6 @@ internal class TestAspect : IocTest {
 
 		serviceDef := ServiceDef.makeStandard() {
 			it.serviceId 		= "T_MyService65Aspect"
-			it.moduleId			= ""
 			it.serviceType 		= Type#
 			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= ""
@@ -53,7 +52,6 @@ internal class TestAspect : IocTest {
 		
 		serviceDef = ServiceDef.makeStandard() {
 			it.serviceId 		= "T_MyService67NoMatch"
-			it.moduleId			= ""
 			it.serviceType 		= Type#
 			it.serviceScope		= ServiceScope.perInjection
 			it.description 		= ""

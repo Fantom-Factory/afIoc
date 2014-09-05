@@ -1,45 +1,42 @@
 
 ** Meta info that defines a service 
 internal const class ServiceDef {	
-	const Str 			moduleId
 	const Str 			serviceId
 	const Type			serviceType
 	const ServiceScope	serviceScope
-	const Bool			noProxy	// FIXME
+	const Bool			noProxy	// FIXME proxy
 	const |->Obj|		serviceBuilder
 	const Str			description
 
+	const Module?		module	// null for adhoc autobuilds and proxies
+
 	private const Str 	unqualifiedServiceId
+	private const Type 	serviceTypeNonNull
 
 	new makeStandard(|This| f ) { 
 		f(this)
+
 		if (serviceScope == ServiceScope.perApplication && !serviceType.isConst)
-			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))	
-		unqualifiedServiceId = unqualify(serviceId)
-	}
-
-	new makeBuiltIn(|This| f) { 
-		this.moduleId		= IocConstants.builtInModuleId
-		this.serviceScope	= ServiceScope.perApplication
-		this.noProxy		= true
-
-		f(this)
-		
-		if (serviceId == null)
-			serviceId = serviceType.qname
+			throw IocErr(IocMessages.perAppScopeOnlyForConstClasses(serviceType))
 
 		if (serviceBuilder == null)
 			serviceBuilder = |->Obj| { 
 				throw IocErr("Can not create BuiltIn service '$serviceId'") 
 			}
 
-		if (description == null)
-			description = "$serviceId : BuiltIn Service"
-
-		unqualifiedServiceId = unqualify(serviceId)
+		unqualifiedServiceId	= unqualify(serviceId)
+		serviceTypeNonNull		= serviceType.toNonNullable
 	}
 
-	// FIXME kill me
+	Obj getService(Bool returnReal) {	// only proxy needs to get real
+		module.service(this, returnReal, null)
+	}
+	
+	Obj newInstance() {
+		module.service(this, false, true)		
+	}
+	
+	// FIXME proxy kill me
 	Bool proxiable() {
 		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
 		// Yeah, exactly! Just don't allow it.
@@ -48,6 +45,10 @@ internal const class ServiceDef {
 	
 	Bool matchesId(Str serviceId) {
 		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
+	}
+
+	Bool matchesType(Type serviceType) {
+		serviceTypeNonNull.fits(serviceType.toNonNullable)
 	}
 	
 	override Str toStr() {
@@ -69,9 +70,10 @@ internal const class ServiceDef {
 
 
 internal class SrvDef {
-	const Str		id
-	const Type?		type
-	const Str 		moduleId
+	Str				id
+	Type?			type
+	Str 			moduleId	// needed for err msgs
+
 	Obj?			buildData	// type or method
 	ServiceScope?	scope
 	ServiceProxy?	proxy
@@ -79,11 +81,24 @@ internal class SrvDef {
 	Str?			overrideRef
 	Bool			overrideOptional
 
+	Bool			builtIn
+	Str?			desc
+
 	new make(|This| in) { in(this) }
 	
-	ServiceDef toServiceDef() {
-		ServiceDef.makeStandard {
-			it.moduleId			= this.moduleId
+	ServiceDef toServiceDef(Module module) {
+		if (builtIn) {
+			proxy		= ServiceProxy.never
+
+			if (scope == null)
+				scope	= ServiceScope.perApplication
+			
+			if (desc == null)
+				desc = "$id : BuiltIn Service"
+		}
+
+		return ServiceDef.makeStandard {
+			it.module			= module
 			it.serviceId		= this.id
 			it.serviceType		= this.type
 			it.serviceScope		= this.scope
@@ -93,16 +108,22 @@ internal class SrvDef {
 				serviceImplType		:= (Type) buildData
 				it.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(it, serviceImplType)
 				it.description		= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
-			}
-
-			if (buildData is Method) {
+			} 
+			
+			else if (buildData is Method) {
 				builderMethod		:= (Method) buildData
 				it.serviceBuilder	= ServiceBuilders.fromBuildMethod(it, builderMethod)
 				it.description		= "$serviceId : via Builder Method (${builderMethod.qname})"
-			}
+			} 
+
+			else		
+				it.serviceBuilder	= buildData
 			
 			if (this.overridden)
 				it.description	+= " (Overridden)"
+			
+			if (desc != null)
+				it.description = desc
 		}
 	}
 

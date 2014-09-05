@@ -6,37 +6,18 @@ internal const class ModuleImpl : Module {
 
 	override const Str					moduleId	
 	private  const OneShotLock 			regShutdown		:= OneShotLock("Registry has shutdown")
-	private  const Str:ModuleState		serviceState
+	private  const Str:ServiceState		serviceState
 	private  const Contribution[]		contributions
 	private  const AdviceDef[]			adviceDefs
 	private  const ObjLocator			objLocator
-	private  const CachingTypeLookup	typeToServiceDefs
 
-	new makeBuiltIn(ObjLocator objLocator, ThreadLocalManager localManager, Str moduleId, ServiceDef:Obj? services) {
-		localMap	:= localManager.createMap(moduleId)
-		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
-		services.each |impl, def| {
-			srvState[def.serviceId] = ModuleState(localMap, def, impl, ServiceLifecycle.builtin)
-		}
-
-		this.serviceState 	= srvState
-		this.moduleId		= moduleId
-		this.objLocator 	= objLocator
-		this.adviceDefs		= [,]
-		this.contributions	= [,]
-		
-		map := Type:ServiceDef[][:]
-		srvState.each |state, id| {
-			map.getOrAdd(state.def.serviceType) { ServiceDef[,] }.add(state.def)
-		}
-		this.typeToServiceDefs = CachingTypeLookup(map)
-	}
-
-	new make(ObjLocator objLocator, ThreadLocalManager localManager, ModuleDef moduleDef) {
+	new make(ObjLocator objLocator, ThreadLocalManager localManager, ModuleDef moduleDef, [Type:Obj]? readyMade) {
 		localMap := localManager.createMap(moduleName(moduleDef.moduleId))
-		srvState 	:= (Str:ModuleState) Utils.makeMap(Str#, ModuleState#)
+		srvState 	:= (Str:ServiceState) Utils.makeMap(Str#, ServiceState#)
 		moduleDef.serviceDefs.each |def| {
-			srvState[def.id] = ModuleState(localMap, def.toServiceDef, null, ServiceLifecycle.defined)
+			impl := readyMade?.get(def.type)
+			life  := (readyMade == null) ? ServiceLifecycle.defined : ServiceLifecycle.builtin
+			srvState[def.id] = ServiceState(localMap, def.toServiceDef(this), impl, life)
 		}
 		
 		this.serviceState 	= srvState		
@@ -51,30 +32,14 @@ internal const class ModuleImpl : Module {
 				it.objLocator 	= objLocator
 			}
 		}
-		
-		map := Type:ServiceDef[][:]
-		srvState.each |state, id| {
-			map.getOrAdd(state.def.serviceType) { ServiceDef[,] }.add(state.def)
-		}
-		this.typeToServiceDefs = CachingTypeLookup(map)		
 	}
 
 	// ---- Module Methods ----------------------------------------------------
-	
-	override ServiceDef? serviceDefByQualifiedId(Str serviceId) {
-		serviceState[serviceId]?.def
+
+	override ServiceDef[] serviceDefs() {
+		serviceState.vals.map { it.def }
 	}
 
-	override ServiceDef[] serviceDefsById(Str serviceId) {
-		return serviceState.vals.findAll |state| {
-			state.def.matchesId(serviceId)
-		}.map { it.def }
-	}
-
-    override ServiceDef[] serviceDefsByType(Type serviceType) {
-		typeToServiceDefs.findChildren(serviceType, false)
-    }
-	
 	override Contribution[] contributionsByServiceDef(ServiceDef serviceDef) {
 		regShutdown.check
 		return contributions.findAll {
@@ -136,12 +101,7 @@ internal const class ModuleImpl : Module {
 		regShutdown.lock
 		serviceState.each { it.shutdown }
 	}
-
-	override Bool hasServices() {
-		// it may have only contributions or advisors 
-		!serviceState.isEmpty
-	}
-	
+		
 	// ---- Private Methods ----------------------------------------------------
 
 	private Obj getOrMakeRealService(ServiceDef def, Bool useCache) {
@@ -187,7 +147,7 @@ internal const class ModuleImpl : Module {
 	}	
 }
 
-internal const class ModuleState {
+internal const class ServiceState {
 	private const LocalMap		localMap
 	private const AtomicRef		aLifecycle	:= AtomicRef(null)
 	private const AtomicInt		aImplCount	:= AtomicInt(0)
