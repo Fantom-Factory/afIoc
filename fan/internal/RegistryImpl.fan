@@ -99,41 +99,63 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 
-		tracker.track("Applying service overrides") |->| {
+		// this IoC trace makes more sense when we throw dup id errs
+		tracker.track("Consolidating service definitions") |->| {
 			serviceDefs  := (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
 			overrideDefs := (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
 			
-			// normalise keys -> map all keys to orig key and apply overrides
-			// code nabbed from Configuration
-			keys		:= Utils.makeMap(Str#, Str#)
-			serviceDefs.each { keys[it.id] = it.id }
-			services	:= Str:SrvDef[:].addList(serviceDefs ) { it.id }	// TODO: nice error on dups
-			overrides	:= Str:SrvDef[:].addList(overrideDefs) { it.id }	// TODO: nice error on dups
-			found		:= true
-			while (!overrides.isEmpty && found) {
-				found = false
-				overrides = overrides.exclude |over, existingKey| {
-					overrideKey := over.overrideRef
-					if (keys.containsKey(existingKey)) {
-						keys[overrideKey] = keys[existingKey]	// TODO: nice error on dups
-						found = true
-						
-						tracker.log("'${overrideKey}' overrides '${existingKey}'")
-						srvDef := services[keys[existingKey]]						
-						srvDef.applyOverride(over)
-
-						return true
-					} else {
-						return false
-					}
-				}
+			// we could use Map.addList(), but do it the long way round so we get a nice error on dups
+			services	:= Str:SrvDef[:] { caseInsensitive = true}
+			serviceDefs.each {
+				if (services.containsKey(it.id))
+					throw IocErr(IocMessages.serviceAlreadyDefined(it.id, it.buildData->qname, services[it.id].buildData->qname))
+				services[it.id] = it
 			}
 
-			overrides = overrides.exclude { it.overrideOptional }
+			// we could use Map.addList(), but do it the long way round so we get a nice error on dups
+			overrides	:= Str:SrvDef[:] { caseInsensitive = true}
+			overrideDefs.each {
+				if (overrides.containsKey(it.id))
+					// FIXME change err msg
+					throw IocErr(IocMessages.overrideAlreadyDefined(it.id, it.buildData->qname, overrides[it.id].buildData->qname))
+				overrides[it.id] = it
+			}
+			
+			tracker.track("Applying service overrides") |->| {
+				keys := Utils.makeMap(Str#, Str#)
+				services.keys.each { keys[it] = it }
+	
+				// normalise keys -> map all keys to orig key and apply overrides
+				// code nabbed from Configuration
+				found		:= true
+				while (!overrides.isEmpty && found) {
+					found = false
+					overrides = overrides.exclude |over, existingKey| {
+						overrideKey := over.overrideRef
+						if (keys.containsKey(existingKey)) {
+							if (keys.containsKey(overrideKey))
+								throw IocErr(IocMessages.overrideAlreadyDefined(over.overrideRef, over.buildData->qname, services[keys[existingKey]].buildData->qname))
 
-			if (!overrides.isEmpty) {
-				keysNotFound := overrides.keys.join(", ")
-				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(keysNotFound), services.keys)
+							keys[overrideKey] = keys[existingKey]	// TODO: nice error on dups
+							found = true
+							
+							tracker.log("'${overrideKey}' overrides '${existingKey}'")
+							srvDef := services[keys[existingKey]]						
+							srvDef.applyOverride(over)
+	
+							return true
+						} else {
+							return false
+						}
+					}
+				}
+	
+				overrides = overrides.exclude { it.overrideOptional }
+	
+				if (!overrides.isEmpty) {
+					keysNotFound := overrides.keys.join(", ")
+					throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(keysNotFound), services.keys)
+				}
 			}
 		}
 		
@@ -142,13 +164,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				module := ModuleImpl(this, threadLocalManager, moduleDef)
 				moduleIdToModule[moduleDef.moduleId] = module
 
-				// ensure services aren't defined twice
 				moduleDef.serviceDefs.keys.each |serviceId| {
-					if (serviceIdToModule.containsKey(serviceId)) {
-						existingDef 	:= serviceIdToModule[serviceId].serviceDefByQualifiedId(serviceId)
-						conflictingDef 	:= module.serviceDefByQualifiedId(serviceId)
-						throw IocErr(IocMessages.serviceIdConflict(serviceId, existingDef, conflictingDef))
-					}
 					serviceIdToModule[serviceId] = module
 				}				
 			}
@@ -461,8 +477,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}.flatten
 	}
 
-	override Str:ServiceStat stats() {
-		stats := Str:ServiceStat[:]	{ caseInsensitive = true }
+	override Str:ServiceDefinition stats() {
+		stats := Str:ServiceDefinition[:]	{ caseInsensitive = true }
 		modules.each { stats.addAll(it.serviceStats) }
 		return stats
 	}	

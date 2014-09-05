@@ -27,8 +27,12 @@ internal const class IocMessages {
 		"Module method $method.qname should be annotated with the @${facetType.name} facet"
 	}
 	
-    static Str buildMethodConflict(Str serviceId, Str conflict, Str existing) {
-        "Service ${serviceId} (${conflict}) conflicts with previously defined service (${existing})"
+    static Str serviceAlreadyDefined(Str overrideId, Str conflict, Str existing) {
+        "Service Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
+    }
+	
+    static Str overrideAlreadyDefined(Str overrideId, Str conflict, Str existing) {
+        "Override Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
     }
 	
 	static Str bindMethodMustBeStatic(Method method) {
@@ -67,10 +71,6 @@ internal const class IocMessages {
 		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service mixin to a specific implementation type."
 	}
 
-	static Str serviceIdConflict(Str serviceId, ServiceDef existing, ServiceDef conflicting) {
-		"Service id '${serviceId}' has already been defined by ${existing} and may not be redefined by ${conflicting}. \n You should rename one of the service builder methods."
-	}
-	
 	static Str serviceIdNotFound(Str serviceId) {
 		"Service id '${serviceId}' is not defined."
 	}

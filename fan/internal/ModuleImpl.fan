@@ -118,9 +118,9 @@ internal const class ModuleImpl : Module {
 		}
 	}
 	
-	override Str:ServiceStat serviceStats() {
+	override Str:ServiceDefinition serviceStats() {
 		serviceState.map |state| {
-			ServiceStat {
+			ServiceDefinition {
 				it.serviceId	= state.def.serviceId
 				it.serviceType	= state.def.serviceType
 				it.serviceScope	= state.def.serviceScope
