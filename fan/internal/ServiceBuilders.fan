@@ -12,10 +12,10 @@ internal const mixin ServiceBuilders {
 					return InjectionUtils.callMethod(method, instance, args)
 				}
 			}
-		}.toImmutable
+		}
 	}
 	
-	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType) {
+	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		|->Obj| {
 			InjectionTracker.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
 				objLocator := InjectionTracker.peek.objLocator
@@ -24,11 +24,11 @@ internal const mixin ServiceBuilders {
 				// config is a very special method argument, as it's optional and if required, we 
 				// use the param to generate the value
 				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, Obj#.emptyList, null)
+					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, ctorArgs, fieldVals)
 					return InjectionUtils.injectIntoFields(obj)
 				}
-			}			
-		}.toImmutable
+			}
+		}
 	}
 }
 

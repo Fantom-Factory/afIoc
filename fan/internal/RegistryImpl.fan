@@ -323,18 +323,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
 		serviceDef := ServiceDef() {
-			it.serviceId 		= "${type.name}Autobuild"
+			it.serviceId 		= "${type.name}(Autobuild)"
 			it.serviceType 		= type
 			it.serviceScope		= type.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
-			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
+			it.serviceBuilder	= safe(ServiceBuilders.fromCtorAutobuild(it, implType, ctorArgs, fieldVals))
 		}
 		
-		// TODO: go through service
-		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
-			return InjectionUtils.autobuild(implType, ctorArgs, fieldVals)
-		}
+		return serviceDef.newInstance
+	}
+	
+	// So we can pass mutable parameters into Autobuilds - they're gonna be used straight away
+	private static |->Obj| safe(|->Obj| func) {
+		unsafe := Unsafe(func) 
+		return |->Obj| { unsafe.val->call }
 	}
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
@@ -349,7 +352,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// create a dummy serviceDef
 		serviceDef := ServiceDef() {
-			it.serviceId 		= "${mixinT.name}CreateProxy"
+			it.serviceId 		= "${mixinT.name}(CreateProxy)"
 			it.serviceType 		= mixinT
 			it.serviceScope		= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.always

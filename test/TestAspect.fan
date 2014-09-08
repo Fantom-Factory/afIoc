@@ -48,7 +48,7 @@ internal class TestAspect : IocTest {
 			it.serviceScope		= it.serviceType.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 6 }
-		}		
+		}
 		verify(def.matchesService(serviceDef))
 		
 		serviceDef = ServiceDef() {
