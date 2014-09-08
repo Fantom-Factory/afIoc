@@ -12,6 +12,7 @@ const class ServiceDefinition {
 	const ServiceLifecycle	lifecycle
 	const Int				noOfImpls		
 
+	@NoDoc
 	override const Str		toStr		
 
 	internal new make(|This| f) { f(this) }	

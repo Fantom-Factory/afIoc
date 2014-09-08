@@ -129,6 +129,10 @@ internal const class IocMessages {
 		"Could not find service to match ID '$serviceId' as defined in contribution method ${method.qname}."
 	}
 
+	static Str contributionMethodsNotWanted(Str serviceId, Method[] methods) {
+		"Service '$serviceId' does not take configuration contributions but has contribution method(s): " + methods.join(", ") { it.qname }
+	}
+
 	static Str configRecursion(Str[] nodeNames) {
 		"Configuration ordering recursion! A configuration contribution depends on its self in some way : " + nodeNames.join(" -> ")
 	}
