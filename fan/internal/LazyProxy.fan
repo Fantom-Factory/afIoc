@@ -43,10 +43,8 @@ internal const class LazyProxyImpl : LazyProxy {
 				return smi
 		}
 
-		serviceInvokerRef.val = InjectionTracker.withCtx(null) |->Obj?| {
-			InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
-				invokerSrc.createServiceMethodInvoker(serviceDef)
-			}
+		serviceInvokerRef.val = InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
+			invokerSrc.createServiceMethodInvoker(serviceDef)
 		}
 
 		return serviceInvokerRef.val

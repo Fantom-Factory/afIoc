@@ -204,10 +204,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? serviceById(Str serviceId, Bool checked := true) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
-			return InjectionTracker.withCtx(null) |->Obj?| {   
-				return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj?| {
-					return trackServiceById(serviceId, checked)
-				}
+			return InjectionTracker.track("Locating service by ID '$serviceId'") |->Obj?| {
+				return trackServiceById(serviceId, checked)
 			}
 		}
 	}
@@ -215,12 +213,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj? dependencyByType(Type dependencyType, Bool checked := true) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
-			return InjectionTracker.withCtx(null) |->Obj?| {
-				return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
-					return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
-						// as ctx is brand new, this won't return null
-						return trackDependencyByType(dependencyType, checked)
-					}
+			return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
+				return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
+					// as ctx is brand new, this won't return null
+					return trackDependencyByType(dependencyType, checked)
 				}
 			}
 		}
@@ -230,19 +226,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj autobuild(Type type2, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			return InjectionTracker.withCtx(null) |->Obj?| {
-				return trackAutobuild(type2, ctorArgs, fieldVals)
-			}
+			return trackAutobuild(type2, ctorArgs, fieldVals)
 		}
 	}
 	
 	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
-			return InjectionTracker.withCtx(null) |->Obj?| {
-				return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
-					return trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
-				}
+			return InjectionTracker.track("Creating proxy for ${mixinType.qname}") |->Obj?| {
+				return trackCreateProxy(mixinType, implType, ctorArgs, fieldVals)
 			}
 		}
 	}
@@ -250,9 +242,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj injectIntoFields(Obj object) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			return InjectionTracker.withCtx(null) |->Obj?| {
-				return trackInjectIntoFields(object)
-			}
+			return trackInjectIntoFields(object)
 		}
 	}
 
@@ -260,10 +250,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		try {
 			return Utils.stackTraceFilter |->Obj?| {
 				shutdownLock.check
-				return InjectionTracker.withCtx(null) |->Obj?| {
-					return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
-						return trackCallMethod(method, instance, providedMethodArgs)
-					}
+				return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
+					return trackCallMethod(method, instance, providedMethodArgs)
 				}
 			}
 		} catch (IocErr iocErr) {

@@ -14,22 +14,17 @@ internal class InjectionTracker {
 		this.opTracker	= tracker
 	}
 
-	static Void forTesting_push(InjectionTracker ctx) {
-		ThreadStack.forTesting_push(trackerId, ctx)
-	}
-
-	static Void forTesting_clear() {
-		ThreadStack.forTesting_clear(trackerId)
-	}
-
-	static Obj? withCtx(OpTracker? tracker, |->Obj?| f) {
-		ctx := ThreadStack.peek(trackerId, false) ?: InjectionTracker.make(tracker ?: OpTracker())
-		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
-		return ThreadStack.pushAndRun(trackerId, ctx, f)
+	static Obj? withCtx(OpTracker tracker, |->Obj?| f) {
+		ThreadStack.pushAndRun(trackerId, InjectionTracker(tracker), f)
 	}
 
 	static Obj? track(Str description, |->Obj?| operation) {
-		tracker.track(description, operation)
+		if (ThreadStack.peek(trackerId, false) == null) {
+			return withCtx(OpTracker()) |->Obj?| {
+				return tracker.track(description, operation)
+			}
+		} else
+			return tracker.track(description, operation)
 	}
 
 	static Void log(Str msg) {
