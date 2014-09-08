@@ -5,13 +5,10 @@ using concurrent
 internal const class ServiceDef {	
 	const Str 			serviceId
 	const Type			serviceType
-	const ServiceScope	serviceScope	
+	const ServiceScope?	serviceScope	
 	const ServiceProxy	serviceProxy
 	const |->Obj|		serviceBuilder
 	const Str			description
-
-	private const Str 	unqualifiedServiceId
-	private const Type 	serviceTypeNonNull
 	
 	// -- null for BareBones ctor --
 	private const ObjLocator?	objLocator
@@ -22,6 +19,8 @@ internal const class ServiceDef {
 	private const ObjectRef?	serviceImplRef
 	private const ObjectRef?	serviceProxyRef
 	
+	private const Str 	unqualifiedServiceId
+	private const Type 	serviceTypeNonNull
 	
 	new makeBareBones(|This|in) {
 		in(this)		
@@ -97,22 +96,47 @@ internal const class ServiceDef {
 		}
 	}	
 
-	Obj getService() {
-		service(this, false, null)
-	}	
-	Obj getRealService() {
-		service(this, true, null)		
-	}
-	Obj newInstance() {
-		service(this, false, true)		
-	}
+	// ---- Service Build Methods ----
+
+	// Because of recursion (service1 creates service2), you can not create the service 
+	// inside an actor - 'cos the actor will block when it eventually messages itself. So...
+	// We could use afConcurrent::Synchronised to allow re-enterant locks but then threaded 
+	// services would be created and stored in the wrong thread. (We'd also have to copy 
+	// over all the thread stacks.)
 	
-	// FIXME proxy kill me
-	Bool proxiable() {
-		// if we proxy a per 'perInjection' into an app scoped service, is it perApp or perThread!??
-		// Yeah, exactly! Just don't allow it.
-		serviceProxy != ServiceProxy.never && serviceType.isMixin && (serviceScope != ServiceScope.perInjection)
+	// TODO: A const service could be created twice if there's a race condition between two 
+	// threads - but only one is stored. 
+	// This is ONLY dangerous because gawd knows what those services do in their ctor and 
+	// @PostInject methods!
+
+	Obj newInstance(ServiceProxy proxy) {
+		InjectionTracker.withServiceDef(this) |->Obj| {
+			(proxy == ServiceProxy.always)
+				? getOrMakeProxyService(true)
+				: getOrMakeRealService(false)
+		}
 	}
+	Obj getRealService() {
+		InjectionTracker.withServiceDef(this) |->Obj| {
+			getOrMakeRealService(true)
+		}
+	}
+	Obj getService() {
+		InjectionTracker.withServiceDef(this) |->Obj| {
+			getOrMakeRealService(true)
+
+			// FIXME Fix Proxy
+//			lastDef := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
+//			proxiable := serviceProxy != ServiceProxy.never && serviceType.isMixin
+//	
+//			// check for allowed scope
+//			if (lastDef?.serviceScope == ServiceScope.perApplication && def.serviceScope == ServiceScope.perThread)
+//				if (!def.proxiable && injectionCtx.injectionKind.isFieldInjection)
+//					throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, def.serviceId))
+//
+//			getOrMakeProxyService(true)
+		}
+	}	
 	
 	ServiceDefinition toServiceDefinition() {
 		ServiceDefinition {
@@ -126,44 +150,32 @@ internal const class ServiceDef {
 		}
 	}
 
-	// ---- Service ----
 	
-	private Obj? service(ServiceDef def, Bool returnReal, Bool? autobuild) {
-		// we're going deeper!
-		return InjectionTracker.withServiceDef(def) |->Obj?| {
+//	private Obj? service(ServiceDef def, Bool returnReal, Bool? autobuild) {
+//		// we're going deeper!
+//		return InjectionTracker.withServiceDef(def) |->Obj?| {
+//
+//			useCache := !(autobuild ?: def.serviceScope == ServiceScope.perInjection)
+//
+//			if (returnReal)
+//				return getOrMakeRealService(def, useCache)
+//
+//			if (!def.proxiable)
+//				return getOrMakeRealService(def, useCache)
+//
+//			return getOrMakeProxyService(def, useCache)
+//		}
+//	}
 
-			// Because of recursion (service1 creates service2), you can not create the service 
-			// inside an actor - 'cos the actor will block when it eventually messages itself. So...
-			// We could use afConcurrent::Synchronised to allow re-enterant locks but then threaded 
-			// services would be created and stored in the wrong thread. (We'd also have to copy 
-			// over all the thread stacks.)
-
-			// TODO: A const service could be created twice if there's a race condition between two 
-			// threads - but only one is stored. 
-			// This is ONLY dangerous because gawd knows what those services do in their ctor and 
-			// @PostInject methods!
-			
-			useCache := !(autobuild ?: def.serviceScope == ServiceScope.perInjection)
-
-			if (returnReal)
-				return getOrMakeRealService(def, useCache)
-
-			if (!def.proxiable)
-				return getOrMakeRealService(def, useCache)
-
-			return getOrMakeProxyService(def, useCache)
-		}
-	}
-
-	private Obj getOrMakeRealService(ServiceDef def, Bool useCache) {
+	private Obj getOrMakeRealService(Bool useCache) {
 		if (useCache) {
 			exisiting := serviceImplRef.object
 			if (exisiting != null)
 				return exisiting
 		}
 
-		return InjectionTracker.track("Creating REAL Service '$def.serviceId'") |->Obj| {
-	        service := def.serviceBuilder.call()
+		return InjectionTracker.track("Creating REAL Service '$serviceId'") |->Obj| {
+	        service := serviceBuilder.call()
 			incImplCount
 			
 			if (useCache) {
@@ -174,16 +186,16 @@ internal const class ServiceDef {
 	    }	
 	}
 
-	private Obj getOrMakeProxyService(ServiceDef def, Bool useCache) {
+	private Obj getOrMakeProxyService(Bool useCache) {
 		if (useCache) {
 			exisiting := serviceProxyRef.object
 			if (exisiting != null)
 				return exisiting
 		}
 		
-		return InjectionTracker.track("Creating VIRTUAL Service '$def.serviceId'") |->Obj| {
+		return InjectionTracker.track("Creating VIRTUAL Service '$serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
-			proxy			:= proxyBuilder.createProxyForService(def)
+			proxy			:= proxyBuilder.createProxyForService(this)
 			
 			if (useCache) {
 				serviceProxyRef.object	= proxy

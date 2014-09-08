@@ -45,18 +45,10 @@ internal class InjectionTracker {
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
 
 	static Obj? withServiceDef(ServiceDef def, |->Obj?| operation) {
-		lastDef := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
-
-		// check for allowed scope
-		if (lastDef?.serviceScope == ServiceScope.perApplication && def.serviceScope == ServiceScope.perThread)
-			if (!def.proxiable && injectionCtx.injectionKind.isFieldInjection)
-				throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, def.serviceId))
-
-		return ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
+		ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
 			// check for recursion
 			ThreadStack.elements(serviceDefId).eachRange(0..<-1) |ServiceDef ele| { 
-				// the serviceDef may be the same, but if the scope is perInjection, the instances will be different
-				if (ele.serviceId == def.serviceId && def.serviceScope != ServiceScope.perInjection)
+				if (ele.serviceId == def.serviceId)
 					throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).map |ServiceDef sd->Str| { sd.serviceId }))
 			}
 

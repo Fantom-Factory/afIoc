@@ -8,13 +8,6 @@
 **  - Place on a ctor to mark it for use by autobuilding / service creation
 facet class Inject { 
 	
-	** If 'true' then a *new* instance of the dependency / service is created via 'Registry.autobuild()'.
-	** 
-	** Can be used to *new up* classes that have not been defined as a service.
-	** 
-	** Defaults to 'false'. 
-	const Bool autobuild	:= false
-	
 	** Specifies the (qualified) id of the service to inject. 
 	**  
 	** Use when a service mixin has multiple implementations.
