@@ -45,6 +45,7 @@ internal class TestAspect : IocTest {
 			it.serviceId 		= "T_MyService65Aspect"
 			it.serviceType 		= Type#
 			it.serviceProxy		= ServiceProxy.always
+			it.serviceScope		= it.serviceType.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 6 }
 		}		
@@ -53,6 +54,7 @@ internal class TestAspect : IocTest {
 		serviceDef = ServiceDef() {
 			it.serviceId 		= "T_MyService67NoMatch"
 			it.serviceType 		= Type#
+			it.serviceScope		= it.serviceType.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= ""
 			it.serviceBuilder	= |->Obj| { 9 }

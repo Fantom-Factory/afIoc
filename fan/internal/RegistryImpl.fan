@@ -325,6 +325,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := ServiceDef() {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.serviceType 		= type
+			it.serviceScope		= type.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
 			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
@@ -350,6 +351,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := ServiceDef() {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.serviceType 		= mixinT
+			it.serviceScope		= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$mixinT.qname : Create Proxy"
 			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable

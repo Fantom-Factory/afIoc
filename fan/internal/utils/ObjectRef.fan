@@ -12,8 +12,9 @@ internal const class ObjectRef {
 	new make(LocalRef localRef, ServiceScope scope, Obj? obj, Obj? def := null) {
 		if (scope == ServiceScope.perApplication)
 			this.atomicObj = AtomicRef()
-		else
+		if (scope == ServiceScope.perThread)
 			this.localObj = localRef
+		
 		this.object = obj
 		this.def	= def
 		this.name	= localRef.name
