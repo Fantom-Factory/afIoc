@@ -12,11 +12,10 @@ const mixin AspectInvokerSource {
 ** @since 1.3.0
 internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 
-	private const ThreadLocalManager	localManager
+	@Inject private const ThreadLocalManager	localManager
+	@Inject private const InjectionUtils		injectionUtils
 	
-	new make(ThreadLocalManager localManager) {
-		this.localManager	= localManager
-	}
+	new make(|This| in) { in(this) }
 
 	** Returns `MethodAdvisor`s fully loaded with callbacks
 	override ServiceMethodInvoker createServiceMethodInvoker(ServiceDef serviceDef) {
@@ -37,7 +36,7 @@ internal const class AspectInvokerSourceImpl : AspectInvokerSource {
 		if (!adviceMethods.isEmpty)
 			InjectionTracker.track("Gathering advice for service '$serviceDef.serviceId'") |->| {
 				adviceMethods.each { 
-					InjectionUtils.callMethod(it, null, [methodAdvisors])
+					injectionUtils.callMethod(it, null, [methodAdvisors])
 				}
 			}
 

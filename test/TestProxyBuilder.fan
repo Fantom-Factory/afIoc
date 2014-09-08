@@ -9,7 +9,7 @@ internal class TestProxyBuilder : IocTest {
 		reg = (RegistryImpl) RegistryBuilder().addModule(T_MyModule76#).build.startup
 		spb = (ServiceProxyBuilder) reg.dependencyByType(ServiceProxyBuilder#)
 		
-		InjectionTracker.forTesting_push(InjectionTracker(reg))
+		InjectionTracker.forTesting_push(InjectionTracker())
 	}
 
 	override Void teardown() {

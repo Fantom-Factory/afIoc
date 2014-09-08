@@ -43,7 +43,7 @@ internal const class LazyProxyForService : LazyProxy {
 				return smi
 		}
 
-		serviceInvokerRef.val = InjectionTracker.withCtx(objLocator, null) |->Obj?| {
+		serviceInvokerRef.val = InjectionTracker.withCtx(null) |->Obj?| {
 			InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 				invokerSrc.createServiceMethodInvoker(serviceDef)
 			}
@@ -60,14 +60,12 @@ internal const class LazyProxyForService : LazyProxy {
 ** Lazily creates and calls any *instance*, as provided by createProxy() 
 internal const class LazyProxyForMixin : LazyProxy {
 	private const ServiceDef 		serviceDef
-	private const ObjLocator		objLocator
 	private const ObjectRef			instanceRef
 
 	internal new make(ObjLocator objLocator, ServiceDef serviceDef) {
 		localManager 		:= (ThreadLocalManager) objLocator.trackServiceById(ThreadLocalManager#.qname, true)
 		localRef			:= localManager.createRef(serviceDef.serviceId + "-lazyProxy")
 		this.serviceDef 	= serviceDef
-		this.objLocator 	= objLocator
 		this.instanceRef	= ObjectRef(localRef, serviceDef.serviceScope, null)
 	}
 
@@ -81,7 +79,7 @@ internal const class LazyProxyForMixin : LazyProxy {
 
 	private Obj getInstance() {
 		if (instanceRef.object == null) {
-			instanceRef.object = InjectionTracker.withCtx(objLocator, null) |->Obj?| { 
+			instanceRef.object = InjectionTracker.withCtx(null) |->Obj?| { 
 				InjectionTracker.track("Lazily creating '$serviceDef.serviceId'") |->Obj| {	
 					serviceDef.serviceBuilder.call
 				}

@@ -8,11 +8,9 @@ internal class InjectionTracker {
 	private static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
 	
 	private OpTracker 			opTracker
-	private ObjLocator?			objLoc
 
 	** nullable for testing only
-	new make(ObjLocator? objLocator, OpTracker tracker := OpTracker()) {
-		this.objLoc 	= objLocator
+	new make(OpTracker tracker := OpTracker()) {
 		this.opTracker	= tracker
 	}
 
@@ -24,8 +22,8 @@ internal class InjectionTracker {
 		ThreadStack.forTesting_clear(trackerId)
 	}
 
-	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
-		ctx := ThreadStack.peek(trackerId, false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
+	static Obj? withCtx(OpTracker? tracker, |->Obj?| f) {
+		ctx := ThreadStack.peek(trackerId, false) ?: InjectionTracker.make(tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
 		return ThreadStack.pushAndRun(trackerId, ctx, f)
 	}
@@ -40,10 +38,6 @@ internal class InjectionTracker {
 
 	static Void logExpensive(|->Str| msgFunc) {
 		tracker.logExpensive(msgFunc)
-	}
-
-	static ObjLocator objLocator() {
-		((InjectionTracker) ThreadStack.peek(trackerId, true)).objLoc
 	}
 
 	private static OpTracker tracker() {
@@ -67,20 +61,6 @@ internal class InjectionTracker {
 	static ServiceDef? peekServiceDef() {
 		ThreadStack.peek(serviceDefId, false)
 	}
-
-	// ---- Config Providing -------------------------------------------------------------------------------------------
-
-//	static Obj? withConfigProvider(ConfigProvider provider, |->Obj?| operation) {
-//		ThreadStack.pushAndRun(confProviderId, provider, operation)
-//	}
-//
-//	static Obj? provideConfig(Type dependencyType) {
-//		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
-//		// jus' passin' thru!
-//		if (ctx?.canProvide(dependencyType) ?: false)
-//			return ctx.provide(dependencyType)
-//		return null
-//	}
 
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 

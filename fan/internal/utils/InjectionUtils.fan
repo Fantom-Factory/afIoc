@@ -2,8 +2,14 @@ using afBeanUtils
 
 internal const class InjectionUtils {
 
+	private const ObjLocator objLocator
+	
+	new make(ObjLocator objLocator) {
+		this.objLocator = objLocator 
+	}
+	
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
-	static Obj injectIntoFields(Obj object) {
+	Obj injectIntoFields(Obj object) {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			if (!findInjectableFields(object.typeof, true)
 				.reduce(false) |bool, field| {
@@ -21,7 +27,7 @@ internal const class InjectionUtils {
 		return object
 	}
 
-	static Obj? callMethod(Method method, Obj? obj, Obj?[]? providedMethodArgs) {
+	Obj? callMethod(Method method, Obj? obj, Obj?[]? providedMethodArgs) {
 		InjectionTracker.doingMethodInjection(obj, method) |->Obj?| {
 			args := findMethodInjectionParams(method, providedMethodArgs)
 			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
@@ -32,43 +38,33 @@ internal const class InjectionUtils {
 
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
 	static Method? findAutobuildConstructor(Type type) {
-//		InjectionTracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
-//			ctor := |->Method?| {
-				constructors := findConstructors(type)
+		constructors := findConstructors(type)
 
-				if (constructors.isEmpty)
-					return null
+		if (constructors.isEmpty)
+			return null
 
-				if (constructors.size == 1)
-					return constructors[0]
+		if (constructors.size == 1)
+			return constructors[0]
 
-				annotated := constructors.findAll |c| {
-					c.hasFacet(Inject#)
-				}
-				if (annotated.size == 1)
-					return annotated[0]
-				if (annotated.size > 1)
-					throw IocErr(IocMessages.onlyOneCtorWithInjectFacetAllowed(type, annotated.size))				
-				
-				// Choose a constructor with the most parameters.
-				params := constructors.sortr |c1, c2| {
-					c1.params.size <=> c2.params.size
-				}
-				if (params[0].params.size == params[1].params.size)
-					throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
+		annotated := constructors.findAll |c| {
+			c.hasFacet(Inject#)
+		}
+		if (annotated.size == 1)
+			return annotated[0]
+		if (annotated.size > 1)
+			throw IocErr(IocMessages.onlyOneCtorWithInjectFacetAllowed(type, annotated.size))				
+		
+		// Choose a constructor with the most parameters.
+		params := constructors.sortr |c1, c2| {
+			c1.params.size <=> c2.params.size
+		}
+		if (params[0].params.size == params[1].params.size)
+			throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
 
-				return params[0]
-//			}()
-//
-//			if (ctor == null)
-//				log("Found ${type.name}()")
-//			else
-//				log("Found ${ctor.signature}")
-//			return ctor
-//		}
+		return params[0]
 	}
 
-	static Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
+	Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
 		building := ctor.parent
 		if (ctor == null) {
 			return track("Instantiating $building via ${building.name}()...") |->Obj| {
@@ -91,7 +87,7 @@ internal const class InjectionUtils {
 		}
 	}
 
-	static Func makeCtorInjectionPlan(Type building) {
+	Func makeCtorInjectionPlan(Type building) {
 		track("Creating injection plan for fields of $building.qname") |->Obj| {
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
@@ -126,7 +122,7 @@ internal const class InjectionUtils {
 	// ---- Private Methods -----------------------------------------------------------------------
 
 	** Calls methods (of all visibilities) that have the @PostInjection facet
-	private static Obj callPostInjectMethods(Obj object) {
+	private Obj callPostInjectMethods(Obj object) {
 		track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
@@ -142,7 +138,7 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj?[] findMethodInjectionParams(Method method, Obj?[]? providedMethodArgs) {
+	private Obj?[] findMethodInjectionParams(Method method, Obj?[]? providedMethodArgs) {
 		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			params := method.params.map |param, index| {
 				log("Parameter ${index+1} = $param.type")
@@ -176,13 +172,13 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Obj? findDependencyFromInjectFacet(Field field) {
+	private Obj? findDependencyFromInjectFacet(Field field) {
 		inject := (Inject) Slot#.method("facet").callOn(field, [Inject#])	// Stoopid F4
 
 		if (inject.serviceId != null) {
 			log("Field has @Inject { serviceId='${inject.serviceId}' }")
 
-			service := InjectionTracker.objLocator.trackServiceById(inject.serviceId, !inject.optional)
+			service := objLocator.trackServiceById(inject.serviceId, !inject.optional)
 			if (service == null && inject.optional) {
 				log("Field has @Inject { optional=true }")
 				log("Service not found - failing silently...")
@@ -202,9 +198,9 @@ internal const class InjectionUtils {
 		return dependency
 	}
 	
-	private static Obj? findDependencyByType(Type dependencyType, Bool checked) {
+	private Obj? findDependencyByType(Type dependencyType, Bool checked) {
 		track("Looking for dependency of type $dependencyType") |->Obj?| {
-			InjectionTracker.objLocator.trackDependencyByType(dependencyType, checked)
+			objLocator.trackDependencyByType(dependencyType, checked)
 		}
 	}
 
@@ -246,10 +242,6 @@ internal const class InjectionUtils {
 
 	static Obj? track(Str description, |->Obj?| operation) {
 		InjectionTracker.track(description, operation)
-	}
-
-	static Void logExpensive(|->Str| msg) {
-		InjectionTracker.logExpensive(msg)
 	}
 
 	static Void log(Str msg) {
