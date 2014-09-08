@@ -20,8 +20,9 @@ internal const class IocModule {
 	
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
-		config["afIoc.localProvider"]	= config.autobuild(LocalProvider#)
-		config["afIoc.logProvider"]		= logProvider
+//		config["afIoc.ctorItBlockProvider"]	= CtorItBlockProvider()
+		config["afIoc.localProvider"]		= config.autobuild(LocalProvider#)
+		config["afIoc.logProvider"]			= logProvider
 	}	
 
 	@Contribute { serviceType=ActorPools# }

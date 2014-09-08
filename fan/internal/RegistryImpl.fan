@@ -27,18 +27,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
-			
 			builtInModuleDef = ModuleDef(tracker, IocModule#)
-			builtInModuleDef.serviceDefs[IocConstants.ctorItBlockBuilder] = SrvDef {
-				it.moduleId		= IocModule#.qname
-				it.id 			= IocConstants.ctorItBlockBuilder
-				it.type 		= |This|#
-				it.scope		= ServiceScope.perInjection
-				it.desc 		= "$it.id : Autobuilt. Always."
-				it.buildData	= |->Obj| {
-					InjectionUtils.makeCtorInjectionPlan(InjectionTracker.injectionCtx.injectingIntoType)
-				}
-			}
 			builtInModuleDef.serviceDefs.each { it.builtIn = true }
 			moduleDefs.add(builtInModuleDef)	// so we can override LogProvider			
 		}
@@ -316,6 +305,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return config
 		}
 
+		if ((ctx.injectingIntoType != null) && (ctx.dependencyType == |This|#))
+			return InjectionUtils.makeCtorInjectionPlan(ctx.injectingIntoType)
+
 		return checked ? throw IocErr(IocMessages.noDependencyMatchesType(dependencyType)) : null
 	}
 
@@ -332,12 +324,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := ServiceDef() {
 			it.serviceId 		= "${type.name}Autobuild"
 			it.serviceType 		= type
-			it.serviceScope		= ServiceScope.perInjection
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
 			it.serviceBuilder	= |->Obj?| { return null }.toImmutable
 		}
 		
+		// TODO: go through service
 		return InjectionTracker.withServiceDef(serviceDef) |->Obj?| {
 			return InjectionUtils.autobuild(implType, ctorArgs, fieldVals)
 		}
@@ -357,12 +349,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceDef := ServiceDef() {
 			it.serviceId 		= "${mixinT.name}CreateProxy"
 			it.serviceType 		= mixinT
-			it.serviceScope		= ServiceScope.perInjection
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$mixinT.qname : Create Proxy"
 			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
 		}
 
+		// TODO: go through service
 		return spb.createProxyForMixin(serviceDef)
 	}
 	

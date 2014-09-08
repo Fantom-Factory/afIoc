@@ -188,26 +188,6 @@ internal const class InjectionUtils {
 		objLocator	:= InjectionTracker.peek.objLocator
 		inject := (Inject) Slot#.method("facet").callOn(field, [Inject#])	// Stoopid F4
 
-		if (inject.serviceId != null && inject.autobuild) {
-			log("Field has @Inject { serviceId='${inject.serviceId}'; autobuild=true }")
-			serviceDef := objLocator.serviceDefById(inject.serviceId)
-			
-			if (serviceDef == null) {
-				if (inject.optional) {
-					log("Field has @Inject { optional=true }")
-					log("Service not found - failing silently...")
-					return null
-				}
-				throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(inject.serviceId), objLocator.serviceIds)
-			}
-
-			service := serviceDef.newInstance
-			
-			if (!service.typeof.fits(field.type))
-				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
-			return service
-		}
-
 		if (inject.serviceId != null) {
 			log("Field has @Inject { serviceId='${inject.serviceId}' }")
 
@@ -221,14 +201,6 @@ internal const class InjectionUtils {
 			if (!service.typeof.fits(field.type))
 				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
 			return service
-		}
-
-		if (inject.autobuild) {
-			log("Field has @Inject { autobuild=true }")
-			// FIXME: what if type is a service? - rethink the meaning / reword autobuild
-			// maybe new-instance for services only
-			// revert back to having a seperate @Autobuild? (would rather not)
-			return objLocator.trackAutobuild(field.type, null, null)
 		}
 
 		dependency := findDependencyByType(field.type, !inject.optional)
