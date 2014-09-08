@@ -30,8 +30,8 @@ internal class TestInjectFacetServiceId : IocTest {
 
 internal class T_MyModule53 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService32#, T_MyService32Impl1#).withId("impl1")
-		binder.bind(T_MyService32#, T_MyService32Impl2#).withId("impl2")
+		binder.bind(T_MyService32#, T_MyService32Impl1#).withId("impl1").withProxy
+		binder.bind(T_MyService32#, T_MyService32Impl2#).withId("impl2").withProxy
 		binder.bind(T_MyService33#)
 		binder.bind(T_MyService34#)
 		binder.bind(T_MyService35#)

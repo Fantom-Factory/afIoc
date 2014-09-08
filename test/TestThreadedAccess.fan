@@ -183,7 +183,7 @@ internal class T_MyService14 {
 
 internal class T_MyModule77 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService61#).withId("s61").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService61#).withId("s61").withScope(ServiceScope.perThread).withProxy
 		binder.bind(T_MyService62#).withId("s62").withScope(ServiceScope.perApplication)
 	}
 }

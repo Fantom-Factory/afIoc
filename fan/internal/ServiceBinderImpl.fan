@@ -11,7 +11,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	private Type? 			serviceMixin
 	private Type? 			serviceImpl
 	private ServiceScope? 	scope
-	private Bool? 			noProxy
+	private ServiceProxy?	proxy
 	private |OpTracker, ObjLocator->Obj|?	source
 	private Str? 			description
 
@@ -56,7 +56,12 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 	}
 
 	override This withoutProxy() {
-		this.noProxy = true
+		this.proxy = ServiceProxy.never
+		return this
+	}
+
+	override This withProxy() {
+		this.proxy = ServiceProxy.always
 		return this
 	}
 	
@@ -79,7 +84,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 			it.moduleId		= this.moduleDef.moduleId
 			it.type 		= this.serviceMixin
 			it.scope		= this.scope
-			it.proxy		= this.noProxy ? ServiceProxy.never : ServiceProxy.always
+			it.proxy		= this.proxy 
 			it.buildData	= this.serviceImpl
 		}
 
@@ -117,7 +122,7 @@ internal class ServiceBinderImpl : ServiceBinder, ServiceBindingOptions {
 		source 			= null
 		scope 			= null
 		description		= null
-		noProxy			= false
+		proxy			= ServiceProxy.ifRequired
 	}
 	
 	private Void setDefaultScope() {
