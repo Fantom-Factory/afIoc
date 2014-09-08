@@ -40,12 +40,12 @@ internal const class ServiceDef {
 		
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
-			this.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(this, serviceImplType)
+			this.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(this, serviceImplType, null, null).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
 		} 	
 		else if (srvDef.buildData is Method) {
 			builderMethod		:= (Method) srvDef.buildData
-			this.serviceBuilder	= ServiceBuilders.fromBuildMethod(this, builderMethod)
+			this.serviceBuilder	= ServiceBuilders.fromBuildMethod(this, builderMethod).toImmutable
 			this.description	= "$serviceId : via Builder Method (${builderMethod.qname})"
 		} 
 		else		
@@ -111,9 +111,9 @@ internal const class ServiceDef {
 	// This is ONLY dangerous because gawd knows what those services do in their ctor and 
 	// @PostInject methods!
 
-	Obj newInstance(ServiceProxy proxy) {
+	Obj newInstance() {
 		InjectionTracker.withServiceDef(this) |->Obj| {
-			(proxy == ServiceProxy.always)
+			(serviceProxy == ServiceProxy.always)
 				? getOrMakeProxyService(false)
 				: getOrMakeRealService(false)
 		}

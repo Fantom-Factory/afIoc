@@ -2,15 +2,6 @@ using afBeanUtils
 
 internal const class InjectionUtils {
 
-	static Obj autobuild(Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
-		track("Autobuilding $type.qname") |->Obj| {
-			ctor := findAutobuildConstructor(type)
-			obj  := createViaConstructor(ctor, type, ctorArgs, fieldVals)
-			injectIntoFields(obj)
-			return obj
-		}
-	}
-
 	** Injects into the fields (of all visibilities) where the @Inject facet is present.
 	static Obj injectIntoFields(Obj object) {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
