@@ -5,7 +5,7 @@ using concurrent
 internal const class ServiceDef {	
 	const Str 			serviceId
 	const Type			serviceType
-	const ServiceScope?	serviceScope	
+	const ServiceScope	serviceScope	
 	const ServiceProxy	serviceProxy
 	const |->Obj|		serviceBuilder
 	const Str			description
