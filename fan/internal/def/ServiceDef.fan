@@ -47,13 +47,13 @@ internal const class ServiceDef {
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
 			ctor 				:= InjectionUtils.findAutobuildConstructor(serviceImplType)
-			this.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(serviceId, ctor, null, null).toImmutable
+			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, ctor, null, null).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
 			this.configType		= findConfigType(ctor)
 		} 	
 		else if (srvDef.buildData is Method) {
 			builderMethod		:= (Method) srvDef.buildData
-			this.serviceBuilder	= ServiceBuilders.fromBuildMethod(serviceId, builderMethod).toImmutable
+			this.serviceBuilder	= objLocator.serviceBuilders.fromBuildMethod(serviceId, builderMethod).toImmutable
 			this.description	= "$serviceId : via Builder Method (${builderMethod.qname})"
 			this.configType		= findConfigType(builderMethod)
 		} 
@@ -142,7 +142,7 @@ internal const class ServiceDef {
 			InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
 				sizeBefore := config.size
 				
-				InjectionUtils.callMethod(method, null, [Configuration(config)])
+				objLocator.injectionUtils.callMethod(method, null, [Configuration(config)])
 				
 				config.cleanupAfterModule
 				sizeAfter := config.size

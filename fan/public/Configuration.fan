@@ -13,9 +13,14 @@ class Configuration {
 		this.config = config
 	}
 	
-	** A convenience method that instantiates an object, injecting any dependencies. See `Registry.autobuild`.  
+	** A convenience method for `Registry.autobuild`.  
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		config.autobuild(type, ctorArgs, fieldVals)
+		registry.autobuild(type, ctorArgs, fieldVals)
+	}
+
+	** A convenience method for `Registry.autobuild`.  
+	Obj createProxycreateProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+		registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
 	** A convenience method that returns the IoC Registry.
@@ -129,10 +134,6 @@ internal class ConfigurationImpl {
 		this.overrides		= Utils.makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
 		this.typeCoercer	= CachingTypeCoercer()
-	}
-	
-	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		objLocator.trackAutobuild(type, ctorArgs, fieldVals)
 	}
 
 	Registry registry() {

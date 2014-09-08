@@ -12,6 +12,7 @@ internal const class IocModule {
 		binder.bind(ActorPools#)
 		binder.bind(AspectInvokerSource#)
 		binder.bind(DependencyProviders#)
+		binder.bind(InjectionUtils#)
 		binder.bind(LogProvider#)
 		binder.bind(PlasticCompiler#)
 		binder.bind(ServiceProxyBuilder#)

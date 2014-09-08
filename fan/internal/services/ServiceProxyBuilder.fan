@@ -65,7 +65,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			if (!serviceType.isPublic)
 				throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
 		
-			return InjectionTracker.withCtx((ObjLocator) registry, null) |->Obj?| {
+			return InjectionTracker.withCtx(null) |->Obj?| {
 				model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
 				
 				model.extendMixin(serviceType)
