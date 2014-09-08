@@ -8,6 +8,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:ServiceDef		serviceDefs
 	private const DependencyProviders?	depProSrc
+	private const ThreadLocalManager	threadLocalMgr
 	private const Duration				startTime
 			const AtomicBool			logServices		:= AtomicBool(false)
 			const AtomicBool			logBanner		:= AtomicBool(false)
@@ -18,11 +19,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime	= tracker.startTime
+		threadLocalMgr 	= ThreadLocalManagerImpl()
+		injectionUtils	= InjectionUtils(this)
+		serviceBuilders	= ServiceBuilders(injectionUtils)
 		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
-		threadLocalMgr 	:= ThreadLocalManagerImpl()
-		injectionUtils	:= InjectionUtils(this)
 		builtInModuleDef:= (ModuleDef?) null
-		serviceBuilders	 = ServiceBuilders(injectionUtils)
 
 		readyMade 		:= [
 			Registry#			: this,
@@ -136,12 +137,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}		
 
-		this.serviceDefs 	= serviceDefs
-		this.injectionUtils	= injectionUtils
-
-		InjectionTracker.withCtx(tracker) |->Obj?| {
-			depProSrc = trackServiceById(DependencyProviders#.qname, true)
-			return null
+		InjectionTracker.withCtx(tracker) |->| {
+			this.serviceDefs 	= serviceDefs
+			this.depProSrc 		= trackServiceById(DependencyProviders#.qname, true)
 		}
 	}
 
@@ -331,26 +329,26 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		sid		:= "${type.name}(Autobuild)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
-		builder	:= safe(serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals))
+		builder	:= threadLocalMgr.createRef("autobuild")
+		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
+		builder.val = serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 		
 		serviceDef := ServiceDef(this) {
 			it.serviceId 		= sid
 			it.serviceType 		= type
-			it.serviceScope		= type.isConst ? ServiceScope.perApplication : ServiceScope.perThread
+			it.serviceScope		= ServiceScope.perThread	// because it's used straight away
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
-			it.serviceBuilder	= builder
+			it.serviceBuilder	= |->Obj| {
+				func := (|->Obj|) builder.val
+				builder.cleanUp
+				return func.call 
+			}
 		}
 		
 		return serviceDef.getService
 	}
 	
-	// So we can pass mutable parameters into Autobuilds - they're gonna be used straight away
-	private static |->Obj| safe(|->Obj| func) {
-		unsafe := Unsafe(func) 
-		return |->Obj| { unsafe.val->call }
-	}
-
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname, true)
 		
@@ -363,17 +361,21 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		sid		:= "${mixinT.name}(CreateProxy)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
-		builder	:= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs.toImmutable, fieldVals.toImmutable).toImmutable
+		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
+		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
+		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 
-		// TODO: allow mutable args for perThread proxies -> use objectref
-		
 		serviceDef := ServiceDef(this) {
 			it.serviceId 		= sid
 			it.serviceType 		= mixinT
-			it.serviceScope		= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
+			it.serviceScope		= scope
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$mixinT.qname : Create Proxy"
-			it.serviceBuilder	= builder
+			it.serviceBuilder	= |->Obj| {
+				func := (|->Obj|) builder.val
+				builder.cleanUp
+				return func.call 
+			}
 		}
 		return serviceDef.getService
 	}

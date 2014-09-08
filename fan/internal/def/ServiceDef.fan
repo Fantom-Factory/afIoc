@@ -80,7 +80,7 @@ internal const class ServiceDef {
 		defLifecycle		:= srvDef.builtIn ? ServiceLifecycle.builtin : ServiceLifecycle.defined
 		this.lifecycleRef	= ObjectRef(localManager.createRef("{$serviceId}.lifecycle"),	serviceScope, null, defLifecycle)
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
-		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope, null)
+		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope)
 		
 		// TODO: err if no configType but has conf methods
 	}
@@ -172,7 +172,7 @@ internal const class ServiceDef {
 
 	private Obj getOrMakeRealService() {
 		if (inServiceCache) {
-			exisiting := serviceImplRef.object
+			exisiting := serviceImplRef.val
 			if (exisiting != null)
 				return exisiting
 		}
@@ -182,8 +182,8 @@ internal const class ServiceDef {
 			incImplCount
 			
 			if (inServiceCache) {
-				serviceImplRef.object = service
-				lifecycleRef.object   = ServiceLifecycle.created
+				serviceImplRef.val = service
+				lifecycleRef.val   = ServiceLifecycle.created
 			}
 			return service
 	    }	
@@ -191,7 +191,7 @@ internal const class ServiceDef {
 
 	private Obj getOrMakeProxyService() {
 		if (inServiceCache) {
-			exisiting := serviceProxyRef.object
+			exisiting := serviceProxyRef.val
 			if (exisiting != null)
 				return exisiting
 		}
@@ -201,16 +201,16 @@ internal const class ServiceDef {
 			proxy			:= proxyBuilder.createProxyForService(this)
 			
 			if (inServiceCache) {
-				serviceProxyRef.object	= proxy
-				lifecycleRef.object 	= ServiceLifecycle.proxied
+				serviceProxyRef.val	= proxy
+				lifecycleRef.val 	= ServiceLifecycle.proxied
 			}
 			return proxy
 		}
 	}
 	
 	ServiceLifecycle serviceLifecycle {
-		get { lifecycleRef.object }
-		set { lifecycleRef.object = it }
+		get { lifecycleRef.val }
+		set { lifecycleRef.val = it }
 	}
 	
 	Void incImplCount() {
@@ -218,8 +218,8 @@ internal const class ServiceDef {
 	}
 
 	Void shutdown() {
-		serviceImplRef.object 	= null
-		serviceProxyRef.object	= null
+		serviceImplRef.val 	= null
+		serviceProxyRef.val	= null
 	}
 	
 	override Str toStr() {

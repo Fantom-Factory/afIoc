@@ -16,8 +16,6 @@ const mixin ServiceProxyBuilder {
 
 	internal abstract Obj createProxyForService(ServiceDef serviceDef)
 
-	internal abstract Obj createProxyForMixin(ServiceDef serviceDef)
-
 	** Returns a cached Type if exists, otherwise compiles a new proxy type 
 	internal abstract Type compileProxyType(Type serviceType)
 }
@@ -43,16 +41,6 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
 			builder["afLazyService"] = LazyProxyForService((ObjLocator) registry, serviceDef)
-			return builder.create
-		}
-	}
-
-	override internal Obj createProxyForMixin(ServiceDef serviceDef) {
-		InjectionTracker.track("Creating Proxy for mixin '$serviceDef.serviceType'") |->Obj| {
-			serviceType	:= serviceDef.serviceType			
-			proxyType	:= compileProxyType(serviceType)
-			builder		:= CtorPlanBuilder(proxyType)
-			builder["afLazyService"] = LazyProxyForMixin((ObjLocator) registry, serviceDef)
 			return builder.create
 		}
 	}
