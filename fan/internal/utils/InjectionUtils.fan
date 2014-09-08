@@ -32,8 +32,8 @@ internal const class InjectionUtils {
 
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
 	static Method? findAutobuildConstructor(Type type) {
-		InjectionTracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
-			ctor := |->Method?| {
+//		InjectionTracker.track("Looking for suitable ctor to autobiuld $type.qname") |->Method?| {
+//			ctor := |->Method?| {
 				constructors := findConstructors(type)
 
 				if (constructors.isEmpty)
@@ -58,17 +58,18 @@ internal const class InjectionUtils {
 					throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
 
 				return params[0]
-			}()
-
-			if (ctor == null)
-				log("Found ${type.name}()")
-			else
-				log("Found ${ctor.signature}")
-			return ctor
-		}
+//			}()
+//
+//			if (ctor == null)
+//				log("Found ${type.name}()")
+//			else
+//				log("Found ${ctor.signature}")
+//			return ctor
+//		}
 	}
 
-	static Obj createViaConstructor(Method? ctor, Type building, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
+	static Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
+		building := ctor.parent
 		if (ctor == null) {
 			return track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
@@ -176,13 +177,12 @@ internal const class InjectionUtils {
 	}
 
 	private static Obj? findDependencyFromInjectFacet(Field field) {
-		objLocator	:= InjectionTracker.peek.objLocator
 		inject := (Inject) Slot#.method("facet").callOn(field, [Inject#])	// Stoopid F4
 
 		if (inject.serviceId != null) {
 			log("Field has @Inject { serviceId='${inject.serviceId}' }")
 
-			service := objLocator.trackServiceById(inject.serviceId, !inject.optional)
+			service := InjectionTracker.objLocator.trackServiceById(inject.serviceId, !inject.optional)
 			if (service == null && inject.optional) {
 				log("Field has @Inject { optional=true }")
 				log("Service not found - failing silently...")
@@ -204,7 +204,7 @@ internal const class InjectionUtils {
 	
 	private static Obj? findDependencyByType(Type dependencyType, Bool checked) {
 		track("Looking for dependency of type $dependencyType") |->Obj?| {
-			InjectionTracker.peek.objLocator.trackDependencyByType(dependencyType, checked)
+			InjectionTracker.objLocator.trackDependencyByType(dependencyType, checked)
 		}
 	}
 

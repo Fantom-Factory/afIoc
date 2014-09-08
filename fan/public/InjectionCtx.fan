@@ -52,6 +52,13 @@ class InjectionCtx {
 		InjectionTracker.log(msg)
 	}
 	
+	internal Bool isForConfigType(Type? configType) {
+		(injectionKind == InjectionKind.ctorInjection || injectionKind == InjectionKind.methodInjection) && 
+		methodParamIndex == 0 && 
+		configType != null && 
+		dependencyType.fits(configType)
+	}
+	
 	@NoDoc
 	override Str toStr() {
 		"Injecting into ${injectingIntoType.qname}"
@@ -78,6 +85,11 @@ enum class InjectionKind {
 	
 	** Returns true if a field injection (of any kind) is taking place
 	Bool isFieldInjection() {
+		this == fieldInjection || this == fieldInjectionViaItBlock
+	}
+
+	** Returns true if a field injection (of any kind) is taking place
+	Bool takesConfig() {
 		this == fieldInjection || this == fieldInjectionViaItBlock
 	}
 }

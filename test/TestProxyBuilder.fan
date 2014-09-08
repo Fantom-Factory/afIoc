@@ -80,7 +80,7 @@ internal class TestProxyBuilder : IocTest {
 	
 	Void testWithoutProxy() {
 		verifyEq(reg.serviceDefinitions["s64"].lifecycle, ServiceLifecycle.defined)
-		s64 	:= reg.serviceById("s64") as T_MyService64
+		s64   := reg.serviceById("s64") as T_MyService64
 		verifyEq(reg.serviceDefinitions["s64"].lifecycle, ServiceLifecycle.created)
 		s64.dude
 		verifyEq(reg.serviceDefinitions["s64"].lifecycle, ServiceLifecycle.created)
@@ -98,6 +98,16 @@ internal class TestProxyBuilder : IocTest {
 		verifyEq(s83.dude, "dude")
 		verifyEq(s83.inc(5), 6)
 	}
+
+	Void testProxiesMustBeMixins() {
+		verifyIocErrMsg(IocMessages.onlyMixinsCanBeProxied(T_MyService67#)) {
+			reg.createProxy(T_MyService67#)
+		}
+
+		verifyIocErrMsg(IocMessages.onlyMixinsCanBeProxied(T_MyService67#)) {
+			reg.serviceById("s67")
+		}
+	}
 }
 
 internal class T_MyModule76 {
@@ -113,6 +123,7 @@ internal class T_MyModule76 {
 		binder.bind(T_MyService83#).withId("s83")
 		binder.bind(T_MyService64#).withId("s64").withoutProxy
 		binder.bind(T_MyService99#).withId("s99")
+		binder.bind(T_MyService67#).withId("s67").withProxy
 	}
 }
 
@@ -187,3 +198,5 @@ internal class T_MyModule76 {
 	static const Str dude := "Don't override me!"
 }
 @NoDoc const class T_MyService99Impl : T_MyService99 { }
+
+@NoDoc const class T_MyService67 { }

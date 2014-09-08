@@ -61,10 +61,6 @@ internal const class IocMessages {
 		"Service Implementation ${impl.qname} can not be instantiated"
 	}
 	
-	static Str bindMixinIsNot(Type muxin) {
-		"Service Mixin ${muxin.qname} is not a mixin!"
-	}
-	
 	static Str perAppScopeOnlyForConstClasses(Type impl) {
 		"'perApplication' scope is only for const classes : $impl.qname"
 	}

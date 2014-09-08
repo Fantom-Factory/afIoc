@@ -1,32 +1,19 @@
 
 internal const mixin ServiceBuilders {
 	
-	static |->Obj| fromBuildMethod(ServiceDef serviceDef, Method method, Obj? instance := null, Obj[]? args := null) {
+	static |->Obj| fromBuildMethod(Str serviceId, Method method, Obj? instance := null, Obj[]? args := null) {
 		|->Obj| {
-			InjectionTracker.track("Creating Service '$serviceDef.serviceId' via a builder method '$method.qname'") |->Obj| {
-				objLocator := InjectionTracker.peek.objLocator
-				
-				// config is a very special method argument, as it's optional and if required, we 
-				// use the param to generate the value
-				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, method)) |->Obj?| {
-					return InjectionUtils.callMethod(method, instance, args)
-				}
+			InjectionTracker.track("Creating Service '$serviceId' via builder method '$method.qname'") |->Obj| {
+				InjectionUtils.callMethod(method, instance, args)
 			}
 		}
 	}
 	
-	static |->Obj| fromCtorAutobuild(ServiceDef serviceDef, Type serviceImplType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
+	static |->Obj| fromCtorAutobuild(Str serviceId, Method ctor, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		|->Obj| {
-			InjectionTracker.track("Creating Serivce '$serviceDef.serviceId' via a standard ctor autobuild") |->Obj| {
-				objLocator := InjectionTracker.peek.objLocator
-				ctor := InjectionUtils.findAutobuildConstructor(serviceImplType)
-				
-				// config is a very special method argument, as it's optional and if required, we 
-				// use the param to generate the value
-				return InjectionTracker.withConfigProvider(ConfigProvider(objLocator, serviceDef, ctor)) |->Obj?| {
-					obj := InjectionUtils.createViaConstructor(ctor, serviceImplType, ctorArgs, fieldVals)
-					return InjectionUtils.injectIntoFields(obj)
-				}
+			InjectionTracker.track("Creating Serivce '$serviceId' via ctor autobuild") |->Obj| {				
+				obj := InjectionUtils.createViaConstructor(ctor, ctorArgs, fieldVals)
+				return InjectionUtils.injectIntoFields(obj)
 			}
 		}
 	}
