@@ -82,7 +82,8 @@ internal const class ServiceDef {
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
 		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope)
 		
-		// TODO: err if no configType but has conf methods
+		if (configType == null && contribMethods != null && !contribMethods.isEmpty)
+			throw IocErr(IocMessages.contributionMethodsNotWanted(serviceId, contribMethods))
 	}
 	
 	Bool matchesId(Str serviceId) {

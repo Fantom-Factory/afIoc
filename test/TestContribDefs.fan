@@ -46,6 +46,12 @@ internal class TestContribDefs : IocTest {
 		reg.dependencyByType(T_MyService31#)
 		reg.serviceById(T_MyService31#.qname)
 	}
+
+	Void testErrWhenConfigMethodsButNotConfigType() {
+		verifyIocErrMsg(IocMessages.contributionMethodsNotWanted("s76", [T_MyModule106#contributeWot])) {
+			RegistryBuilder().addModule(T_MyModule106#).build.startup
+		}
+	}
 }
 
 internal class T_MyModule23 {
@@ -91,4 +97,17 @@ internal class T_MyModule52 {
 @NoDoc mixin T_MyService31 { }
 @NoDoc class T_MyService31Impl : T_MyService31 {
 	new make(DependencyProvider[] config) { }
+}
+
+internal class T_MyModule106 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService76#).withId("s76")
+	}
+	@Contribute { serviceId="s76"}
+	static Void contributeWot(Configuration config) { }
+}
+
+@NoDoc class T_MyService76 {
+	new make() { }
+
 }
