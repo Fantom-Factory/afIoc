@@ -53,40 +53,38 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			if (!serviceType.isPublic)
 				throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
 		
-			return InjectionTracker.withCtx(null) |->Obj?| {
-				model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
-				
-				model.extendMixin(serviceType)
-				model.addField(LazyProxy#, "afLazyService")
-		
-				serviceType.fields.rw
-					.findAll { it.isAbstract || it.isVirtual }
-					.each |field| {
-						getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
-						setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
-						model.overrideField(field, getBody, setBody)
-					}
-		
-				serviceType.methods.rw
-					.findAll { it.isAbstract || it.isVirtual }
-					.exclude { Obj#.methods.contains(it) }
-					.each |method| {
-						params 	:= method.params.join(", ") |param| { param.name }
-						paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
-						body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
-						model.overrideMethod(method, body)
-					}
-		
-				Pod? pod
-				code 		:= model.toFantomCode
-				podName		:= plasticCompiler.generatePodName
-				InjectionTracker.track("Compiling Pod '$podName'") |->Obj| {
-					pod 	= plasticCompiler.compileCode(code, podName)
-				}			
-				proxyType 	:= pod.type(model.className)
-						
-				return proxyType
-			}
+			model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
+			
+			model.extendMixin(serviceType)
+			model.addField(LazyProxy#, "afLazyService")
+	
+			serviceType.fields.rw
+				.findAll { it.isAbstract || it.isVirtual }
+				.each |field| {
+					getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
+					setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
+					model.overrideField(field, getBody, setBody)
+				}
+	
+			serviceType.methods.rw
+				.findAll { it.isAbstract || it.isVirtual }
+				.exclude { Obj#.methods.contains(it) }
+				.each |method| {
+					params 	:= method.params.join(", ") |param| { param.name }
+					paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
+					body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
+					model.overrideMethod(method, body)
+				}
+	
+			Pod? pod
+			code 		:= model.toFantomCode
+			podName		:= plasticCompiler.generatePodName
+			InjectionTracker.track("Compiling Pod '$podName'") |->Obj| {
+				pod 	= plasticCompiler.compileCode(code, podName)
+			}			
+			proxyType 	:= pod.type(model.className)
+					
+			return proxyType
 		}
 	}	
 }
