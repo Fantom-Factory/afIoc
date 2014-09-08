@@ -63,9 +63,9 @@ internal const class ServiceMethodInvoker {
 
 	Obj? invokeMethod(Method method, Obj?[] args) {
 		return MethodInvocation {
-			if (this.service.object == null)
+			if (this.service.val == null)
 				throw WtfErr("ObjectRef '${this.service.name}' with scope '${this.service.scope}' is null!???")
-			it.service	= this.service.object
+			it.service	= this.service.val
 			it.aspects	= this.aspects[method]
 			it.method	= method
 			it.args		= args

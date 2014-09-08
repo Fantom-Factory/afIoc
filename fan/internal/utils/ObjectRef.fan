@@ -9,28 +9,32 @@ internal const class ObjectRef {
 	private const Obj?			def
 	override const Str 			toStr
 	
-	new make(LocalRef localRef, ServiceScope scope, Obj? obj, Obj? def := null) {
+	new make(LocalRef localRef, ServiceScope scope, Obj? val := null, Obj? def := null) {
 		if (scope == ServiceScope.perApplication)
 			this.atomicObj = AtomicRef()
 		if (scope == ServiceScope.perThread)
 			this.localObj = localRef
 		
-		this.object = obj
+		this.val	= val
 		this.def	= def
 		this.name	= localRef.name
 		this.scope	= scope
 		this.toStr	= name
 	}
 	
-	Obj? object {
+	Obj? val {
 		get {
 			if (atomicObj != null)	return atomicObj.val ?: def
-			if (localObj  != null)	return localObj.val ?: def
+			if (localObj  != null)	return localObj.val  ?: def
 			return null
 		}
 		set { 
-			if (atomicObj != null)	atomicObj.val = it 
-			if (localObj  != null)	localObj.val = it
+			if (atomicObj != null)	atomicObj.val = it.toImmutable
+			if (localObj  != null)	localObj.val  = it
 		}
-	}	
+	}
+	
+	Void cleanUp() {
+		localObj?.cleanUp
+	}
 }

@@ -108,6 +108,11 @@ internal class TestProxyBuilder : IocTest {
 			reg.serviceById("s67")
 		}
 	}
+	
+	Void testThreadedProxiesCanBeCreatedWithMutableState() {
+		s75 := reg.createProxy(T_MyService75#, T_MyService75Impl#, null, [T_MyService75#mutable:StrBuf().add("boobs")]) as T_MyService75
+		verifyEq(s75.mutable.toStr, "boobs")
+	}
 }
 
 internal class T_MyModule76 {
@@ -183,6 +188,7 @@ internal class T_MyModule76 {
 @NoDoc class T_MyService58Impl : T_MyService58 { 
 	override Str dude := "Stella!"
 	override Int judge := 69
+	new make(|This|in) { in(this) }
 }
 
 @NoDoc const mixin T_MyService83 {
@@ -200,3 +206,11 @@ internal class T_MyModule76 {
 @NoDoc const class T_MyService99Impl : T_MyService99 { }
 
 @NoDoc const class T_MyService67 { }
+
+@NoDoc mixin T_MyService75 { 
+	abstract StrBuf mutable
+}
+@NoDoc class T_MyService75Impl : T_MyService75 { 
+	override StrBuf mutable
+	new make(|This|in) { in(this) }
+}
