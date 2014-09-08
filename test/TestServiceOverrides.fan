@@ -89,7 +89,7 @@ internal class TestServiceOverride : IocTest {
 	}
 
 	Void testOverrideByType() {
-//		override in service defs
+//		FIXME: override in service defs
 		reg := RegistryBuilder().addModule(T_MyModule58#).build.startup
 		s45 := (T_MyService45) reg.serviceById("s45-type")
 		verifyEq(s45.dude, "auto")

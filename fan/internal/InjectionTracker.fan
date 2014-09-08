@@ -27,6 +27,7 @@ internal class InjectionTracker {
 	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
 		ctx := peek(false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
+		// FIXME: don't push and run, hold in an atomic / local ref
 		return ThreadStack.pushAndRun(trackerId, ctx, f)
 	}
 
@@ -40,6 +41,11 @@ internal class InjectionTracker {
 
 	static Void logExpensive(|->Str| msgFunc) {
 		peek.tracker.logExpensive(msgFunc)
+	}
+
+	// TODO: replace with objlocator
+	static InjectionTracker? peek(Bool checked := true) {
+		ThreadStack.peek(trackerId, checked)
 	}
 
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
@@ -56,15 +62,14 @@ internal class InjectionTracker {
 		}
 	}
 
+	static ServiceDef? peekServiceDef() {
+		ThreadStack.peek(serviceDefId, false)
+	}
+
 	// ---- Config Providing -------------------------------------------------------------------------------------------
 
 	static Obj? withConfigProvider(ConfigProvider provider, |->Obj?| operation) {
 		ThreadStack.pushAndRun(confProviderId, provider, operation)
-	}
-
-	static Bool canProvideConfig(Type dependencyType) {
-		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
-		return ctx != null && ctx.canProvide(dependencyType)
 	}
 
 	static Obj? provideConfig(Type dependencyType) {
@@ -137,13 +142,7 @@ internal class InjectionTracker {
 		return func.call
 	}
 
-	// ----
-	
 	static InjectionCtx injectionCtx() {
 		ThreadStack.peek(injectionCtxId)
-	}
-	
-	static InjectionTracker? peek(Bool checked := true) {
-		ThreadStack.peek(trackerId, checked)
-	}
+	}	
 }

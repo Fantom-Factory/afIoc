@@ -72,6 +72,8 @@ internal const class ServiceDef {
 		this.lifecycleRef	= ObjectRef(localManager.createRef("{$serviceId}.lifecycle"),	serviceScope, null, defLifecycle)
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
 		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope, null)
+		
+		// TODO: throw err if proxy but not mixin
 	}
 	
 	Bool matchesId(Str serviceId) {
@@ -112,7 +114,7 @@ internal const class ServiceDef {
 	Obj newInstance(ServiceProxy proxy) {
 		InjectionTracker.withServiceDef(this) |->Obj| {
 			(proxy == ServiceProxy.always)
-				? getOrMakeProxyService(true)
+				? getOrMakeProxyService(false)
 				: getOrMakeRealService(false)
 		}
 	}
@@ -122,19 +124,21 @@ internal const class ServiceDef {
 		}
 	}
 	Obj getService() {
-		InjectionTracker.withServiceDef(this) |->Obj| {
-			getOrMakeRealService(true)
+		lastDef 	:= InjectionTracker.peekServiceDef
+		proxiable	:= serviceProxy != ServiceProxy.never && serviceType.isMixin
+		needsAdvice	:= adviceMethods != null && !adviceMethods.isEmpty
+		needsProxy	:= lastDef?.serviceScope == ServiceScope.perApplication && serviceScope == ServiceScope.perThread && InjectionTracker.injectionCtx.injectionKind.isFieldInjection
 
-			// FIXME Fix Proxy
-//			lastDef := (ServiceDef?) ThreadStack.peek(serviceDefId, false)
-//			proxiable := serviceProxy != ServiceProxy.never && serviceType.isMixin
-//	
-//			// check for allowed scope
-//			if (lastDef?.serviceScope == ServiceScope.perApplication && def.serviceScope == ServiceScope.perThread)
-//				if (!def.proxiable && injectionCtx.injectionKind.isFieldInjection)
-//					throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, def.serviceId))
-//
-//			getOrMakeProxyService(true)
+		if (needsAdvice && !proxiable)
+			throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, serviceId))
+
+		if (needsProxy && !proxiable)
+			throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, serviceId))
+
+		return InjectionTracker.withServiceDef(this) |->Obj| {
+			(needsAdvice || needsProxy || serviceProxy == ServiceProxy.always) 
+				? getOrMakeProxyService(true)
+				: getOrMakeRealService(true)
 		}
 	}	
 	
@@ -149,23 +153,6 @@ internal const class ServiceDef {
 			it.toStr		= this.description
 		}
 	}
-
-	
-//	private Obj? service(ServiceDef def, Bool returnReal, Bool? autobuild) {
-//		// we're going deeper!
-//		return InjectionTracker.withServiceDef(def) |->Obj?| {
-//
-//			useCache := !(autobuild ?: def.serviceScope == ServiceScope.perInjection)
-//
-//			if (returnReal)
-//				return getOrMakeRealService(def, useCache)
-//
-//			if (!def.proxiable)
-//				return getOrMakeRealService(def, useCache)
-//
-//			return getOrMakeProxyService(def, useCache)
-//		}
-//	}
 
 	private Obj getOrMakeRealService(Bool useCache) {
 		if (useCache) {

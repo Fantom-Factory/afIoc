@@ -305,6 +305,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return config
 		}
 
+		// if we had this as a DependencyProvider, then other dependency providers couldn't use ctor injection
 		if ((ctx.injectingIntoType != null) && (ctx.dependencyType == |This|#))
 			return InjectionUtils.makeCtorInjectionPlan(ctx.injectingIntoType)
 

@@ -20,4 +20,7 @@ mixin ServiceBindingOptions {
 
 	** Disables the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
 	abstract This withoutProxy()
+
+	** Enables the creation of a service proxy. Only applicable if the service is fronted by a mixin. 
+	abstract This withProxy()
 }

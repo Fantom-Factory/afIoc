@@ -83,8 +83,8 @@ internal class BugFixes : IocTest {
 
 internal class T_MyModule83 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService50#).withId("t50").withScope(ServiceScope.perThread)
-		binder.bind(T_MyService50#).withId("t50-thread").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService50#).withId("t50").withScope(ServiceScope.perThread).withProxy
+		binder.bind(T_MyService50#).withId("t50-thread").withScope(ServiceScope.perThread).withProxy
 		binder.bind(T_MyService50#).withId("t50-app").withScope(ServiceScope.perApplication)
 	}
 }
@@ -92,7 +92,7 @@ internal class T_MyModule83 {
 internal class T_MyModule85 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService70#).withId("t70")
-		binder.bind(T_MyService85#).withId("t85").withScope(ServiceScope.perThread)
+		binder.bind(T_MyService85#).withId("t85").withScope(ServiceScope.perThread).withProxy
 	}
 	
 	@Contribute
@@ -125,7 +125,7 @@ internal const class T_MyService89 { }
 
 internal class T_MyModule100 {
 	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService91#).withScope(ServiceScope.perThread)		
+		binder.bind(T_MyService91#).withScope(ServiceScope.perThread)
 		binder.bind(T_MyService92#).withId("s92")
 		binder.bind(T_MyService93#).withId("s93")
 	}	
