@@ -1,5 +1,5 @@
 
-** Used by `ServiceStat` to define the lifecycle state of a service. 
+** As returned by `ServiceDefinition` to define the lifecycle state of a service. 
 ** A service lifecycle looks like:
 ** 
 ** pre>

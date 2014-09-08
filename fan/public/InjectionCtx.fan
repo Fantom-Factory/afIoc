@@ -65,7 +65,7 @@ class InjectionCtx {
 	}
 }
 
-** Used by `InjectionCtx` to inform 'DependencyProviders' of what kind of injection is occurring.
+** As returned by `InjectionCtx` to inform 'DependencyProviders' what kind of injection is occurring.
 enum class InjectionKind {
 	
 	** A direct call to 'Registry.dependencyByType()' 
