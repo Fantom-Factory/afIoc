@@ -40,7 +40,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
 			builder		:= CtorPlanBuilder(proxyType)
-			builder["afLazyService"] = LazyProxyForService((ObjLocator) registry, serviceDef)
+			builder["afLazyService"] = LazyProxyImpl((ObjLocator) registry, serviceDef)
 			return builder.create
 		}
 	}

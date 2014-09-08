@@ -74,6 +74,6 @@ const mixin Registry {
 	** Returns a map of all service definitions (keyed by service id) held by this IoC.
 	** Useful for the inquisitive.
 	**  
-	** @since 1.8.0
+	** @since 2.0.0
 	abstract Str:ServiceDefinition serviceDefinitions()
 }

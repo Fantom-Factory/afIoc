@@ -14,7 +14,7 @@ const mixin LazyProxy {
 }
 
 ** Lazily finds and calls a *service*
-internal const class LazyProxyForService : LazyProxy {
+internal const class LazyProxyImpl : LazyProxy {
 	private const ObjLocator			objLocator
 	private const AspectInvokerSource	invokerSrc
 	private const ServiceDef 			serviceDef

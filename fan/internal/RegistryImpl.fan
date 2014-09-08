@@ -327,6 +327,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
 		}
 		
+//		TODO: warn if service
+		
 		sid		:= "${type.name}(Autobuild)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
 		builder	:= threadLocalMgr.createRef("autobuild")
@@ -358,6 +360,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		if (!mixinT.isMixin)
 			throw IocErr(IocMessages.onlyMixinsCanBeProxied(mixinT))
+//		TODO: warn if service
 
 		sid		:= "${mixinT.name}(CreateProxy)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
