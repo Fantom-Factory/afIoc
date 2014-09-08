@@ -214,7 +214,7 @@ internal class ModuleDef {
 		tracker.log("Adding service definition for service '$serviceDef.id' -> ${serviceDef.type.qname}")
 		
 		if (serviceDefs.containsKey(serviceDef.id))
-			throw IocErr(IocMessages.serviceAlreadyDefined(serviceDef.id, serviceDef.buildData->qname, serviceDefs[serviceDef.id].buildData->qname))
+			throw IocErr(IocMessages.serviceAlreadyDefined(serviceDef.id, serviceDef, serviceDefs[serviceDef.id]))
 		
 		serviceDefs[serviceDef.id] = serviceDef
     }	

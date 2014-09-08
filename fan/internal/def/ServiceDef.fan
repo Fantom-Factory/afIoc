@@ -2,7 +2,9 @@ using concurrent
 
 ** Meta info that defines a service
 // TODO: rename to ServiceMeta? ServiceWrapper 
-internal const class ServiceDef {	
+internal const class ServiceDef {
+	const Bool			inServiceCache
+
 	const Str 			serviceId
 	const Type			serviceType
 	const ServiceScope	serviceScope	
@@ -12,8 +14,9 @@ internal const class ServiceDef {
 	
 	// -- null for BareBones ctor --
 	private const ObjLocator?	objLocator
-			const Method[]?		adviceMethods
+			const Type?			configType
 			const Method[]?		contribMethods
+			const Method[]?		adviceMethods
 	private const AtomicInt?	implCountRef	:= AtomicInt(0)
 	private const ObjectRef?	lifecycleRef
 	private const ObjectRef?	serviceImplRef
@@ -22,14 +25,17 @@ internal const class ServiceDef {
 	private const Str 	unqualifiedServiceId
 	private const Type 	serviceTypeNonNull
 	
-	new makeBareBones(|This|in) {
-		in(this)		
+	new makeBareBones(ObjLocator? objLocator, |This|in) {
+		this.objLocator = objLocator
+		in(this)
+		this.inServiceCache			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
 	}
 		
 	new make(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
 		this.objLocator		= objLocator
+		this.inServiceCache	= true
 		this.serviceId		= srvDef.id
 		this.serviceType	= srvDef.type
 		this.serviceScope	= srvDef.scope
@@ -40,13 +46,16 @@ internal const class ServiceDef {
 		
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
-			this.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(this, serviceImplType, null, null).toImmutable
+			ctor 				:= InjectionUtils.findAutobuildConstructor(serviceImplType)
+			this.serviceBuilder	= ServiceBuilders.fromCtorAutobuild(serviceId, ctor, null, null).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
+			this.configType		= findConfigType(ctor)
 		} 	
 		else if (srvDef.buildData is Method) {
 			builderMethod		:= (Method) srvDef.buildData
-			this.serviceBuilder	= ServiceBuilders.fromBuildMethod(this, builderMethod).toImmutable
+			this.serviceBuilder	= ServiceBuilders.fromBuildMethod(serviceId, builderMethod).toImmutable
 			this.description	= "$serviceId : via Builder Method (${builderMethod.qname})"
+			this.configType		= findConfigType(builderMethod)
 		} 
 		else		
 			this.serviceBuilder	= srvDef.buildData
@@ -73,7 +82,7 @@ internal const class ServiceDef {
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
 		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope, null)
 		
-		// TODO: throw err if proxy but not mixin
+		// TODO: err if no configType but has conf methods
 	}
 	
 	Bool matchesId(Str serviceId) {
@@ -82,20 +91,6 @@ internal const class ServiceDef {
 
 	Bool matchesType(Type serviceType) {
 		serviceTypeNonNull.fits(serviceType.toNonNullable)
-	}
-
-	Void contribute(ConfigurationImpl config) {
-		contribMethods?.each |method| {
-			InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
-				sizeBefore := config.size
-				
-				InjectionUtils.callMethod(method, null, [Configuration(config)])
-				
-				config.cleanupAfterModule
-				sizeAfter := config.size
-				InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
-			}
-		}
 	}	
 
 	// ---- Service Build Methods ----
@@ -111,16 +106,9 @@ internal const class ServiceDef {
 	// This is ONLY dangerous because gawd knows what those services do in their ctor and 
 	// @PostInject methods!
 
-	Obj newInstance() {
-		InjectionTracker.withServiceDef(this) |->Obj| {
-			(serviceProxy == ServiceProxy.always)
-				? getOrMakeProxyService(false)
-				: getOrMakeRealService(false)
-		}
-	}
 	Obj getRealService() {
 		InjectionTracker.withServiceDef(this) |->Obj| {
-			getOrMakeRealService(true)
+			getOrMakeRealService
 		}
 	}
 	Obj getService() {
@@ -137,10 +125,38 @@ internal const class ServiceDef {
 
 		return InjectionTracker.withServiceDef(this) |->Obj| {
 			(needsAdvice || needsProxy || serviceProxy == ServiceProxy.always) 
-				? getOrMakeProxyService(true)
-				: getOrMakeRealService(true)
+				? getOrMakeProxyService
+				: getOrMakeRealService
 		}
-	}	
+	}
+	
+	Obj? gatherConfiguration() {
+		if (configType == null)
+			return null
+		
+		// continue even if we have no contrib methods, so an empty map / list is made
+		
+		config := ConfigurationImpl(objLocator, this, configType)
+		
+		contribMethods?.each |method| {
+			InjectionTracker.track("Gathering configuration of type $config.contribType") |->| {
+				sizeBefore := config.size
+				
+				InjectionUtils.callMethod(method, null, [Configuration(config)])
+				
+				config.cleanupAfterModule
+				sizeAfter := config.size
+				InjectionTracker.log("Added ${sizeAfter-sizeBefore} contributions")
+			}
+		}
+
+		if (configType.name == "List")
+			return config.toList
+		if (configType.name == "Map")
+			return config.toMap
+		
+		throw WtfErr("${configType.name} is neither a List nor a Map")
+	}
 	
 	ServiceDefinition toServiceDefinition() {
 		ServiceDefinition {
@@ -154,8 +170,8 @@ internal const class ServiceDef {
 		}
 	}
 
-	private Obj getOrMakeRealService(Bool useCache) {
-		if (useCache) {
+	private Obj getOrMakeRealService() {
+		if (inServiceCache) {
 			exisiting := serviceImplRef.object
 			if (exisiting != null)
 				return exisiting
@@ -165,7 +181,7 @@ internal const class ServiceDef {
 	        service := serviceBuilder.call()
 			incImplCount
 			
-			if (useCache) {
+			if (inServiceCache) {
 				serviceImplRef.object = service
 				lifecycleRef.object   = ServiceLifecycle.created
 			}
@@ -173,8 +189,8 @@ internal const class ServiceDef {
 	    }	
 	}
 
-	private Obj getOrMakeProxyService(Bool useCache) {
-		if (useCache) {
+	private Obj getOrMakeProxyService() {
+		if (inServiceCache) {
 			exisiting := serviceProxyRef.object
 			if (exisiting != null)
 				return exisiting
@@ -184,7 +200,7 @@ internal const class ServiceDef {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
 			proxy			:= proxyBuilder.createProxyForService(this)
 			
-			if (useCache) {
+			if (inServiceCache) {
 				serviceProxyRef.object	= proxy
 				lifecycleRef.object 	= ServiceLifecycle.proxied
 			}
@@ -220,6 +236,19 @@ internal const class ServiceDef {
 	
 	private static Str unqualify(Str id) {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
+	}
+	
+	private Type? findConfigType(Method buildMethod) {
+		if (buildMethod.params.isEmpty)
+			return null
+		
+		// Config HAS to be the first param
+		paramType := buildMethod.params[0].type
+		if (paramType.name == "List")
+			return paramType
+		if (paramType.name == "Map")
+			return paramType
+		return null
 	}
 }
 

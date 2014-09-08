@@ -41,7 +41,7 @@ internal class TestAspect : IocTest {
 			it.advisorMethod	= Obj#hash
 		}
 
-		serviceDef := ServiceDef() {
+		serviceDef := ServiceDef(null) {
 			it.serviceId 		= "T_MyService65Aspect"
 			it.serviceType 		= Type#
 			it.serviceProxy		= ServiceProxy.always
@@ -51,7 +51,7 @@ internal class TestAspect : IocTest {
 		}
 		verify(def.matchesService(serviceDef))
 		
-		serviceDef = ServiceDef() {
+		serviceDef = ServiceDef(null) {
 			it.serviceId 		= "T_MyService67NoMatch"
 			it.serviceType 		= Type#
 			it.serviceScope		= it.serviceType.isConst ? ServiceScope.perApplication : ServiceScope.perThread

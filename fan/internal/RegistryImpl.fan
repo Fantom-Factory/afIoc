@@ -299,13 +299,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return serviceDef.getService
 		}
 
-		config := InjectionTracker.provideConfig(dependencyType)
-		if (config != null) {
-			InjectionTracker.logExpensive |->Str| { "Found Configuration '$config.typeof.signature'" }
-			return config
+		// if this was a DependencyProvider then we couldn't contribute to DependencyProviders! 
+		parentServiceDef := InjectionTracker.peekServiceDef 
+		if (ctx.isForConfigType(parentServiceDef?.configType)) {
+			InjectionTracker.logExpensive |->Str| { "Found Configuration '$ctx.dependencyType.signature'" }
+			return parentServiceDef.gatherConfiguration
 		}
 
-		// if we had this as a DependencyProvider, then other dependency providers couldn't use ctor injection
+		// if this was a DependencyProvider then other dependency providers couldn't use ctor injection
 		if ((ctx.injectingIntoType != null) && (ctx.dependencyType == |This|#))
 			return InjectionUtils.makeCtorInjectionPlan(ctx.injectingIntoType)
 
@@ -319,19 +320,22 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			implType 	= Type.find("${type.qname}Impl", false)
 			if (implType == null)
 				throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
-		}		
+		}
 		
-		// create a dummy serviceDef - this will be used by CtorItBlockBuilder to find the type being built
-		serviceDef := ServiceDef() {
-			it.serviceId 		= "${type.name}(Autobuild)"
+		sid		:= "${type.name}(Autobuild)"
+		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
+		builder	:= safe(ServiceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals))
+		
+		serviceDef := ServiceDef(this) {
+			it.serviceId 		= sid
 			it.serviceType 		= type
 			it.serviceScope		= type.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname : Autobuild"
-			it.serviceBuilder	= safe(ServiceBuilders.fromCtorAutobuild(it, implType, ctorArgs, fieldVals))
+			it.serviceBuilder	= builder
 		}
 		
-		return serviceDef.newInstance
+		return serviceDef.getService
 	}
 	
 	// So we can pass mutable parameters into Autobuilds - they're gonna be used straight away
@@ -348,20 +352,23 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		implT 	:= serviceTypes[1]
 		
 		if (!mixinT.isMixin)
-			throw IocErr(IocMessages.bindMixinIsNot(mixinT))
+			throw IocErr(IocMessages.onlyMixinsCanBeProxied(mixinT))
 
-		// create a dummy serviceDef
-		serviceDef := ServiceDef() {
-			it.serviceId 		= "${mixinT.name}(CreateProxy)"
+		sid		:= "${mixinT.name}(CreateProxy)"
+		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
+		builder	:= ServiceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs.toImmutable, fieldVals.toImmutable).toImmutable
+
+		// TODO: allow mutable args for perThread proxies -> use objectref
+		
+		serviceDef := ServiceDef(this) {
+			it.serviceId 		= sid
 			it.serviceType 		= mixinT
 			it.serviceScope		= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$mixinT.qname : Create Proxy"
-			it.serviceBuilder	= |->Obj| { autobuild(implT, ctorArgs, fieldVals) }.toImmutable
+			it.serviceBuilder	= builder
 		}
-
-		// TODO: go through service
-		return spb.createProxyForMixin(serviceDef)
+		return serviceDef.getService
 	}
 	
 	override Obj trackInjectIntoFields(Obj object) {

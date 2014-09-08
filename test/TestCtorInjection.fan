@@ -2,9 +2,8 @@
 internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
 		verifyIocErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
-			reg.dependencyByType(T_MyService04#)
+			RegistryBuilder().addModule(T_MyModule104#).build.startup
 		}
 	}
 
@@ -16,9 +15,8 @@ internal class TestCtorInjection : IocTest {
 	}
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		verifyIocErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) { 
-			reg.dependencyByType(T_MyService05#) 
+		verifyIocErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) {
+			RegistryBuilder().addModule(T_MyModule105#).build.startup
 		}
 	}
 
@@ -76,12 +74,21 @@ internal class TestCtorInjection : IocTest {
 	}
 }
 
+internal class T_MyModule104 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService04#)
+	}	
+}
+internal class T_MyModule105 {
+	static Void bind(ServiceBinder binder) {
+		binder.bind(T_MyService05#)
+	}	
+}
+
 internal class T_MyModule06 {
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService01#)
 		binder.bind(T_MyService02#)
-		binder.bind(T_MyService04#)
-		binder.bind(T_MyService05#)
 		binder.bind(T_MyService06#)
 		binder.bind(T_MyService07#)
 		binder.bind(T_MyService08#)

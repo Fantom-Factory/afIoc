@@ -7,13 +7,13 @@ internal class InjectionTracker {
 	private static const Str 	confProviderId	:= "afIoc.configProvider"
 	private static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
 	
-	private OpTracker 			tracker
-			ObjLocator?			objLocator
+	private OpTracker 			opTracker
+	private ObjLocator?			objLoc
 
-	** nullable & internal for testing only
+	** nullable for testing only
 	new make(ObjLocator? objLocator, OpTracker tracker := OpTracker()) {
-		this.objLocator = objLocator
-		this.tracker	= tracker
+		this.objLoc 	= objLocator
+		this.opTracker	= tracker
 	}
 
 	static Void forTesting_push(InjectionTracker ctx) {
@@ -25,27 +25,29 @@ internal class InjectionTracker {
 	}
 
 	static Obj? withCtx(ObjLocator objLocator, OpTracker? tracker, |->Obj?| f) {
-		ctx := peek(false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
+		ctx := ThreadStack.peek(trackerId, false) ?: InjectionTracker.make(objLocator, tracker ?: OpTracker())
 		// all the objs on the stack should be the same instance - this doesn't *need* to be a stack
-		// FIXME: don't push and run, hold in an atomic / local ref
 		return ThreadStack.pushAndRun(trackerId, ctx, f)
 	}
 
 	static Obj? track(Str description, |->Obj?| operation) {
-		peek.tracker.track(description, operation)
+		tracker.track(description, operation)
 	}
 
 	static Void log(Str msg) {
-		peek.tracker.log(msg)
+		tracker.log(msg)
 	}
 
 	static Void logExpensive(|->Str| msgFunc) {
-		peek.tracker.logExpensive(msgFunc)
+		tracker.logExpensive(msgFunc)
 	}
 
-	// TODO: replace with objlocator
-	static InjectionTracker? peek(Bool checked := true) {
-		ThreadStack.peek(trackerId, checked)
+	static ObjLocator objLocator() {
+		((InjectionTracker) ThreadStack.peek(trackerId, true)).objLoc
+	}
+
+	private static OpTracker tracker() {
+		((InjectionTracker) ThreadStack.peek(trackerId, true)).opTracker
 	}
 
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
@@ -68,17 +70,17 @@ internal class InjectionTracker {
 
 	// ---- Config Providing -------------------------------------------------------------------------------------------
 
-	static Obj? withConfigProvider(ConfigProvider provider, |->Obj?| operation) {
-		ThreadStack.pushAndRun(confProviderId, provider, operation)
-	}
-
-	static Obj? provideConfig(Type dependencyType) {
-		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
-		// jus' passin' thru!
-		if (ctx?.canProvide(dependencyType) ?: false)
-			return ctx.provide(dependencyType)
-		return null
-	}
+//	static Obj? withConfigProvider(ConfigProvider provider, |->Obj?| operation) {
+//		ThreadStack.pushAndRun(confProviderId, provider, operation)
+//	}
+//
+//	static Obj? provideConfig(Type dependencyType) {
+//		ctx := (ConfigProvider?) ThreadStack.peek(confProviderId, false)
+//		// jus' passin' thru!
+//		if (ctx?.canProvide(dependencyType) ?: false)
+//			return ctx.provide(dependencyType)
+//		return null
+//	}
 
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 
@@ -101,7 +103,7 @@ internal class InjectionTracker {
 	}
 
 	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionKind.fieldInjection) {
+		ctx := InjectionCtx(InjectionKind.fieldInjectionViaItBlock) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
 			it.field			= field
@@ -123,7 +125,7 @@ internal class InjectionTracker {
 	}
 
 	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |->Obj?| func) {
-		ctx := InjectionCtx(InjectionKind.methodInjection) {
+		ctx := InjectionCtx(InjectionKind.ctorInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
