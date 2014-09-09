@@ -11,13 +11,14 @@ internal class TestInjectFacetAutobuild : IocTest {
 		verifyNotSame(s37.ser2, s37.auto2)
 	}
 
-	// FIXME autobuild service id
-//	Void testAutoServiceId() {
-//		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
-//		s39 := (T_MyService39) reg.serviceById("s39")
-//		verifyType(s39.ser2, T_MyService02#)
-//		verifyNull(s39.ser12)
-//	}
+	Void testAutoServiceId() {
+		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
+		s39 := (T_MyService39) reg.serviceById("s39")
+
+		verifyEq(s39.auto.typeof, T_MyService77Impl#)
+		verifyEq(s39.auto.fromList, "auto-ctor")
+		verifyEq(s39.auto.fromMap,  "auto-field")
+	}
 	
 	Void testAutobuildHandlesNullableTypes() {
 		reg := RegistryBuilder().addModule(T_MyModule55#).build.startup
@@ -35,9 +36,8 @@ internal class T_MyModule55 {
 		binder.bind(T_MyService02#).withId("s2")
 		binder.bind(T_MyService36#).withId("s36")
 		binder.bind(T_MyService37#).withId("s37")
-		binder.bind(T_MyService39#).withId("s39")
-		binder.bind(T_MyService59#).withId("s59")
 		binder.bind(T_MyService63#).withId("s63")
+		binder.bind(T_MyService39#).withId("s39")
 	}
 }
 
@@ -54,14 +54,6 @@ internal class T_MyService37 {
 	T_MyService02? ser2
 }
 
-internal class T_MyService39 {
-	// FIXME autobuild service id
-//	@Autobuild { serviceId = "s2" }
-//	T_MyService02? ser2	
-//	@Autobuild { optional = true; serviceId = "s12" }
-//	T_MyService12? ser12	
-}
-
 internal class T_MyService63 {
 	@Autobuild
 	T_MyService59? auto
@@ -70,4 +62,26 @@ internal class T_MyService63 {
 internal class T_MyService59 {
 	// BUGFIX: this ctor did break IoC
 	new make(|This|in) { in(this) }
+}
+
+internal class T_MyService39 {
+	@Autobuild { ctorArgs=["auto-ctor"]; fieldVals=[T_MyService77#fromMap:"auto-field"]; implType=T_MyService77Impl#;  }
+	T_MyService77? auto
+	
+	@Autobuild { ctorArgs=["proxy-ctor"]; fieldVals=[T_MyService77#fromMap:"proxy-field"]; createProxy=true }
+	T_MyService77? proxy
+}
+
+internal mixin T_MyService77 {
+	abstract Str fromList
+	abstract Str fromMap
+}
+
+internal class T_MyService77Impl : T_MyService77 {
+	override Str fromList
+	override Str fromMap
+	new make(Str fromList, |This|in) {
+		this.fromList = fromList
+		in(this) 
+	}
 }

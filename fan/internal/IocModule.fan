@@ -21,7 +21,7 @@ internal const class IocModule {
 	
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
-//		config["afIoc.ctorItBlockProvider"]	= CtorItBlockProvider()
+		config["afIoc.autobuildProvider"]	= config.autobuild(AutobuildProvider#)
 		config["afIoc.localProvider"]		= config.autobuild(LocalProvider#)
 		config["afIoc.logProvider"]			= logProvider
 	}	

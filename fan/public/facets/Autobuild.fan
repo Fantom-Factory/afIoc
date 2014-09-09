@@ -4,4 +4,12 @@
 ** 
 ** @since 2.0.0
 facet class Autobuild {
+	
+	const Bool createProxy
+
+	const Type? implType
+	
+	const Obj?[]? ctorArgs
+	
+	const [Field:Obj?]? fieldVals
 }

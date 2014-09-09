@@ -339,7 +339,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		return serviceDef.getService
 	}
-	
+
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname, true)
 		

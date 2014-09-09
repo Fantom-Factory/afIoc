@@ -226,16 +226,16 @@ internal const class InjectionUtils {
 
 	private static Field[] findInjectableFields(Type type, Bool includeConst) {
 		type.fields.findAll |field| {
-	    	if (!field.hasFacet(Inject#)) 
-	    		return false
+			if (!field.hasFacet(Inject#) && !field.hasFacet(Autobuild#)) 
+				return false
 
-	    	if (field.isStatic)
-	    		throw IocErr(IocMessages.injectionUtils_fieldIsStatic(field))
-			
+			if (field.isStatic)
+				throw IocErr(IocMessages.injectionUtils_fieldIsStatic(field))
+
 			if (field.isConst && !includeConst)
 				return false
 
-    		log("Found field $field.signature")
+			log("Found field $field.signature")
 			return true
 		}
 	}
