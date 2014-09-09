@@ -81,6 +81,10 @@ internal const class IocMessages {
 		"Service id '${serviceId}' is not defined."
 	}
 
+	static Str serviceTypeNotFound(Type type) {
+		"No service matches type ${type.signature}."
+	}
+
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {
 		"Only 1 ctor is allowed to have the @${Inject#.name} facet, ${serviceType.qname} has ${noOfCtors}!"
 	}
@@ -94,7 +98,7 @@ internal const class IocMessages {
 	}
 	
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
-		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". \nAutomatic dependency resolution requires that exactly one service implement the interface. \nConsider using the @ServiceId facet."
+		"Service mixin ${serviceType} is matched by ${ids.size} services: " + ids.join(", ") + ". \nAutomatic dependency resolution requires that exactly one service implement the interface."
 	}
 	
 	static Str threadScopeInAppScope(Str owningServiceId, Str injectedServiceId) {
@@ -157,16 +161,8 @@ internal const class IocMessages {
 		"Shutdown function '${listener}' is not immutable"
 	}
 	
-	static Str serviceIdDoesNotFit(Str serviceId, Type serviceType, Type fieldType) {
-		"Service Id '${serviceId}' of type ${serviceType.signature} does not fit type ${fieldType.signature}"
-	}
-	
 	static Str dependencyDoesNotFit(Type? dependencyType, Type fieldType) {
 		"Dependency of type ${dependencyType?.signature} does not fit type ${fieldType.signature}"
-	}
-	
-	static Str onlyOneDependencyProviderAllowed(Type type, Type[] dps) {
-		"Only one Dependency Provider is allowed, but type ${type.signature} matches ${dps.size} : " + dps.map { it.qname }.join(", ")
 	}
 	
 	static Str providerMethodArgDoesNotFit(Type? providedArg, Type paramArg) {
@@ -201,10 +197,6 @@ internal const class IocMessages {
 		"Field value ${val.typeof.signature} does not fit field ${field.qname} ${field.type.signature}"
 	}
 	
-	static Str injectionUtils_fieldIsStatic(Field field) {
-		"Can not @Inject into static fields: ${field.qname}"
-	}
-
 	static Str multipleServicesDefined(Str serviceId, Str[] serviceIds) {
 		"Service ID '${serviceId}' matches multiple services -> " + serviceIds.join(", ")
 	}

@@ -7,7 +7,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 			startupLock 	:= OneShotLock(IocMessages.registryStarted)
 	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:ServiceDef		serviceDefs
-	private const DependencyProviders?	depProSrc
 	private const ThreadLocalManager	threadLocalMgr
 	private const Duration				startTime
 			const AtomicBool			logServices		:= AtomicBool(false)
@@ -16,6 +15,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override const InjectionUtils		injectionUtils
 	override const ServiceBuilders		serviceBuilders
+	override const DependencyProviders	dependencyProviders
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
 		this.startTime	= tracker.startTime
@@ -31,6 +31,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			ThreadLocalManager#	: threadLocalMgr,
 			InjectionUtils#		: injectionUtils
 		]
+		
+		// create a temp internal version for creating Depdendency Providers with
+		this.dependencyProviders = DependencyProvidersImpl.makeInternal([
+			AutobuildProvider(this),
+			LocalProvider(threadLocalMgr),
+			LogProviderImpl(),
+			ConfigProvider(),
+			CtorItBlockProvider(this),
+			ServiceProvider(this)
+		])
 
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -138,8 +148,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}		
 
 		InjectionTracker.withCtx(tracker) |->| {
-			this.serviceDefs 	= serviceDefs
-			this.depProSrc 		= trackServiceById(DependencyProviders#.qname, true)
+			this.serviceDefs 		= serviceDefs
+			this.dependencyProviders= trackServiceById(DependencyProviders#.qname, true)
 		}
 	}
 
@@ -214,9 +224,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
 			return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
-				return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
-					return trackDependencyByType(dependencyType, checked)
-				}
+				return trackDependencyByType(dependencyType, checked)
 			}
 		}
 	}
@@ -241,7 +249,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Obj injectIntoFields(Obj object) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			return trackInjectIntoFields(object)
+			return InjectionTracker.track("Injecting dependencies into fields of ${object.typeof.qname}") |->Obj?| {
+				return injectionUtils.injectIntoFields(object)
+			}
 		}
 	}
 
@@ -250,7 +260,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return Utils.stackTraceFilter |->Obj?| {
 				shutdownLock.check
 				return InjectionTracker.track("Calling method '$method.signature'") |->Obj?| {
-					return trackCallMethod(method, instance, providedMethodArgs)
+					return injectionUtils.callMethod(method, instance, providedMethodArgs)
 				}
 			}
 		} catch (IocErr iocErr) {
@@ -275,34 +285,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return serviceDef.getService
 	}
 
-	override Obj? trackDependencyByType(Type dependencyType, Bool checked) {
-
-		// ask dependency providers first, for they may dictate dependency scope
-		ctx := InjectionTracker.injectionCtx
-		if (depProSrc?.canProvideDependency(ctx) ?: false) {
-			dependency := depProSrc.provideDependency(ctx)
-			InjectionTracker.logExpensive |->Str| { "Found Dependency via Provider : '$dependency?.typeof'" }
-			return dependency
+	Obj? trackDependencyByType(Type dependencyType, Bool checked) {
+		return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
+			ctx := InjectionTracker.injectionCtx
+			return dependencyProviders.provideDependency(ctx, checked)
 		}
-
-		serviceDef := serviceDefByType(dependencyType)
-		if (serviceDef != null) {
-			InjectionTracker.logExpensive |->Str| { "Found Service '$serviceDef.serviceId'" }
-			return serviceDef.getService
-		}
-
-		// if this was a DependencyProvider then we couldn't contribute to DependencyProviders! 
-		parentServiceDef := InjectionTracker.peekServiceDef 
-		if (ctx.isForConfigType(parentServiceDef?.configType)) {
-			InjectionTracker.logExpensive |->Str| { "Found Configuration '$ctx.dependencyType.signature'" }
-			return parentServiceDef.gatherConfiguration
-		}
-
-		// if this was a DependencyProvider then other dependency providers couldn't use ctor injection
-		if ((ctx.injectingIntoType != null) && (ctx.dependencyType == |This|#))
-			return injectionUtils.makeCtorInjectionPlan(ctx.injectingIntoType)
-
-		return checked ? throw IocErr(IocMessages.noDependencyMatchesType(dependencyType)) : null
 	}
 
 	override Obj trackAutobuild(Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
@@ -375,14 +362,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return serviceDef.getService
 	}
 	
-	Obj trackInjectIntoFields(Obj object) {
-		return injectionUtils.injectIntoFields(object)
-	}
-
-	Obj? trackCallMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs) {
-		return injectionUtils.callMethod(method, instance, providedMethodArgs)
-	}
-
 	ServiceDef? serviceDefById(Str serviceId) {
 		// attempt a qualified search first
 		serviceDef := serviceDefs[serviceId]
@@ -396,7 +375,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return serviceDefs.isEmpty ? null : serviceDefs.first
 	}
 
-	ServiceDef? serviceDefByType(Type serviceType) {
+	override Bool typeMatchesService(Type serviceType) {
+		// TODO use caching type lookup
+		serviceDefs.any { it.matchesType(serviceType) }
+	}
+
+	override ServiceDef? serviceDefByType(Type serviceType) {
 		serviceDefs := serviceDefs.vals.findAll { it.matchesType(serviceType) }
 
 		if (serviceDefs.size > 1) {

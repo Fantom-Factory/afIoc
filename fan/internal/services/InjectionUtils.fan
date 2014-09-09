@@ -2,24 +2,25 @@ using afBeanUtils
 
 internal const class InjectionUtils {
 
-	private const ObjLocator objLocator
+	private const ObjLocator 			objLocator
 	
 	new make(ObjLocator objLocator) {
-		this.objLocator = objLocator 
+		this.objLocator 		 = objLocator 
 	}
 	
-	** Injects into the fields (of all visibilities) where the @Inject facet is present.
+	** Injects dependencies into fields (of all visibilities) 
 	Obj injectIntoFields(Obj object) {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			if (!findInjectableFields(object.typeof, true)
-				.reduce(false) |bool, field| {
-					InjectionTracker.doingFieldInjection(object, field) |->Bool| {
-						dependency := findDependencyFromInjectFacet(field)
-						if (dependency != null)
-							inject(object, field, dependency)
-						return true
-					}
-				})
+			fields := findInjectableFields(object.typeof, true)
+			fields.each |field| {
+				InjectionTracker.doingFieldInjection(object, field) |->| {
+					ctx := InjectionTracker.injectionCtx
+					dependency := dependencyProviders.provideDependency(ctx, false)
+					if (dependency != null)
+						inject(object, field, dependency)
+				}
+			}
+			if (fields.isEmpty)
 				log("No injection fields found")
 		}
 
@@ -92,7 +93,8 @@ internal const class InjectionUtils {
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
 				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
-					dependency := findDependencyFromInjectFacet(field)
+					ctx := InjectionTracker.injectionCtx
+					dependency := dependencyProviders.provideDependency(ctx, false)
 					if (dependency != null)
 						plan[field] = dependency
 				}
@@ -157,7 +159,9 @@ internal const class InjectionUtils {
 				}
 
 				return InjectionTracker.doingParamInjection(param, index) |->Obj?| {
-					dep := findDependencyByType(param.type, false)
+					ctx := InjectionTracker.injectionCtx
+					dep := dependencyProviders.provideDependency(ctx, false)
+					// TODO: distinguish between returning null and not providing 
 					if (dep != null)
 						return dep
 					if (param.hasDefault)
@@ -169,38 +173,6 @@ internal const class InjectionUtils {
 			if (params.isEmpty)
 				log("No injection parameters found")
 			return params
-		}
-	}
-
-	private Obj? findDependencyFromInjectFacet(Field field) {
-		inject := (Inject) Slot#.method("facet").callOn(field, [Inject#])	// Stoopid F4
-
-		if (inject.serviceId != null) {
-			log("Field has @Inject { serviceId='${inject.serviceId}' }")
-
-			service := objLocator.trackServiceById(inject.serviceId, !inject.optional)
-			if (service == null && inject.optional) {
-				log("Field has @Inject { optional=true }")
-				log("Service not found - failing silently...")
-				return null
-			}			
-			
-			if (!service.typeof.fits(field.type))
-				throw IocErr(IocMessages.serviceIdDoesNotFit(inject.serviceId, service.typeof, field.type))
-			return service
-		}
-
-		dependency := findDependencyByType(field.type, !inject.optional)
-		if (dependency == null && inject.optional) {
-			log("Field has @Inject { optional=true }")
-			log("Dependency not found - failing silently...")
-		}
-		return dependency
-	}
-	
-	private Obj? findDependencyByType(Type dependencyType, Bool checked) {
-		track("Looking for dependency of type $dependencyType") |->Obj?| {
-			objLocator.trackDependencyByType(dependencyType, checked)
 		}
 	}
 
@@ -226,11 +198,8 @@ internal const class InjectionUtils {
 
 	private static Field[] findInjectableFields(Type type, Bool includeConst) {
 		type.fields.findAll |field| {
-			if (!field.hasFacet(Inject#) && !field.hasFacet(Autobuild#)) 
-				return false
-
 			if (field.isStatic)
-				throw IocErr(IocMessages.injectionUtils_fieldIsStatic(field))
+				return false
 
 			if (field.isConst && !includeConst)
 				return false
@@ -246,5 +215,10 @@ internal const class InjectionUtils {
 
 	static Void log(Str msg) {
 		InjectionTracker.log(msg)
+	}
+	
+	// needs to be dynamic 'cos the instance changes during the Registry's ctor
+	private DependencyProviders dependencyProviders() {
+		this.objLocator.dependencyProviders
 	}
 }

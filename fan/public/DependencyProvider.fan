@@ -3,7 +3,6 @@
 ** 
 ** Provide your own dependencies for fields annotated with the '@Inject' facet. 
 ** Typically you would augment '@Inject' with your own facet to provide injection meta. 
-** See [@ServiceId]`ServiceId` and [@Autobuild]`Autobuild` for built-in examples. 
 ** 
 ** Contribute 'DependencyProvider' instances to the 'DependencyProviders' service.
 ** 
