@@ -2,13 +2,18 @@ using afConcurrent
 
 internal const class LocalProvider : DependencyProvider {
 
-	@Inject	private const ThreadLocalManager	localManager
+			private const ThreadLocalManager	localManager
 	static	private const Type[]				localTypes		:= [LocalRef#, LocalList#, LocalMap#]	
 
-	new make(|This|di) { di(this) }
+	new make(ThreadLocalManager	localManager) {
+		this.localManager = localManager 
+	}
 
 	override Bool canProvide(InjectionCtx ctx) {
-		(ctx.injectingIntoType != null) && localTypes.contains(ctx.dependencyType.toNonNullable) 
+		// IoC standards dictate that field injection should be denoted by a facet
+		ctx.injectionKind.isFieldInjection
+			? localTypes.contains(ctx.dependencyType.toNonNullable) && ctx.injectingIntoType != null && ctx.field.hasFacet(Inject#)
+			: localTypes.contains(ctx.dependencyType.toNonNullable) && ctx.injectingIntoType != null
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {

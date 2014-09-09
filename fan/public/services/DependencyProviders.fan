@@ -20,16 +20,19 @@ using afBeanUtils
 @NoDoc	// don't overwhelm the masses
 const mixin DependencyProviders {
 	
-	internal abstract Bool canProvideDependency(InjectionCtx injectionCtx)
-
-	internal abstract Obj? provideDependency(InjectionCtx injectionCtx)
+	internal abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked)
 }
 
 ** @since 1.1.0
 internal const class DependencyProvidersImpl : DependencyProviders {
 	private const DependencyProvider[] dependencyProviders
 
-	new make(DependencyProvider[] dependencyProviders, Registry registry) {
+	new makeInternal(DependencyProvider[] dependencyProviders) {
+		this.dependencyProviders = dependencyProviders
+	}
+
+	@Inject
+	new make(DependencyProvider[] dependencyProviders) {
 		this.dependencyProviders = dependencyProviders.toImmutable
 		
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
@@ -38,34 +41,31 @@ internal const class DependencyProvidersImpl : DependencyProviders {
 		dependencyProviders.each { it.canProvide(ctx) }
 	}
 
-	override Bool canProvideDependency(InjectionCtx ctx) {
-		dependencyProviders.any |provider->Bool| {
-			// providers can't provide themselves!
-			if (ctx.dependencyType.fits(provider.typeof))
+	override Obj? provideDependency(InjectionCtx ctx, Bool checked) {
+		ctx.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
+			dependency := null
+			
+			found := dependencyProviders.any |depPro->Bool| {
+				if (depPro.canProvide(ctx)) {
+					dependency = depPro.provide(ctx)
+					
+					if (dependency == null) {
+						if (!ctx.dependencyType.isNullable )
+							throw IocErr(IocMessages.dependencyDoesNotFit(null, ctx.dependencyType))
+					} else {
+						if (!ReflectUtils.fits(dependency.typeof, ctx.dependencyType))
+							throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
+					}
+	
+					return true
+				}
 				return false
-			return provider.canProvide(ctx) 
-		}		
-	}
-
-	override Obj? provideDependency(InjectionCtx ctx) {
-		dps := dependencyProviders.findAll { it.canProvide(ctx) }
-
-		if (dps.isEmpty)
-			return null
-		
-		if (dps.size > 1)
-			throw IocErr(IocMessages.onlyOneDependencyProviderAllowed(ctx.dependencyType, dps.map { it.typeof }))
-		
-		dependency := dps[0].provide(ctx)
-		
-		if (dependency == null) {
-			if (!ctx.dependencyType.isNullable )
-				throw IocErr(IocMessages.dependencyDoesNotFit(null, ctx.dependencyType))
-		} else {
-			if (!ReflectUtils.fits(dependency.typeof, ctx.dependencyType))
-				throw IocErr(IocMessages.dependencyDoesNotFit(dependency.typeof, ctx.dependencyType))
+			}
+	
+			if (found)
+				return dependency
+	
+			return checked ? throw IocErr(IocMessages.noDependencyMatchesType(ctx.dependencyType)) : null
 		}
-
-		return dependency
 	}
 }

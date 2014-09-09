@@ -72,12 +72,12 @@ internal class T_MyService39 {
 	T_MyService77? proxy
 }
 
-internal mixin T_MyService77 {
+@NoDoc mixin T_MyService77 {
 	abstract Str fromList
 	abstract Str fromMap
 }
 
-internal class T_MyService77Impl : T_MyService77 {
+@NoDoc class T_MyService77Impl : T_MyService77 {
 	override Str fromList
 	override Str fromMap
 	new make(Str fromList, |This|in) {

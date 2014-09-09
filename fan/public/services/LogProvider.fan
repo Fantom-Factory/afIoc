@@ -35,7 +35,10 @@ internal const class LogProviderImpl : LogProvider {
 	}
 
 	override Bool canProvide(InjectionCtx ctx) {
-		ctx.dependencyType.fits(Log#) && (ctx.injectingIntoType != null)
+		// IoC standards dictate that field injection should be denoted by a facet
+		ctx.injectionKind.isFieldInjection
+			? ctx.dependencyType.fits(Log#) && ctx.injectingIntoType != null && ctx.field.hasFacet(Inject#)
+			: ctx.dependencyType.fits(Log#) && ctx.injectingIntoType != null
 	}
 
 	override Obj? provide(InjectionCtx ctx) {
