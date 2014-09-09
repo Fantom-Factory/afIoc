@@ -2,7 +2,7 @@
 internal class TestModuleBuilderMethods : IocTest {
 	
 	Void testBuilderMethodMustBeStatic() {
-		verifyIocErrMsg(IocMessages.builderMethodsMustBeStatic(T_MyModule37#buildT1)) {
+		verifyIocErrMsg(IocMessages.moduleMethodMustBeStatic(T_MyModule37#buildT1)) {
 			RegistryBuilder().addModule(T_MyModule37#).build
 		}
 	}

@@ -27,6 +27,10 @@ internal const class IocMessages {
 		"Module method $method.qname should be annotated with the @${facetType.name} facet"
 	}
 	
+	static Str moduleMethodWithWrongDefineParams(Method method) {
+		"Module method $method.qname should take a single parameter of ${ServiceDefinition#.qname}"
+	}
+	
     static Str serviceAlreadyDefined(Str overrideId, SrvDef conflictDef, SrvDef existingDef) {
 		conflict := conflictDef.buildData is Method ? "${conflictDef.buildData->qname}()" : "Service Definition in ${conflictDef.moduleId}"
 		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
@@ -38,7 +42,7 @@ internal const class IocMessages {
 		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
         return "Override Id '${overrideId}' from '${conflict}' has already been defined by '${existing}'"
     }
-	
+
     static Str onlyOneOverrideAllowed(Str serviceId, SrvDef conflictDef, SrvDef existingDef) {
 		conflict := conflictDef.buildData is Method ? "${conflictDef.buildData->qname}()" : "Service Definition in ${conflictDef.moduleId}"
 		existing := existingDef.buildData is Method ? "${existingDef.buildData->qname}()" : "Service Definition in ${existingDef.moduleId}"
@@ -65,8 +69,8 @@ internal const class IocMessages {
 		"'perApplication' scope is only for const classes : $impl.qname"
 	}
 	
-	static Str errorInBindMethod(Str methodId, Err cause) {
-		"Error invoking service binder method ${methodId}: ${cause}"
+	static Str errorInServiceDefinitonMethod(Str methodId, Err cause) {
+		"Error invoking service definition method ${methodId}: ${cause}"
 	}
 
 	static Str noDependencyMatchesType(Type type) {
@@ -93,8 +97,8 @@ internal const class IocMessages {
 		"${serviceType.qname} has too many ctors with ${noOfParams} params - try annotating one with the @${Inject#.name} facet."
 	}
 	
-	static Str builderMethodsMustBeStatic(Method method) {
-		"Builder method $method.qname must be static"
+	static Str moduleMethodMustBeStatic(Method method) {
+		"Module method $method.qname must be static"
 	}
 	
 	static Str manyServiceMatches(Type serviceType, Str[] ids) {
