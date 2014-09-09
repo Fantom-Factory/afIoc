@@ -50,9 +50,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			moduleDefs.add(builtInModuleDef)	// so we can override LogProvider			
 		}
 
-		srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs.vals }.flatten
-		ovrDefs	:= (SrvDef[]) moduleDefs.map { it.serviceOverrides }.flatten
-		
+		srvDefs	:= (SrvDef[]) moduleDefs.map { it.serviceDefs  }.flatten
+		ovrDefs	:= (SrvDef[]) moduleDefs.map { it.overrideDefs }.flatten
+
 		// this IoC trace makes more sense when we throw dup id errs
 		tracker.track("Consolidating service definitions") |->| {
 			// we could use Map.addList(), but do it the long way round so we get a nice error on dups

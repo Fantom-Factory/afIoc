@@ -24,6 +24,7 @@ mixin Constraints {
 	abstract This after(Obj key)
 }
 
+// TODO: make Constraints a class
 internal class Contrib : Constraints {
 	Obj key; Obj? val
 	Bool unordered

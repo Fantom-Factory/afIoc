@@ -135,12 +135,13 @@ internal class T_MyModule59 {
 }
 
 internal class T_MyModule58 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService44#).withId("s44").withoutProxy
-		binder.bind(T_MyService44#).withoutProxy
-		binder.bind(T_MyService90#).withoutProxy
-		binder.bind(T_MyService45#).withId("s45-type").withScope(ServiceScope.perThread)
-		binder.bind(T_MyService45#).withId("s45-func").withScope(ServiceScope.perThread)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService44#).withId("s44")
+		defs.add(T_MyService44#)
+		defs.add(T_MyService90#)
+		defs.add(T_MyService45#).withId("s45-type").withScope(ServiceScope.perThread)
+		defs.add(T_MyService45#).withId("s45-func").withScope(ServiceScope.perThread)
+		defs.overrideById("s45-type").withImpl(T_MyService45Impl2#)
 	}
 
 	@Override { serviceId = "s44" }
