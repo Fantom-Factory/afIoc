@@ -8,6 +8,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	private const OneShotLock 			shutdownLock	:= OneShotLock(|->| { throw IocShutdownErr(IocMessages.registryShutdown) })
 	private const Str:ServiceDef		serviceDefs
 	private const ThreadLocalManager	threadLocalMgr
+	private const CachingTypeLookup		typeLookup
 	private const Duration				startTime
 			const AtomicBool			logServices		:= AtomicBool(false)
 			const AtomicBool			logBanner		:= AtomicBool(false)
@@ -149,6 +150,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		InjectionTracker.withCtx(tracker) |->| {
 			this.serviceDefs 		= serviceDefs
+			this.typeLookup			= CachingTypeLookup(serviceDefs.vals)
 			this.dependencyProviders= trackServiceById(DependencyProviders#.qname, true)
 		}
 	}
@@ -376,12 +378,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	override Bool typeMatchesService(Type serviceType) {
-		// TODO use caching type lookup
-		serviceDefs.any { it.matchesType(serviceType) }
+		!typeLookup.findChildren(serviceType).isEmpty
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
-		serviceDefs := serviceDefs.vals.findAll { it.matchesType(serviceType) }
+		serviceDefs := (ServiceDef[]) typeLookup.findChildren(serviceType)
 
 		if (serviceDefs.size > 1) {
 			// if exists, return the default service, the one with the qname as its serviceId 
