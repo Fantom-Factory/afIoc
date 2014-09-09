@@ -59,14 +59,14 @@ internal class InjectionTracker {
 
 	// ---- Injection Ctx ----------------------------------------------------------------------------------------------
 
-	static Obj? doingDependencyByType(Type dependencyType, |->Obj?| func) {
+	static Obj? doingDependencyByType(Type dependencyType, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.dependencyByType) {
 			it.dependencyType = dependencyType
 		}
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
-	static Obj? doingFieldInjection(Obj injectingInto, Field field, |->Obj?| func) {
+	static Obj? doingFieldInjection(Obj injectingInto, Field field, |InjectionCtx| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof
@@ -77,7 +77,7 @@ internal class InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |->Obj?| func) {
+	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |InjectionCtx| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjectionViaItBlock) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
@@ -87,7 +87,7 @@ internal class InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |->Obj?| func) {
+	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.methodInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= method.parent
@@ -99,7 +99,7 @@ internal class InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |->Obj?| func) {
+	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.ctorInjection) {
 			it.injectingIntoType= injectingIntoType
 			it.method			= ctor
@@ -111,14 +111,14 @@ internal class InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingParamInjection(Param param, Int index, |->Obj?| func) {
-		ctx := (InjectionCtx) ThreadStack.peek(injectionCtxId)
+	static Obj? doingParamInjection(InjectionCtx ctx, Param param, Int index, |InjectionCtx->Obj?| func) {
 		ctx.dependencyType		= param.type
 		ctx.methodParam			= param
 		ctx.methodParamIndex	= index
-		return func.call
+		return func.call(ctx)
 	}
 
+	// sigh - this whole injectionCtx stack is only needed for ONE call in ServiceDef.getService()!
 	static InjectionCtx injectionCtx() {
 		ThreadStack.peek(injectionCtxId)
 	}	

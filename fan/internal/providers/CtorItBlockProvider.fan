@@ -12,6 +12,6 @@ internal const class CtorItBlockProvider : DependencyProvider {
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {
-		injectionUtils.makeCtorInjectionPlan(ctx.injectingIntoType)
+		injectionUtils.makeCtorInjectionPlan(ctx)
 	}
 }

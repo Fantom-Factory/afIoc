@@ -87,10 +87,5 @@ enum class InjectionKind {
 	Bool isFieldInjection() {
 		this == fieldInjection || this == fieldInjectionViaItBlock
 	}
-
-	** Returns true if a field injection (of any kind) is taking place
-	Bool takesConfig() {
-		this == fieldInjection || this == fieldInjectionViaItBlock
-	}
 }
 
