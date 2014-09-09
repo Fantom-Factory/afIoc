@@ -20,6 +20,8 @@
 const mixin DependencyProvider {
 
 	** Return 'true' if the provider can provide. (!)
+	** 
+	** This method exists to allow 'provide()' to return 'null'.
 	abstract Bool canProvide(InjectionCtx injectionCtx)
 
 	** Return the dependency to be injected. All details of the injection to be performed is in 'InjectionCtx'.

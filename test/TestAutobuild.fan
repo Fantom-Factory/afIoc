@@ -51,7 +51,7 @@ internal class TestAutobuild : IocTest {
 
 	Void testAutobuildFieldVals() {
 		reg := RegistryBuilder().build.startup
-		s94 := (T_MyService94) reg.autobuild(T_MyService94#, Obj#.emptyList, [T_MyService94#latex:"Mask!"])
+		s94 := (T_MyService94) reg.autobuild(T_MyService94#, null, [T_MyService94#latex:"Mask!"])
 		verifyEq(s94.latex, "Mask!")
 	}
 
@@ -205,3 +205,4 @@ internal class T_MyService98 {
 		ioc(this)
 	}
 }
+
