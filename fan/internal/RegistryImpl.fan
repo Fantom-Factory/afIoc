@@ -288,8 +288,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	}
 
 	Obj? trackDependencyByType(Type dependencyType, Bool checked) {
-		return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
-			ctx := InjectionTracker.injectionCtx
+		return InjectionTracker.doingDependencyByType(dependencyType) |ctx->Obj?| {
 			return dependencyProviders.provideDependency(ctx, checked)
 		}
 	}

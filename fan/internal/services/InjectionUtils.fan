@@ -2,10 +2,10 @@ using afBeanUtils
 
 internal const class InjectionUtils {
 
-	private const ObjLocator 			objLocator
+	private const ObjLocator objLocator
 	
 	new make(ObjLocator objLocator) {
-		this.objLocator 		 = objLocator 
+		this.objLocator = objLocator 
 	}
 	
 	** Injects dependencies into fields (of all visibilities) 
@@ -13,8 +13,7 @@ internal const class InjectionUtils {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			fields := findInjectableFields(object.typeof, true)
 			fields.each |field| {
-				InjectionTracker.doingFieldInjection(object, field) |->| {
-					ctx := InjectionTracker.injectionCtx
+				InjectionTracker.doingFieldInjection(object, field) |ctx| {
 					dependency := dependencyProviders.provideDependency(ctx, false)
 					if (dependency != null)
 						inject(object, field, dependency)
@@ -29,8 +28,8 @@ internal const class InjectionUtils {
 	}
 
 	Obj? callMethod(Method method, Obj? obj, Obj?[]? providedMethodArgs) {
-		InjectionTracker.doingMethodInjection(obj, method) |->Obj?| {
-			args := findMethodInjectionParams(method, providedMethodArgs)
+		InjectionTracker.doingMethodInjection(obj, method) |ctx->Obj?| {
+			args := findMethodInjectionParams(ctx, method, providedMethodArgs)
 			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 			}
@@ -73,8 +72,8 @@ internal const class InjectionUtils {
 			}
 		}
 
-		args := InjectionTracker.doingCtorInjection(building, ctor, fieldVals) |->Obj?| {
-			return findMethodInjectionParams(ctor, providedCtorArgs)
+		args := InjectionTracker.doingCtorInjection(building, ctor, fieldVals) |ctx->Obj?| {
+			return findMethodInjectionParams(ctx, ctor, providedCtorArgs)
 		}
 		
 		return track("Instantiating $building via ${ctor.signature}...") |->Obj| {
@@ -88,13 +87,13 @@ internal const class InjectionUtils {
 		}
 	}
 
-	Func makeCtorInjectionPlan(Type building) {
-		track("Creating injection plan for fields of $building.qname") |->Obj| {
+	Func makeCtorInjectionPlan(InjectionCtx ctx) {
+		track("Creating injection plan for fields of ctx.injectingIntoType.qname") |->Obj| {
+			building := ctx.injectingIntoType
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
-				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |->| {
-					ctx := InjectionTracker.injectionCtx
-					dependency := dependencyProviders.provideDependency(ctx, false)
+				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |ctxNew| {
+					dependency := dependencyProviders.provideDependency(ctxNew, false)
 					if (dependency != null)
 						plan[field] = dependency
 				}
@@ -140,7 +139,7 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private Obj?[] findMethodInjectionParams(Method method, Obj?[]? providedMethodArgs) {
+	private Obj?[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[]? providedMethodArgs) {
 		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			params := method.params.map |param, index| {
 				log("Parameter ${index+1} = $param.type")
@@ -158,9 +157,8 @@ internal const class InjectionUtils {
 					return provided
 				}
 
-				return InjectionTracker.doingParamInjection(param, index) |->Obj?| {
-					ctx := InjectionTracker.injectionCtx
-					dep := dependencyProviders.provideDependency(ctx, false)
+				return InjectionTracker.doingParamInjection(ctx, param, index) |ctxNew->Obj?| {
+					dep := dependencyProviders.provideDependency(ctxNew, false)
 					// TODO: distinguish between returning null and not providing 
 					if (dep != null)
 						return dep
