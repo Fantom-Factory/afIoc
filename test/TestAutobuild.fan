@@ -1,5 +1,18 @@
+using afConcurrent
 
 internal class TestAutobuild : IocTest {
+	private static const AtomicList logs := AtomicList()
+	private static const |LogRec rec| handler := |LogRec rec| { logs.add(rec) }
+
+	override Void setup() {
+		logs.clear
+		Log.addHandler(handler)
+		Log.get("afIoc").level = LogLevel.warn
+	}
+	
+	override Void teardown() {
+		Log.removeHandler(handler)		
+	}
 	
 	Void testAutobuildWithParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
@@ -76,6 +89,18 @@ internal class TestAutobuild : IocTest {
 		s98 := (T_MyService98) RegistryBuilder().build.autobuild(T_MyService98#, [itBlock])
 		verifyEq(s98.emma, "boobies")
 	}
+	
+	Void testWarningWhenAutobuildingService() {
+		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
+
+		reg.autobuild(T_MyService02#)
+		log := (LogRec) logs.list.last
+		verifyEq(log.msg, IocMessages.warnAutobuildingService("s2", T_MyService02#))
+
+		reg.createProxy(T_MyService80#)
+		log = (LogRec) logs.list.last
+		verifyEq(log.msg, IocMessages.warnAutobuildingService(T_MyService80#.qname, T_MyService80#))
+	}
 }
 
 internal class T_MyModule75 {
@@ -114,8 +139,8 @@ internal class T_MyModule75 {
 
 	static Void bind(ServiceBinder binder) {
 		binder.bind(T_MyService02#).withId("s2")
-		binder.bind(T_MyService48#)
 		binder.bind(T_MyService49#)
+		binder.bind(T_MyService80#)
 	}
 }
 
@@ -147,10 +172,10 @@ internal class T_MyService49 {
 	}
 }
 
-internal mixin T_MyService80 {
+@NoDoc mixin T_MyService80 {
 	abstract Str dude
 }
-internal class T_MyService80Impl : T_MyService80 {
+@NoDoc class T_MyService80Impl : T_MyService80 {
 	override Str dude := "Dude!"
 }
 

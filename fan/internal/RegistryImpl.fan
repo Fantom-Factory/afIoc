@@ -215,7 +215,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			shutdownLock.check
 			return InjectionTracker.track("Locating dependency by type '$dependencyType.qname'") |->Obj?| {
 				return InjectionTracker.doingDependencyByType(dependencyType) |->Obj?| {
-					// as ctx is brand new, this won't return null
 					return trackDependencyByType(dependencyType, checked)
 				}
 			}
@@ -315,7 +314,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
 		}
 		
-//		TODO: warn if service
+		existing := serviceDefByType(implType) 
+		if (existing != null)
+			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 		
 		sid		:= "${type.name}(Autobuild)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
@@ -348,10 +349,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		
 		if (!mixinT.isMixin)
 			throw IocErr(IocMessages.onlyMixinsCanBeProxied(mixinT))
-//		TODO: warn if service
+
+		existing := serviceDefByType(mixinType) 
+		if (existing != null)
+			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 
 		sid		:= "${mixinT.name}(CreateProxy)"
-		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
+		ctor 	:= InjectionUtils.findAutobuildConstructor(implT)
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
 		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)

@@ -213,6 +213,10 @@ internal const class IocMessages {
 		"Built-in services cannot be overridden: $serviceId"
 	}
 
+	static Str warnAutobuildingService(Str serviceId, Type serviceType) {
+		"Autobuilding type '${serviceType.qname}' which is *also* defined as service '${serviceId} - unusual!"
+	}
+
 
 
 	// ---- Service Override Messages -------------------------------------------------------------
