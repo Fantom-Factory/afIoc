@@ -3,20 +3,20 @@ using afPlastic
 
 internal const class IocModule {
 
-	static Void bind(ServiceBinder binder) {
-		binder.bind(Registry#) 
-		binder.bind(RegistryMeta#) 
-		binder.bind(RegistryStartup#).withScope(ServiceScope.perThread)	// for non-const listeners 
-		binder.bind(RegistryShutdown#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(Registry#) 
+		defs.add(RegistryMeta#) 
+		defs.add(RegistryStartup#).withScope(ServiceScope.perThread)	// for non-const listeners 
+		defs.add(RegistryShutdown#)
 		
-		binder.bind(ActorPools#)
-		binder.bind(AspectInvokerSource#)
-		binder.bind(DependencyProviders#)
-		binder.bind(InjectionUtils#)
-		binder.bind(LogProvider#)
-		binder.bind(PlasticCompiler#)
-		binder.bind(ServiceProxyBuilder#)
-		binder.bind(ThreadLocalManager#) 
+		defs.add(ActorPools#)
+		defs.add(AspectInvokerSource#)
+		defs.add(DependencyProviders#)
+		defs.add(InjectionUtils#)
+		defs.add(LogProvider#)
+		defs.add(PlasticCompiler#)
+		defs.add(ServiceProxyBuilder#)
+		defs.add(ThreadLocalManager#) 
 	}
 	
 	@Contribute { serviceType=DependencyProviders# }

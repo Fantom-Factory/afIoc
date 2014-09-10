@@ -14,7 +14,7 @@
 ** 
 ** The service implementation is created on demand when methods on the proxy are called.
 ** 
-** Note that if a service does not have a proxy, the 'VIRTUAL' stage is skipped.
+** Note that if a service does not have a proxy, the 'Proxied' stage is skipped.
 ** 
 ** @since 1.2.0
 enum class ServiceLifecycle {

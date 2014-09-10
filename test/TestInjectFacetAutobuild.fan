@@ -32,12 +32,12 @@ internal class TestInjectFacetAutobuild : IocTest {
 }
 
 internal class T_MyModule55 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService02#).withId("s2")
-		binder.bind(T_MyService36#).withId("s36")
-		binder.bind(T_MyService37#).withId("s37")
-		binder.bind(T_MyService63#).withId("s63")
-		binder.bind(T_MyService39#).withId("s39")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService02#).withId("s2")
+		defs.add(T_MyService36#).withId("s36")
+		defs.add(T_MyService37#).withId("s37")
+		defs.add(T_MyService63#).withId("s63")
+		defs.add(T_MyService39#).withId("s39")
 	}
 }
 

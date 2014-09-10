@@ -90,8 +90,8 @@ internal class T_MyModule29 {
 }
 
 internal class T_MyModule52 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService31#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService31#)
 	}
 }
 @NoDoc mixin T_MyService31 { }
@@ -100,8 +100,8 @@ internal class T_MyModule52 {
 }
 
 internal class T_MyModule106 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService76#).withId("s76")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService76#).withId("s76")
 	}
 	@Contribute { serviceId="s76"}
 	static Void contributeWot(Configuration config) { }

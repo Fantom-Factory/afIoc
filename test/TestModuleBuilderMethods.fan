@@ -52,8 +52,8 @@ internal class TestModuleBuilderMethods : IocTest {
 }
 
 internal class T_MyModule04 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService02#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService02#)
 	}
 	
 	@Build
@@ -67,8 +67,8 @@ internal class T_MyModule04 {
 }
 
 internal class T_MyModule05 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService02#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService02#)
 	}
 	
 	@Build { serviceId = "penguin" }
@@ -89,8 +89,8 @@ internal class T_MyModule05 {
 }
 
 internal class T_MyModule21 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService01#).withScope(ServiceScope.perApplication)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService01#).withScope(ServiceScope.perApplication)
 	}
 }
 

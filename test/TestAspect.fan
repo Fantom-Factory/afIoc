@@ -85,10 +85,10 @@ internal class TestAspect : IocTest {
 }
 
 internal class T_MyModule78 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService65Aspect#).withId("s65Aspect")
-		binder.bind(T_MyService66Aspect#).withId("s66Aspect")
-		binder.bind(T_MyService67NoMatch#).withId("s67NoMatch")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService65Aspect#).withId("s65Aspect")
+		defs.add(T_MyService66Aspect#).withId("s66Aspect")
+		defs.add(T_MyService67NoMatch#).withId("s67NoMatch")
 	}
 	
 	@Advise { serviceId="*Aspect" }
@@ -113,11 +113,11 @@ internal class T_MyModule80 {
 }
 
 internal class T_MyModule81 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService65Aspect#).withId("s65Aspect")
-		binder.bind(T_MyService66Aspect#).withId("s66Aspect")
-		binder.bind(T_MyService67NoMatch#).withId("s67NoMatch")
-		binder.bind(T_MyService60#).withId("s60")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService65Aspect#).withId("s65Aspect")
+		defs.add(T_MyService66Aspect#).withId("s66Aspect")
+		defs.add(T_MyService67NoMatch#).withId("s67NoMatch")
+		defs.add(T_MyService60#).withId("s60")
 	}
 	
 	@Advise { serviceId="s??*As*" }
@@ -162,16 +162,16 @@ internal class T_MyModule81 {
 }
 
 internal class T_MyModule11 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService69#).withId("s69-bingo")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService69#).withId("s69-bingo")
 	}	
 	@Advise { serviceId="s69" }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }
 }
 
 internal class T_MyModule84 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService69#).withId("s69-bingo")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService69#).withId("s69-bingo")
 	}	
 	@Advise { serviceId="s69"; optional=true }
 	static Void addTransactions(MethodAdvisor[] methodAdvisors) { }

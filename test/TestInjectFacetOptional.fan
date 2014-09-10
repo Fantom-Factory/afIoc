@@ -17,9 +17,9 @@ internal class TestInjectFacetOptional : IocTest {
 }
 
 internal class T_MyModule34 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService65#).withId("s65")
-		binder.bind(T_MyService66#).withId("s66")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService65#).withId("s65")
+		defs.add(T_MyService66#).withId("s66")
 	}
 }
 

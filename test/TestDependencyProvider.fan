@@ -49,8 +49,8 @@ internal class TestDependencyProvider : IocTest {
 }
 
 internal class T_MyModule56 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService40#).withId("s40")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService40#).withId("s40")
 	}
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config) {
@@ -67,11 +67,11 @@ internal const class T_DependencyProvider1 : DependencyProvider {
 }
 
 internal class T_MyModule57 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_DependencyProvider2#).withId("dp")
-		binder.bind(T_MyService41#).withId("s41")
-		binder.bind(T_MyService42#).withId("s42")
-		binder.bind(T_MyService43#).withId("s43")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_DependencyProvider2#).withId("dp")
+		defs.add(T_MyService41#).withId("s41")
+		defs.add(T_MyService42#).withId("s42")
+		defs.add(T_MyService43#).withId("s43")
 	}
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, T_DependencyProvider2 dp) {
@@ -105,8 +105,8 @@ internal const class T_DependencyProvider3 : DependencyProvider {
 }
 
 internal class T_MyModule88 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService72#).withId("s72")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService72#).withId("s72")
 	}
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config) {
@@ -120,10 +120,10 @@ internal const class T_MyService72 {
 }
 
 internal class T_MyModule96 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService72#).withId("s72")
-		binder.bind(T_MyService84#).withId("s84")
-		binder.bind(T_DependencyProvider4#).withId("dp4")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService72#).withId("s72")
+		defs.add(T_MyService84#).withId("s84")
+		defs.add(T_DependencyProvider4#).withId("dp4")
 	}
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, T_DependencyProvider4 dp) {
