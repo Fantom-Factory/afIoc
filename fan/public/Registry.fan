@@ -1,5 +1,5 @@
 
-** (Service) - The registry of IoC services; this is the main IoC service. 
+** (Service) - The registry of IoC services; this is the main IoC interface. 
 const mixin Registry {
 	
  	** Invoke to execute all contributions to the `RegistryStartup` service.
@@ -53,6 +53,7 @@ const mixin Registry {
 	** whenever a mixin method is invoked.
 	** 
 	** If 'implType' is null then it is assumed to have the same name as the mixin, plus a 'Impl' suffix.
+	** 
 	** @since 1.5.0
 	abstract Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 

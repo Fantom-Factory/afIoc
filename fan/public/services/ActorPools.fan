@@ -3,26 +3,25 @@ using afBeanUtils::NotFoundErr
 
 ** (Service) - 
 ** Maintains a collection of named 'ActorPools'. Use to keep tabs on your resources, particularly 
-** useful when creating [SynchronizedMap]`afConcurrent::SynchronizedMap` and 
-** [SynchronizedList]`afConcurrent::SynchronizedList` instances.
+** useful when creating 'SynchronizedMap' and 'SynchronizedList' instances.
 ** 
 ** IoC itself uses an 'ActorPool' named 'afIoc.system'. Contribute your own via your 'AppModule':
 ** 
 ** pre>
-** @Contribute { serviceType=RegistryShutdownHub# }
+** @Contribute { serviceType=ActorPools# }
 ** static Void contributeActorPools(Configuration config) {
 **   config["myPool"] = ActorPool() { it.name = "MyPool" }
 ** }
 ** <pre  
 ** 
-** Note it is always a good idea to name your 'ActorPools' for debugging reasons.
+** Note it is always a good idea to name your 'ActorPools' for debugging purposes.
 ** 
 ** @since 1.6.0
 ** 
 ** @uses Configuration of 'Str:ActorPool'
 const mixin ActorPools {
 
-	** Returns the 'ActorPool' mapped to the given name, or throws a 'NotFoundErr' if it doesn't exist.
+	** Returns the 'ActorPool' mapped to the given name, or throws a 'IocErr' / 'NotFoundErr' if it doesn't exist.
 	@Operator
 	abstract ActorPool get(Str name)
 

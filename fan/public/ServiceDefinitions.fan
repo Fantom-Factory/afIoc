@@ -1,5 +1,5 @@
 
-** Passed to module 'defineServices()' methods to add and override service definitions.
+** Passed to 'AppModule' 'defineServices()' methods to add and override service definitions.
 ** 
 ** Service builder methods are the default means to define services. 
 ** But if your service can be 'autobuilt' (and most can!) then the 'defineServices()' method is a quick and easy alternative. 
@@ -45,6 +45,12 @@ class ServiceDefinitions {
 		this._addOvrDefFunc = addOvrDefFunc
 	}
 	
+	** Defines a service of the given type. The service defaults to the following attributes:
+	**  - **id** - the qualified name of the service type 
+	**  - **scope** - 'perApplication', or 'perThread' if the service type is non-const 
+	**  - **proxy** - 'ifRequried'
+	** 
+	** All options may be refined in the returned 'ServiceDefinitionOptions'. 
 	ServiceDefinitionOptions add(Type serviceType, Type? serviceImplType := null) {
 		if (serviceImplType == null) {
 			if (serviceType.isAbstract) {
@@ -79,14 +85,17 @@ class ServiceDefinitions {
         return ServiceDefinitionOptions(serviceDef)
     }
 
-	ServiceOverrideOptions overrideById(Str serviceId) {
+	** Override values in an existing service definition.
+	** 
+	** The given id may be a service id to override a service, or an override id to override an override.  
+	ServiceOverrideOptions overrideById(Str id) {
 		serviceDef := SrvDef() {
 			it.moduleId 		= _moduleId
-			it.id 				= serviceId
+			it.id 				= id
 			it.scope 			= null 
 			it.proxy			= null
 			it.buildData		= null
-			it.overrideRef		= "${_moduleId}.override${serviceId.capitalize}."
+			it.overrideRef		= "${_moduleId}.override${id.capitalize}"
 			it.overrideOptional	= false
 		}
 		
@@ -95,24 +104,15 @@ class ServiceDefinitions {
         return ServiceOverrideOptions(serviceDef)
     }
 
+	** Override values in an existing service definition.
+	** 
+	** Convenience for 'overrideById(serviceType.qname)'. 
 	ServiceOverrideOptions overrideByType(Type serviceType) {
-		serviceDef := SrvDef() {
-			it.moduleId 		= _moduleId
-			it.id 				= serviceType.qname
-			it.scope 			= null 
-			it.proxy			= null
-			it.buildData		= null
-			it.overrideRef		= "${_moduleId}.override${serviceType.name.capitalize}."
-			it.overrideOptional	= false
-		}
-		
-		_addOvrDefFunc(serviceDef)
-
-        return ServiceOverrideOptions(serviceDef)
+		overrideById(serviceType.qname)
     }
 }
 
-** Returned from `ServiceDefinitions` methods to allow further service options to be set.
+** Returned from 'AppModule' `ServiceDefinitions` methods to allow further service options to be set.
 ** 
 ** @since 2.0.0
 class ServiceDefinitionOptions {
@@ -122,31 +122,33 @@ class ServiceDefinitionOptions {
 		this.serviceDef = serviceDef
 	}
 	
+	** Sets the service id.
 	This withId(Str id) {
 		serviceDef.id = id
 		return this
 	}
 	
+	** Sets the service id to the qualified name of the service implementation class. 
 	This withImplId(Str id) {
-		if (serviceDef.buildData isnot Type)
-			throw Err("wutgh")
 		implType := (Type) serviceDef.buildData
 		serviceDef.id = implType.qname
 		return this
 	}
 
+	** Sets the scope of the service.
 	This withScope(ServiceScope scope) {
 		serviceDef.scope = scope
 		return this
 	}
 	
+	** Sets the proxy strategy for the service.
 	This withProxy(ServiceProxy proxy := ServiceProxy.always) {
 		serviceDef.proxy = proxy
 		return this
 	}
 }
 
-** Returned from `ServiceDefinitions` methods to allow further override options to be set.
+** Returned from 'AppModule' `ServiceDefinitions` methods to allow further override options to be set.
 ** 
 ** @since 2.0.0
 class ServiceOverrideOptions {
@@ -156,6 +158,7 @@ class ServiceOverrideOptions {
 		this.serviceDef = serviceDef
 	}
 	
+	** Overrides the service implementation with the given type.
 	This withImpl(Type implType) {
 		if (implType.isMixin) 
 			throw IocErr(IocMessages.bindImplNotClass(implType))
@@ -164,21 +167,26 @@ class ServiceOverrideOptions {
 		return this
 	}
 
+	** Overrides the scope of the service.
 	This withScope(ServiceScope scope) {
 		serviceDef.scope = scope
 		return this
 	}
 	
+	** Overrides the proxy strategy for the service.
 	This withProxy(ServiceProxy proxy := ServiceProxy.always) {
 		serviceDef.proxy = proxy
 		return this
 	}
 	
+	** Sets an id for this override definition so others may override this override.
 	This withOverrideId(Str overrideId) {
 		serviceDef.overrideRef = overrideId
 		return this
 	}
 	
+	** If 'true' makes this override optional. As in no error is thrown if the service id does not exist. 
+	** Useful for overriding 3rd party libraries that may or may not exist.
 	This optional(Bool optional := true) {
 		serviceDef.overrideOptional = optional
 		return this

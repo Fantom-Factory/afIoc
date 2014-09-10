@@ -19,10 +19,10 @@ using afConcurrent::LocalMap
 const mixin RegistryStartup {
 	internal abstract Void startup(OpTracker tracker)
 	
-	** Returns a printed list of all the registry services and their lifecycle status. 
+	** Miscellaneous method that returns a printed list of all the registry services and their lifecycle status. 
 	abstract Str printServiceList()
 
-	** Returns the Alien-Factory banner.
+	** Miscellaneous method that returns the Alien-Factory banner.
 	abstract Str printBanner()
 }
 

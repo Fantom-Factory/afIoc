@@ -31,10 +31,6 @@ internal class InjectionTracker {
 		tracker.log(msg)
 	}
 
-	static Void logExpensive(|->Str| msgFunc) {
-		tracker.logExpensive(msgFunc)
-	}
-
 	private static OpTracker tracker() {
 		((InjectionTracker) ThreadStack.peek(trackerId, true)).opTracker
 	}

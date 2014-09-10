@@ -32,7 +32,7 @@ internal class TestIocService : IocTest {
 				ioc.addModulesFromPod(this.typeof.pod)
 			}
 			verifyIocErrMsg(IocMessages.serviceStarted) {
-				ioc.addModulesFromIndexProperties
+				ioc.addModulesFromIndexProps
 			}
 		} finally {
 			ioc.uninstall

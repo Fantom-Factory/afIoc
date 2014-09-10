@@ -54,10 +54,10 @@ const class IocService : Service {
 		return this
 	}
 
-	** Convenience for `RegistryBuilder.addModulesFromIndexProperties`
-	This addModulesFromIndexProperties() {
+	** Convenience for `RegistryBuilder.addModulesFromIndexProps`
+	This addModulesFromIndexProps() {
 		checkServiceNotStarted
-		builder.addModulesFromIndexProperties
+		builder.addModulesFromIndexProps
 		return this
 	}
 

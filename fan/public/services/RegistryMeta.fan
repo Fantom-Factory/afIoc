@@ -2,7 +2,7 @@
 ** (Service) - Holds meta information on how the IoC registry was built.
 const mixin RegistryMeta {
 	
-	** The options as passed as into [RegistryBuilder.build()]`RegistryBuilder.build`. 
+	** The options map as defined by `RegistryBuilder`. 
 	** This map is case-insensitive.
 	** Useful for passing external immutable data into services.   
 	abstract [Str:Obj?] options()

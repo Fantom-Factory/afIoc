@@ -8,5 +8,7 @@
 **   }
 ** <pre
 facet class SubModule {
+	
+	** A list of additional modules to be loaded.
 	const Type[] modules
 }

@@ -35,7 +35,7 @@ const mixin ThreadLocalManager {
 	** Returns all (fully qualified) keys in the current thread associated / used with this manager. 
 	abstract Str[] keys() 
 	
-	** Add a handler to be called on thread clean up. Handlers need to be added for each thread.
+	** Add a handler to be called on thread clean up. New handlers have to be added for each thread.
 	abstract Void addCleanUpHandler(|->| handler)
 	
 	** Removes all values in the current thread associated / used with this manager.
