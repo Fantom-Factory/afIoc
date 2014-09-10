@@ -2,7 +2,7 @@
 ** 
 ** Returned from 'ServiceBinder.bind()'; lets you specify additional service options. Use to override defaults.
 ** 
-//@Deprecated
+@NoDoc @Deprecated { msg="Use ServiceDefinitionOptions instead." }
 mixin ServiceBindingOptions {
 
 	** Sets a specific id for the service, rather than the default (the qualified name of the service type / mixin).  

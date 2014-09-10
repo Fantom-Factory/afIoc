@@ -1,4 +1,39 @@
 
+** Passed to module 'defineServices()' methods to add and override service definitions.
+** 
+** Service builder methods are the default means to define services. 
+** But if your service can be 'autobuilt' (and most can!) then the 'defineServices()' method is a quick and easy alternative. 
+** 
+** For standard services that can be 'autobuilt', the 'defineServices()' method lets you quickly define them without using builder methods. 
+** Services defined with 'defineServices()' must be able to be built     
+** Use in your 'AppModule.defineServices(ServiceDefinitions defs) {...}' method  
+** If your service implementation is fronted by a mixin, then pass them both in: 
+** 
+** pre>
+** class AppModule {
+**     static Void bind(ServiceBinder binder) {
+**         binder.bind(MyService#, MyServiceImpl#)
+**     } 
+** }
+** <pre
+**
+** If your service is just an impl class then you can use the shorter form:
+** 
+** pre>
+** class AppModule {
+**     static Void bind(ServiceBinder binder) {
+**         binder.bind(MyServiceImpl#)
+**     } 
+** }
+** <pre
+** 
+** You can also use the shorter form, passing in the mixin, if your Impl class has the same name as your mixin + "Impl".
+** 
+** The default service id is the unqualified name of the service mixin (or impl if no mixin was provided).
+** 
+** This is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
+** 
+** @since 2.0.0
 class ServiceDefinitions {
 	
 	private |SrvDef|	_addSvrDefFunc
@@ -78,6 +113,9 @@ class ServiceDefinitions {
     }
 }
 
+** Returned from `ServiceDefinitions` methods to allow further service options to be set.
+** 
+** @since 2.0.0
 class ServiceDefinitionOptions {
 	private SrvDef	serviceDef
 	
@@ -109,6 +147,9 @@ class ServiceDefinitionOptions {
 	}
 }
 
+** Returned from `ServiceDefinitions` methods to allow further override options to be set.
+** 
+** @since 2.0.0
 class ServiceOverrideOptions {
 	private SrvDef	serviceDef
 	

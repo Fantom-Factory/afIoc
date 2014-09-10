@@ -1,5 +1,5 @@
 
-** Passed into [DependencyProviders]`DependencyProvider` to give contextual injection information.
+** Passed to [DependencyProviders]`DependencyProvider` to give contextual injection information.
 class InjectionCtx {
 	
 	** The type of injection.

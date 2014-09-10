@@ -4,7 +4,7 @@ Overview [#overview]
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
 
-- **Injection - the way *you* want it!**
+- **Injection - any way *you* want it!**
   - field injection
   - ctor injection
   - it-block ctor injection - 'new make(|This|in) { in(this) }'
@@ -16,7 +16,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Override everything**
   - override services and configuration, even override your overrides!
   - replace real services with test services
-  - set sensible application defaults and let your users override them
+  - set sensible defaults and let your users override them
 
 - **True lazy loading**
   - services are proxied to ensure nothing is created until you actually use it
@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [34 tests, 206 methods, 418 verifies]'
+  - Extensively tested: - 'All tests passed! [35 tests, 214 methods, 453 verifies]'
 
 > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc`!
 
@@ -304,11 +304,18 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
-v1.8.0 [#1.8.0]
+v2.0.0 [#2.0.0]
 ---------------
+ - New: All attributes of a service (scope, proxy, etc...) may be overridden.
  - New: '@Override' facet for defining service override methods in 'AppModule'.
+ - New: '@Autobuild' facet for injecting non-service instances.
+ - New: 'ServiceDefinitions', 'ServiceDefinitionOptions' and 'ServiceOverrideOptions' replaces 'ServiceBinder' et al.
  - New: Added 'RegistryBuilder.removeModule()'.
- - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type.
+ - Chg: Optomised and reduced internal code - **now 20% faster!**
+ - Chg: Services are not proxied unless they need to be; e.g. it has method advice, or is thread scope being injected into an app scoped service. (Potential breaking change.)
+ - Chg: 'DependencyProviders' are applied to *all* fields, '@Inject' facet is no longer required.
+ - Chg: Deleted 'autobuild' from '@Inject' facet in favour of a new-ish '@Autobuild' facet. (Breaking change.)
+ - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type. (Potential breaking change.)
  - Chg: Deleted 'ServiceOverrides' service in favour of service '@Override' methods. (Breaking change.)
  - Chg: Deleted 'ServiceStats' service in favour of method 'Registry.serviceDefinitions()'. (Breaking change.)
  - Chg: Deleted all existing @Deprecated classes. (Breaking change.)
@@ -316,7 +323,6 @@ v1.8.0 [#1.8.0]
  - Chg: Reanmed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
  - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
  - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
- - Bug: '@Inject.autobuild' *services* were just autobuilt and not built via the service builder func.
  - Bug: 'IocService' methods now more closely follow those of 'Registry'.
 
 v1.7.6 [#1.7.6]

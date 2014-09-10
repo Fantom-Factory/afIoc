@@ -1,5 +1,5 @@
 
-** Returned from 'Configuration' methods to add ordering constraints to your contributions.
+** Returned from `Configuration` methods to add ordering constraints to your contributions.
 ** 
 ** Constraints are keys of other contributions that this contribution must appear before or after. 
 ** 
@@ -11,7 +11,7 @@
 ** <pre
 ** 
 ** Constraints become very powerful when used across multiple modules and pods.
-mixin Constraints {
+abstract class Constraints {
 	
 	** Specify a key your contribution should appear *before*.
 	** 
@@ -24,7 +24,6 @@ mixin Constraints {
 	abstract This after(Obj key)
 }
 
-// TODO: make Constraints a class
 internal class Contrib : Constraints {
 	Obj key; Obj? val
 	Bool unordered

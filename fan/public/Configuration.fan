@@ -1,5 +1,5 @@
 
-** Passed into module contribution methods to allow the method to contribute configuration.
+** Passed to module [@Contribution]`Contribution` methods to allow the method to contribute configuration.
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.
@@ -19,7 +19,7 @@ class Configuration {
 	}
 
 	** A convenience method for `Registry.autobuild`.  
-	Obj createProxycreateProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+	Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
 	}
 
