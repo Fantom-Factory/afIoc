@@ -66,7 +66,7 @@ class RegistryBuilder {
 
 	** Looks for all index properties of key 'afIoc.module' which defines a qualified name of 
 	** a module to load.
-	This addModulesFromIndexProperties() {
+	This addModulesFromIndexProps() {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding modules from index properties") |->Obj| {
 				lock.check
@@ -168,7 +168,7 @@ class RegistryBuilder {
 			_addModulesFromTypeNames(moduleTypeNames)
 
 			if (addDependencies) {
-				mods := ctx.track("Adding dependencies of '${pod.name}'") |->| {
+				ctx.track("Adding dependencies of '${pod.name}'") |->| {
 					pod.depends.each |depend| {
 						dependency := Pod.find(depend.name)
 						_addModulesFromPod(dependency)

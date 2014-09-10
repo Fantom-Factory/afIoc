@@ -1,6 +1,6 @@
 using afBeanUtils
 
-** As thrown by IoC
+** As thrown by IoC.
 const class IocErr : Err {
 	
 	** A trace of IoC operations that led to the Err. 
@@ -11,6 +11,7 @@ const class IocErr : Err {
 		this.operationTrace = opTrace
 	}
 	
+	@NoDoc
 	override Str toStr() {
 		opTrace := causeStr
 		opTrace += opTraceStr
@@ -18,6 +19,7 @@ const class IocErr : Err {
 		return opTrace
 	}
 	
+	@NoDoc
 	protected Str causeStr() {
 		opTrace := (cause == null) 
 				? "${typeof.qname}: " 
@@ -26,6 +28,7 @@ const class IocErr : Err {
 		return opTrace
 	}
 
+	@NoDoc
 	protected Str opTraceStr() {
 		opTrace := ""
 		if (operationTrace != null && !operationTrace.isEmpty) {

@@ -4,7 +4,7 @@ class Build : BuildPod {
 	
 	new make() {
 		podName = "afIoc"
-		summary = "A powerful Dependency Injection (DI) / Inversion Of Control (IoC) framework"
+		summary = "A powerful Dependency Injection / Inversion Of Control framework"
 		version = Version("1.7.7")
 
 		meta = [	

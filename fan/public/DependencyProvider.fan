@@ -1,19 +1,16 @@
 
 ** Implement to provide your own dependency resolution. Extend the capabilities of IoC!
 ** 
-** Provide your own dependencies for fields annotated with the '@Inject' facet. 
-** Typically you would augment '@Inject' with your own facet to provide injection meta. 
-** 
 ** Contribute 'DependencyProvider' instances to the 'DependencyProviders' service.
 ** 
 ** pre>
 ** @Contribute { serviceType=DependencyProviders# }
-** static Void contributeDependencyProviders(Configuration conf) {
-**   conf["myProvider"] = conf.autobuild(MyProvider#)
+** static Void contributeDependencyProviders(Configuration config) {
+**     config["myProvider"] = MyProvider()
 ** }
 ** <pre
 ** 
-** Due to 'DependencyProviders' being instantiated before the Registry is fully loaded, 'DependencyProviders' should not be proxied.
+** Note that due to 'DependencyProviders' being instantiated before the Registry is fully loaded, 'DependencyProviders' should *not* be proxied.
 ** 
 ** @since 1.1
 const mixin DependencyProvider {

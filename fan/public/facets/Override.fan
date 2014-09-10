@@ -14,7 +14,7 @@ facet class Override {
 	** Use either this or 'serviceId', not both.
 	const Type?	serviceType	:= null
 	
-	** If specified this will override the service's proxy setting.
+	** If specified this will override the service's scope setting.
 	const ServiceScope? scope	:= null
 	
 	** If specified this will override the service's proxy setting.

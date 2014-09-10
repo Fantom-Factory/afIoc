@@ -1,7 +1,7 @@
 
-v2.0.0 Maybe...?
+v2.0.2 Maybe...?
 ----------------
-
+make ServiceDefinitions.overrideByType more intelligent than type.qname
 
 
 Meh... can't be arsed
@@ -25,6 +25,10 @@ Just Plain Bad Ideas:
 Allow other @Inject facets
  - so BedSheet can define its own, for fewer pod import statements
  - but if afIoc and afBedSheet are imported at same time ~ conflict!
+
+Remove tracker info to improve performance
+ - tried it.
+ - deleted ALL tracker calls -> NO discernable speed difference!
 
 Maybe add a means to delete / reset a service lifecycle?
  - people can create their own service lifecycle.

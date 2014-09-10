@@ -1,5 +1,5 @@
 
-** Returned from `Configuration` methods to add ordering constraints to your contributions.
+** Returned from 'AppModule' `Configuration` methods to add ordering constraints to your contributions.
 ** 
 ** Constraints are keys of other contributions that this contribution must appear before or after. 
 ** 

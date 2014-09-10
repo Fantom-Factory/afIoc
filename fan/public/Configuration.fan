@@ -1,5 +1,5 @@
 
-** Passed to module [@Contribution]`Contribution` methods to allow the method to contribute configuration.
+** Passed to 'AppModule' [@Contribution]`Contribution` methods to allow the method to contribute configuration.
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
 ** ctor or builder method. Contributions must be compatible with the type.

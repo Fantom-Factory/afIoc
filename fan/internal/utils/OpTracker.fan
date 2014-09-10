@@ -46,12 +46,6 @@ internal class OpTracker {
                 logged = false	
 		}
 	}
-	
-	Void logExpensive(|->Str| msg) {
-		if (logEnabled) {
-			log(msg())
-		}
-	}
 
 	Void log(Str description) {
 		if (logEnabled) {

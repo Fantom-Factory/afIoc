@@ -8,17 +8,20 @@ using afConcurrent::SynchronizedState
 ** pre>
 ** class AppModule {
 **     @Contribute { serviceType=RegistryShutdown# }
-**     static Void contributeRegistryShutdown(Configuration conf, MyService myService) {
-**         conf["myShutdownFunc"] = |->| { myService.shutdown() }
+**     static Void contributeRegistryShutdown(Configuration config, MyService myService) {
+**         config["myShutdownFunc"] = |->| { myService.shutdown() }
 **     }
 ** }
 ** <pre
 ** 
-** If the shutdown method of your service depends on other services being available, add a constraint on 'afIoc.shutdown': 
+** If your shutdown method depends on other services still being available, add a constraint on their shutdown functions: 
 ** 
-**   conf.set("myShutdownFunc", |->| { myService.shutdown() }).before("afIoc.shutdown")
+**   shutdownFunc := |->| { myService.shutdown() }
+**   config.set("myShutdownFunc", shutdownFunc).before("otherShutdownFunc")
 ** 
-** Note that Errs thrown by shutdown functions will be logged and then swallowed.
+** IoC also defines a general use constraint placeholder named 'afIoc.shutdown'.  
+** 
+** Note that any Errs thrown by shutdown functions will be logged and then swallowed.
 ** 
 ** @uses Configuration of '|->| []'
 const mixin RegistryShutdown {

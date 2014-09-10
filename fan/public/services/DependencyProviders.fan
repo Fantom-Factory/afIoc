@@ -10,7 +10,7 @@ using afBeanUtils
 ** pre>
 ** @Contribute { serviceType=DependencyProviders# }
 ** static Void contributeDependencyProviders(Configuration conf) {
-**   conf["myProvider"] = conf.autobuild(MyProvider#)
+**   conf["myProvider"] = MyProvider()
 ** }
 ** <pre
 ** 
