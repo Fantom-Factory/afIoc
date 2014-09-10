@@ -1,6 +1,5 @@
 
-**
-** Passed into module advisor methods to allow the method to, err, advise services!
+** Passed to module [@Advise]`Advise` methods to allow the method to, err, advise services!
 ** 
 ** @see The `Advise` facet for more details.
 ** 
@@ -28,7 +27,7 @@ class MethodAdvisor {
 //	abstract Void overrideOrderedAdvice(Str idToOverride, Str id, Str[] orderingConstraints, |Obj target, Obj[] args| aspect)
 }
 
-** Used by aspects to call the method they wrap.
+** Returned from `MethodAdvisor` methods to wrap calls to advised methods.
 ** 
 ** The wrapped method is purposely hidden so no-one is tempted to call it directly, use [invoke()]`#invoke` instead.  
 ** The real method is hidden behind this class so multiple Method Advisors can be chained

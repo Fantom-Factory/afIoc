@@ -3,7 +3,7 @@
 // see TestInjectFacetInheritance
 // @FacetMeta { inherited = true } 
 
-** Use in services to inject dependencies and services.
+** Use in services to inject services and other dependencies.
 **  - Place on a field to mark it for field injection
 **  - Place on a ctor to mark it for use by autobuilding / service creation
 facet class Inject { 

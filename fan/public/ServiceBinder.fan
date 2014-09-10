@@ -25,7 +25,7 @@
 ** The default service id is the unqualified name of the service mixin (or impl if no mixin was provided).
 ** 
 ** This is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
-//@Deprecated
+@NoDoc @Deprecated { msg="Use ServiceDefinitions instead." }
 mixin ServiceBinder {
 
 	** Binds the service mixin to a service impl class. The default service id is the unqualified name of the service mixin. 

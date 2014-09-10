@@ -1,7 +1,6 @@
 using concurrent
 
 ** Meta info that defines a service
-// TODO: rename to ServiceMeta? ServiceWrapper 
 internal const class ServiceDef {
 	const Bool			inServiceCache
 
@@ -253,7 +252,6 @@ internal const class ServiceDef {
 	}
 }
 
-// TODO: rename to ServiceDef
 internal class SrvDef {
 	Str				id
 	Type?			type
