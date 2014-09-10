@@ -1,6 +1,6 @@
 
 ** 
-** Returned from 'ServiceBinder.bind()'; lets you specify additional service options. Use to override defaults.
+** Returned from 'Servicedefs.add()'; lets you specify additional service options. Use to override defaults.
 ** 
 @NoDoc @Deprecated { msg="Use ServiceDefinitionOptions instead." }
 mixin ServiceBindingOptions {

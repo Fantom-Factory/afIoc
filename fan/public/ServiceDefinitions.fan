@@ -4,34 +4,33 @@
 ** Service builder methods are the default means to define services. 
 ** But if your service can be 'autobuilt' (and most can!) then the 'defineServices()' method is a quick and easy alternative. 
 ** 
-** For standard services that can be 'autobuilt', the 'defineServices()' method lets you quickly define them without using builder methods. 
-** Services defined with 'defineServices()' must be able to be built     
-** Use in your 'AppModule.defineServices(ServiceDefinitions defs) {...}' method  
-** If your service implementation is fronted by a mixin, then pass them both in: 
+** If your service is a class named 'MyServiceClass' then it may be defined as follows:
 ** 
 ** pre>
 ** class AppModule {
-**     static Void bind(ServiceBinder binder) {
-**         binder.bind(MyService#, MyServiceImpl#)
+**     static Void defineServices(ServiceDefinitions defs) {
+**         defs.add(MyServiceClass#)
 **     } 
 ** }
+** <pre
+** 
+** If your service is a mixin with a default implementation class then it may be defined as follows: 
+** 
+** pre>
+** static Void defineServices(ServiceDefinitions defs) {
+**     defs.add(MyService#, MyServiceImpl#)
+** } 
 ** <pre
 **
-** If your service is just an impl class then you can use the shorter form:
+** If the implementation class has the same name as the mixin but with an 'Impl' suffix (as does the example above) then it may be defined with the shorthand notation of:
 ** 
 ** pre>
-** class AppModule {
-**     static Void bind(ServiceBinder binder) {
-**         binder.bind(MyServiceImpl#)
-**     } 
-** }
+** static Void defineServices(ServiceDefinitions defs) {
+**     defs.add(MyService#)
+** } 
 ** <pre
 ** 
-** You can also use the shorter form, passing in the mixin, if your Impl class has the same name as your mixin + "Impl".
-** 
-** The default service id is the unqualified name of the service mixin (or impl if no mixin was provided).
-** 
-** This is an adaptation of ideas from [Guice]`http://code.google.com/p/google-guice/`.
+** Note that the default service id for all services is the *qualified* name of the first parameter.
 ** 
 ** @since 2.0.0
 class ServiceDefinitions {
@@ -141,7 +140,7 @@ class ServiceDefinitionOptions {
 		return this
 	}
 	
-	This withProxy(ServiceProxy proxy) {
+	This withProxy(ServiceProxy proxy := ServiceProxy.always) {
 		serviceDef.proxy = proxy
 		return this
 	}
@@ -170,7 +169,7 @@ class ServiceOverrideOptions {
 		return this
 	}
 	
-	This withProxy(ServiceProxy proxy) {
+	This withProxy(ServiceProxy proxy := ServiceProxy.always) {
 		serviceDef.proxy = proxy
 		return this
 	}

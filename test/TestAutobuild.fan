@@ -137,10 +137,10 @@ internal class T_MyModule75 {
 //		.optional
 //	}
 
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService02#).withId("s2")
-		binder.bind(T_MyService49#)
-		binder.bind(T_MyService80#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService02#).withId("s2")
+		defs.add(T_MyService49#)
+		defs.add(T_MyService80#)
 	}
 }
 

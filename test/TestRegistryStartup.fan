@@ -11,8 +11,8 @@ internal class TestRegistryStartup : IocTest {
 
 internal class T_MyModule39 {
 	
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService02#).withId("s2")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService02#).withId("s2")
 	}
 
 	@Contribute

@@ -1,11 +1,11 @@
 
-** Use in your 'AppModule.bind(ServiceBinder binder) {...}' method. It's how you tell IoC about your services. If 
+** Use in your 'AppModule.defineServices(ServiceDefinitions defs) {...}' method. It's how you tell IoC about your services. If 
 ** your service implementation is fronted by a mixin, then pass them both in: 
 ** 
 ** pre>
 ** class AppModule {
-**     static Void bind(ServiceBinder binder) {
-**         binder.bind(MyService#, MyServiceImpl#)
+**     static Void defineServices(ServiceDefinitions defs) {
+**         defs.add(MyService#, MyServiceImpl#)
 **     } 
 ** }
 ** <pre
@@ -14,8 +14,8 @@
 ** 
 ** pre>
 ** class AppModule {
-**     static Void bind(ServiceBinder binder) {
-**         binder.bind(MyServiceImpl#)
+**     static Void defineServices(ServiceDefinitions defs) {
+**         defs.add(MyServiceImpl#)
 **     } 
 ** }
 ** <pre

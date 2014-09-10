@@ -38,9 +38,9 @@ internal class TestRegistryMethods : IocTest {
 }
 
 internal class T_MyModule01 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService01#)
-		binder.bind(T_MyService02#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService01#)
+		defs.add(T_MyService02#)
 	}
 }
 

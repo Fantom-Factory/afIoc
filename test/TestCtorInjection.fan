@@ -75,24 +75,24 @@ internal class TestCtorInjection : IocTest {
 }
 
 internal class T_MyModule104 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService04#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService04#)
 	}	
 }
 internal class T_MyModule105 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService05#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService05#)
 	}	
 }
 
 internal class T_MyModule06 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService01#)
-		binder.bind(T_MyService02#)
-		binder.bind(T_MyService06#)
-		binder.bind(T_MyService07#)
-		binder.bind(T_MyService08#)
-		binder.bind(T_MyService09#)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService01#)
+		defs.add(T_MyService02#)
+		defs.add(T_MyService06#)
+		defs.add(T_MyService07#)
+		defs.add(T_MyService08#)
+		defs.add(T_MyService09#)
 	}
 }
 
@@ -141,12 +141,12 @@ internal class T_MyService09 {
 }
 
 internal class T_MyModule42 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService24#).withId("s24")
-		binder.bind(T_MyService25#).withId("s25")
-		binder.bind(T_MyService30#).withId("s30")
-		binder.bind(T_MyService38#).withId("s38")
-		binder.bind(T_MyService53#).withId("s53")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService24#).withId("s24")
+		defs.add(T_MyService25#).withId("s25")
+		defs.add(T_MyService30#).withId("s30")
+		defs.add(T_MyService38#).withId("s38")
+		defs.add(T_MyService53#).withId("s53")
 	}
 }
 

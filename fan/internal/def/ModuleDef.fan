@@ -238,9 +238,10 @@ internal class ModuleDef {
 
     private Void addServiceDef(SrvDef serviceDef) {
 		tracker.log("Adding service definition for service '$serviceDef.id'")
-		
-		if (serviceDefs.any { it.id == serviceDef.id })
-			throw IocErr(IocMessages.serviceAlreadyDefined(serviceDef.id, serviceDef, serviceDefs.find { it.id == serviceDef.id }))
+
+		// don't err straight away, give the user time to change the ID! 
+//		if (serviceDefs.any { it.id == serviceDef.id })
+//			throw IocErr(IocMessages.serviceAlreadyDefined(serviceDef.id, serviceDef, serviceDefs.find { it.id == serviceDef.id }))
 		
 		serviceDefs.add(serviceDef)
     }	
@@ -248,8 +249,9 @@ internal class ModuleDef {
     private Void addOverrideDef(SrvDef overrideDef) {
 		tracker.log("Adding service override for service '$overrideDef.id'")
 		
-		if (overrideDefs.any { it.id == overrideDef.id })
-			throw IocErr(IocMessages.onlyOneOverrideAllowed(overrideDef.id, overrideDef, overrideDefs.find { it.id == overrideDef.id }))
+		// don't err straight away, give the user time to change the ID! 
+//		if (overrideDefs.any { it.id == overrideDef.id })
+//			throw IocErr(IocMessages.onlyOneOverrideAllowed(overrideDef.id, overrideDef, overrideDefs.find { it.id == overrideDef.id }))
 
 		overrideDefs.add(overrideDef)
     }	

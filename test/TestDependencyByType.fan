@@ -28,8 +28,8 @@ internal const mixin T_MyService91_Options  : T_MyService91_Meta	{ override Str 
 internal const class T_MyService91_MetaImpl : T_MyService91_Options	{ override Str judge(){"anderson"} }
 
 internal class T_MyModule99 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService91_Options#, T_MyService91_MetaImpl#).withoutProxy
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService91_Options#, T_MyService91_MetaImpl#)
 	}
 }
 

@@ -1,21 +1,23 @@
 
-v1.7.2 Maybe...?
+v2.0.0 Maybe...?
 ----------------
 
 
 
 Meh... can't be arsed
 --------------------- 
+Make Service Advice orderable
+ - just have MethodAdvisor.addAdvice return a Constraints impl
+
+InjectionUtils 
+ - tidy up the handling of default parameters
+
 Service disambiguation via facets 
  - is just another dep pro: map of services keyed by type & facet
 
 Make Js compatible...?
  - Phew! It's a biggie!
 
-Maybe add a means to delete / reset a service lifecycle?
- - people can create their own service lifecycle.
- - WHY!???
- - could fudge it with just a depProvider and autobuild!
 
 
 Just Plain Bad Ideas:
@@ -23,6 +25,11 @@ Just Plain Bad Ideas:
 Allow other @Inject facets
  - so BedSheet can define its own, for fewer pod import statements
  - but if afIoc and afBedSheet are imported at same time ~ conflict!
+
+Maybe add a means to delete / reset a service lifecycle?
+ - people can create their own service lifecycle.
+ - WHY!???
+ - could fudge it with just a depProvider and autobuild!
 
 @Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
  - just a convenience for serviceById

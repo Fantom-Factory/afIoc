@@ -82,17 +82,17 @@ internal class BugFixes : IocTest {
 }
 
 internal class T_MyModule83 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService50#).withId("t50").withScope(ServiceScope.perThread).withProxy
-		binder.bind(T_MyService50#).withId("t50-thread").withScope(ServiceScope.perThread).withProxy
-		binder.bind(T_MyService50#).withId("t50-app").withScope(ServiceScope.perApplication)
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService50#).withId("t50").withScope(ServiceScope.perThread).withProxy
+		defs.add(T_MyService50#).withId("t50-thread").withScope(ServiceScope.perThread).withProxy
+		defs.add(T_MyService50#).withId("t50-app").withScope(ServiceScope.perApplication)
 	}
 }
 
 internal class T_MyModule85 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService70#).withId("t70")
-		binder.bind(T_MyService85#).withId("t85").withScope(ServiceScope.perThread).withProxy
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService70#).withId("t70")
+		defs.add(T_MyService85#).withId("t85").withScope(ServiceScope.perThread).withProxy
 	}
 	
 	@Contribute
@@ -116,18 +116,18 @@ const class T_MyService85Impl : T_MyService85 {
 }
 
 internal class T_MyModule98 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService89#)		
-		binder.bind(T_MyService89#).withId("PillowRoutes")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService89#)		
+		defs.add(T_MyService89#).withId("PillowRoutes")
 	}
 }
 internal const class T_MyService89 { }
 
 internal class T_MyModule100 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService91#).withScope(ServiceScope.perThread)
-		binder.bind(T_MyService92#).withId("s92")
-		binder.bind(T_MyService93#).withId("s93")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService91#).withScope(ServiceScope.perThread)
+		defs.add(T_MyService92#).withId("s92")
+		defs.add(T_MyService93#).withId("s93")
 	}	
 }
 internal class T_MyService91 { }	// threaded

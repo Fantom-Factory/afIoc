@@ -96,8 +96,8 @@ internal class TestServiceOverride : IocTest {
 }
 
 internal class T_MyModule07 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService44#).withId("s44")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService44#).withId("s44")
 	}
 }
 internal class T_MyModule07_b {
@@ -119,9 +119,9 @@ internal class T_MyModule50 {
 }
 
 internal class T_MyModule59 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService44#).withId("s44")
-		binder.bind(T_MyService45#).withId("s45")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService44#).withId("s44")
+		defs.add(T_MyService45#).withId("s45")
 	}
 	@Override { serviceId="s44"; overrideId="taken" }
 	static T_MyService44 overrideS44() {
@@ -180,9 +180,9 @@ internal const class T_MyService90Impl2 : T_MyService90 { override Str judge() {
 }
 
 internal class T_MyModule60 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService44#).withId("s44")
-		binder.bind(T_MyService12#).withId("s12")
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService44#).withId("s44")
+		defs.add(T_MyService12#).withId("s12")
 	}
 
 	@Override { serviceId="s44" }

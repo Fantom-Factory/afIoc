@@ -110,19 +110,19 @@ internal class TestProxyBuilder : IocTest {
 }
 
 internal class T_MyModule76 {
-	static Void bind(ServiceBinder binder) {
-		binder.bind(T_MyService50#).withId("s50")
-		binder.bind(T_MyService51#).withId("s51")
-		binder.bind(T_MyService52#).withId("s52")
-		binder.bind(T_MyService54#).withId("s54")
-		binder.bind(T_MyService55#).withId("s55")
-		binder.bind(T_MyService56#).withId("s56")
-		binder.bind(T_MyService57#).withId("s57")
-		binder.bind(T_MyService58#).withId("s58")
-		binder.bind(T_MyService83#).withId("s83")
-		binder.bind(T_MyService64#).withId("s64").withoutProxy
-		binder.bind(T_MyService99#).withId("s99")
-		binder.bind(T_MyService67#).withId("s67").withProxy
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService50#).withId("s50")
+		defs.add(T_MyService51#).withId("s51")
+		defs.add(T_MyService52#).withId("s52")
+		defs.add(T_MyService54#).withId("s54")
+		defs.add(T_MyService55#).withId("s55")
+		defs.add(T_MyService56#).withId("s56")
+		defs.add(T_MyService57#).withId("s57")
+		defs.add(T_MyService58#).withId("s58")
+		defs.add(T_MyService83#).withId("s83")
+		defs.add(T_MyService64#).withId("s64")
+		defs.add(T_MyService99#).withId("s99")
+		defs.add(T_MyService67#).withId("s67").withProxy
 	}
 }
 
