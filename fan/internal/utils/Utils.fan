@@ -32,6 +32,7 @@ internal class Utils {
 	** on all internal afIoc Errs.
 	** @see http://fantom.org/sidewalk/topic/2147
 	static Obj? stackTraceFilter(|->Obj?| func) {
+			return func.call
 		try {
 			return func.call
 

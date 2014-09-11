@@ -8,7 +8,7 @@ internal const class CtorItBlockProvider : DependencyProvider {
 	}
 
 	override Bool canProvide(InjectionCtx ctx) {
-		ctx.injectionKind == InjectionKind.ctorInjection && ctx.dependencyType == |This|# && ctx.methodParamIndex == ctx.method.params.size - 1
+		ctx.injectionKind == InjectionKind.ctorInjection && ctx.dependencyType.fits(|This|#) && ctx.methodParamIndex == ctx.method.params.size - 1
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {
