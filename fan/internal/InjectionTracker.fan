@@ -37,7 +37,7 @@ internal class InjectionTracker {
 
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
 
-	static Obj? withServiceDef(ServiceDef def, |->Obj?| operation) {
+	static Obj? recursionCheck(ServiceDef def, Str msg, |->Obj?| operation) {
 		ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
 			// check for recursion
 			ThreadStack.elements(serviceDefId).eachRange(0..<-1) |ServiceDef ele| { 
@@ -45,7 +45,7 @@ internal class InjectionTracker {
 					throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).map |ServiceDef sd->Str| { sd.serviceId }))
 			}
 
-			return operation.call()
+			return track(msg, operation)
 		}
 	}
 
