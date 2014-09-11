@@ -107,10 +107,9 @@ internal const class ServiceDef {
 	// @PostInject methods!
 
 	Obj getRealService() {
-		InjectionTracker.withServiceDef(this) |->Obj| {
-			getOrMakeRealService
-		}
+		getOrMakeRealService
 	}
+
 	Obj getService() {
 		lastDef 	:= InjectionTracker.peekServiceDef
 		proxiable	:= serviceProxy != ServiceProxy.never && serviceType.isMixin
@@ -123,11 +122,9 @@ internal const class ServiceDef {
 		if (needsProxy && !proxiable)
 			throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, serviceId))
 
-		return InjectionTracker.withServiceDef(this) |->Obj| {
-			(needsAdvice || needsProxy || serviceProxy == ServiceProxy.always) 
-				? getOrMakeProxyService
-				: getOrMakeRealService
-		}
+		return (needsAdvice || needsProxy || serviceProxy == ServiceProxy.always) 
+			? getOrMakeProxyService
+			: getOrMakeRealService
 	}
 	
 	Obj? gatherConfiguration() {
@@ -177,7 +174,7 @@ internal const class ServiceDef {
 				return exisiting
 		}
 
-		return InjectionTracker.track("Creating REAL Service '$serviceId'") |->Obj| {
+		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {
 	        service := serviceBuilder.call()
 			incImplCount
 			
@@ -186,7 +183,7 @@ internal const class ServiceDef {
 				serviceLifecycle   = ServiceLifecycle.created
 			}
 			return service
-	    }	
+		}
 	}
 
 	private Obj getOrMakeProxyService() {
