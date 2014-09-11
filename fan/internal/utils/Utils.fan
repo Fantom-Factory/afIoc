@@ -41,8 +41,8 @@ internal class Utils {
 		} catch (IocErr iocErr) {
 			unwrapped := unwrap(iocErr)
 
-			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 
-			if (unwrapped is NotFoundErr)
+			// don't loose the list of available services
+			if (unwrapped is ServiceNotFoundErr)
 				throw ServiceNotFoundErr(iocErr.msg, ((NotFoundErr) unwrapped).availableValues, null, iocErr.operationTrace)
 
 			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 

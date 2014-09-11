@@ -1,5 +1,4 @@
 using concurrent::AtomicRef
-using afConcurrent::LocalMap
 using afConcurrent::LocalRef
 
 **
@@ -10,7 +9,7 @@ using afConcurrent::LocalRef
 const class IocService : Service {
 	private static const Log 	log 		:= Utils.getLog(IocService#)
 	private const LocalRef	 	builderRef	:= LocalRef("builder") |->Obj?| { RegistryBuilder() }
-	private const LocalRef	 	startErrRef	:= LocalRef("startErr")
+	private const AtomicRef	 	startErrRef	:= AtomicRef()
 	private const AtomicRef		registryRef	:= AtomicRef()
 
 	private RegistryBuilder builder {
@@ -23,7 +22,7 @@ const class IocService : Service {
 		get { 
 			// rethrow any errs that occurred on startup 
 			// see http://fantom.org/sidewalk/topic/2133
-			if (startErrRef.isMapped)
+			if (startErrRef.val != null)
 				throw startErrRef.val
 			return registryRef.val 
 		}
@@ -35,7 +34,6 @@ const class IocService : Service {
 	// ---- Public Builder Methods ---------------------------------------------------------------- 
 
 	new make(Type[] moduleTypes := [,]) {
-		startErrRef.cleanUp
 		builderRef.cleanUp
 		builder.addModules(moduleTypes)
 	}
@@ -68,17 +66,17 @@ const class IocService : Service {
 	** See `Registry.startup`.
 	override Void onStart() {
 		checkServiceNotStarted
-		log.info("Starting IOC...");
+		log.info("Starting IoC...");
 	
 		try {
-			startErrRef.cleanUp
+			startErrRef.val = null
 			
 			registry = builder.build
 			
 			registry.startup
 			
 		} catch (Err e) {
-			log.err("Err starting IOC", e)
+			log.err("Err starting IoC", e)
 			
 			// keep the err so we can rethrow later (as 'Service.start()' swallows it)
 			// see http://fantom.org/sidewalk/topic/2133
@@ -100,7 +98,7 @@ const class IocService : Service {
 			log.info("Registry already stopped.")
 			return
 		}
-		log.info("Stopping IOC...");
+		log.info("Stopping IoC...");
 		registry.shutdown
 		registry = null
 	}

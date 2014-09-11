@@ -1,7 +1,12 @@
 using concurrent::AtomicRef
 
-** (Service) - A `DependencyProvider` that injects 'Log' instances. 
-** By default, a pod name is used to create the log instance. 
+** (Service) - A `DependencyProvider` that injects 'Log' instances.
+** 
+** For field injection 'LogProvider' reuses the '@Inject' facet:
+** 
+**   @Inject Log log
+**  
+** By default, the class's pod name is used to create the log instance. 
 ** 
 **   |Type type->Log| { return type.pod.log }
 ** 
@@ -16,6 +21,11 @@ using concurrent::AtomicRef
 **     }
 ** } 
 ** <pre
+** 
+** You may also provide a log name via the '@Inject.id' parameter:
+** 
+**   @Inject { id="my.log.name" } Log log
+**  
 const mixin LogProvider : DependencyProvider {
 	
 	** Creates a 'LogProvider' with the given log creation func.
@@ -43,6 +53,8 @@ internal const class LogProviderImpl : LogProvider {
 
 	override Obj? provide(InjectionCtx ctx) {
 		ctx.log("Injecting Log for ${ctx.injectingIntoType.qname}")
-		return logCreatorFunc.call(ctx.injectingIntoType)
+		inject	:= (Inject?) ctx.fieldFacets.findType(Inject#).first
+		logId	:= inject?.id
+		return logId != null ? Log.get(logId) : logCreatorFunc.call(ctx.injectingIntoType)
 	}
 }

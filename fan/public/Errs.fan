@@ -51,7 +51,8 @@ const class IocShutdownErr : IocErr {
 @NoDoc
 const class ServiceNotFoundErr : IocErr, NotFoundErr {
 	override const Str[] availableValues
-	
+	override const Str	 valueMsg := "Available Service IDs:"
+
 	new make(Str msg, Obj?[] availableValues, Err? cause := null, Str? opTrace := null) : super(msg, cause, opTrace) {
 		this.availableValues = availableValues.map { it?.toStr }.sort
 	}

@@ -19,7 +19,7 @@ internal const class ServiceProvider : DependencyProvider {
 
 		if (ctx.injectionKind.isFieldInjection) {
 			inject		:= (Inject) Slot#.method("facet").callOn(ctx.field, [Inject#])	// Stoopid F4
-			serviceId	= inject.serviceId
+			serviceId	= inject.id
 			optional	= inject.optional
 		}
 

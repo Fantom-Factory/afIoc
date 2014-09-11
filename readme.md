@@ -4,22 +4,22 @@
 
 Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Then you'll love *afIoc*!
 
-- **Injection - the way *you* want it!**
+- **Injection - any way *you* want it!**
   - field injection
   - ctor injection
   - it-block ctor injection - `new make(|This|in) { in(this) }`
 
-- **Distributed service configuration between pods and modules**
-  - configure *any* service *from* any pod / module
+- **Distributed service configuration**
+  - configure *any* service *from* any **pod** / **module**
   - configure via simple Lists and Maps
 
 - **Override everything**
   - override services and configuration, even override your overrides!
   - replace real services with test services
-  - set sensible application defaults and let your users override them
+  - set sensible defaults and let users override them
 
 - **True lazy loading**
-  - services are proxied to ensure nothing is created until you actually use it
+  - services can be proxied to ensure nothing is created until you actually use it
   - make circular service dependencies a thing of the past!
 
 - **Advise services with aspects**
@@ -32,10 +32,10 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [34 tests, 206 methods, 418 verifies]`
+  - Extensively tested: - `All tests passed! [35 tests, 214 methods, 453 verifies]`
 
 
-  > **ALIEN-AID:** For tips and tutorials on IoC, be sure to check out [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc)!
+  > **ALIEN-AID:** See [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc) for IoC tutorials.
 
 
 
@@ -47,7 +47,7 @@ Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/
 
 To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan`:
 
-    depends = ["sys 1.0", ..., "afIoc 1.7+"]
+    depends = ["sys 1.0", ..., "afIoc 2.0+"]
 
 ## Documentation 
 
@@ -55,34 +55,38 @@ Full API & fandocs are available on the [Status302 repository](http://repo.statu
 
 ## Quick Start 
 
-1. Create services as Plain Old Fantom Objects
+1. Create services as plain Fantom objects
 2. Use the `@Inject` facet to mark fields as dependencies
-3. Define and configure your services in a `Module` class
+3. Define and configure services in an `AppModule` class
 4. Build and start the registry
 5. Go, go, go!
 
+### Example 
+
+1). Create a text file called `Example.fan`
+
 ```
 class Main {
-  static Void main(Str[] args) {
+  Void main() {
     registry := IocService([MyModule#]).start.registry
 
-    test1 := (MyService1) registry.serviceById("myservice1")        // return a singleton
-    test2 := (MyService1) registry.dependencyByType(MyService1#)    // same instance as test1
+    test1 := (MyService1) registry.serviceById("myservice1")        // returns a singleton
+    test2 := (MyService1) registry.dependencyByType(MyService1#)    // returns the same singleton
     test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
     test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
 
-    test1.service2.kick // --> Ass!
-    test2.service2.kick // --> Ass!
-    test3.service2.kick // --> Ass!
-    test4.service2.kick // --> Ass!
+    test1.service2.kick  // --> Ass!
+    test2.service2.kick  // --> Ass!
+    test3.service2.kick  // --> Ass!
+    test4.service2.kick  // --> Ass!
 
     Service.find(IocService#).uninstall
   }
 }
 
-class MyModule {                    // every application needs a module class
-  static Void bind(ServiceBinder binder) {
-    binder.bind(MyService1#)    // define your singletons here
+class MyModule {              // every application needs a module class
+  static Void defineServices(ServiceBinder binder) {
+    binder.bind(MyService1#)  // define your singletons here
     binder.bind(MyService2#)
   }
 }
@@ -97,11 +101,52 @@ class MyService2 {
 }
 ```
 
+2). Run `Example.fan` as a Fantom script from the command line:
+
+```
+C:\> fan Example.fan
+
+[info] [afIoc] Adding module definition for Example_0::MyModule
+[info] [afIoc] Starting IoC...
+
+14 Services:
+
+     Example_0::MyService1: Defined
+     Example_0::MyService2: Defined
+         afIoc::ActorPools: Builtin
+afIoc::AspectInvokerSource: Builtin
+afIoc::DependencyProviders: Builtin
+     afIoc::InjectionUtils: Builtin
+        afIoc::LogProvider: Builtin
+           afIoc::Registry: Builtin
+       afIoc::RegistryMeta: Builtin
+   afIoc::RegistryShutdown: Builtin
+    afIoc::RegistryStartup: Builtin
+afIoc::ServiceProxyBuilder: Builtin
+ afIoc::ThreadLocalManager: Builtin
+afPlastic::PlasticCompiler: Builtin
+
+14.29% of services are unrealised (2/14)
+
+   ___    __                 _____        _
+  / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
+ / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
+/_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
+                            Alien-Factory IoC v2.0.0 /___/
+
+IoC Registry built in 205ms and started up in 11ms
+
+[warn] [afIoc] Autobuilding type 'Example_0::MyService1' which is *also* defined as service 'Example_0::MyService1 - unusual!
+[info] [afIoc] Stopping IoC...
+[info] [afIoc] IoC shutdown in 19ms
+[info] [afIoc] "Goodbye!" from afIoc!
+```
+
 ## Terminology 
 
 IoC distinguishes between **Services** and **Dependencies**.
 
-A **service** is just a Plain Old Fantom Object where there is only one (singleton) instance for the whole application (or one per thread for non-const classes). Each service is identified by a unique ID (usually the qualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
+A **service** is a Fantom class where there is only one (singleton) instance for the whole application (or one per thread for non-const classes). Each service is identified by a unique ID (usually the qualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
 
 A **dependency** is any class or object that another service depends on. A dependency may or may not be a service.  For example, a class may depend on a field `Int maxNoOfThreads` but that `Int` isn't a service, it's just a number. Non service dependencies are managed by user defined [dependency providers](http://repo.status302.com/doc/afIoc/DependencyProvider.html).
 
@@ -111,7 +156,7 @@ A **module** is a class where services and contributions are defined.
 
 ## Starting the IoC 
 
-Use [IocService](http://repo.status302.com/doc/afIoc/IocService.html) to start `IoC` as a Fantom service:
+You can use [IocService](http://repo.status302.com/doc/afIoc/IocService.html) to start `IoC` as a Fantom service:
 
     IocService([MyModule#]).start
     ...
@@ -138,23 +183,23 @@ Modules can also be loaded from index properties in a similar manner.
 
 ## Defining Services 
 
-Services are defined in Module classes, where each meaningful method is static and annotated with a facet.
+Services are defined in Module classes, where each meaningful method is static and usually annotated with a facet.
 
-Except the `bind()` method which, does not have a facet but, is declared with a standard signature. The bind method is also the common means to define services. For example:
+The `defineServices()` method does not have a facet, but is declared with a standard signature. The `defineServices()` method is the common means to define services. For example:
 
 ```
 class AppModule {
 
-  static Void bind(ServiceBinder binder) {
+  static Void defineServices(ServiceDefinitions defs) {
 
-    // has service ID of 'myPod::MyService'
-    binder.bind(MyService#, MyServiceImpl#)
+    // defines a service with an ID of 'myPod::MyService'
+    defs.add(MyService#, MyServiceImpl#)
 
-    // has service ID of 'myPod::myServiceImpl'
-    binder.bind(MyServiceImpl#)
+    // defines a service with an ID of 'myPod::myServiceImpl'
+    defs.add(MyServiceImpl#)
 
-    // has service ID of 'elephant'
-    binder.bind(MyServiceImpl#).withId("elephant")
+    // defines a service with an ID of 'elephant'
+    defs.add(MyServiceImpl#).withId("elephant")
   }
 }
 ```
@@ -209,7 +254,7 @@ After object construction and field injection, any extra setup may be performed 
 
 ## Service Scope 
 
-Services are either created once [perApplication](http://repo.status302.com/doc/afIoc/ServiceScope#perApplication.html) (singletons) or once [perThread](http://repo.status302.com/doc/afIoc/ServiceScope#perThread.html). Application scoped services *must* be defined as `const`. If you need mutable state in your const service, try using the [ConcurrentState](http://repo.status302.com/doc/afIoc/ConcurrentState.html) class.
+Services are either created once [perApplication](http://repo.status302.com/doc/afIoc/ServiceScope#perApplication.html) (singletons) or once [perThread](http://repo.status302.com/doc/afIoc/ServiceScope#perThread.html). Application scoped services *must* be defined as `const`.
 
 (Using proxies) you can even inject a `perThread` scoped service into a `perApplication` scoped service! Think about it... you can inject your [http request](http://fantom.org/doc/web/WebReq.html) into any static service you desire!
 
@@ -245,7 +290,7 @@ Think of `Configuration` as an ordered Map that collects data from *all* the IoC
 
 Define your service with a mixin and take advantage of true lazy loading!
 
-By fronting your service with a mixin, IoC will generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
+By fronting your service with a mixin, IoC can generate and compile a service proxy on the fly. The *real* service is only instantiated when you call a method on the proxy.
 
 This means circular service dependencies are virtually eliminated!
 

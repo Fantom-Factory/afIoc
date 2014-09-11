@@ -1,7 +1,5 @@
 
 ** Use in 'AppModule' classes to denote a service override method.
-** 
-** See [Defining Services]`index#definingServices`
 facet class Override {
 	
 	** The service Id (or override Id) to be overridden. 

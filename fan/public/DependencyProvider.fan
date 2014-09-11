@@ -12,6 +12,16 @@
 ** 
 ** Note that due to 'DependencyProviders' being instantiated before the Registry is fully loaded, 'DependencyProviders' should *not* be proxied.
 ** 
+** Because service injection is a 'catch-all' provider and throws an Err if a matching service is not found, should you 
+** create a 'DependencyProvider' that re-uses the '@Inject' facet, you should add it *before* the service provider:
+** 
+** pre>
+** @Contribute { serviceType=DependencyProviders# }
+** internal static Void contributeDependencyProviders(Configuration config) {
+**     myProvider := config.autobuild(MyProvider#)
+**     config.set("acme.myProvider", myProvider).before("afIoc.serviceProvider")
+** }
+** <pre 
 ** @since 1.1
 const mixin DependencyProvider {
 
