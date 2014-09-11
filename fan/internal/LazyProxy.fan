@@ -51,6 +51,6 @@ internal const class LazyProxyImpl : LazyProxy {
 	}
 
 	override Str toStr() {
-		"LazyProxyForService ${serviceDef.serviceId}"
+		"LazyProxy for ${serviceDef.serviceId}"
 	}
 }

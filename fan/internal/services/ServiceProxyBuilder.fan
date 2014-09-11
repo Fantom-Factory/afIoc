@@ -53,7 +53,7 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			if (!serviceType.isPublic)
 				throw IocErr(IocMessages.proxiedMixinsMustBePublic(serviceType))
 		
-			model := IocClassModel(serviceType.name + "Impl", serviceType.isConst)
+			model := IocClassModel(serviceType.name + "Proxy", serviceType.isConst)
 			
 			model.extendMixin(serviceType)
 			model.addField(LazyProxy#, "afLazyService")

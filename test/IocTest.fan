@@ -15,7 +15,7 @@ abstract internal class IocTest : Test {
 //			try Pod.of(this).type(typeName)
 //			catch echo("$typeName is free!")
 //		}
-////		78, 79
+////		79
 	}
 	
 	Void verifyIocErrMsg(Str errMsg, |Obj| func) {

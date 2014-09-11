@@ -317,7 +317,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceType 		= type
 			it.serviceScope		= ServiceScope.perThread	// because it's used straight away
 			it.serviceProxy		= ServiceProxy.never
-			it.description 		= "$type.qname : Autobuild"
+			it.description 		= "$type.qname (Autobuild)"
 			it.serviceBuilder	= |->Obj| {
 				func := (|->Obj|) builder.val
 				builder.cleanUp
@@ -342,7 +342,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (existing != null)
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 
-		sid		:= "${mixinT.name}(CreateProxy)"
+		sid		:= "${implT.name}(Proxy)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implT)
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
@@ -353,7 +353,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceType 		= mixinT
 			it.serviceScope		= scope
 			it.serviceProxy		= ServiceProxy.always
-			it.description 		= "$mixinT.qname : Create Proxy"
+			it.description 		= "$implT.qname (Proxy)"
 			it.serviceBuilder	= |->Obj| {
 				func := (|->Obj|) builder.val
 				builder.cleanUp

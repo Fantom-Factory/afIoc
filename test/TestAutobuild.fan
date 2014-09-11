@@ -89,6 +89,12 @@ internal class TestAutobuild : IocTest {
 		s98 := (T_MyService98) RegistryBuilder().build.autobuild(T_MyService98#, [itBlock])
 		verifyEq(s98.emma, "boobies")
 	}
+
+	Void testCanUseNullableItBlock() {
+		// BugFix from Morphia
+		s78 := (T_MyService78) RegistryBuilder().build.autobuild(T_MyService78#, null, [T_MyService78#emma:"boobies"])
+		verifyEq(s78.emma, "boobies")
+	}
 	
 	Void testWarningWhenAutobuildingService() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
@@ -104,39 +110,6 @@ internal class TestAutobuild : IocTest {
 }
 
 internal class T_MyModule75 {
-	
-//	It's all about creating and modifying ServiceDefs
-// add overrideRef to @Build
-	
-//	@Build
-//  static IocEnv overrideIocEnv() { ... }
-	
-//	static Void defineServices(ServiceDefs defs) ...?
-	
-//	static Void serviceDefinitions(ServiceDefs defs) {
-//		defs.add(T_MyService02#).withProxy
-//		//defs.add(T_MyService02#).withProxy.withImpl
-//
-//		defs.overrideService(T_MyService02#).withImpl(MyService02Impl#)
-//		
-//		defs.overrideService(T_MyService03#).withBuildFunc |->Obj| { MyService03Impl()  }
-//		
-//		
-//		Norm:
-//		.withId(Str id)
-//		.withImplId		-> fully qualified
-//		.withScope(ServiceScope scope)
-//		.withProxy(ServiceProxy.asNeeded / never / always)
-//		
-//		Override
-//		override(Str serviceId)
-//		.withScope(ServiceScope scope)
-//		.withProxy(ServiceProxy.asNeeded / never / always)
-//		.withImpl(Type)
-//		.withOverrideId(Str)
-//		.optional
-//	}
-
 	static Void defineServices(ServiceDefinitions defs) {
 		defs.add(T_MyService02#).withId("s2")
 		defs.add(T_MyService49#)
@@ -203,6 +176,13 @@ internal class T_MyService98 {
 	new make(|This| boobies, |This| ioc) {
 		boobies(this)
 		ioc(this)
+	}
+}
+
+internal class T_MyService78 {
+	Str	emma
+	new make(|This|? f := null) {
+		f?.call(this)
 	}
 }
 
