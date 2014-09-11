@@ -58,8 +58,8 @@ internal const class ActorPoolsImpl : ActorPools {
 	}
 }
 
-@NoDoc
-const class ActorPoolNotFoundErr : IocErr, NotFoundErr {
+@NoDoc // extend ArgErr because this is an Service Impl Err / nothing to do with the internals of IoC
+const class ActorPoolNotFoundErr : ArgErr, NotFoundErr {
 	override const Str?[] availableValues
 	
 	new make(Str msg, Obj?[] availableValues, Err? cause := null) : super(msg, cause) {

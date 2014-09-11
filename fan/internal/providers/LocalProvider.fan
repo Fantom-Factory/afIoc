@@ -25,6 +25,11 @@ internal const class LocalProvider : DependencyProvider {
 		if (ctx.methodParam != null)
 			name += "." + ctx.methodParam.name
 		
+		// let @Inject.id override the default name
+		inject	:= (Inject?) ctx.fieldFacets.findType(Inject#).first
+		if (inject?.id != null)
+			name = inject.id 
+		
 		if (type == LocalRef#)
 			return localManager.createRef(name)
 		if (type == LocalList#)

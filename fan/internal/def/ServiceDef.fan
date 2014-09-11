@@ -183,7 +183,7 @@ internal const class ServiceDef {
 			
 			if (inServiceCache) {
 				serviceImplRef.val = service
-				lifecycleRef.val   = ServiceLifecycle.created
+				serviceLifecycle   = ServiceLifecycle.created
 			}
 			return service
 	    }	
@@ -196,13 +196,13 @@ internal const class ServiceDef {
 				return exisiting
 		}
 		
-		return InjectionTracker.track("Creating VIRTUAL Service '$serviceId'") |->Obj| {
+		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
 			proxy			:= proxyBuilder.createProxyForService(this)
 			
 			if (inServiceCache) {
 				serviceProxyRef.val	= proxy
-				lifecycleRef.val 	= ServiceLifecycle.proxied
+				serviceLifecycle 	= ServiceLifecycle.proxied
 			}
 			return proxy
 		}
@@ -210,7 +210,7 @@ internal const class ServiceDef {
 	
 	ServiceLifecycle serviceLifecycle {
 		get { lifecycleRef.val }
-		set { lifecycleRef.val = it }
+		set { if (lifecycleRef.val < ServiceLifecycle.builtin) lifecycleRef.val = it }
 	}
 	
 	Void incImplCount() {

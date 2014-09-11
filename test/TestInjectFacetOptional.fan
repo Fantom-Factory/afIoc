@@ -27,7 +27,7 @@ internal class T_MyService65 {
 	@Inject { optional=true }
 	T_MyService02? opt2_1
 
-	@Inject { optional=true; serviceId="wotever" }
+	@Inject { optional=true; id="wotever" }
 	T_MyService02? opt2_2
 }
 
@@ -35,7 +35,7 @@ internal const class T_MyService66 {
 	@Inject { optional=true }
 	const T_MyService24? opt2_1
 
-	@Inject { optional=true; serviceId="wotever" }
+	@Inject { optional=true; id="wotever" }
 	const T_MyService24? opt2_2
 	
 	new make(|This|in) { in(this) }

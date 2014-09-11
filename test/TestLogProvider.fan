@@ -43,12 +43,23 @@ internal class TestLogProvider : IocTest {
 		verifyEq(rec.msg, "Yo!")
 		verifyEq(rec.logName, "afIoc")
 	}
+
+	Void testLogId() {
+		reg := RegistryBuilder().addModule(T_MyModule97#).build.startup
+		s86 := (T_MyService86_3) reg.serviceById("s86-3")
+		s86.log.warn("Yo!")
+
+		rec := logs.list.last as LogRec
+		verifyEq(rec.msg, "Yo!")
+		verifyEq(rec.logName, "slimer.dude")
+	}
 }
 
 internal class T_MyModule97 {
 	static Void defineServices(ServiceDefinitions defs) {
 		defs.add(T_MyService86#).withId("s86")
 		defs.add(T_MyService86_2#).withId("s86-2")
+		defs.add(T_MyService86_3#).withId("s86-3")
 	}
 }
 
@@ -67,5 +78,9 @@ internal const class T_MyService86_2 {
 	@Inject 
 	const Log log
 	new make(|This|in) { in(this) }
+}
+internal class T_MyService86_3 {
+	@Inject { id="slimer.dude" }
+	Log? log
 }
 
