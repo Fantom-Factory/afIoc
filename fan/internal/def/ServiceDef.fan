@@ -1,12 +1,12 @@
 using concurrent
 
 ** Meta info that defines a service
-internal const class ServiceDef {
-	const Bool			inServiceCache
+internal const class ServiceDef : LazyProxy {
+	const Bool			isIocService
 
 	const Str 			serviceId
 	const Type			serviceType
-	const ServiceScope	serviceScope	
+	const ServiceScope?	serviceScope	// autobuilds are null
 	const ServiceProxy	serviceProxy
 	const |->Obj|		serviceBuilder
 	const Str			description
@@ -20,21 +20,36 @@ internal const class ServiceDef {
 	private const ObjectRef?	lifecycleRef
 	private const ObjectRef?	serviceImplRef
 	private const ObjectRef?	serviceProxyRef
+	private const AtomicRef?	adviceMap		:= AtomicRef()
 	
 	private const Str 	unqualifiedServiceId
 	private const Type 	serviceTypeNonNull
 	
-	new makeBareBones(ObjLocator? objLocator, |This|in) {
+	
+	
+	// ---- Ctor Methods --------------------------------------------------------------------------
+	
+	new makeForAutobuild(ObjLocator? objLocator, |This|in) {
 		this.objLocator = objLocator
 		in(this)
-		this.inServiceCache			= false
+		this.isIocService			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
 	}
+
+	new makeForProxybuild(ObjLocator objLocator, ThreadLocalManager localManager, |This|in) {
+		this.objLocator = objLocator
+		in(this)
+		this.isIocService			= false
+		this.unqualifiedServiceId	= unqualify(serviceId)
+		this.serviceTypeNonNull		= serviceType.toNonNullable
+		this.serviceImplRef			= ObjectRef(localManager.createRef("{$serviceId}.impl"), serviceScope)
+	}
 		
+	** Used by services
 	new make(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
 		this.objLocator		= objLocator
-		this.inServiceCache	= true
+		this.isIocService	= true
 		this.serviceId		= srvDef.id
 		this.serviceType	= srvDef.type
 		this.serviceScope	= srvDef.scope
@@ -85,15 +100,9 @@ internal const class ServiceDef {
 			throw IocErr(IocMessages.contributionMethodsNotWanted(serviceId, contribMethods))
 	}
 	
-	Bool matchesId(Str serviceId) {
-		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
-	}
+	
 
-	Bool matchesType(Type serviceType) {
-		serviceTypeNonNull.fits(serviceType.toNonNullable)
-	}	
-
-	// ---- Service Build Methods ----
+	// ---- Service Build Methods -----------------------------------------------------------------
 
 	// Because of recursion (service1 creates service2), you can not create the service 
 	// inside an actor - 'cos the actor will block when it eventually messages itself. So...
@@ -106,15 +115,19 @@ internal const class ServiceDef {
 	// This is ONLY dangerous because gawd knows what those services do in their ctor and 
 	// @PostInject methods!
 
-	Obj getRealService() {
-		getOrMakeRealService
+	override Obj getRealService(Bool saveInCache) {
+		getOrMakeRealService(saveInCache)
+	}
+
+	Obj getProxyService(Bool saveInCache) {
+		getOrMakeProxyService(saveInCache)
 	}
 
 	Obj getService() {
 		lastDef 	:= InjectionTracker.peekServiceDef
 		proxiable	:= serviceProxy != ServiceProxy.never && serviceType.isMixin
 		needsAdvice	:= adviceMethods != null && !adviceMethods.isEmpty
-		needsProxy	:= lastDef?.serviceScope == ServiceScope.perApplication && serviceScope == ServiceScope.perThread && InjectionTracker.injectionCtx.injectionKind.isFieldInjection
+		needsProxy	:= isIocService && lastDef?.serviceScope == ServiceScope.perApplication && serviceScope == ServiceScope.perThread && InjectionTracker.injectionCtx.injectionKind.isFieldInjection
 
 		if (needsAdvice && !proxiable)
 			throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, serviceId))
@@ -123,10 +136,54 @@ internal const class ServiceDef {
 			throw IocErr(IocMessages.threadScopeInAppScope(lastDef.serviceId, serviceId))
 
 		return (needsAdvice || needsProxy || serviceProxy == ServiceProxy.always) 
-			? getOrMakeProxyService
-			: getOrMakeRealService
+			? getOrMakeProxyService(true)
+			: getOrMakeRealService(true)
 	}
 	
+	private Obj getOrMakeRealService(Bool saveInCache) {
+		if (saveInCache) {
+			exisiting := serviceImplRef.val
+			if (exisiting != null)
+				return exisiting
+		}
+
+		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {
+	        service := serviceBuilder.call()
+			incImplCount
+			
+			// don't bother saving on-the-fly autobuilt / proxy instances
+			if (saveInCache) {
+				serviceImplRef.val = service
+				serviceLifecycle   = ServiceLifecycle.created
+			}
+			return service
+		}
+	}
+
+	private Obj getOrMakeProxyService(Bool saveInCache) {
+		if (saveInCache) {
+			exisiting := serviceProxyRef.val
+			if (exisiting != null)
+				return exisiting
+		}
+		
+		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
+			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
+			proxy			:= proxyBuilder.createProxyForService(this)
+			
+			// don't bother saving on-the-fly autobuilt / proxy instances, they just set up circular dependencies anyway 
+			if (saveInCache) {
+				serviceProxyRef.val	= proxy
+				serviceLifecycle 	= ServiceLifecycle.proxied
+			}
+			return proxy
+		}
+	}
+	
+	
+	
+	// ---- Service Configuration Methods ---------------------------------------------------------
+
 	Obj? gatherConfiguration() {
 		if (configType == null)
 			return null
@@ -155,6 +212,61 @@ internal const class ServiceDef {
 		throw WtfErr("${configType.name} is neither a List nor a Map")
 	}
 	
+	
+	
+	// ---- Service Advice Methods ----------------------------------------------------------------
+	
+	override Obj? callMethod(Method method, Obj?[] args) {
+		// lazily load advice
+		if (adviceMap.val == null)
+			adviceMap.val = gatherAdvice.toImmutable
+		
+		adviceMap 	:= ([Method:|MethodInvocation invocation -> Obj?|[]]) adviceMap.val
+		advice 		:= adviceMap[method]
+
+		if (advice == null)
+			return method.callOn(getRealService(true), args)
+		
+		return MethodInvocation {
+			it.service	= getRealService(true)
+			it.aspects	= advice
+			it.method	= method
+			it.args		= args
+			it.index	= 0
+		}.invoke
+	}
+	
+	Method:|MethodInvocation invocation -> Obj?|[] gatherAdvice() {
+		adviceMap := [Method:|MethodInvocation invocation -> Obj?|[]][:]
+		
+		if (adviceMethods == null || adviceMethods.isEmpty)
+			return adviceMap
+		
+		// create a MethodAdvisor for each (non-Obj) method to be advised
+		methodAdvisors := (MethodAdvisor[]) serviceType.methods.rw
+			.exclude { Obj#.methods.contains(it) }
+			.map |m->MethodAdvisor| { MethodAdvisor(m) }
+				
+		// call the module @Advise methods, filling up the MethodAdvisors
+		InjectionTracker.track("Gathering advice for service '$serviceId'") |->| {
+			adviceMethods.each { 
+				objLocator.injectionUtils.callMethod(it, null, [methodAdvisors])
+			}
+		}
+
+		// convert the method advisors into a handy, easy access, map 
+		methodAdvisors.each {
+			if (!it.aspects.isEmpty)
+				adviceMap[it.method] = it.aspects
+		}
+		
+		return adviceMap
+	}
+	
+
+	
+	// ---- Misc Methods ---------------------------------------------------------------------------
+	
 	ServiceDefinition toServiceDefinition() {
 		ServiceDefinition {
 			it.serviceId	= this.serviceId
@@ -166,48 +278,18 @@ internal const class ServiceDef {
 			it.toStr		= this.description
 		}
 	}
-
-	private Obj getOrMakeRealService() {
-		if (inServiceCache) {
-			exisiting := serviceImplRef.val
-			if (exisiting != null)
-				return exisiting
-		}
-
-		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {
-	        service := serviceBuilder.call()
-			incImplCount
-			
-			if (inServiceCache) {
-				serviceImplRef.val = service
-				serviceLifecycle   = ServiceLifecycle.created
-			}
-			return service
-		}
+	
+	Bool matchesId(Str serviceId) {
+		this.serviceId.equalsIgnoreCase(serviceId) || this.unqualifiedServiceId.equalsIgnoreCase(unqualify(serviceId))
 	}
 
-	private Obj getOrMakeProxyService() {
-		if (inServiceCache) {
-			exisiting := serviceProxyRef.val
-			if (exisiting != null)
-				return exisiting
-		}
-		
-		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
-			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
-			proxy			:= proxyBuilder.createProxyForService(this)
-			
-			if (inServiceCache) {
-				serviceProxyRef.val	= proxy
-				serviceLifecycle 	= ServiceLifecycle.proxied
-			}
-			return proxy
-		}
+	Bool matchesType(Type serviceType) {
+		serviceTypeNonNull.fits(serviceType.toNonNullable)
 	}
 	
 	ServiceLifecycle serviceLifecycle {
 		get { lifecycleRef.val }
-		set { if (lifecycleRef.val < ServiceLifecycle.builtin) lifecycleRef.val = it }
+		set { if (lifecycleRef != null && lifecycleRef.val < ServiceLifecycle.builtin) lifecycleRef.val = it }
 	}
 	
 	Void incImplCount() {
@@ -219,19 +301,7 @@ internal const class ServiceDef {
 		serviceProxyRef.val	= null
 	}
 	
-	override Str toStr() {
-		description
-	}
-	
-	override Int hash() {
-		serviceId.hash
-	}
-
-	override Bool equals(Obj? obj) {
-		serviceId == (obj as ServiceDef)?.serviceId
-	}
-	
-	private static Str unqualify(Str id) {
+	private Str unqualify(Str id) {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}
 	
@@ -247,7 +317,21 @@ internal const class ServiceDef {
 			return paramType
 		return null
 	}
+	
+	override Int hash() {
+		serviceId.hash
+	}
+
+	override Bool equals(Obj? obj) {
+		serviceId == (obj as ServiceDef)?.serviceId
+	}
+	
+	override Str toStr() {
+		description
+	}
 }
+
+
 
 internal class SrvDef {
 	Str				id

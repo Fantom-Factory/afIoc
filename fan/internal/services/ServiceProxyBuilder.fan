@@ -24,8 +24,6 @@ const mixin ServiceProxyBuilder {
 
 ** @since 1.3.0
 internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
-
-	@Inject private const Registry 			registry
 	@Inject	private const PlasticCompiler	plasticCompiler
 			private const SynchronizedMap 	typeCache
 		
@@ -35,13 +33,12 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 	}
 
 	** We need the serviceDef as only *it* knows how to build the serviceImpl
-	override internal Obj createProxyForService(ServiceDef serviceDef) {
+	override Obj createProxyForService(ServiceDef serviceDef) {
 		InjectionTracker.track("Creating Proxy for service '$serviceDef.serviceId'") |->Obj| {
 			serviceType	:= serviceDef.serviceType			
 			proxyType	:= compileProxyType(serviceType)
-			builder		:= CtorPlanBuilder(proxyType)
-			builder["afLazyService"] = LazyProxyImpl((ObjLocator) registry, serviceDef)
-			return builder.create
+			proxy		:= CtorPlanBuilder(proxyType).set("_af_lazyProxy", serviceDef).create
+			return proxy
 		}
 	}
 	
@@ -56,23 +53,25 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			model := IocClassModel(serviceType.name + "Proxy", serviceType.isConst)
 			
 			model.extendMixin(serviceType)
-			model.addField(LazyProxy#, "afLazyService")
+			model.addField(LazyProxy#, "_af_lazyProxy")
 	
+			// call fields on service directly
 			serviceType.fields.rw
 				.findAll { it.isAbstract || it.isVirtual }
 				.each |field| {
-					getBody	:= "((${serviceType.qname}) afLazyService.service).${field.name}"
-					setBody	:= "((${serviceType.qname}) afLazyService.service).${field.name} = it"
+					getBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService(true)).${field.name}"
+					setBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService(true)).${field.name} = it"
 					model.overrideField(field, getBody, setBody)
 				}
 	
+			// route method calls through advice
 			serviceType.methods.rw
 				.findAll { it.isAbstract || it.isVirtual }
 				.exclude { Obj#.methods.contains(it) }
 				.each |method| {
 					params 	:= method.params.join(", ") |param| { param.name }
 					paramLt	:= params.isEmpty ? "Obj#.emptyList" : "[${params}]" 
-					body 	:= "afLazyService.call(${serviceType.qname}#${method.name}, ${paramLt})"
+					body 	:= "_af_lazyProxy.callMethod(${serviceType.qname}#${method.name}, ${paramLt})"
 					model.overrideMethod(method, body)
 				}
 	

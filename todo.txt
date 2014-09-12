@@ -3,6 +3,9 @@ v2.0.2 Maybe...?
 ----------------
 make ServiceDefinitions.overrideByType more intelligent than type.qname
 
+update aspects to wrap fields
+
+
 
 Meh... can't be arsed
 --------------------- 

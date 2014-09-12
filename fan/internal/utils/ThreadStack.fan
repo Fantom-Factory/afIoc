@@ -3,8 +3,8 @@ using concurrent
 ** I've recently become a fan of threaded stacks - they get me outa a whole lot of trouble!
 internal class ThreadStack {
 
-	private Str		stackId
-	private Obj[]	stack	:= [,]
+	Str		stackId
+	Obj[]	stack	:= [,]
 		
 
 	** static use only
@@ -64,11 +64,11 @@ internal class ThreadStack {
 		getStack(stackId, checked)?.stack
 	}
 
-	private static ThreadStack? getStack(Str stackId, Bool checked) {
+	static ThreadStack? getStack(Str stackId, Bool checked) {
 		Actor.locals.get(stackId) ?: (checked ? throw Err("Could not find ThreadStack in Actor.locals() with id '$stackId'") : null)		
 	}
 
-	private static ThreadStack getOrMakeStack(Str stackId) {
+	static ThreadStack getOrMakeStack(Str stackId) {
 		Actor.locals.getOrAdd(stackId) { ThreadStack(stackId) }
 	}
 }
