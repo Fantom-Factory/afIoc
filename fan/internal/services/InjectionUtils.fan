@@ -1,7 +1,7 @@
 using afBeanUtils
 
 internal const class InjectionUtils {
-
+	private static const Log logger := Utils.getLog(InjectionUtils#)
 	private const ObjLocator objLocator
 	
 	new make(ObjLocator objLocator) {
@@ -88,7 +88,7 @@ internal const class InjectionUtils {
 	}
 
 	Func makeCtorInjectionPlan(InjectionCtx ctx) {
-		track("Creating injection plan for fields of ctx.injectingIntoType.qname") |->Obj| {
+		track("Creating injection plan for fields of ${ctx.injectingIntoType.qname}") |->Obj| {
 			building := ctx.injectingIntoType
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
@@ -176,10 +176,17 @@ internal const class InjectionUtils {
 
 	private static Void inject(Obj target, Field field, Obj? value) {
 		track("Injecting ${value?.typeof?.qname} into field $field.signature") |->| {
-			if (field.get(target) != null) {
-				log("Field has non null value. Aborting injection.")
+			try {
+				if (field.get(target) != null) {
+					log("Field has non null value. Aborting injection.")
+					return
+				}
+			} catch (Err err) {
+				// be lenient on write-only fields
+				logger.warn(IocMessages.injectionUtils_couldNotReadField(field, err.msg))
 				return
 			}
+
 			// BugFix: if injecting null (via DepProvider) then don't throw the Const Err below
 			if (value == null)
 				return	

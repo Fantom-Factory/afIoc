@@ -38,14 +38,22 @@ internal class InjectionTracker {
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
 
 	static Obj? recursionCheck(ServiceDef def, Str msg, |->Obj?| operation) {
-		ThreadStack.pushAndRun(serviceDefId, def) |->Obj?| {
-			// check for recursion
-			ThreadStack.elements(serviceDefId).eachRange(0..<-1) |ServiceDef ele| { 
-				if (ele.serviceId == def.serviceId)
-					throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).map |ServiceDef sd->Str| { sd.serviceId }))
-			}
+		threadStack := ThreadStack.getOrMakeStack(serviceDefId)
 
+		// check for recursion
+		ThreadStack.elements(serviceDefId).each |ServiceDef ele| { 
+			if (ele.serviceId == def.serviceId)
+				throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).dup.add(def).map |ServiceDef sd->Str| { sd.serviceId }))
+		}
+		
+		// hand code push and run to cut down on some call stack
+		threadStack.stack.push(def)
+		try {
 			return track(msg, operation)
+		} finally {
+			threadStack.stack.pop
+			if (threadStack.stack.isEmpty)
+				Actor.locals.remove(serviceDefId)			
 		}
 	}
 

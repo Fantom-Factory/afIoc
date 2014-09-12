@@ -5,10 +5,10 @@
 ** 
 ** @since 1.3.0
 class MethodAdvisor {
-	internal |MethodInvocation invocation -> Obj?|[]? aspects
+	internal |MethodInvocation invocation -> Obj?|[] aspects := [,]
 	
 	** The method to advise
-	const Method	method
+	const Method method
 	
 	internal new make(Method method) {
 		this.method = method
@@ -16,8 +16,6 @@ class MethodAdvisor {
 	
 	** Add an aspect that will be called when the method is invoked
 	Void addAdvice(|MethodInvocation invocation -> Obj?| aspect) {
-		if (aspects == null)
-			aspects = [,]
 		aspects.add(aspect)
 	}
 

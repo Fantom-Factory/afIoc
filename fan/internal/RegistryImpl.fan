@@ -312,10 +312,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
 		builder.val = serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 		
-		serviceDef := ServiceDef(this) {
+		serviceDef := ServiceDef.makeForAutobuild(this) {
 			it.serviceId 		= sid
 			it.serviceType 		= type
-			it.serviceScope		= ServiceScope.perThread	// because it's used straight away
+			it.serviceScope		= null	// efanXtra dies when perThread and Pillow / BedSheet dies when perApplication!
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname (Autobuild)"
 			it.serviceBuilder	= |->Obj| {
@@ -325,7 +325,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		return serviceDef.getService
+		return serviceDef.getRealService(false)
 	}
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
@@ -342,13 +342,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (existing != null)
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 
+		// TODO: pass in proxy scope
 		sid		:= "${implT.name}(Proxy)"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implT)
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
 		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 
-		serviceDef := ServiceDef(this) {
+		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr) {
 			it.serviceId 		= sid
 			it.serviceType 		= mixinT
 			it.serviceScope		= scope
@@ -360,7 +361,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				return func.call 
 			}
 		}
-		return serviceDef.getService
+		return serviceDef.getProxyService(false)
 	}
 	
 	ServiceDef? serviceDefById(Str serviceId) {

@@ -201,6 +201,10 @@ internal const class IocMessages {
 		"Field value ${val.typeof.signature} does not fit field ${field.qname} ${field.type.signature}"
 	}
 	
+	static Str injectionUtils_couldNotReadField(Field field, Str msg) {
+		stripSys("Could not determine field value of '${field.type} ${field.qname}', aborting injection -> $msg")
+	}
+	
 	static Str multipleServicesDefined(Str serviceId, Str[] serviceIds) {
 		"Service ID '${serviceId}' matches multiple services -> " + serviceIds.join(", ")
 	}
@@ -212,7 +216,6 @@ internal const class IocMessages {
 	static Str warnAutobuildingService(Str serviceId, Type serviceType) {
 		"Autobuilding type '${serviceType.qname}' which is *also* defined as service '${serviceId} - unusual!"
 	}
-
 
 
 	// ---- Service Override Messages -------------------------------------------------------------

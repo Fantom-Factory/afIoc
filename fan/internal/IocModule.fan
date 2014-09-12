@@ -10,9 +10,7 @@ internal const class IocModule {
 		defs.add(RegistryShutdown#)
 		
 		defs.add(ActorPools#)
-		defs.add(AspectInvokerSource#)
 		defs.add(DependencyProviders#)
-		defs.add(InjectionUtils#)
 		defs.add(LogProvider#)
 		defs.add(PlasticCompiler#)
 		defs.add(ServiceProxyBuilder#)
