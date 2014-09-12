@@ -57,7 +57,7 @@ internal const class RegistryStartupImpl : RegistryStartup {
 		unreal:= 0
 		stats.each {
 			srvcs	+= it.serviceId.padl(maxId) + ": ${it.lifecycle.name.toDisplayName}\n"
-			if (it.lifecycle == ServiceLifecycle.defined)
+			if (it.lifecycle == ServiceLifecycle.defined || it.lifecycle == ServiceLifecycle.proxied)
 				unreal++
 		}
 		perce := (100d * unreal / stats.size).toLocale("0.00")
