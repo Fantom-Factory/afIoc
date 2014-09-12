@@ -20,9 +20,19 @@ internal class InjectionTracker {
 
 	static Obj? track(Str description, |->Obj?| operation) {
 		if (ThreadStack.peek(trackerId, false) == null) {
-			return withCtx(OpTracker()) |->Obj?| {
+			
+			// hand code pushAndRun to cut down on some call stack
+			threadStack	:= ThreadStack.getOrMakeStack(trackerId)
+			threadStack.stack.push(InjectionTracker(OpTracker()))
+			try {
 				return tracker.track(description, operation)
+				
+			} finally {
+				threadStack.stack.pop
+				if (threadStack.stack.isEmpty)
+					Actor.locals.remove(trackerId)			
 			}
+			
 		} else
 			return tracker.track(description, operation)
 	}
@@ -46,7 +56,7 @@ internal class InjectionTracker {
 				throw IocErr(IocMessages.serviceRecursion(ThreadStack.elements(serviceDefId).dup.add(def).map |ServiceDef sd->Str| { sd.serviceId }))
 		}
 		
-		// hand code push and run to cut down on some call stack
+		// hand code pushAndRun to cut down on some call stack
 		threadStack.stack.push(def)
 		try {
 			return track(msg, operation)
