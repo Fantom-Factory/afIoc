@@ -5,6 +5,8 @@ make ServiceDefinitions.overrideByType more intelligent than type.qname
 
 update aspects to wrap fields
 
+Relocate RegistryStartup.printServiceList() and 
+         RegistryStartup.printBanner() so they can be called externally! 
 
 
 Meh... can't be arsed
