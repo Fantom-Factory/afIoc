@@ -86,10 +86,10 @@ class Main {
   }
 }
 
-class MyModule {              // every application needs a module class
-  static Void defineServices(ServiceBinder binder) {
-    binder.bind(MyService1#)  // define your singletons here
-    binder.bind(MyService2#)
+class MyModule {           // every application needs a module class
+  static Void defineServices(ServiceDefinitions defs) {
+    defs.add(MyService1#)  // define your singletons here
+    defs.add(MyService2#)
   }
 }
 
