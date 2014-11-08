@@ -129,7 +129,7 @@ class ServiceDefinitionOptions {
 	}
 	
 	** Sets the service id to the qualified name of the service implementation class. 
-	This withImplId(Str id) {
+	This withImplId() {
 		implType := (Type) serviceDef.buildData
 		serviceDef.id = implType.qname
 		return this
