@@ -347,6 +347,10 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v2.0.2 [#2.0.2]
+---------------
+ - Chg: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
+
 v2.0.0 [#2.0.0]
 ---------------
  - New: All attributes of a service (scope, proxy, etc...) may be overridden.
