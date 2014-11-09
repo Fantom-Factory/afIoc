@@ -3,6 +3,22 @@ using concurrent::ActorPool
 
 internal class BugFixes : IocTest {
 	
+	Void testImplServiceIdsCanBeInjected() {
+		Registry reg := RegistryBuilder().addModule(T_MyModule107#).build.startup
+		
+		// should have always worked
+		s79 := reg.serviceById(T_MyService79Impl#.qname)
+		verifyEq(s79.typeof, T_MyService79Impl#)
+
+		// should have always worked
+		s79 = reg.dependencyByType(T_MyService79#)
+		verifyEq(s79.typeof, T_MyService79Impl#)
+
+		// the bug / enhancement
+		s79 = reg.dependencyByType(T_MyService79Impl#)
+		verifyEq(s79.typeof, T_MyService79Impl#)
+	}
+	
 	Void testProxiedServicesAreStillThreadScoped() {
 		Registry reg := RegistryBuilder().addModule(T_MyModule83#).build.startup
 		
@@ -140,3 +156,11 @@ internal const class T_MyService92 {
 internal const class T_MyService93 {
 	new make(T_MyService91 s91, |This|in) { } 	
 }
+
+internal class T_MyModule107 {
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService79#).withImplId		
+	}
+}
+internal const mixin T_MyService79 { }
+internal const class T_MyService79Impl : T_MyService79 { }

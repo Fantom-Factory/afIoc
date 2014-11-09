@@ -9,8 +9,9 @@ internal const class CachingTypeLookup {
 	}
 	
 	ServiceDef[] findChildren(Type type) {
-		cache.getOrAdd(type.toNonNullable) |key -> Obj| {
-			serviceDefs.findAll |def| { def.matchesType(key) }
+		typeNonNull := type.toNonNullable
+		return cache.getOrAdd(typeNonNull) |key -> Obj| {
+			serviceDefs.findAll |def| { def.matchesType(typeNonNull) }
 		}
 	}
 }

@@ -71,6 +71,13 @@ const mixin Registry {
 	** 
 	** @since 1.5.0
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null)
+
+	** Builds a new instance of the service, regardless of whether one has already been built or not.
+	** 
+	** Note: This method is probably *not* what you're looking for - try 'serviceById()' instead. 
+	** 
+	** @since 2.0.2
+	abstract Obj? buildService(Str serviceId, Bool checked := true)
 	
 	** Returns a map of all service definitions (keyed by service id) held by this IoC.
 	** Useful for the inquisitive.
