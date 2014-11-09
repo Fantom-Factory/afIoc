@@ -11,59 +11,59 @@ internal class TestProxyBuilder : IocTest {
 	}
 
 	Void testProxyMethod() {
-		s50 := spb.createProxyForService(reg.serviceDefById("s50")) as T_MyService50
+		s50 := spb.createProxyForService(reg.serviceDefById("s50", false)) as T_MyService50
 		verifyEq(s50.dude, "dude")
 		verifyEq(s50.inc(5), 6)
 	}
 	
 	Void testNonVirtualMethodsAreNotOverridden() {
-		s51 := spb.createProxyForService(reg.serviceDefById("s51")) as T_MyService51
+		s51 := spb.createProxyForService(reg.serviceDefById("s51", false)) as T_MyService51
 		verifyEq(s51.dude, "Don't override me!")
 		verifyEq(s51.inc(6), 9)
 	}
 	
 	Void testNonVirtualFieldsAreNotOverridden() {
-		s99 := spb.createProxyForService(reg.serviceDefById("s99"))
+		s99 := spb.createProxyForService(reg.serviceDefById("s99", false))
 		verifyEq(s99->dude, "Don't override me!")
 	}
 	
 	Void testCanBuildMultipleServices() {
 		// don't want any nasty sys::Err: Duplicate pod name: afPlasticProxies
-		spb.createProxyForService(reg.serviceDefById("s50"))
-		spb.createProxyForService(reg.serviceDefById("s50"))
+		spb.createProxyForService(reg.serviceDefById("s50", false))
+		spb.createProxyForService(reg.serviceDefById("s50", false))
 	}
 
 	Void testVirtualButNotOverriddenMethods() {
 		// bizarrely, we *do* override Virtual methods and call it on the impl, but if they're not
 		// overridden then we end up calling the mixin method!
-		s52 := spb.createProxyForService(reg.serviceDefById("s52")) as T_MyService52
+		s52 := spb.createProxyForService(reg.serviceDefById("s52", false)) as T_MyService52
 		verifyEq(s52.dude, "Virtual Reality")
 		verifyEq(s52.inc(7), 6)
 	}
 	
 	Void testProtectedProxyMethod() {
-		s54 := spb.createProxyForService(reg.serviceDefById("s54")) as T_MyService54
+		s54 := spb.createProxyForService(reg.serviceDefById("s54", false)) as T_MyService54
 		verifyEq(s54.dude, "dude")
 	}
 
 	Void testCannotProxyInternalMixin() {
 		verifyIocErrMsg(IocMessages.proxiedMixinsMustBePublic(T_MyService55#)) {
-			spb.createProxyForService(reg.serviceDefById("s55"))
+			spb.createProxyForService(reg.serviceDefById("s55", false))
 		}
 	}
 	
 	Void testNonConstMixin() {
-		spb.createProxyForService(reg.serviceDefById("s56"))
+		spb.createProxyForService(reg.serviceDefById("s56", false))
 	}
 	
 	Void testOnlyMixinsAllowed() {
 		verifyIocErrMsg(IocMessages.onlyMixinsCanBeProxied(T_MyService57#)) {
-			spb.createProxyForService(reg.serviceDefById("s57"))
+			spb.createProxyForService(reg.serviceDefById("s57", false))
 		}
 	}
 	
 	Void testPerThreadProxy() {
-		s58 := spb.createProxyForService(reg.serviceDefById("s58")) as T_MyService58
+		s58 := spb.createProxyForService(reg.serviceDefById("s58", false)) as T_MyService58
 		verifyEq(s58.dude, "Stella!")
 		
 		s58.typeof.field("dude").set(s58, "Pint of Pride")
@@ -88,7 +88,7 @@ internal class TestProxyBuilder : IocTest {
 	}
 	
 	Void testConstFieldsOnMixin() {
-		s83 := spb.createProxyForService(reg.serviceDefById("s83")) as T_MyService83
+		s83 := spb.createProxyForService(reg.serviceDefById("s83", false)) as T_MyService83
 		verifyEq(s83.dude, "dude")
 		verifyEq(s83.inc(5), 6)
 	}

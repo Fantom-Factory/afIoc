@@ -284,7 +284,7 @@ internal const class ServiceDef : LazyProxy {
 	}
 
 	Bool matchesType(Type serviceType) {
-		serviceTypeNonNull.fits(serviceType.toNonNullable)
+		serviceTypeNonNull.fits(serviceType)
 	}
 	
 	ServiceLifecycle serviceLifecycle {
@@ -334,7 +334,12 @@ internal const class ServiceDef : LazyProxy {
 
 
 internal class SrvDef {
-	Str				id
+	Str				id {
+		set {
+			&id = it
+			unqualifiedId 	= unqualify(it)
+		}
+	}
 	Type?			type
 	Str 			moduleId	// needed for err msgs
 
@@ -351,12 +356,11 @@ internal class SrvDef {
 	Method[]?		adviceMeths
 	Method[]?		contribMeths
 
-	private const Str 	unqualifiedId
+	private Str 	unqualifiedId
 	private const Type?	typeNonNull
 
 	new make(|This| in) {
 		in(this) 
-		unqualifiedId 	= unqualify(id)
 		typeNonNull		= type?.toNonNullable
 	}
 	

@@ -272,6 +272,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
+	override Obj? buildService(Str serviceId, Bool checked := true) {
+		return Utils.stackTraceFilter |->Obj?| {
+			shutdownLock.check
+			// FIXME: check if service is proxiable - return proxy if needed
+			return serviceDefById(serviceId, checked)?.getRealService(false)
+		}
+	}
+
 	override Str:ServiceDefinition serviceDefinitions() {
 		defs := Str:ServiceDefinition[:] { ordered = true }
 		serviceDefs.keys.sort.each { defs[it] = serviceDefs[it].toServiceDefinition }
@@ -281,10 +289,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj? trackServiceById(Str serviceId, Bool checked) {
-		serviceDef := serviceDefById(serviceId)
-		if (serviceDef == null)
-			return checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds) : null
-		return serviceDef.getService
+		serviceDefById(serviceId, checked)?.getService
 	}
 
 	Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -364,7 +369,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		return serviceDef.getProxyService(false)
 	}
 	
-	ServiceDef? serviceDefById(Str serviceId) {
+	ServiceDef? serviceDefById(Str serviceId, Bool checked) {
 		// attempt a qualified search first
 		serviceDef := serviceDefs[serviceId]
 		if (serviceDef != null)
@@ -374,11 +379,16 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (serviceDefs.size > 1)
 			throw IocErr(IocMessages.multipleServicesDefined(serviceId, serviceDefs.map { it.serviceId }))
 		
-		return serviceDefs.isEmpty ? null : serviceDefs.first
+		if (serviceDefs.isEmpty && checked)
+			throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds)
+
+		return serviceDefs.first
 	}
 
 	override Bool typeMatchesService(Type serviceType) {
-		!typeLookup.findChildren(serviceType).isEmpty
+		!typeLookup.findChildren(serviceType).isEmpty ||
+		// because we don't always know what the impl type is (think build methods) all we can do is check the id
+		serviceDefById(serviceType.qname, false) != null
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {
@@ -390,7 +400,15 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return lastChance ?: throw IocErr(IocMessages.manyServiceMatches(serviceType, serviceDefs.map { it.serviceId }))
 		}
 
-		return serviceDefs.isEmpty ? null : serviceDefs[0]
+		if (!serviceDefs.isEmpty) 
+			return serviceDefs.first
+		
+		// because we don't always know what the impl type is (think build methods) all we can do is check the id
+		serviceDef := serviceDefById(serviceType.qname, false)
+		if (serviceDef != null)
+			return serviceDef
+		
+		return null
 	}
 	
 	override Str[] serviceIds() {
