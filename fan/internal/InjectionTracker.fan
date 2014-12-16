@@ -1,21 +1,15 @@
 using concurrent::Actor
 
-internal class InjectionTracker {
+// static method only
+internal mixin InjectionTracker {
 
 	private static const Str 	trackerId		:= "afIoc.injectionTracker"
 	private static const Str 	serviceDefId	:= "afIoc.serviceDef"
 	private static const Str 	confProviderId	:= "afIoc.configProvider"
 	private static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
 	
-	private OpTracker 			opTracker
-
-	** nullable for testing only
-	new make(OpTracker tracker := OpTracker()) {
-		this.opTracker	= tracker
-	}
-
 	static Obj? withCtx(OpTracker tracker, |->Obj?| f) {
-		ThreadStack.pushAndRun(trackerId, InjectionTracker(tracker), f)
+		ThreadStack.pushAndRun(trackerId, tracker, f)
 	}
 
 	static Obj? track(Str description, |->Obj?| operation) {
@@ -23,7 +17,7 @@ internal class InjectionTracker {
 			
 			// hand code pushAndRun to cut down on some call stack
 			threadStack	:= ThreadStack.getOrMakeStack(trackerId)
-			threadStack.stack.push(InjectionTracker(OpTracker()))
+			threadStack.stack.push(OpTracker())
 			try {
 				return tracker.track(description, operation)
 				
@@ -42,7 +36,7 @@ internal class InjectionTracker {
 	}
 
 	private static OpTracker tracker() {
-		((InjectionTracker) ThreadStack.peek(trackerId, true)).opTracker
+		ThreadStack.peek(trackerId, true)
 	}
 
 	// ---- Recursion Detection ----------------------------------------------------------------------------------------
@@ -135,5 +129,22 @@ internal class InjectionTracker {
 	// sigh - this whole injectionCtx stack is only needed for ONE call in ServiceDef.getService()!
 	static InjectionCtx injectionCtx() {
 		ThreadStack.peek(injectionCtxId)
-	}	
+	}
+
+	static Unsafe copy() {
+		Unsafe(ThreadStack?[
+			Actor.locals[trackerId],
+			Actor.locals[serviceDefId],
+			Actor.locals[confProviderId],
+			Actor.locals[injectionCtxId]
+		])
+	}
+
+	static Void paste(Unsafe unsafe) {
+		list := (ThreadStack?[]) unsafe.val
+		if (list[0] != null) Actor.locals[trackerId] 		= list[0]
+		if (list[1] != null) Actor.locals[serviceDefId]		= list[1]
+		if (list[2] != null) Actor.locals[confProviderId]	= list[2]
+		if (list[3] != null) Actor.locals[injectionCtxId]	= list[3]
+	}
 }

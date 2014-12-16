@@ -1,3 +1,4 @@
+using afConcurrent
 using concurrent
 
 ** Meta info that defines a service
@@ -24,30 +25,33 @@ internal const class ServiceDef : LazyProxy {
 	
 	private const Str 	unqualifiedServiceId
 	private const Type 	serviceTypeNonNull
+
+	private const Synchronized	buildThread
 	
 	
 	
 	// ---- Ctor Methods --------------------------------------------------------------------------
 	
 	new makeForAutobuild(ObjLocator? objLocator, |This|in) {
-		this.objLocator = objLocator
 		in(this)
+		this.objLocator 			= objLocator	// nullable for testing
 		this.isIocService			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
+		this.buildThread			= Synchronized(ActorPool())	// FIXME
 	}
 
 	new makeForProxybuild(ObjLocator objLocator, ThreadLocalManager localManager, |This|in) {
-		this.objLocator = objLocator
 		in(this)
+		this.objLocator 			= objLocator
 		this.isIocService			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
 		this.serviceImplRef			= ObjectRef(localManager.createRef("{$serviceId}.impl"), serviceScope)
+		this.buildThread			= Synchronized(ActorPool())	// FIXME
 	}
 		
-	** Used by services
-	new make(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
+	new makeForService(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
 		this.objLocator		= objLocator
 		this.isIocService	= true
 		this.serviceId		= srvDef.id
@@ -57,11 +61,14 @@ internal const class ServiceDef : LazyProxy {
 		this.adviceMethods	= srvDef.adviceMeths
 		this.contribMethods	= srvDef.contribMeths
 		this.description	= "wotever"
+		this.buildThread			= Synchronized(ActorPool())	// FIXME
 		
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
 			ctor 				:= InjectionUtils.findAutobuildConstructor(serviceImplType)
-			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, ctor, null, null).toImmutable
+			ctorArgs			:= srvDef.ctorArgs
+			fieldVals			:= srvDef.fieldVals
+			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, ctor, ctorArgs, fieldVals).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
 			this.configType		= findConfigType(ctor)
 		} 	
@@ -147,8 +154,12 @@ internal const class ServiceDef : LazyProxy {
 				return exisiting
 		}
 
-		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {
-	        service := serviceBuilder.call()
+		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {			
+			trackers	:= InjectionTracker.copy
+	        service 	:= (serviceScope == ServiceScope.perApplication) ? buildThread.synchronized |->Obj?| { 
+				InjectionTracker.paste(trackers); 
+				return serviceBuilder.call() 
+	        } : serviceBuilder.call() 
 			incImplCount
 			
 			// don't bother saving on-the-fly autobuilt / proxy instances
@@ -169,7 +180,12 @@ internal const class ServiceDef : LazyProxy {
 		
 		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
-			proxy			:= proxyBuilder.createProxyForService(this)
+			serviceDef		:= this
+			trackers		:= InjectionTracker.copy
+	        proxy			:= (serviceScope == ServiceScope.perApplication) ? buildThread.synchronized |->Obj?| {
+				InjectionTracker.paste(trackers);
+				return proxyBuilder.createProxyForService(serviceDef)
+	        } : proxyBuilder.createProxyForService(serviceDef) 
 			
 			// don't bother saving on-the-fly autobuilt / proxy instances, they just set up circular dependencies anyway 
 			if (saveInCache) {
@@ -349,6 +365,8 @@ internal class SrvDef {
 	Bool			overridden
 	Str?			overrideRef
 	Bool			overrideOptional
+	Obj?[]?			ctorArgs
+	[Field:Obj?]?	fieldVals
 
 	Bool			builtIn
 	Str?			desc
@@ -413,6 +431,12 @@ internal class SrvDef {
 
 		if (serviceOverride.proxy != null)
 			this.proxy = serviceOverride.proxy
+
+		if (serviceOverride.ctorArgs != null)
+			this.ctorArgs = serviceOverride.ctorArgs
+
+		if (serviceOverride.fieldVals != null)
+			this.fieldVals = serviceOverride.fieldVals
 
 		this.overridden = true
 	}

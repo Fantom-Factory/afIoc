@@ -146,6 +146,18 @@ class ServiceDefinitionOptions {
 		serviceDef.proxy = proxy
 		return this
 	}
+
+	** Passed as args to the service ctor. The args must be immutable.
+	This withCtorArgs(Obj?[] ctorArgs) {
+		serviceDef.ctorArgs = ctorArgs
+		return this
+	}
+
+	** Field values to set in the service impl. An alternative to using ctor args. All vals must be immutable.
+	This withFieldVals([Field:Obj?]? fieldVals) {
+		serviceDef.fieldVals = fieldVals
+		return this
+	}
 }
 
 ** Returned from 'AppModule' `ServiceDefinitions` methods to allow further override options to be set.
@@ -189,6 +201,18 @@ class ServiceOverrideOptions {
 	** Useful for overriding 3rd party libraries that may or may not exist.
 	This optional(Bool optional := true) {
 		serviceDef.overrideOptional = optional
+		return this
+	}
+
+	** Passed as args to the service ctor. The args must be immutable.
+	This withCtorArgs(Obj?[] ctorArgs) {
+		serviceDef.ctorArgs = ctorArgs
+		return this
+	}
+
+	** Field values to set in the service impl. An alternative to using ctor args. All vals must be immutable.
+	This withFieldVals([Field:Obj?]? fieldVals) {
+		serviceDef.fieldVals = fieldVals
 		return this
 	}
 }

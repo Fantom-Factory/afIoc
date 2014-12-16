@@ -61,7 +61,7 @@ class InjectionCtx {
 	
 	@NoDoc
 	override Str toStr() {
-		"Injecting into ${injectingIntoType.qname}"
+		"Injecting into ${injectingIntoType?.qname}"
 	}
 }
 

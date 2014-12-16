@@ -349,6 +349,7 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.2 [#2.0.2]
 ---------------
+ - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
  - Chg: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
 
 v2.0.0 [#2.0.0]
