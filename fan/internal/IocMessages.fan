@@ -1,6 +1,22 @@
 
 internal const class IocMessages {
 
+	// ---- RegistryBuilder Messages --------------------------------------------------------------
+	
+	static Str regBuilder_moduleRecursion(Type[] modNames) {
+		"Module recursion! A module references itself in some way: " + modNames.join(" -> ") { it.qname }
+	}
+	
+	static Str regBuilder_moduleAlreadyAdded(Type module) {
+		"Module $module.qname has already been added - ignoring it this time round."
+	}
+
+	static Str regBuilder_podNameNotStr(Obj podName) {
+		"podName should be a Str - not ${podName.typeof.signature} - ${podName}"
+	}
+
+	
+	
 	// ---- Err Messages --------------------------------------------------------------------------
 	
 	static Str invalidRegistryValue(Str key, Type wrongType, Type rightType) {
@@ -13,14 +29,6 @@ internal const class IocMessages {
 
 	static Str serviceStarted() {
 		"IoC Service has already started."		
-	}
-
-	static Str moduleRecursion(Type[] modNames) {
-		"Module recursion! A module references itself in some way: " + modNames.join(" -> ") { it.qname }
-	}
-	
-	static Str moduleAlreadyAdded(Type module) {
-		"Module $module.qname has already been added - ignoring it this time round."
 	}
 	
 	static Str moduleMethodWithNoFacet(Method method, Type facetType) {
