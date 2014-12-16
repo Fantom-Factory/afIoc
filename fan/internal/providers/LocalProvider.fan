@@ -32,10 +32,36 @@ internal const class LocalProvider : DependencyProvider {
 		
 		if (type == LocalRef#)
 			return localManager.createRef(name)
-		if (type == LocalList#)
-			return localManager.createList(name)
-		if (type == LocalMap#)
-			return localManager.createMap(name)
+
+		if (type == LocalList#) {
+			listType := inject?.type
+			if (listType == null)
+				return localManager.createList(name)
+
+			if (listType.params["L"] == null)
+				throw IocErr(IocMessages.localProvider_typeNotList(ctx.field, listType))
+			return LocalList(localManager.createName(name)) {
+				it.listType = listType.params["V"]
+			} 
+		}
+
+		if (type == LocalMap#) {
+			mapType := inject?.type
+			if (mapType == null)
+				return localManager.createMap(name)
+
+			if (mapType.params["M"] == null)
+				throw IocErr(IocMessages.localProvider_typeNotMap(ctx.field, mapType))
+
+			return LocalMap(localManager.createName(name)) {
+				it.keyType = mapType.params["K"]
+				it.valType = mapType.params["V"]
+				if (it.keyType == Str#)
+					it.caseInsensitive = true
+				else
+					it.ordered = true
+			} 
+		}
 
 		throw WtfErr("What's a {$type.qname}???")
 	}

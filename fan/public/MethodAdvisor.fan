@@ -23,6 +23,10 @@ class MethodAdvisor {
 	// afIoc!) we'll not order the advice for now
 //	abstract Void addOrderedAdvice(Str id, Str[] orderingConstraints, |Obj target, Obj[] args| aspect)
 //	abstract Void overrideOrderedAdvice(Str idToOverride, Str id, Str[] orderingConstraints, |Obj target, Obj[] args| aspect)
+	
+	override Str toStr() {
+		"Advice for ${method.qname}"
+	}
 }
 
 ** Returned from 'AppModule' `MethodAdvisor` methods to wrap calls to advised methods.

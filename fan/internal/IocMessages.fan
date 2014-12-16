@@ -298,6 +298,18 @@ internal const class IocMessages {
 	
 	
 	
+	// ---- Local Provider Messages ---------------------------------------------------------------
+	
+	static Str localProvider_typeNotList(Field field, Type type) {
+		"@Inject { type=${type.signature}# } on field ${field.qname} should be a list type, e.g. @Inject { type=Str[]# }"
+	}
+
+	static Str localProvider_typeNotMap(Field field, Type type) {
+		"@Inject { type=${type.signature}# } on field ${field.qname} should be a map type, e.g. @Inject { type=[Int:Str]# }"
+	}
+
+
+	
 	// ---- Helper Methods ------------------------------------------------------------------------
 	
 	private static Str stripSys(Str str) {
