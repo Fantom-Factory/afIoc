@@ -52,8 +52,15 @@ class RegistryBuilder {
 	** 
 	** If 'addDependencies' is 'true' then the pod's dependencies are also inspected for IoC 
 	** modules. 
-	This addModulesFromPod(Pod pod, Bool addDependencies := true) {
-		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
+	** 
+	** Note: 'podName' should be a 'Str'. (It takes a 'Pod' instance for backwards compatibility only.)  
+	This addModulesFromPod(Obj podName, Bool addDependencies := true) {
+		if (podName isnot Str && podName isnot Pod)
+			throw ArgErr(IocMessages.regBuilder_podNameNotStr(podName))
+		if (podName is Pod)
+			logger.warn("@Deprecated - RegistryBuilder.addModulesFromPod(podName) should take a Str not a Pod instance")
+		pod := (Pod) ((podName is Pod) ? podName : Pod.find(podName))
+		return (RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
 				lock.check
 				if (!suppressLogging)
@@ -143,7 +150,7 @@ class RegistryBuilder {
 			if (moduleDefs.find { it.moduleType == moduleType } != null) {
 				// Debug because sometimes you can't help adding the same module twice (via dependencies)
 				// afBedSheet is a prime example
-				logger.debug(IocMessages.moduleAlreadyAdded(moduleType))
+				logger.debug(IocMessages.regBuilder_moduleAlreadyAdded(moduleType))
 				return
 			}
 
@@ -213,7 +220,7 @@ internal class BuildCtx {
 
 	Obj? withModule(Type module, |->Obj?| operation) {
 		if (moduleStack.contains(module))
-			throw IocErr(IocMessages.moduleRecursion(moduleStack.dup.add(module)))
+			throw IocErr(IocMessages.regBuilder_moduleRecursion(moduleStack.dup.add(module)))
 
 		moduleStack.push(module)
 		try {
