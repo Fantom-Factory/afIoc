@@ -32,7 +32,7 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [35 tests, 217 methods, 459 verifies]'
+  - Extensively tested: - 'All tests passed! [36 tests, 219 methods, 476 verifies]'
 
 > **ALIEN-AID:** See [Fantom-Factory]`http://www.fantomfactory.org/tags/afIoc` for IoC tutorials.
 
@@ -350,6 +350,7 @@ Release Notes [#releaseNotes]
 v2.0.2 [#2.0.2]
 ---------------
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
+ - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
  - Chg: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
 
 v2.0.0 [#2.0.0]

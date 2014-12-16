@@ -2,12 +2,19 @@ using concurrent
 using afConcurrent
 
 ** (Service) -
-** Use to create 'LocalRef' instances whose contents can be *cleaned* up. Erm, I mean deleted! 
+** Use to create 'LocalRef / LocalList / LocalMap' instances whose contents can be *cleaned* up. 
+** Erm, I mean deleted! 
 **  
 ** This is particularly important in the context of web applications where resources need to be 
 ** *cleaned* up at the end of a web request / thread. 
 ** 
-** 'LocalRef' instances may also be injected directed into your classes:
+** Then when 'cleanUpThread()' is called, all thread local data created by this manager will be
+** deleted from 'Actor.locals' 
+**
+** LocalXXX Injection
+** ******************
+** IoC defines a 'DependencyProvider' that injects 'LocalXXX' instances directly into your class.
+** Where possible, the field name is used as the *local* name. 
 ** 
 ** pre>
 ** const class Example {
@@ -17,8 +24,22 @@ using afConcurrent
 ** }
 ** <pre
 ** 
-** Then when 'cleanUpThread()' is called, all thread local data created by this manager will be
-** deleted from 'Actor.locals' 
+** '@Inject.type' may be used to declare the underlying parameters of the 'LocalList / LocalMap':
+** 
+** pre>
+** const class Example {
+**   @Inject { type=Str[]# }
+**   const LocalList localList
+** 
+**   @Inject { type=[Str:Slot?]# }
+**   const LocalMap localMap
+** 
+**   new make(|This|in) { in(this) }
+** }
+** <pre
+** 
+** If '@Inject.type' is used with a 'LocalMap', then if the key is a 'Str' the map will be 
+** case-insensitive, otherwise it will be ordered.  
 ** 
 ** @since 1.6.0
 const mixin ThreadLocalManager {
@@ -32,6 +53,10 @@ const mixin ThreadLocalManager {
 	** Creates a `LocalMap` with the given name.
 	abstract LocalMap createMap(Str name)
 
+	** Creates a qualified name unique to this 'ThreadLocalManager' that when used to create a 
+	** Local Refs, List or Map, ensures it is cleanup up with all the others.  
+	abstract Str createName(Str name)
+
 	** Returns all (fully qualified) keys in the current thread associated / used with this manager. 
 	abstract Str[] keys() 
 	
@@ -44,7 +69,6 @@ const mixin ThreadLocalManager {
 
 
 internal const class ThreadLocalManagerImpl : ThreadLocalManager {
-	
 	static	
 	private const AtomicInt	counter	:= AtomicInt(0)
 	private const LocalList	cleanUpHandlers
@@ -57,17 +81,21 @@ internal const class ThreadLocalManagerImpl : ThreadLocalManager {
 	}
 
 	override LocalRef createRef(Str name, |->Obj?|? defFunc := null) {
-		LocalRef("${prefix}.\${id}.${name}", defFunc)
+		LocalRef(createName(name), defFunc)
 	}
 
 	override LocalList createList(Str name) {
-		LocalList("${prefix}.\${id}.${name}")
+		LocalList(createName(name))
 	}
 
 	override LocalMap createMap(Str name) {
-		LocalMap("${prefix}.\${id}.${name}")
+		LocalMap(createName(name))
 	}
 
+	override Str createName(Str name) {
+		"${prefix}.\${id}.${name}"
+	}
+	
 	override Str[] keys() {
 		Actor.locals.keys
 			.findAll { it.startsWith(prefix) }
