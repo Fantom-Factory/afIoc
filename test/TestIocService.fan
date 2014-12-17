@@ -29,7 +29,7 @@ internal class TestIocService : IocTest {
 				ioc.addModules([,])
 			}
 			verifyIocErrMsg(IocMessages.serviceStarted) {
-				ioc.addModulesFromPod(this.typeof.pod)
+				ioc.addModulesFromPod("afIoc")
 			}
 			verifyIocErrMsg(IocMessages.serviceStarted) {
 				ioc.addModulesFromIndexProps
