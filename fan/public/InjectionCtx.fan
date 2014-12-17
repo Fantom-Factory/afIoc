@@ -10,6 +10,7 @@ class InjectionCtx {
 
 	** The object that will receive the injection. Only available for field and (non-static) method injection.  
 		  Obj?			injectingInto
+
 	** The 'Type' that will receive the injection. Not available during 'dependencyByType'.
 	const Type?			injectingIntoType
 
@@ -30,14 +31,16 @@ class InjectionCtx {
 		  @NoDoc
 		  [Field:Obj?]?	ctorFieldVals { internal set }
 	
-	internal new makeWithType(InjectionKind injectionKind, |This|? in := null) {
+	@NoDoc	// public to provide a backdoor for DependencyProviders
+	new makeWithType(InjectionKind injectionKind, |This|? in := null) {
 		this.fieldFacets	= Facet#.emptyList
 		this.methodFacets	= Facet#.emptyList
 		in?.call(this)
 		this.injectionKind	= injectionKind
 	}
 
-	private new make(|This|? in := null) {
+	@NoDoc
+	new make(|This|? in := null) {
 		in?.call(this)
 	}
 
@@ -85,7 +88,7 @@ enum class InjectionKind {
 	
 	** Returns true if a field injection (of any kind) is taking place
 	Bool isFieldInjection() {
-		this == fieldInjection || this == fieldInjectionViaItBlock
+		this == fieldInjection || this == fieldInjectionViaItBlock 
 	}
 }
 

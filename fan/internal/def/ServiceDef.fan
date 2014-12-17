@@ -26,7 +26,7 @@ internal const class ServiceDef : LazyProxy {
 	private const Str 	unqualifiedServiceId
 	private const Type 	serviceTypeNonNull
 
-	private const Synchronized	buildThread
+	private const Synchronized?	serviceBuildActor
 	
 	
 	
@@ -38,30 +38,29 @@ internal const class ServiceDef : LazyProxy {
 		this.isIocService			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
-		this.buildThread			= Synchronized(ActorPool())	// FIXME
 	}
 
-	new makeForProxybuild(ObjLocator objLocator, ThreadLocalManager localManager, |This|in) {
+	new makeForProxybuild(ObjLocator objLocator, ThreadLocalManager localManager, Synchronized serviceBuildActor, |This|in) {
 		in(this)
 		this.objLocator 			= objLocator
 		this.isIocService			= false
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
 		this.serviceImplRef			= ObjectRef(localManager.createRef("{$serviceId}.impl"), serviceScope)
-		this.buildThread			= Synchronized(ActorPool())	// FIXME
+		this.serviceBuildActor		= serviceBuildActor
 	}
-		
-	new makeForService(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {
-		this.objLocator		= objLocator
-		this.isIocService	= true
-		this.serviceId		= srvDef.id
-		this.serviceType	= srvDef.type
-		this.serviceScope	= srvDef.scope
-		this.serviceProxy	= srvDef.proxy
-		this.adviceMethods	= srvDef.adviceMeths
-		this.contribMethods	= srvDef.contribMeths
-		this.description	= "wotever"
-		this.buildThread			= Synchronized(ActorPool())	// FIXME
+
+	new makeForService(ObjLocator objLocator, ThreadLocalManager localManager, Synchronized serviceBuildActor, SrvDef srvDef, Obj? serviceImpl) {
+		this.objLocator			= objLocator
+		this.isIocService		= true
+		this.serviceId			= srvDef.id
+		this.serviceType		= srvDef.type
+		this.serviceScope		= srvDef.scope
+		this.serviceProxy		= srvDef.proxy
+		this.adviceMethods		= srvDef.adviceMeths
+		this.contribMethods		= srvDef.contribMeths
+		this.description		= "wotever"
+		this.serviceBuildActor	= serviceBuildActor
 		
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
@@ -155,11 +154,30 @@ internal const class ServiceDef : LazyProxy {
 		}
 
 		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {			
-			trackers	:= InjectionTracker.copy
-	        service 	:= (serviceScope == ServiceScope.perApplication) ? buildThread.synchronized |->Obj?| { 
-				InjectionTracker.paste(trackers); 
-				return serviceBuilder.call() 
-	        } : serviceBuilder.call() 
+//			trackers	:= InjectionTracker.copy
+			service		:= null
+			
+//			if (serviceScope == ServiceScope.perApplication) {
+//				// the build thread ensures only ONE instance of a service is ever created - even in race conditions
+//		        service = serviceBuildActor.synchronized |->Obj?| { 
+//					InjectionTracker.paste(trackers) 
+//					return serviceBuilder.call()
+//		        } 
+//				service = serviceBuilder.call()
+//			}
+//
+//			if (serviceScope == ServiceScope.perThread) {
+//				insync := (LocalRef) Synchronized#.field("insync").get(serviceBuildActor)
+//				if (insync.val == true)	// == true takes care of isMapped
+//					// I don't think this could ever happen - but better to be explicit and safe rather than have random failings
+//					throw IocErr("Can not create a perThread service (${serviceType.qname}) when injecting into a perApplication service")
+//				service = serviceBuilder.call()
+//			}
+
+			// serviceScope is null for autobuilds
+			if (service == null)
+				service = serviceBuilder.call()
+
 			incImplCount
 			
 			// don't bother saving on-the-fly autobuilt / proxy instances
@@ -177,16 +195,11 @@ internal const class ServiceDef : LazyProxy {
 			if (exisiting != null)
 				return exisiting
 		}
-		
+	
 		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
 			proxyBuilder 	:= (ServiceProxyBuilder) objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
-			serviceDef		:= this
-			trackers		:= InjectionTracker.copy
-	        proxy			:= (serviceScope == ServiceScope.perApplication) ? buildThread.synchronized |->Obj?| {
-				InjectionTracker.paste(trackers);
-				return proxyBuilder.createProxyForService(serviceDef)
-	        } : proxyBuilder.createProxyForService(serviceDef) 
-			
+	        proxy			:= proxyBuilder.createProxyForService(this) 
+
 			// don't bother saving on-the-fly autobuilt / proxy instances, they just set up circular dependencies anyway 
 			if (saveInCache) {
 				serviceProxyRef.val	= proxy
@@ -402,7 +415,7 @@ internal class SrvDef {
 		typeNonNull.fits(serviceType.toNonNullable)
 	}
 
-	ServiceDef toServiceDef(ObjLocator objLocator, ThreadLocalManager localManager, Obj? impl) {
+	ServiceDef toServiceDef(ObjLocator objLocator, ThreadLocalManager localManager, Synchronized serviceBuildActor, Obj? impl) {
 		if (builtIn) {
 			proxy = ServiceProxy.never
 
@@ -413,7 +426,7 @@ internal class SrvDef {
 				desc = "$id : BuiltIn Service"
 		}
 
-		return ServiceDef(objLocator, localManager, this, impl)
+		return ServiceDef.makeForService(objLocator, localManager, serviceBuildActor, this, impl)
 	}
 
 	Void applyOverride(SrvDef serviceOverride) {

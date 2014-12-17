@@ -17,10 +17,13 @@ using afBeanUtils
 ** @since 1.1
 ** 
 ** @uses Configuration of 'DependencyProvider[]'
+// this service makes for a handy backdoor for field injection for efanXtra
 @NoDoc	// don't overwhelm the masses
 const mixin DependencyProviders {
 	
-	internal abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked)
+	abstract Bool canProvideDependency(InjectionCtx injectionCtx)
+
+	abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked)
 }
 
 ** @since 1.1.0
@@ -41,6 +44,14 @@ internal const class DependencyProvidersImpl : DependencyProviders {
 		dependencyProviders.each { it.canProvide(ctx) }
 	}
 
+	override Bool canProvideDependency(InjectionCtx ctx) {
+		ctx.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
+			dependencyProviders.any |depPro->Bool| {
+				depPro.canProvide(ctx)
+			}
+		}
+	}
+	
 	override Obj? provideDependency(InjectionCtx ctx, Bool checked) {
 		ctx.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
 			dependency := null

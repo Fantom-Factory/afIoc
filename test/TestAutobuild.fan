@@ -1,3 +1,4 @@
+using concurrent
 using afConcurrent
 
 internal class TestAutobuild : IocTest {
@@ -107,6 +108,13 @@ internal class TestAutobuild : IocTest {
 		log = (LogRec) logs.list.last
 		verifyEq(log.msg, IocMessages.warnAutobuildingService(T_MyService80#.qname, T_MyService80#))
 	}
+	
+	// BugFix
+	Void testAutobuildOnlyBuildsTheOnce() {
+		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
+		s105 := reg.serviceById(T_MyService105#.qname) as T_MyService105
+		verifyEq(T_MyService105.built.val, 1)
+	}
 }
 
 internal class T_MyModule75 {
@@ -114,6 +122,7 @@ internal class T_MyModule75 {
 		defs.add(T_MyService02#).withId("s2")
 		defs.add(T_MyService49#)
 		defs.add(T_MyService80#)
+		defs.add(T_MyService105#)
 	}
 }
 
@@ -184,5 +193,17 @@ internal class T_MyService78 {
 	new make(|This|? f := null) {
 		f?.call(this)
 	}
+}
+
+internal class T_MyService105 {
+	@Autobuild
+	T_MyService80? service {
+		set {
+			built.incrementAndGet
+			&service = it
+		}
+	}
+	static const AtomicInt built := AtomicInt(0)
+//	new make(|This|? f := null) { f?.call(this)	}
 }
 

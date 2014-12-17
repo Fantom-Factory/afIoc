@@ -13,10 +13,11 @@ internal const class InjectionUtils {
 		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
 			fields := findInjectableFields(object.typeof, true)
 			fields.each |field| {
-				InjectionTracker.doingFieldInjection(object, field) |ctx| {
+				InjectionTracker.doingFieldInjection(object, field) |ctx->Obj?| {
 					dependency := dependencyProviders.provideDependency(ctx, false)
 					if (dependency != null)
 						inject(object, field, dependency)
+					return null
 				}
 			}
 			if (fields.isEmpty)
@@ -92,10 +93,11 @@ internal const class InjectionUtils {
 			building := ctx.injectingIntoType
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
-				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |ctxNew| {
+				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |ctxNew->Obj?| {
 					dependency := dependencyProviders.provideDependency(ctxNew, false)
 					if (dependency != null)
 						plan[field] = dependency
+					return null
 				}
 			}
 			ctorFieldVals := InjectionTracker.injectionCtx.ctorFieldVals 

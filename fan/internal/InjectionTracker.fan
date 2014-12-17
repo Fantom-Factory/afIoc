@@ -74,7 +74,7 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
-	static Obj? doingFieldInjection(Obj injectingInto, Field field, |InjectionCtx| func) {
+	static Obj? doingFieldInjection(Obj injectingInto, Field field, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof
@@ -85,7 +85,7 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |InjectionCtx| func) {
+	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjectionViaItBlock) {
 			it.injectingIntoType= injectingIntoType
 			it.dependencyType	= field.type
@@ -147,4 +147,12 @@ internal mixin InjectionTracker {
 		if (list[2] != null) Actor.locals[confProviderId]	= list[2]
 		if (list[3] != null) Actor.locals[injectionCtxId]	= list[3]
 	}
+
+	// these may get left behind, but they should be empty
+//	static Void clear() {
+//		Actor.locals.remove(trackerId)
+//		Actor.locals.remove(serviceDefId)
+//		Actor.locals.remove(confProviderId)
+//		Actor.locals.remove(injectionCtxId)
+//	}
 }

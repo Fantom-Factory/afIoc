@@ -1,4 +1,5 @@
 using concurrent
+using afConcurrent::Synchronized
 using afPlastic::PlasticCompiler
 
 internal const class RegistryImpl : Registry, ObjLocator {
@@ -19,13 +20,17 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override const DependencyProviders	dependencyProviders
 	
 	new make(OpTracker tracker, ModuleDef[] moduleDefs, [Str:Obj?] options) {
-		this.startTime	= tracker.startTime
-		threadLocalMgr 	= ThreadLocalManagerImpl()
-		injectionUtils	= InjectionUtils(this)
-		serviceBuilders	= ServiceBuilders(injectionUtils)
-		serviceDefs		:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
-		builtInModuleDef:= (ModuleDef?) null
+		this.startTime		= tracker.startTime
+		threadLocalMgr 		= ThreadLocalManagerImpl()
+		injectionUtils		= InjectionUtils(this)
+		serviceBuilders		= ServiceBuilders(injectionUtils)
+		serviceDefs			:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
+		builtInModuleDef	:= (ModuleDef?) null
+		sysPool				:= ActorPool() { it.name = IocConstants.systemActorPool }
+		serviceBuildActor	:= Synchronized(sysPool)
 
+		options[IocConstants.systemActorPool]	= sysPool
+		options[IocConstants.serviceBuildActor]	= serviceBuildActor
 		readyMade 		:= [
 			Registry#			: this,
 			RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
@@ -142,7 +147,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			moduleDefs.each |moduleDef| {
 				moduleDef.serviceDefs.each |def| {
 					impl := readyMade.get(def.type)
-					sdef := def.toServiceDef(this, threadLocalMgr, impl)
+					sdef := def.toServiceDef(this, threadLocalMgr, serviceBuildActor, impl)
 					serviceDefs[sdef.serviceId] = sdef
 				}
 			}
@@ -239,6 +244,14 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 	
+//	override Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true) {
+//		return Utils.stackTraceFilter |->Obj?| {
+//			shutdownLock.check
+//			// FIXME: check if service is proxiable - return proxy if needed
+//			return serviceDefById(serviceId, checked)?.getRealService(false)
+//		}
+//	}
+
 	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {
 			shutdownLock.check
@@ -269,14 +282,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			unwrapped := Utils.unwrap(iocErr)
 			// if unwrapped is still an IocErr then re-throw the original
 			throw (unwrapped is IocErr) ? iocErr : unwrapped
-		}
-	}
-
-	override Obj? buildService(Str serviceId, Bool checked := true) {
-		return Utils.stackTraceFilter |->Obj?| {
-			shutdownLock.check
-			// FIXME: check if service is proxiable - return proxy if needed
-			return serviceDefById(serviceId, checked)?.getRealService(false)
 		}
 	}
 
@@ -335,6 +340,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname, true)
+		sba := ((RegistryMeta) trackServiceById(RegistryMeta#.qname, true))[IocConstants.serviceBuildActor]
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
 		mixinT 	:= serviceTypes[0] 
@@ -354,7 +360,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
 		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 
-		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr) {
+		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr, sba) {
 			it.serviceId 		= sid
 			it.serviceType 		= mixinT
 			it.serviceScope		= scope
