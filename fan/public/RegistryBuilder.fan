@@ -52,14 +52,8 @@ class RegistryBuilder {
 	** 
 	** If 'addDependencies' is 'true' then the pod's dependencies are also inspected for IoC 
 	** modules. 
-	** 
-	** Note: 'podName' should be a 'Str'. (It takes a 'Pod' instance for backwards compatibility only.)  
-	This addModulesFromPod(Obj podName, Bool addDependencies := true) {
-		if (podName isnot Str && podName isnot Pod)
-			throw ArgErr(IocMessages.regBuilder_podNameNotStr(podName))
-		if (podName is Pod)
-			logger.warn("@Deprecated - RegistryBuilder.addModulesFromPod(podName) should take a Str not a Pod instance")
-		pod := (Pod) ((podName is Pod) ? podName : Pod.find(podName))
+	This addModulesFromPod(Str podName, Bool addDependencies := true) {
+		pod := Pod.find(podName)
 		return (RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
 			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
 				lock.check

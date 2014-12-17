@@ -1,12 +1,12 @@
 using concurrent::Actor
 
-// static method only
+// static methods only
 internal mixin InjectionTracker {
 
-	private static const Str 	trackerId		:= "afIoc.injectionTracker"
-	private static const Str 	serviceDefId	:= "afIoc.serviceDef"
-	private static const Str 	confProviderId	:= "afIoc.configProvider"
-	private static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
+	static const Str 	trackerId		:= "afIoc.injectionTracker"
+	static const Str 	serviceDefId	:= "afIoc.serviceDef"
+	static const Str 	confProviderId	:= "afIoc.configProvider"
+	static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
 	
 	static Obj? withCtx(OpTracker tracker, |->Obj?| f) {
 		ThreadStack.pushAndRun(trackerId, tracker, f)

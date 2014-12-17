@@ -46,9 +46,9 @@ const class IocService : Service {
 	}
 	
 	** Convenience for `RegistryBuilder.addModulesFromPod`
-	This addModulesFromPod(Pod pod, Bool addDependencies := true) {
+	This addModulesFromPod(Str podName, Bool addDependencies := true) {
 		checkServiceNotStarted
-		builder.addModulesFromPod(pod, addDependencies)
+		builder.addModulesFromPod(podName, addDependencies)
 		return this
 	}
 

@@ -349,7 +349,7 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.2 [#2.0.2]
 ---------------
- - Chg: 'perApp' scoped services can only be created once, even during threaded race conditions.
+ - Chg: 'perApplication' scoped services can only be created once, even during threaded race conditions.
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
  - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
  - Chg: 'RegistryBuilder.addModulesFromPod()' now takes a Str (pod name), not a pod instance.

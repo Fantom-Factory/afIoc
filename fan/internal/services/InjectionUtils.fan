@@ -204,11 +204,16 @@ internal const class InjectionUtils {
 		type.methods.findAll |method| { method.isCtor && method.parent.fits(type) }
 	}
 
-	private static Field[] findInjectableFields(Type type, Bool includeConst) {
-		type.fields.findAll |field| {
-			if (field.isStatic)
-				return false
+	// internal for testing
+	internal static Field[] findInjectableFields(Type type, Bool includeConst) {
+		fieldList	:= (Obj[]) type.inheritance.findAll { it.isClass }.reduce([,]) |Obj[] fields, t| { fields.add(t.fields) } 
+		fieldsAll	:= (Field[]) fieldList.flatten.unique
+		fields		:= fieldsAll.exclude { it.isAbstract || it.isStatic }
 
+		// it's tricky (not impossible - but too much work!) to tell if a field if overridden,
+		// so virtual fields that are overridden appear in the list twice
+		
+		return fields.findAll |field| {
 			if (field.isConst && !includeConst)
 				return false
 

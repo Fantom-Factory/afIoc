@@ -46,6 +46,7 @@ internal const class ServiceDef : LazyProxy {
 		this.unqualifiedServiceId	= unqualify(serviceId)
 		this.serviceTypeNonNull		= serviceType.toNonNullable
 		this.serviceImplRef			= ObjectRef(localManager.createRef("{$serviceId}.impl"), serviceScope)
+		this.notBuilt				= AtomicBool(true)
 	}
 
 	new makeForService(ObjLocator objLocator, ThreadLocalManager localManager, SrvDef srvDef, Obj? serviceImpl) {

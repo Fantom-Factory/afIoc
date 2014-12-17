@@ -41,7 +41,7 @@ internal const class LocalProvider : DependencyProvider {
 			if (listType.params["L"] == null)
 				throw IocErr(IocMessages.localProvider_typeNotList(ctx.field, listType))
 			return LocalList(localManager.createName(name)) {
-				it.listType = listType.params["V"]
+				it.valType = listType.params["V"]
 			} 
 		}
 

@@ -11,11 +11,7 @@ internal const class IocMessages {
 		"Module $module.qname has already been added - ignoring it this time round."
 	}
 
-	static Str regBuilder_podNameNotStr(Obj podName) {
-		"podName should be a Str - not ${podName.typeof.signature} - ${podName}"
-	}
 
-	
 	
 	// ---- Err Messages --------------------------------------------------------------------------
 	
