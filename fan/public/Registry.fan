@@ -2,14 +2,14 @@
 ** (Service) - The registry of IoC services; this is the main IoC interface. 
 const mixin Registry {
 	
- 	** Invoke to execute all contributions to the `RegistryStartup` service.
+ 	** Invoke to execute all listeners in (or contributions to) the `RegistryStartup` service.
 	abstract This startup()
 	
 	** Shuts down the Registry. Notifies all listeners that the registry has shutdown. Further 
 	** method invocations on the Registry are no longer allowed, and the Registry instance 
 	** should be discarded.
 	**
-	** See `RegistryShutdownHub`
+	** See `RegistryShutdown` service for details on how to add shutdown listeners.
 	abstract This shutdown()
 	
 	** Obtains a service via its unique service id. 
@@ -49,6 +49,13 @@ const mixin Registry {
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
     abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 
+//	** Builds a new instance of the service, regardless of whether one has already been built or not.
+//	** 
+//	** Note: This method is probably *not* what you're looking for - try 'serviceById()' instead. 
+//	** 
+//	** @since 2.0.2
+//	abstract Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true)
+
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.
 	** 
@@ -71,13 +78,6 @@ const mixin Registry {
 	** 
 	** @since 1.5.0
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[]? providedMethodArgs := null)
-
-	** Builds a new instance of the service, regardless of whether one has already been built or not.
-	** 
-	** Note: This method is probably *not* what you're looking for - try 'serviceById()' instead. 
-	** 
-	** @since 2.0.2
-	abstract Obj? buildService(Str serviceId, Bool checked := true)
 	
 	** Returns a map of all service definitions (keyed by service id) held by this IoC.
 	** Useful for the inquisitive.

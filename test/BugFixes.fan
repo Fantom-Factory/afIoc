@@ -88,7 +88,7 @@ internal class BugFixes : IocTest {
 	
 	Void testThreadedServicesCanBeAutobuiltInCtor() {
 		reg := RegistryBuilder().addModule(T_MyModule100#).build.startup
-		t2 := reg.serviceById("s92")		
+		t2 := reg.serviceById("s92")
 	}
 
 	Void testThreadedServicesCanBeInjectedIntoCtor() {

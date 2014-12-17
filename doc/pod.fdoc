@@ -349,9 +349,12 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.2 [#2.0.2]
 ---------------
+ - Chg: 'perApp' scoped services can only be created once, even during threaded race conditions.
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
  - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
- - Chg: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
+ - Chg: 'RegistryBuilder.addModulesFromPod()' now takes a Str (pod name), not a pod instance.
+ - Chg: 'DependencyProviders' is more accessible for efanXtra.
+ - Bug: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
 
 v2.0.0 [#2.0.0]
 ---------------
@@ -369,7 +372,7 @@ v2.0.0 [#2.0.0]
  - Chg: Deleted 'ServiceStats' service in favour of method 'Registry.serviceDefinitions()'. (Breaking change.)
  - Chg: Deleted all existing @Deprecated classes. (Breaking change.)
  - Chg: 'LogProvider' service may be overridden to ensure it provides *all* injected 'Log' instances. (Breaking change.)
- - Chg: Reanmed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
+ - Chg: Renamed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
  - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
  - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
  - Bug: 'IocService' methods now more closely follow those of 'Registry'.
