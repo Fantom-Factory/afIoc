@@ -130,29 +130,4 @@ internal mixin InjectionTracker {
 	static InjectionCtx injectionCtx() {
 		ThreadStack.peek(injectionCtxId)
 	}
-
-	static Unsafe copy() {
-		Unsafe(ThreadStack?[
-			Actor.locals[trackerId],
-			Actor.locals[serviceDefId],
-			Actor.locals[confProviderId],
-			Actor.locals[injectionCtxId]
-		])
-	}
-
-	static Void paste(Unsafe unsafe) {
-		list := (ThreadStack?[]) unsafe.val
-		if (list[0] != null) Actor.locals[trackerId] 		= list[0]
-		if (list[1] != null) Actor.locals[serviceDefId]		= list[1]
-		if (list[2] != null) Actor.locals[confProviderId]	= list[2]
-		if (list[3] != null) Actor.locals[injectionCtxId]	= list[3]
-	}
-
-	// these may get left behind, but they should be empty
-//	static Void clear() {
-//		Actor.locals.remove(trackerId)
-//		Actor.locals.remove(serviceDefId)
-//		Actor.locals.remove(confProviderId)
-//		Actor.locals.remove(injectionCtxId)
-//	}
 }

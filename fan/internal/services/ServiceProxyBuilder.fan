@@ -59,8 +59,8 @@ internal const class ServiceProxyBuilderImpl : ServiceProxyBuilder {
 			serviceType.fields.rw
 				.findAll { it.isAbstract || it.isVirtual }
 				.each |field| {
-					getBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService(true)).${field.name}"
-					setBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService(true)).${field.name} = it"
+					getBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService).${field.name}"
+					setBody	:= "((${serviceType.qname}) _af_lazyProxy.getRealService).${field.name} = it"
 					model.overrideField(field, getBody, setBody)
 				}
 	
