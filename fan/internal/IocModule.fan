@@ -9,17 +9,12 @@ internal const class IocModule {
 		defs.add(RegistryStartup#).withScope(ServiceScope.perThread)	// for non-const listeners 
 		defs.add(RegistryShutdown#)
 		
+		defs.add(ActorPools#)
 		defs.add(DependencyProviders#)
 		defs.add(LogProvider#)
 		defs.add(PlasticCompiler#)
 		defs.add(ServiceProxyBuilder#)
 		defs.add(ThreadLocalManager#) 
-	}
-	
-	@Build
-	static ActorPools buildActorPools(Str:ActorPool actorPools, RegistryMeta regMeta) {
-		actorPools[IocConstants.systemActorPool] = regMeta[IocConstants.systemActorPool]
-		return ActorPoolsImpl(actorPools)
 	}
 	
 	@Contribute { serviceType=DependencyProviders# }
@@ -31,6 +26,11 @@ internal const class IocModule {
 		config["afIoc.ctorItBlockProvider"]	= config.autobuild(CtorItBlockProvider#)
 		config["afIoc.serviceProvider"]		= config.autobuild(ServiceProvider#)
 	}	
+
+	@Contribute { serviceType=ActorPools# }
+	static Void contributeActorPools(Configuration config) {
+		config[IocConstants.systemActorPool] = ActorPool() { it.name = IocConstants.systemActorPool } 
+	}
 
 	@Contribute { serviceType=RegistryStartup# }
 	static Void contributeRegistryStartup(Configuration config) {

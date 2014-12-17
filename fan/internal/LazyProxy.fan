@@ -12,5 +12,5 @@ const mixin LazyProxy {
 	abstract Obj? callMethod(Method method, Obj?[] args)
 	
 	** used to access fields
-	abstract Obj getRealService(Bool saveInCache)
+	abstract Obj getRealService()
 }

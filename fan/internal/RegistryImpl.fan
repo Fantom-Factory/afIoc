@@ -26,11 +26,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		serviceBuilders		= ServiceBuilders(injectionUtils)
 		serviceDefs			:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
 		builtInModuleDef	:= (ModuleDef?) null
-		sysPool				:= ActorPool() { it.name = IocConstants.systemActorPool }
-		serviceBuildActor	:= Synchronized(sysPool)
 
-		options[IocConstants.systemActorPool]	= sysPool
-		options[IocConstants.serviceBuildActor]	= serviceBuildActor
 		readyMade 		:= [
 			Registry#			: this,
 			RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
@@ -147,7 +143,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			moduleDefs.each |moduleDef| {
 				moduleDef.serviceDefs.each |def| {
 					impl := readyMade.get(def.type)
-					sdef := def.toServiceDef(this, threadLocalMgr, serviceBuildActor, impl)
+					sdef := def.toServiceDef(this, threadLocalMgr, impl)
 					serviceDefs[sdef.serviceId] = sdef
 				}
 			}
@@ -316,7 +312,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (existing != null)
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 		
-		sid		:= "${type.name}(Autobuild)"
+		sid		:= "${type.name}"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
 		builder	:= threadLocalMgr.createRef("autobuild")
 		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
@@ -335,12 +331,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			}
 		}
 		
-		return serviceDef.getRealService(false)
+		return serviceDef.autobuild
 	}
 
 	override Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		spb := (ServiceProxyBuilder) trackServiceById(ServiceProxyBuilder#.qname, true)
-		sba := ((RegistryMeta) trackServiceById(RegistryMeta#.qname, true))[IocConstants.serviceBuildActor]
 		
 		serviceTypes := ServiceBinderImpl.verifyServiceImpl(mixinType, implType)
 		mixinT 	:= serviceTypes[0] 
@@ -354,13 +349,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 
 		// TODO: pass in proxy scope
-		sid		:= "${implT.name}(Proxy)"
+		sid		:= "${implT.name}"
 		ctor 	:= InjectionUtils.findAutobuildConstructor(implT)
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
 		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
 
-		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr, sba) {
+		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr) {
 			it.serviceId 		= sid
 			it.serviceType 		= mixinT
 			it.serviceScope		= scope
@@ -372,7 +367,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				return func.call 
 			}
 		}
-		return serviceDef.getProxyService(false)
+		return serviceDef.autoproxy
 	}
 	
 	ServiceDef? serviceDefById(Str serviceId, Bool checked) {

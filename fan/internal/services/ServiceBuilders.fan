@@ -9,7 +9,7 @@ internal const class ServiceBuilders {
 
 	|->Obj| fromBuildMethod(Str serviceId, Method method, Obj? instance := null, Obj[]? args := null) {
 		|->Obj| {
-			InjectionTracker.track("Creating Service '$serviceId' via builder method '$method.qname'") |->Obj| {
+			InjectionTracker.track("Creating '$serviceId' via builder method '$method.qname'") |->Obj| {
 				injectionUtils.callMethod(method, instance, args)
 			}
 		}
@@ -17,7 +17,7 @@ internal const class ServiceBuilders {
 	
 	|->Obj| fromCtorAutobuild(Str serviceId, Method ctor, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		|->Obj| {
-			InjectionTracker.track("Creating Serivce '$serviceId' via ctor autobuild") |->Obj| {				
+			InjectionTracker.track("Creating '$serviceId' via ctor autobuild") |->Obj| {				
 				obj := injectionUtils.createViaConstructor(ctor, ctorArgs, fieldVals)
 				return injectionUtils.injectIntoFields(obj)
 			}

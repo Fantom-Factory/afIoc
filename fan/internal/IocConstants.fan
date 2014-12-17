@@ -7,6 +7,4 @@ internal const class IocConstants {
 	
 	static const Str systemActorPool		:= "afIoc.system"
 
-	static const Str serviceBuildActor		:= "afIoc.serviceBuildActor"
-
 }
