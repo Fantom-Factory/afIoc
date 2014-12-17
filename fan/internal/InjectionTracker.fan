@@ -74,7 +74,7 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
-	static Obj? doingFieldInjection(Obj injectingInto, Field field, |InjectionCtx->Obj?| func) {
+	static Obj? doingFieldInjection(Obj? injectingInto, Field field, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjection) {
 			it.injectingInto	= injectingInto
 			it.injectingIntoType= injectingInto.typeof

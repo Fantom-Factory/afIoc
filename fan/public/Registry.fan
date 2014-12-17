@@ -48,12 +48,6 @@ const mixin Registry {
 	** 
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
     abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
-
-//	** Builds a new instance of the service, regardless of whether one has already been built or not.
-//	** 
-//	** Note: This method is probably *not* what you're looking for - try 'serviceById()' instead. 
-//	** 
-//	** @since 2.0.2
 //	abstract Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true)
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 

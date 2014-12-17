@@ -239,14 +239,6 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return trackAutobuild(type2, ctorArgs, fieldVals)
 		}
 	}
-	
-//	override Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true) {
-//		return Utils.stackTraceFilter |->Obj?| {
-//			shutdownLock.check
-//			// FIXME: check if service is proxiable - return proxy if needed
-//			return serviceDefById(serviceId, checked)?.getRealService(false)
-//		}
-//	}
 
 	override Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		return Utils.stackTraceFilter |->Obj?| {

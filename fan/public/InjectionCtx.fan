@@ -39,6 +39,18 @@ class InjectionCtx {
 		this.injectionKind	= injectionKind
 	}
 
+	@NoDoc // a common need, esp for efanXtra!
+	new makeFromField(Obj? injectingInto, Field field, |This|? in := null) {
+		this.injectionKind		= InjectionKind.fieldInjection
+		this.injectingInto		= injectingInto
+		this.injectingIntoType	= injectingInto?.typeof
+		this.dependencyType		= field.type
+		this.field				= field
+		this.fieldFacets		= field.facets
+		this.methodFacets		= Facet#.emptyList
+		in?.call(this)
+	}
+
 	@NoDoc
 	new make(|This|? in := null) {
 		in?.call(this)
