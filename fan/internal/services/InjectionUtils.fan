@@ -160,14 +160,12 @@ internal const class InjectionUtils {
 				}
 
 				return InjectionTracker.doingParamInjection(ctx, param, index) |ctxNew->Obj?| {
-					dep := dependencyProviders.provideDependency(ctxNew, false)
-					// TODO: distinguish between returning null and not providing 
-					if (dep != null)
-						return dep
-					if (param.hasDefault)
-						return "afIoc.exclude.me.please!"
-					// FIXME: null may be allowed / have been provided
-					throw IocErr(IocMessages.noDependencyMatchesType(param.type))
+					if (!dependencyProviders.canProvideDependency(ctxNew)) {
+						if (param.hasDefault)
+							return "afIoc.exclude.me.please!"
+						throw IocErr(IocMessages.noDependencyMatchesType(param.type))
+					}
+					return dependencyProviders.provideDependency(ctxNew, true)
 				}
 			}.exclude { it == "afIoc.exclude.me.please!" }
 			
@@ -210,7 +208,7 @@ internal const class InjectionUtils {
 		fieldsAll	:= (Field[]) fieldList.flatten.unique
 		fields		:= fieldsAll.exclude { it.isAbstract || it.isStatic }
 
-		// it's tricky (not impossible - but too much work!) to tell if a field if overridden,
+		// it's tricky (not impossible - but too much work for now!) to tell if a field if overridden,
 		// so virtual fields that are overridden appear in the list twice
 		
 		return fields.findAll |field| {
