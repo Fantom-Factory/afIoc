@@ -39,6 +39,9 @@ internal class Utils {
 			throw iocShutdownErr
 
 		} catch (IocErr iocErr) {
+			if (Env.cur.vars["afIoc.filterStackTrace"]?.trim?.lower == "false")
+				throw iocErr
+
 			unwrapped := unwrap(iocErr)
 
 			// don't loose the list of available services
