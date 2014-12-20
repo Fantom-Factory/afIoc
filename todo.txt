@@ -1,0 +1,60 @@
+
+v2.0.2 Maybe...?
+----------------
+make ServiceDefinitions.overrideByType more intelligent than type.qname
+
+update aspects to wrap fields
+
+Relocate RegistryStartup.printServiceList() and 
+         RegistryStartup.printBanner() so they can be called externally! 
+
+
+Meh... can't be arsed
+--------------------- 
+Make Service Advice orderable
+ - just have MethodAdvisor.addAdvice return a Constraints impl
+
+InjectionUtils 
+ - tidy up the handling of default parameters
+
+Service disambiguation via facets 
+ - is just another dep pro: map of services keyed by type & facet
+
+Make Js compatible...?
+ - Phew! It's a biggie!
+
+
+
+Just Plain Bad Ideas:
+---------------------
+Allow other @Inject facets
+ - so BedSheet can define its own, for fewer pod import statements
+ - but if afIoc and afBedSheet are imported at same time ~ conflict!
+
+Remove tracker info to improve performance
+ - tried it.
+ - deleted ALL tracker calls -> NO discernable speed difference!
+
+Maybe add a means to delete / reset a service lifecycle?
+ - people can create their own service lifecycle.
+ - WHY!???
+ - could fudge it with just a depProvider and autobuild!
+
+@Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
+ - just a convenience for serviceById
+ - now that serviceIds are qualified, what's the point?
+ 
+OrderConfig wildcards - e.g. "before: *" NO WILDCARDS
+ - use placeholders instead
+
+Create PerThreadService 
+ - is just a registry.get()!
+
+IocHelper.eagerLoadBuiltInServices
+ - I mean, why?
+ 
+On RegistryShutdown
+ - kill ALL ActorPools: 
+   - No, lets users be in charge of their own pools.  
+ - clean up ALL threads:
+   - Can't! Can only clean up up current thread.
