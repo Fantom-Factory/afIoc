@@ -8,6 +8,10 @@ update aspects to wrap fields
 Relocate RegistryStartup.printServiceList() and 
          RegistryStartup.printBanner() so they can be called externally! 
 
+Duvet needs: make 'optional' contribution of: .after("afPillow.pillowPages")
+ - ordered contributions
+
+
 
 Meh... can't be arsed
 --------------------- 
