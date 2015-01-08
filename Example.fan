@@ -2,7 +2,7 @@ using afIoc
 
 class Main {
   Void main() {
-    registry := IocService([MyModule#]).start.registry
+    registry := RegistryBuilder().addModule(MyModule#).build().startup()
 
     test1 := (MyService1) registry.serviceById("myservice1")        // returns a singleton
     test2 := (MyService1) registry.dependencyByType(MyService1#)    // returns the same singleton
@@ -14,7 +14,7 @@ class Main {
     test3.service2.kick  // --> Ass!
     test4.service2.kick  // --> Ass!
 
-    Service.find(IocService#).uninstall
+    registry.shutdown()
   }
 }
 
