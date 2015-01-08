@@ -209,7 +209,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		shutdownTime := (Duration.now - then).toMillis.toLocale("#,###")
 		if (sayGoodbye.val) {
 			log.info("IoC shutdown in ${shutdownTime}ms")
-			log.info("\"Goodbye!\" from afIoc!")
+			log.info("\"Goodbye!\" from IoC!")
 		}
 		return this
 	}

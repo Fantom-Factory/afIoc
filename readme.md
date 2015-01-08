@@ -1,4 +1,4 @@
-## Overview 
+## Overview
 
 `IoC` is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html).
 
@@ -39,7 +39,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 
 
 
-## Install 
+## Install
 
 Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
 
@@ -49,11 +49,11 @@ To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan
 
     depends = ["sys 1.0", ..., "afIoc 2.0+"]
 
-## Documentation 
+## Documentation
 
 Full API & fandocs are available on the [Status302 repository](http://repo.status302.com/doc/afIoc/).
 
-## Quick Start 
+## Quick Start
 
 1. Create services as plain Fantom objects
 2. Use the `@Inject` facet to mark fields as dependencies
@@ -61,14 +61,14 @@ Full API & fandocs are available on the [Status302 repository](http://repo.statu
 4. Build and start the registry
 5. Go, go, go!
 
-### Example 
+### Example
 
 1). Create a text file called `Example.fan`
 
 ```
 class Main {
   Void main() {
-    registry := IocService([MyModule#]).start.registry
+    registry := RegistryBuilder().addModule(MyModule#).build().startup()
 
     test1 := (MyService1) registry.serviceById("myservice1")        // returns a singleton
     test2 := (MyService1) registry.dependencyByType(MyService1#)    // returns the same singleton
@@ -80,7 +80,7 @@ class Main {
     test3.service2.kick  // --> Ass!
     test4.service2.kick  // --> Ass!
 
-    Service.find(IocService#).uninstall
+    registry.shutdown()
   }
 }
 
@@ -109,14 +109,12 @@ C:\> fan Example.fan
 [info] [afIoc] Adding module definition for Example_0::MyModule
 [info] [afIoc] Starting IoC...
 
-14 Services:
+12 Services:
 
      Example_0::MyService1: Defined
      Example_0::MyService2: Defined
          afIoc::ActorPools: Builtin
-afIoc::AspectInvokerSource: Builtin
 afIoc::DependencyProviders: Builtin
-     afIoc::InjectionUtils: Builtin
         afIoc::LogProvider: Builtin
            afIoc::Registry: Builtin
        afIoc::RegistryMeta: Builtin
@@ -126,13 +124,13 @@ afIoc::ServiceProxyBuilder: Builtin
  afIoc::ThreadLocalManager: Builtin
 afPlastic::PlasticCompiler: Builtin
 
-14.29% of services are unrealised (2/14)
+16.67% of services are unrealised (2/12)
 
    ___    __                 _____        _
   / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
  / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
 /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                            Alien-Factory IoC v2.0.0 /___/
+                            Alien-Factory IoC v2.0.2 /___/
 
 IoC Registry built in 205ms and started up in 11ms
 
@@ -142,7 +140,7 @@ IoC Registry built in 205ms and started up in 11ms
 [info] [afIoc] "Goodbye!" from afIoc!
 ```
 
-## Terminology 
+## Terminology
 
 IoC distinguishes between **Services** and **Dependencies**.
 
@@ -154,34 +152,55 @@ A **contribution** is a means to configure a service.
 
 A **module** is a class where services and contributions are defined.
 
-## Starting the IoC 
+## Building the Registry
 
-You can use [IocService](http://repo.status302.com/doc/afIoc/IocService.html) to start `IoC` as a Fantom service:
+Use [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html) to manually manage an IoC `Registry` instance. You would typically do this when running tests.
 
-    IocService([MyModule#]).start
+    registry := RegistryBuilder().addModule(MyModule#).build().startup()
     ...
-    reg     := ((IocService) Service.find(IocService#)).registry
-    service := reg.dependencyByType(MyService#)
+    registry.injectIntoFields(this)
     ...
-    Service.find(IocService#).uninstall
+    registry.shutdown()
 
-Or use [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html) to manage the [Registry](http://repo.status302.com/doc/afIoc/Registry.html) instance manually;
+Ensure modules are added from other IoC libraries the code uses. Example, if using the [IocEnv library](http://www.fantomfactory.org/pods/afIocEnv) then add `IocEnvModule`:
 
-    reg := RegistryBuilder().addModule(MyModule#).build.startup
-    ...
-    service := reg.dependencyByType(MyService#)
-    ...
-    reg.shutdown
+    registry := RegistryBuilder().addModule(MyModule#).addModule(IocEnvModule#).build().startup()
+
+It's standard that IoC library modules are named after the library, but with a `Module` suffix.
+
+### Pod Meta-data
 
 When [building a registry](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), you declare which modules are to loaded. You may also load modules from dependant pods, in which case, each pod should have declared the following meta:
 
-`"afIoc.module" : "{qname}"`
+    meta = [ "afIoc.module" : "<module-qname>" ]
 
-Where `{qname}` is a qualified type name of an `AppModule` class. Additional modules can be declared by the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet.
+Where `<module-qname>` is a qualified type name of an `AppModule` class. Additional modules can be declared by the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet.
 
-Modules can also be loaded from index properties in a similar manner.
+### Using a Fantom Service
 
-## Defining Services 
+If your code runs in an IoC container, such as [BedSheet](http://www.fantomfactory.org/pods/afBedSheet), then the container manages the `Registry` instance for you.
+
+If running unit tests then typically you would create your own `Registry` instance and hold it as a variable / field.
+
+An alternative is to create a [Fantom Service](http://fantom.org/doc/sys/Service.html) to hold the registry. This is useful in situations where static access to the `Registry`, such as `fwt` applications where you have very little control over how your classes are created.
+
+[IocService](http://repo.status302.com/doc/afIoc/IocService.html) is a helper class that extends `Service` and contains convenience methods for creating and accessing the registry.
+
+For example, to create and start a Fantom IoC Service (assuming you use IoC Env):
+
+    IocService([MyModule#]).start()
+
+Then from anywhere in your code, it may be accessed with:
+
+    iocService := (IocService) Service.find(IocService#)
+    ...
+    myService  := iocService.serviceById(MyService#.qname)
+
+Uninstall `IocService` like any other:
+
+    Service.find(IocService#).uninstall()
+
+## Defining Services
 
 Services are defined in Module classes, where each meaningful method is static and usually annotated with a facet.
 
@@ -218,7 +237,7 @@ class AppModule {
 
 Services are *not* created until they are referenced or required.
 
-## Dependency Injection 
+## Dependency Injection
 
 IoC performs both ctor and field injection, for normal and const fields.
 
@@ -252,13 +271,13 @@ On calling `f` all injectable fields are set, even fields marked as `const`. The
 
 After object construction and field injection, any extra setup may be performed via methods annotated with `@PostInjection`. These methods may be of any visibility and all parameters are resolved as dependencies.
 
-## Service Scope 
+## Service Scope
 
 Services are either created once [perApplication](http://repo.status302.com/doc/afIoc/ServiceScope#perApplication.html) (singletons) or once [perThread](http://repo.status302.com/doc/afIoc/ServiceScope#perThread.html). Application scoped services *must* be defined as `const`.
 
 (Using proxies) you can even inject a `perThread` scoped service into a `perApplication` scoped service! Think about it... you can inject your [http request](http://fantom.org/doc/web/WebReq.html) into any static service you desire!
 
-## Service Configuration 
+## Service Configuration
 
 Services can solicit configuration from modules simply by declaring a list or a map in their ctor or builder method.
 
@@ -286,7 +305,7 @@ The list and map types are inferred from the ctor definition and all contributio
 
 Think of `Configuration` as an ordered Map that collects data from *all* the IoC modules. The collected data / Map is then passed to the ctor of the service. If the service ctor takes a List then just the Map values are passed.
 
-## Lazy Loading 
+## Lazy Loading
 
 Define your service with a mixin and take advantage of true lazy loading!
 
@@ -296,13 +315,13 @@ This means circular service dependencies are virtually eliminated!
 
 It also allows you to inject `perThread` scoped services into `perApplication` scoped services.
 
-## Advise Your Services 
+## Advise Your Services
 
 Intercept all method calls to proxied services and wrap them in your own code!
 
 See [@Advise](http://repo.status302.com/doc/afIoc/Advise.html) for details
 
-## Tips 
+## Tips
 
 Strive to keep your services `const`, delcare a serialisation ctor to keep `@Inject`ed fields non-nullable:
 

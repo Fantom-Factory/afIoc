@@ -116,7 +116,7 @@ internal class TestIocService : IocTest {
 	Void testStartErrsAreRethrown() {
 		iocs := IocService([T_MyModule101#]).start
 		try {
-			verifyErrMsg(Err#, "Boobies!") { 
+			verifyErrMsg(IocErr#, "Boobies!") { 
 				iocs.registry.serviceById("wotever")
 			}
 			verifyFalse(iocs.isRunning)
