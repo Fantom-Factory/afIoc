@@ -69,7 +69,7 @@ internal class TestServiceOverride : IocTest {
 	}
 
 	Void testOverrideDoesNotExist() {
-		verifyIocErrMsg(IocMessages.serviceIdNotFound("s12")) {
+		verifySrvNotFoundErrMsg(IocMessages.serviceIdNotFound("s12")) {
 			RegistryBuilder().addModule(T_MyModule61#).build.startup
 		}
 	}

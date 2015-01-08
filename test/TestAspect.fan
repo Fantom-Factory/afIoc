@@ -63,7 +63,7 @@ internal class TestAspect : IocTest {
 	}
 	
 	Void testAdvisingNonProxy() {
-		verifyIocErrMsg(IocMessages.adviceDoesNotMatchAnyServices(AdviceDef {
+		verifySrvNotFoundErrMsg(IocMessages.adviceDoesNotMatchAnyServices(AdviceDef {
 			it.advisorMethod = T_MyModule11#addTransactions
 			it.serviceIdGlob = "s69"
 		})) {
