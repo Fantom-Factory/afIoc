@@ -90,7 +90,7 @@ internal const class IocMessages {
 	}
 
 	static Str serviceTypeNotFound(Type type) {
-		"No service matches type ${type.signature}."
+		"No service matches type ${type.signature}. Did you forget to define it in your AppModule?"
 	}
 
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {

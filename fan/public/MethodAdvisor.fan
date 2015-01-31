@@ -31,7 +31,7 @@ class MethodAdvisor {
 
 ** Returned from 'AppModule' `MethodAdvisor` methods to wrap calls to advised methods.
 ** 
-** The wrapped method is purposely hidden so no-one is tempted to call it directly, use [invoke()]`#invoke` instead.  
+** The wrapped method is purposely hidden so no-one is tempted to call it directly, use [invoke()]`MethodInvocation.invoke` instead.  
 ** The real method is hidden behind this class so multiple Method Advisors can be chained
 ** 
 ** @see The `Advise` facet for more details.

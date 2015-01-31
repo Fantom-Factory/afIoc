@@ -2,7 +2,7 @@ Overview [#overview]
 ********************
 'IoC' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
 
-Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *afIoc*!
+Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *IoC*!
 
 - **Injection - any way *you* want it!**
   - field injection
@@ -58,48 +58,54 @@ Full API & fandocs are available on the [Status302 repository]`http://repo.statu
 
 Quick Start [#quickStart]
 *************************
-1. Create services as plain Fantom objects
-1. Use the '@Inject' facet to mark fields as dependencies
-1. Define and configure services in an 'AppModule' class
-1. Build and start the registry
-1. Go, go, go!
-
-Example [#example]
-==================
 1). Create a text file called 'Example.fan'
 pre>
-class Main {
-  Void main() {
-    registry := RegistryBuilder().addModule(MyModule#).build().startup()
+using afIoc
 
-    test1 := (MyService1) registry.serviceById("myservice1")        // returns a singleton
-    test2 := (MyService1) registry.dependencyByType(MyService1#)    // returns the same singleton
-    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
-    test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
-
-    test1.service2.kick  // --> Ass!
-    test2.service2.kick  // --> Ass!
-    test3.service2.kick  // --> Ass!
-    test4.service2.kick  // --> Ass!
-
-    registry.shutdown()
-  }
-}
-
-class MyModule {           // every application needs a module class
-  static Void defineServices(ServiceDefinitions defs) {
-    defs.add(MyService1#)  // define your singletons here
-    defs.add(MyService2#)
-  }
-}
+// ---- Services are plain Fantom classes -------------------------------------
 
 class MyService1 {
-  @Inject               // you'll use @Inject all the time
-  MyService2? service2  // inject services into services!
+    ** Inject services into services!
+    @Inject MyService2? service2
 }
 
 class MyService2 {
-  Str kick() { return "Ass!" }
+    Void poke() { echo("Poking ${this.toStr}") }
+}
+
+
+
+// ---- Modules are where services are defined and configured -----------------
+
+** Every application needs a module class
+class MyModule {
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(MyService1#)
+        defs.add(MyService2#)
+    }
+}
+
+
+
+// ---- Build and start the IoC Registry --------------------------------------
+
+class Main {
+    Void main() {
+        registry := RegistryBuilder().addModule(MyModule#).build().startup()
+
+        test1 := (MyService1) registry.serviceById("myservice1")       // returns a singleton
+        test2 := (MyService1) registry.dependencyByType(MyService1#)   // returns the same singleton
+        test3 := (MyService1) registry.autobuild(MyService1#)          // build a new instance
+        test4 := (MyService1) registry.injectIntoFields(MyService1())  // inject into existing Objs
+
+        // all test classes poke the same instantce of Service2
+        test1.service2.poke
+        test2.service2.poke
+        test3.service2.poke
+        test4.service2.poke
+
+        registry.shutdown()
+    }
 }
 <pre
 
@@ -132,11 +138,17 @@ afPlastic::PlasticCompiler: Builtin
   / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
  / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
 /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                            Alien-Factory IoC v2.0.2 /___/
+                            Alien-Factory IoC v2.0.4 /___/
 
 IoC Registry built in 205ms and started up in 11ms
 
 [warn] [afIoc] Autobuilding type 'Example_0::MyService1' which is *also* defined as service 'Example_0::MyService1 - unusual!
+
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+
 [info] [afIoc] Stopping IoC...
 [info] [afIoc] IoC shutdown in 19ms
 [info] [afIoc] "Goodbye!" from afIoc!
@@ -146,62 +158,60 @@ IoC Registry built in 205ms and started up in 11ms
 
 Terminology [#terminology]
 **************************
-IoC distinguishes between **Services** and **Dependencies**.
+A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Service are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined in multiple modules.
 
-A **service** is a Fantom class where there is only one (singleton) instance for the whole application (or one per thread for non-const classes). Each service is identified by a unique ID (usually the qualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
+A **dependency** is any class instance or object that a service depends on. A dependency may or may not be a service. Non service dependencies are managed by user defined [dependency providers]`DependencyProvider`.
 
-A **dependency** is any class or object that another service depends on. A dependency may or may not be a service.  For example, a class may depend on a field 'Int maxNoOfThreads' but that 'Int' isn't a service, it's just a number. Non service dependencies are managed by user defined [dependency providers]`DependencyProvider`.
+A **module** is a class whose static methods define and configure services.
 
-A **contribution** is a means to configure a service.
-
-A **module** is a class where services and contributions are defined.
+The **registry** is the key class in an IoC application. It creates, holds and manages the service instances.
 
 
 
 Building the Registry [#loadingModules]
 ***************************************
-Use `RegistryBuilder` to manually manage an IoC 'Registry' instance. You would typically do this when running tests.
+Frameworks such as [BedSheet]`pod:afBedSheet` and [Reflux]`pod:afReflux` are IoC containers. That is, they create and look after a 'Registry' instance, using it to create classes and provide access to services.
 
-  registry := RegistryBuilder().addModule(MyModule#).build().startup()
+Sometimes you don't have access to an IoC container and have to create the 'Registry' instance yourself. (Running unit tests is a good example.) In these cases you will need to use the `RegistryBuilder`, passing in the module that defines your services:
+
+  registry := RegistryBuilder().addModule(AppModule#).build().startup()
   ...
-  registry.injectIntoFields(this)
+  service  := registry.getServiceById("serviceId")
   ...
-  registry.shutdown()
+  registry.shutdown
 
-Ensure modules are added from other IoC libraries the code uses. Example, if using the [IocEnv library]`pod:afIocEnv` then add 'IocEnvModule':
+If your code uses other IoC libraries, make sure modules from these pods are added too. Example, if using the [IocEnv library]`pod:afIocEnv` then add a dependency on the 'afIocEnv' pod:
 
-  registry := RegistryBuilder().addModule(MyModule#).addModule(IocEnvModule#).build().startup()
+  registry := RegistryBuilder()
+      .addModule(MyModule#)
+      .addModulesFromPod("afIocEnv")
+      .build().startup()
 
-It's standard that IoC library modules are named after the library, but with a 'Module' suffix.
 
 
-
-Pod Meta-data
-=========
-When [building a registry]`RegistryBuilder`, you declare which modules are to loaded. You may also load modules from dependant pods, in which case, each pod should have declared the following meta:
+Pod Meta Data [#metaData]
+=========================
+It is good practice, when writing an IoC application or library, to always include the following meta in the 'build.fan':
 
   meta = [ "afIoc.module" : "<module-qname>" ]
 
-Where '<module-qname>' is a qualified type name of an 'AppModule' class. Additional modules can be declared by the [@SubModule]`SubModule` facet.
+Where '<module-qname>' is the qualified type name of the pod's 'AppModule' class.
+
+This is how IoC knows what modules each pod has. It is how the 'addModulesFromPod("afIocEnv")' line works; IoC inspects the meta-data in the 'afIocEnv' pod and looks up the 'afIoc.module' key. It then loads the modules listed.
+
+The 'afIoc.module' meta may also be a Comma Seperated List (CSV) of module names, should the pod have many. Though it is generally better (more explicit / less prone to error) to use the [@SubModule]`SubModule` facet to delcare them on a main 'AppModule' class.
 
 
 
+Fantom Services [#fantomServices]
+=================================
+The Fantom language has the notion of application wide [services]`sys::Service`. Should your application make use this mechanism, IoC provides the `IocService` wrapper class that holds a 'Registry' instance and extends Fantom's [Service]`sys::Service`. It also contains convenience methods for creating and accessing the registry.
 
-Using a Fantom Service [#iocService]
-====================================
-If your code runs in an IoC container, such as [BedSheet]`pod:afBedSheet`, then the container manages the 'Registry' instance for you.
-
-If running unit tests then typically you would create your own 'Registry' instance and hold it as a variable / field.
-
-An alternative is to create a [Fantom Service]`sys::Service` to hold the registry. This is useful in situations where static access to the 'Registry', such as 'fwt' applications where you have very little control over how your classes are created.
-
-`IocService` is a helper class that extends 'Service' and contains convenience methods for creating and accessing the registry.
-
-For example, to create and start a Fantom IoC Service (assuming you use IoC Env):
+For example, to create and start a Fantom IoC Service:
 
   IocService([MyModule#]).start()
 
-Then from anywhere in your code, it may be accessed with:
+Then, from anywhere in your code, use the standard Fantom service methods to locate the 'IocService' instance and query the registry:
 
   iocService := (IocService) Service.find(IocService#)
   ...
@@ -210,7 +220,6 @@ Then from anywhere in your code, it may be accessed with:
 Uninstall 'IocService' like any other:
 
   Service.find(IocService#).uninstall()
-
 
 
 
@@ -372,8 +381,12 @@ Don't be scared of creating 'const' services! Use the [Concurrent]`pod:afConcurr
 
 Release Notes [#releaseNotes]
 *****************************
+v2.0.4 [#2.0.4]
+===============
+ - Bug: '@Autobuild' fields could be created twice if an it-block ctor was used.
+
 v2.0.2 [#2.0.2]
----------------
+===============
  - Chg: 'perApplication' scoped services can only be created once, even during threaded race conditions.
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
  - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
@@ -382,7 +395,7 @@ v2.0.2 [#2.0.2]
  - Bug: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
 
 v2.0.0 [#2.0.0]
----------------
+===============
  - New: All attributes of a service (scope, proxy, etc...) may be overridden.
  - New: '@Override' facet for defining service override methods in 'AppModule'.
  - New: '@Autobuild' facet for injecting non-service instances.
@@ -403,23 +416,23 @@ v2.0.0 [#2.0.0]
  - Bug: 'IocService' methods now more closely follow those of 'Registry'.
 
 v1.7.6 [#1.7.6]
----------------
+===============
  - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.
  - Chg: Added 'checked' parameter to 'Registry.serviceById()'.
  - Chg: Removed the little used 'Unwrappable' Err mixin.
  - Bug: 'RegistryBuilder' could potentially throw an Err when adding both modules and pods.
 
 v1.7.4 [#1.7.4]
----------------
+===============
  - Bug: Configuration contributions added via 'set()' did not have any implied ordering constraints.
 
 v1.7.2 [#1.7.2]
----------------
+===============
  - Chg: Configuration ordering constraints are no longer specified with strings. Use the new 'Constraints' class to pass your Obj keys in.
    This avoids problems with 'toStr()' and string keys with commas.
 
 v1.7.0 [#1.7.0]
----------------
+===============
  - New: All service configuration is done through the *uber* 'Configuration' object.
  - New: Configuration IDs can now be injected by specifying a Map rather than a List.
  - New: Added '@Advise.serviceType' for advising a single service.
@@ -430,7 +443,7 @@ v1.7.0 [#1.7.0]
  - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
 
 v1.6.4 [#1.6.4]
----------------
+===============
  - New: Methods on proxied services may now have *plain* default values - 'Plastic' will attempt to *guess* what they are!
  - Chg: Removed deprecated classes 'TypeCoercer, StrategyRegistry' and 'NotFoundErr'.
  - Chg: Changed the default values for some 'Registry' methods to 'null' (from 'Obj#.emptyList').
@@ -440,7 +453,7 @@ v1.6.4 [#1.6.4]
  - Bug: Could not autobuild nullable types.
 
 v1.6.2 [#1.6.2]
----------------
+===============
  - New: Threaded services can be overriden.
  - New: Using [Bean Utils 0.0.2]`pod:afBeanUtils`
  - Chg: Deleted all previous '@Deprecated' classes and methods.
@@ -455,7 +468,7 @@ v1.6.2 [#1.6.2]
  - Bug: Trying to proxy a mixin with a static field gave an Err.
 
 v1.6.0 [#1.6.0]
----------------
+===============
  - New: 'Registry.dependencyByType()' now returns services via a type inheritance search.
  - New: 'LocalRefs, LocalMaps, LocalLists' instances may now be '@Inject'ed thanks to new 'DependencyProviders'
  - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
@@ -473,12 +486,12 @@ v1.6.0 [#1.6.0]
  - Chg: 'TypeCoercer' is now 'const'.
 
 v1.5.4 [#1.5.4]
----------------
+===============
  - Chg: Available values in 'NotFoundErr' are now sorted alphabetically.
  - Bug: Attempting to inject or autobuild a threaded service in an app-scoped (const) service gave an error.
 
 v1.5.2 [#1.5.2]
----------------
+===============
  - New: 'TypeCoercer' converts Lists from one parameterised type to another.
  - New: 'ConcurrentCache' gets new methods: 'clear(), isEmpty(), remove(), replace(), size()'.
  - New: Added 'clearCache()' to 'TypeCoercer'.
@@ -491,7 +504,7 @@ v1.5.2 [#1.5.2]
  - Bug: 'Log' could not be injected via ctor.
 
 v1.5.0 [#1.5.0]
----------------
+===============
  - New: 'Registry.createProxy()' lets you create a lazy proxy from an arbituary mixin / impl pair.
  - New: 'Registry.callMethod()' lets you invoke methods with dependencies injected into the parameters.
  - New: 'LogProvider' lets you inject 'Log' instances.
@@ -504,18 +517,18 @@ v1.5.0 [#1.5.0]
  - Chg: Overhauled 'InjectionCtx' to make use of ThreadStacks so it doesn't need to be passed around.
 
 v1.4.10 [#1.4.10]
------------------
+=================
  - Chg: InjectionCtx is now threaded and used in Lazy Service creation. (Um, that means more complete Operation Stacks in IocErrs!)
  - Bug: Once a proxied service, always a proxied service! In some cases the *real* service could have been returned.
 
 v1.4.8 [#1.4.8]
----------------
+===============
  - New: RegistryBuilder options are now available via `RegistryOptions`.
  - Chg: Injectable services are now documented with '(Service)'.
  - Chg: Enabled multi-line banner text.
 
 v1.4.6 [#1.4.6]
----------------
+===============
  - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to 'ConcurrentCache'.
  - New: `NotFoundErr` now pretty prints available values.
  - Chg: [Plastic]`pod:afPlastic` has been broken out into an external dependency.
@@ -524,7 +537,7 @@ v1.4.6 [#1.4.6]
  - Bug: 'ThreadStash' name prefix tidy.
 
 v1.4.4 [#1.4.4]
----------------
+===============
  - New: 'PlasticCompilationErr' gives detailed info and code snippets.
  - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
  - Chg: afPlastic now generates 'using' statements.
@@ -532,14 +545,14 @@ v1.4.4 [#1.4.4]
  - Bug: 'Before' and 'After' ordering constraint prefixes were not case insensitive.
 
 v1.4.2 [#1.4.2]
----------------
+===============
  - New: Added 'ConcurrentCache' class, an application of 'ConcurrentState' designed for fast reads.
  - New: Added 'PlasticClassModel.extendClass()' for the model may now extend multiple Mixins.
  - New: Added 'PlasticClassModel.addMethod()' for adding new methods.
  - Chg: 'ConcurrentState' state may now be 'null' (and added an instance count).
 
 v1.4.0 [#1.4.0]
----------------
+===============
  - New: Added 'OrderedConfig.remove()' and 'MappedConfig.remove()'.
  - New: Added `RegistryBuilder#moduleTypes` to return a list of modules types held by the builder.
  - New: Added 'suppressStartupMsg' build option.
@@ -551,7 +564,7 @@ v1.4.0 [#1.4.0]
  - Bug: Could not override ordered config if it was referenced by constraints.
 
 v1.3.10 [#1.3.10]
------------------
+=================
  - New: Added 'PipelineBuilder' util service.
  - Chg: [Registry.autobuild()]`Registry#autobuild` now looks for a default implementation if passed a mixin.
  - Chg: Made it clear when service creation fails due to Registry Shutdown.
@@ -561,7 +574,7 @@ v1.3.10 [#1.3.10]
  - Bug: Stack frames were lost from Errs originating from module builder methods.
 
 v1.3.8 [#v1.3.8]
-----------------
+================
  - New: Added `TypeCoercer` util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
  - Chg: `OrderedConfig` contributions are coerced to the contrib type.
  - Chg: `MappedConfig` key and value contributions are coerced to their required types.
@@ -571,13 +584,13 @@ v1.3.8 [#v1.3.8]
  - Chg: Exposed '@NoDoc PlasticPodCompiler' so it may be used outside of afIoc.
 
 v1.3.6 [#v1.3.6]
-----------------
+================
  - Bug: Real impls of proxied const services were not being cached.
  - Bug: The implied order of unordered config in 'OrderedConfig' was not assured.
  - Bug: Could not inject null into const fields via a custom 'DependencyProvider'.
 
 v1.3.4 [#v1.3.4]
-----------------
+================
  - Chg: `DependencyProvider`s may now provide 'null' values.
  - Chg: `OrderedConfig` values may be 'null'.
  - Chg: `MappedConfig` values may be 'null'.
@@ -585,7 +598,7 @@ v1.3.4 [#v1.3.4]
  - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.
 
 v1.3.2 [#v1.3.2]
-----------------
+================
  - New: IocErr is thrown on startup if module advisor methods don't match any proxyable serivces.
  - New: Module advisor methods may be marked as optional.
  - New: Add thread clean up handlers to 'ThreadStashManager'.
@@ -595,7 +608,7 @@ v1.3.2 [#v1.3.2]
  - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
 
 v1.3.0 [#v1.3.0]
-----------------
+================
  - New: Simple Aspect API for advising proxied servies.
  - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
  - New: 'ThreadStashManager' now keeps tabs on your 'ThreadStashes' so they may be cleanup at the end of, um... say a web request!
@@ -608,12 +621,12 @@ v1.3.0 [#v1.3.0]
  - Bug: Autobuild now checks if the type is instantiable.
 
 v1.2.2 [#v1.2.2]
-----------------
+================
  - Chg: `Registry#autobuild` now accepts optional parameters to pass / mix into the ctor.
  - Chg: 'ConcurrentState' now accepts a factory method for creating / initialising state.
 
 v1.2.0 [#v1.2.0]
-----------------
+================
  - New: Browse defined services via `ServiceStats`
  - New: Override defined services with your own implementations via the new powerful 'ServiceOverrides' feature.
  - New: Override any existing 'OrderedConfig' contribution with you own, via 'OrderedConfig.addOverride'.
@@ -624,7 +637,7 @@ v1.2.0 [#v1.2.0]
  - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
 
 v1.1.0 [#v1.1.0]
-----------------
+================
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
  - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
@@ -632,13 +645,13 @@ v1.1.0 [#v1.1.0]
  - Bug: Services can be created even if they don't define any ctors.
 
 v1.0.0 [#v1.0.0]
-----------------
+================
  - New: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
  - Chg: Multiple instances of 'ConcurrentState' can be created with the same state class.
  - Bug: Made public the 'withState()' and 'getState()' methods on 'ConcurrentState'.
  - Bug: NPE could be thrown if ctor depdendency not found.
 
 v0.0.2 [#v0.0.2]
-----------------
+================
  - New: A fully loaded preview release.
 

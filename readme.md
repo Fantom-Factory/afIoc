@@ -1,8 +1,14 @@
+#IoC v2.0.2
+---
+[![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
+[![pod: v2.0.2](http://img.shields.io/badge/pod-v2.0.2-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
+
 ## Overview
 
 `IoC` is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html).
 
-Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Then you'll love *afIoc*!
+Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Then you'll love *IoC*!
 
 - **Injection - any way *you* want it!**
   - field injection
@@ -55,49 +61,55 @@ Full API & fandocs are available on the [Status302 repository](http://repo.statu
 
 ## Quick Start
 
-1. Create services as plain Fantom objects
-2. Use the `@Inject` facet to mark fields as dependencies
-3. Define and configure services in an `AppModule` class
-4. Build and start the registry
-5. Go, go, go!
-
-### Example
-
 1). Create a text file called `Example.fan`
 
 ```
-class Main {
-  Void main() {
-    registry := RegistryBuilder().addModule(MyModule#).build().startup()
+using afIoc
 
-    test1 := (MyService1) registry.serviceById("myservice1")        // returns a singleton
-    test2 := (MyService1) registry.dependencyByType(MyService1#)    // returns the same singleton
-    test3 := (MyService1) registry.autobuild(MyService1#)           // build a new instance
-    test4 := (MyService1) registry.injectIntoFields(MyService1())   // inject into existing Objs
-
-    test1.service2.kick  // --> Ass!
-    test2.service2.kick  // --> Ass!
-    test3.service2.kick  // --> Ass!
-    test4.service2.kick  // --> Ass!
-
-    registry.shutdown()
-  }
-}
-
-class MyModule {           // every application needs a module class
-  static Void defineServices(ServiceDefinitions defs) {
-    defs.add(MyService1#)  // define your singletons here
-    defs.add(MyService2#)
-  }
-}
+// ---- Services are plain Fantom classes -------------------------------------
 
 class MyService1 {
-  @Inject               // you'll use @Inject all the time
-  MyService2? service2  // inject services into services!
+    ** Inject services into services!
+    @Inject MyService2? service2
 }
 
 class MyService2 {
-  Str kick() { return "Ass!" }
+    Void poke() { echo("Poking ${this.toStr}") }
+}
+
+
+
+// ---- Modules are where services are defined and configured -----------------
+
+** Every application needs a module class
+class MyModule {
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(MyService1#)
+        defs.add(MyService2#)
+    }
+}
+
+
+
+// ---- Build and start the IoC Registry --------------------------------------
+
+class Main {
+    Void main() {
+        registry := RegistryBuilder().addModule(MyModule#).build().startup()
+
+        test1 := (MyService1) registry.serviceById("myservice1")       // returns a singleton
+        test2 := (MyService1) registry.dependencyByType(MyService1#)   // returns the same singleton
+        test3 := (MyService1) registry.autobuild(MyService1#)          // build a new instance
+        test4 := (MyService1) registry.injectIntoFields(MyService1())  // inject into existing Objs
+
+        // all test classes poke the same instantce of Service2
+        test1.service2.poke
+        test2.service2.poke
+        test3.service2.poke
+        test4.service2.poke
+
+        registry.shutdown()
+    }
 }
 ```
 
@@ -130,11 +142,17 @@ afPlastic::PlasticCompiler: Builtin
   / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
  / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
 /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                            Alien-Factory IoC v2.0.2 /___/
+                            Alien-Factory IoC v2.0.4 /___/
 
 IoC Registry built in 205ms and started up in 11ms
 
 [warn] [afIoc] Autobuilding type 'Example_0::MyService1' which is *also* defined as service 'Example_0::MyService1 - unusual!
+
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.MyService2@680e2291
+
 [info] [afIoc] Stopping IoC...
 [info] [afIoc] IoC shutdown in 19ms
 [info] [afIoc] "Goodbye!" from afIoc!
@@ -142,55 +160,54 @@ IoC Registry built in 205ms and started up in 11ms
 
 ## Terminology
 
-IoC distinguishes between **Services** and **Dependencies**.
+A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Service are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined in multiple modules.
 
-A **service** is a Fantom class where there is only one (singleton) instance for the whole application (or one per thread for non-const classes). Each service is identified by a unique ID (usually the qualified class name) and may, or may not, be represented by a Mixin. Services are managed by IoC and must be defined by a module. Services may solicit configuration contributed by other modules.
+A **dependency** is any class instance or object that a service depends on. A dependency may or may not be a service. Non service dependencies are managed by user defined [dependency providers](http://repo.status302.com/doc/afIoc/DependencyProvider.html).
 
-A **dependency** is any class or object that another service depends on. A dependency may or may not be a service.  For example, a class may depend on a field `Int maxNoOfThreads` but that `Int` isn't a service, it's just a number. Non service dependencies are managed by user defined [dependency providers](http://repo.status302.com/doc/afIoc/DependencyProvider.html).
+A **module** is a class whose static methods define and configure services.
 
-A **contribution** is a means to configure a service.
-
-A **module** is a class where services and contributions are defined.
+The **registry** is the key class in an IoC application. It creates, holds and manages the service instances.
 
 ## Building the Registry
 
-Use [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html) to manually manage an IoC `Registry` instance. You would typically do this when running tests.
+Frameworks such as [BedSheet](http://www.fantomfactory.org/pods/afBedSheet) and [Reflux](http://www.fantomfactory.org/pods/afReflux) are IoC containers. That is, they create and look after a `Registry` instance, using it to create classes and provide access to services.
 
-    registry := RegistryBuilder().addModule(MyModule#).build().startup()
+Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), passing in the module that defines your services:
+
+    registry := RegistryBuilder().addModule(AppModule#).build().startup()
     ...
-    registry.injectIntoFields(this)
+    service  := registry.getServiceById("serviceId")
     ...
-    registry.shutdown()
+    registry.shutdown
 
-Ensure modules are added from other IoC libraries the code uses. Example, if using the [IocEnv library](http://www.fantomfactory.org/pods/afIocEnv) then add `IocEnvModule`:
+If your code uses other IoC libraries, make sure modules from these pods are added too. Example, if using the [IocEnv library](http://www.fantomfactory.org/pods/afIocEnv) then add a dependency on the `afIocEnv` pod:
 
-    registry := RegistryBuilder().addModule(MyModule#).addModule(IocEnvModule#).build().startup()
+    registry := RegistryBuilder()
+        .addModule(MyModule#)
+        .addModulesFromPod("afIocEnv")
+        .build().startup()
 
-It's standard that IoC library modules are named after the library, but with a `Module` suffix.
+### Pod Meta Data
 
-### Pod Meta-data
-
-When [building a registry](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), you declare which modules are to loaded. You may also load modules from dependant pods, in which case, each pod should have declared the following meta:
+It is good practice, when writing an IoC application or library, to always include the following meta in the `build.fan`:
 
     meta = [ "afIoc.module" : "<module-qname>" ]
 
-Where `<module-qname>` is a qualified type name of an `AppModule` class. Additional modules can be declared by the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet.
+Where `<module-qname>` is the qualified type name of the pod's `AppModule` class.
 
-### Using a Fantom Service
+This is how IoC knows what modules each pod has. It is how the `addModulesFromPod("afIocEnv")` line works; IoC inspects the meta-data in the `afIocEnv` pod and looks up the `afIoc.module` key. It then loads the modules listed.
 
-If your code runs in an IoC container, such as [BedSheet](http://www.fantomfactory.org/pods/afBedSheet), then the container manages the `Registry` instance for you.
+The `afIoc.module` meta may also be a Comma Seperated List (CSV) of module names, should the pod have many. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet to delcare them on a main `AppModule` class.
 
-If running unit tests then typically you would create your own `Registry` instance and hold it as a variable / field.
+### Fantom Services
 
-An alternative is to create a [Fantom Service](http://fantom.org/doc/sys/Service.html) to hold the registry. This is useful in situations where static access to the `Registry`, such as `fwt` applications where you have very little control over how your classes are created.
+The Fantom language has the notion of application wide [services](http://fantom.org/doc/sys/Service.html). Should your application make use this mechanism, IoC provides the [IocService](http://repo.status302.com/doc/afIoc/IocService.html) wrapper class that holds a `Registry` instance and extends Fantom's [Service](http://fantom.org/doc/sys/Service.html). It also contains convenience methods for creating and accessing the registry.
 
-[IocService](http://repo.status302.com/doc/afIoc/IocService.html) is a helper class that extends `Service` and contains convenience methods for creating and accessing the registry.
-
-For example, to create and start a Fantom IoC Service (assuming you use IoC Env):
+For example, to create and start a Fantom IoC Service:
 
     IocService([MyModule#]).start()
 
-Then from anywhere in your code, it may be accessed with:
+Then, from anywhere in your code, use the standard Fantom service methods to locate the `IocService` instance and query the registry:
 
     iocService := (IocService) Service.find(IocService#)
     ...

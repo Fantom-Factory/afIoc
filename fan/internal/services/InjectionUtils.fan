@@ -14,9 +14,8 @@ internal const class InjectionUtils {
 			fields := findInjectableFields(object.typeof, true)
 			fields.each |field| {
 				InjectionTracker.doingFieldInjection(object, field) |ctx->Obj?| {
-					dependency := dependencyProviders.provideDependency(ctx, false)
-					if (dependency != null)
-						inject(object, field, dependency)
+					valueFunc := |->Obj?| { dependencyProviders.provideDependency(ctx, false) }
+					inject(object, field, valueFunc)
 					return null
 				}
 			}
@@ -175,9 +174,10 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Void inject(Obj target, Field field, Obj? value) {
-		track("Injecting ${value?.typeof?.qname} into field $field.signature") |->| {
+	private static Void inject(Obj target, Field field, |->Obj?| valueFunc) {
+		track("Injecting ${field.type.qname} into field $field.signature") |->| {
 			try {
+				// TODO: 'null' is the wrong check, we should hold a list of fields (somewhere) that state what fields are accounted for
 				if (field.get(target) != null) {
 					log("Field has non null value. Aborting injection.")
 					return
@@ -188,9 +188,10 @@ internal const class InjectionUtils {
 				return
 			}
 
-			// BugFix: if injecting null (via DepProvider) then don't throw the Const Err below
+			value := valueFunc()
+			// BugFix: if we're injecting null (via DepProvider) then don't throw a Const Err
 			if (value == null)
-				return	
+				return
 			if (field.isConst)
 				throw IocErr(IocMessages.cannotSetConstFields(field))
 			field.set(target, value)
@@ -208,8 +209,8 @@ internal const class InjectionUtils {
 		fieldsAll	:= (Field[]) fieldList.flatten.unique
 		fields		:= fieldsAll.exclude { it.isAbstract || it.isStatic }
 
-		// it's tricky (not impossible - but too much work for now!) to tell if a field if overridden,
-		// so virtual fields that are overridden appear in the list twice
+		// TODO: it's tricky (not impossible - but too much work for now!) to tell if a field if overridden,
+		// so overridden virtual fields appear in the list twice
 		
 		return fields.findAll |field| {
 			if (field.isConst && !includeConst)
