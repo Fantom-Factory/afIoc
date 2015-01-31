@@ -158,7 +158,7 @@ Poking fan.Example_0.MyService2@680e2291
 
 Terminology [#terminology]
 **************************
-A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Service are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined in multiple modules.
+A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Services are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined in multiple modules.
 
 A **dependency** is any class instance or object that a service depends on. A dependency may or may not be a service. Non service dependencies are managed by user defined [dependency providers]`DependencyProvider`.
 
@@ -168,15 +168,15 @@ The **registry** is the key class in an IoC application. It creates, holds and m
 
 
 
-Building the Registry [#loadingModules]
-***************************************
+The IoC Registry [#theIocRegistry]
+**********************************
 Frameworks such as [BedSheet]`pod:afBedSheet` and [Reflux]`pod:afReflux` are IoC containers. That is, they create and look after a 'Registry' instance, using it to create classes and provide access to services.
 
 Sometimes you don't have access to an IoC container and have to create the 'Registry' instance yourself. (Running unit tests is a good example.) In these cases you will need to use the `RegistryBuilder`, passing in the module that defines your services:
 
   registry := RegistryBuilder().addModule(AppModule#).build().startup()
   ...
-  service  := registry.getServiceById("serviceId")
+  service  := registry.serviceById("serviceId")
   ...
   registry.shutdown
 
@@ -189,33 +189,19 @@ If your code uses other IoC libraries, make sure modules from these pods are add
 
 
 
-Pod Meta Data [#metaData]
-=========================
-It is good practice, when writing an IoC application or library, to always include the following meta in the 'build.fan':
-
-  meta = [ "afIoc.module" : "<module-qname>" ]
-
-Where '<module-qname>' is the qualified type name of the pod's 'AppModule' class.
-
-This is how IoC knows what modules each pod has. It is how the 'addModulesFromPod("afIocEnv")' line works; IoC inspects the meta-data in the 'afIocEnv' pod and looks up the 'afIoc.module' key. It then loads the modules listed.
-
-The 'afIoc.module' meta may also be a Comma Seperated List (CSV) of module names, should the pod have many. Though it is generally better (more explicit / less prone to error) to use the [@SubModule]`SubModule` facet to delcare them on a main 'AppModule' class.
-
-
-
 Fantom Services [#fantomServices]
 =================================
-The Fantom language has the notion of application wide [services]`sys::Service`. Should your application make use this mechanism, IoC provides the `IocService` wrapper class that holds a 'Registry' instance and extends Fantom's [Service]`sys::Service`. It also contains convenience methods for creating and accessing the registry.
+The Fantom language has the notion of application wide [services]`sys::Service`. Should your application make use of this mechanism, IoC provides the `IocService` wrapper class that holds a 'Registry' instance and extends Fantom's [Service]`sys::Service`. It also contains convenience methods for creating and accessing the registry.
 
 For example, to create and start a Fantom IoC Service:
 
-  IocService([MyModule#]).start()
+  IocService([ MyModule# ]).start()
 
 Then, from anywhere in your code, use the standard Fantom service methods to locate the 'IocService' instance and query the registry:
 
   iocService := (IocService) Service.find(IocService#)
   ...
-  myService  := iocService.serviceById(MyService#.qname)
+  myService  := iocService.dependencyByType(MyService#)
 
 Uninstall 'IocService' like any other:
 
@@ -223,42 +209,150 @@ Uninstall 'IocService' like any other:
 
 
 
+Modules [#modules]
+******************
+Every IoC application / library will have a module class. Module classes are where services are defined and configured. Module classes declare static methods with special facets that tell IoC what they do.
+
+By convention an application will call its module 'AppModule' and libraries will name modules after themselves, but with a 'Module' suffix. Example, BedSheet has a module named 'BedSheetModule'.
+
+
+
+Pod Meta-data [#metaData]
+=========================
+It is good practice, when writing an IoC application or library, to always include the following meta in the 'build.fan'
+
+  meta = [ "afIoc.module" : "<module-qname>" ]
+
+Where '<module-qname>' is the qualified type name of the pod's main module class.
+
+This is how IoC knows what modules each pod has. It is how the 'addModulesFromPod("afIocEnv")' line works; IoC inspects the meta-data in the 'afIocEnv' pod and looks up the 'afIoc.module' key. It then loads the modules listed.
+
+The 'afIoc.module' meta may also be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule]`SubModule` facet on a main 'AppModule' class.
+
+
+
+Services [#services]
+********************
+A service can be any old Fantom class. What differentiates a *service* from any other class is that you typically want to reuse a service in multiple places. An IoC Service is a class that is created and held by the IoC Registry. IoC may then inject that service into other classes, which may themselves be services.
+
+For IoC to instantiate and manage a service it needs to know:
+
+ - How to build the service
+ - What unique ID to store it under
+ - What scope it has (application or threaded)
+ - What its proxy strategy is.
+
+(Scopes and proxy strategies are covered later, as they're kinda advanced topics.)
+
+All these details are defined in the application's module.
+
+Note that IoC does not want an instance of your service. Instead it wants to know how to make it. That is because IoC will defer creating your service for as long as possible (lazy loading).
+
+If nobody ever asks for your service, it is never created. When the service is explicitly asked for, either by you or by anther service, only then is it created.
+
+
+
+Build Your Own [#buildYourOwn]
+==============================
+If we have a class 'MyService' that we wish to use as a service, then we need to tell IoC how to build it. The simplest way is to declare a static *build* method in the module that creates the instance for us:
+
+pre>
+using afIoc
+
+// example 1
+class AppModule {
+
+    @Build
+    static MyService buildMyService() {
+        return MyService()
+    }
+}
+<pre
+
+The method may be called anything you like and be of any scope (internal or even private), but it needs to be 'static' and it needs the '@Build' facet.
+
+Because of the '@Build' facet, IoC inspects the method and infers the following:
+
+ - Calling the method creates a service instance - *inferred from '@Build'*
+ - The service is of type 'MyService' - *inferred from the return type*
+ - The unique ID is 'myPod::MyService' - *inferred from the return type's qualified name*
+
+We could now retrieve an instance of 'MyService' with the following:
+
+  myService := (MyService) registry.serviceById(MyService#.qname)
+
+  myService := (MyService) registry.dependencyByType(MyService#)
+
+What if 'MyService' created penguins? Well, it'd be useful to have a 'Penguins' class / service to hold them in. We'll pass that into 'MyService'. We'll also tell 'MyService' how many penguins it should make:
+
+  class MyService {
+      new make(Int noOfPenguins, Penguins penguins) { ... }
+  }
+
+The 'AppModule' now needs updating with a builder method for the 'Penguins' service, and the 'MyService' builder method needs updating also:
+
+pre>
+using afIoc
+
+// example 2
+class AppModule {
+
+    @Build
+    static Penguins buildPenguins() {
+       return Penguins()
+    }
+
+    @Build
+    static MyService buildMyService(Penguins penguins) {
+        return MyService(3, penguins)
+    }
+}
+<pre
+
+Before IoC calls 'buildMyService()' it looks at the method signature and assumes any parameters are dependant services. In this case, 'Penguins'. It then looks up, and creates if it doesn't already exist, the 'Penguins' service and passes it to 'buildMyService()'. This is an example of *method injection*. All this is automatic, and all builder methods may declare any number of services as a method parameters.
+
+Note that the '@Build' facet has other attributes that give you control over the service's unique ID, scope and proxy strategy.
+
+Service builder methods are a very powerful pattern as they give you complete control over how the service is created. But they are also very verbose and require a lot of code. So lets look at an easier way; the 'defineServices()' method...
+
+
+
 Defining Services [#definingServices]
-*************************************
-Services are defined in Module classes, where each meaningful method is static and usually annotated with a facet.
+=====================================
+Modules may declare a 'defineServices()' static method. It may be of any visibility but must be called 'defineServices' and it must define a single parameter of 'ServiceDefinitions'. The method lets you create and add service definitions in place of writing builder methods.
 
-The 'defineServices()' method does not have a facet, but is declared with a standard signature. The 'defineServices()' method is the common means to define services. For example:
+We could replace the previous 'example 1' with the following:
 
 pre>
+using afIoc
+
 class AppModule {
-
-  static Void defineServices(ServiceDefinitions defs) {
-
-    // defines a service with an ID of 'myPod::MyService'
-    defs.add(MyService#, MyServiceImpl#)
-
-    // defines a service with an ID of 'myPod::myServiceImpl'
-    defs.add(MyServiceImpl#)
-
-    // defines a service with an ID of 'elephant'
-    defs.add(MyServiceImpl#).withId("elephant")
-  }
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(MyService#)
+    }
 }
 <pre
 
-Modules may can also define *builder* methods. These are static methods annotated with the '@Build' facet. Here you may construct and return the service yourself. Any parameters are taken to be dependencies and are resolved and injected as such when the method is called. For example, to manually build a service with the Id 'penguin':
+It may look simple, but several things are inferred from the above code:
+
+ - The service is of type 'MyService' - *inferred from the service type*
+ - The unique ID is 'myPod::MyService' - *inferred from the service type's qualified name*
+ - 'MyService' may be instantiated by IoC.
+
+Now lets replace 'example 2':
 
 pre>
-class AppModule {
+using afIoc
 
-  @Build { serviceId="penguin" }
-  static EmailService buildStuff(EmailConfig config) {
-    EmailServiceImpl(config)
-  }
+class AppModule {
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(MyService#).withCtorArgs([ 3 ])
+        defs.add(Penguins#)
+    }
 }
 <pre
 
-Services are *not* created until they are referenced or required.
+That's a lot more succinct! But wait! We gave 'MyService' a ctor arg of '3', but what about 'Penguins'? All supplied ctor arguments must come first in the parameter list, because all non-supplied ctor args are taken to be services. These services, same as in method injection, are resolved, built if needed, and handed to the ctor. This is an example of *ctor injection*.
 
 
 
@@ -361,7 +455,7 @@ See [@Advise]`Advise` for details
 
 Tips [#tips]
 ************
-Strive to keep your services 'const', delcare a serialisation ctor to keep '@Inject'ed fields non-nullable:
+Strive to keep your services 'const', declare a serialisation ctor to keep '@Inject'ed fields non-nullable:
 
   new make(|This| injectInto) { injectInto(this) }
 
