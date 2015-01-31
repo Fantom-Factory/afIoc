@@ -109,8 +109,6 @@ internal class TestAutobuild : IocTest {
 		verifyEq(log.msg, IocMessages.warnAutobuildingService(T_MyService80#.qname, T_MyService80#))
 	}
 	
-	// BugFix - that I can't make fail! 
-	// Nevermind, it obviously wasn't a bug then!
 	Void testAutobuildOnlyBuildsTheOnce() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
 		s105 := reg.serviceById(T_MyService105#.qname) as T_MyService105
@@ -201,13 +199,13 @@ internal class T_MyService78 {
 internal class T_MyService105 {
 	static const AtomicInt built := AtomicInt(0)
 	@Autobuild
-	T_MyService105A? service {
+	T_MyService105A service {
 		set {
 			built.incrementAndGet
 			&service = it
 		}
 	}
-//	new make(|This|? f := null) { f?.call(this)	}
+	new make(|This|? f := null) { f?.call(this)	}
 }
 
 internal class T_MyService105A {

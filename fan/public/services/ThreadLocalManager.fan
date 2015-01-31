@@ -44,13 +44,13 @@ using afConcurrent
 ** @since 1.6.0
 const mixin ThreadLocalManager {
 
-	** Creates a `LocalRef` with the given default function.
+	** Creates a `afConcurrent::LocalRef` with the given default function.
 	abstract LocalRef createRef(Str name, |->Obj?|? defFunc := null)
 
-	** Creates a `LocalList` with the given name.
+	** Creates a `afConcurrent::LocalList` with the given name.
 	abstract LocalList createList(Str name)
 
-	** Creates a `LocalMap` with the given name.
+	** Creates a `afConcurrent::LocalMap` with the given name.
 	abstract LocalMap createMap(Str name)
 
 	** Creates a qualified name unique to this 'ThreadLocalManager' that when used to create a 

@@ -9,7 +9,7 @@
 **  - ignore the method call
 **  - do something else entirely!
 ** 
-** The [serviceId]`#serviceId` argument is a [glob pattern]`sys::Regex.glob` and is matched against 
+** The [serviceId]`Advise.serviceId` argument is a [glob pattern]`sys::Regex.glob` and is matched against 
 ** all service ids in the registry. This allows a single advisor method to match and advise 
 ** multiple services. e.g. to advise all DAOs you might define:
 ** 
