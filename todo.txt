@@ -1,5 +1,15 @@
+Fandoc
 
-v2.0.2 Maybe...?
+ - 
+ - Overrides
+   - Services
+   - Configuration Contributions
+ - Lazy Loading
+ - Service Scope
+ - Advicing / AOP
+ - Testing
+
+v2.0.6 Maybe...?
 ----------------
 make ServiceDefinitions.overrideByType more intelligent than type.qname
 
@@ -10,6 +20,14 @@ Relocate RegistryStartup.printServiceList() and
 
 Duvet needs: make 'optional' contribution of: .after("afPillow.pillowPages")
  - ordered contributions
+ - not backwards binary compatible
+
+Somehow group constraints together:
+	config.addPlaceholder("afExplorer.start").after("afReflux.save")
+	config["afExplorer.rename"]		= MenuItem.makeCommand(globalCmds["afExplorer.cmdRenameFile"].command)
+	config["afExplorer.delete"]		= MenuItem.makeCommand(globalCmds["afExplorer.cmdDeleteFile"].command)
+	config["separator.02"]			= MenuItem { it.mode = MenuItemMode.sep }
+	config.addPlaceholder("afExplorer.end").before("separator.01")
 
 
 
