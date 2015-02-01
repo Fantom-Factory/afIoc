@@ -89,6 +89,7 @@ internal const class InjectionUtils {
 
 	Func makeCtorInjectionPlan(InjectionCtx ctx) {
 		track("Creating injection plan for fields of ${ctx.injectingIntoType.qname}") |->Obj| {
+			dependencyProviders := dependencyProviders
 			building := ctx.injectingIntoType
 			plan := Field:Obj?[:]
 			findInjectableFields(building, true).each |field| {
@@ -142,6 +143,7 @@ internal const class InjectionUtils {
 
 	private Obj?[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[]? providedMethodArgs) {
 		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
+			dependencyProviders := dependencyProviders
 			params := method.params.map |param, index| {
 				log("Parameter ${index+1} = $param.type")
 
