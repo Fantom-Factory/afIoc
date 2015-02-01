@@ -1,8 +1,9 @@
 Fandoc
 
- - 
+ - Dependency Injection
+ - Configuration
  - Overrides
-   - Services
+   - Services, @Override / serviceDefs
    - Configuration Contributions
  - Lazy Loading
  - Service Scope

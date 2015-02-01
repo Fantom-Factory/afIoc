@@ -64,46 +64,51 @@ using afIoc
 
 // ---- Services are plain Fantom classes -------------------------------------
 
-class MyService1 {
-    ** Inject services into services!
-    @Inject MyService2? service2
-}
-
-class MyService2 {
+** A reusable piece of code
+class PokerService {
     Void poke() { echo("Poking ${this.toStr}") }
 }
 
+** PokerService is reused here
+class MyService {
+    ** Inject services into services!
+    @Inject PokerService? poker
+}
 
 
-// ---- Modules are where services are defined and configured -----------------
 
-** Every application needs a module class
+// ---- Modules - every IoC application / library needs one -------------------
+
+** This is the central place where services are defined and configured
 class MyModule {
     static Void defineServices(ServiceDefinitions defs) {
-        defs.add(MyService1#)
-        defs.add(MyService2#)
+        defs.add(MyService#)
+        defs.add(PokerService#)
     }
 }
 
 
 
-// ---- Build and start the IoC Registry --------------------------------------
+// ---- Use the IoC Registry to access the services ---------------------------
 
 class Main {
     Void main() {
+        // create the registry, passing in our module
         registry := RegistryBuilder().addModule(MyModule#).build().startup()
 
-        test1 := (MyService1) registry.serviceById("myservice1")       // returns a singleton
-        test2 := (MyService1) registry.dependencyByType(MyService1#)   // returns the same singleton
-        test3 := (MyService1) registry.autobuild(MyService1#)          // build a new instance
-        test4 := (MyService1) registry.injectIntoFields(MyService1())  // inject into existing Objs
+        // different ways to access services
+        test1 := (MyService) registry.serviceById("myService")       // returns a service instance
+        test2 := (MyService) registry.dependencyByType(MyService#)   // returns the same instance
+        test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
+        test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
 
-        // all test classes poke the same instantce of Service2
-        test1.service2.poke
-        test2.service2.poke
-        test3.service2.poke
-        test4.service2.poke
+        // all test classes poke the same instance of Service2
+        test1.poker.poke()
+        test2.poker.poke()
+        test3.poker.poke()
+        test4.poker.poke()
 
+        // clean up
         registry.shutdown()
     }
 }
@@ -144,10 +149,10 @@ IoC Registry built in 205ms and started up in 11ms
 
 [warn] [afIoc] Autobuilding type 'Example_0::MyService1' which is *also* defined as service 'Example_0::MyService1 - unusual!
 
-Poking fan.Example_0.MyService2@680e2291
-Poking fan.Example_0.MyService2@680e2291
-Poking fan.Example_0.MyService2@680e2291
-Poking fan.Example_0.MyService2@680e2291
+Poking fan.Example_0.Poker@680e2291
+Poking fan.Example_0.Poker@680e2291
+Poking fan.Example_0.Poker@680e2291
+Poking fan.Example_0.Poker@680e2291
 
 [info] [afIoc] Stopping IoC...
 [info] [afIoc] IoC shutdown in 19ms
@@ -259,7 +264,7 @@ If we have a class 'MyService' that we wish to use as a service, then we need to
 pre>
 using afIoc
 
-// example 1
+// Example 1
 class AppModule {
 
     @Build
@@ -277,11 +282,13 @@ Because of the '@Build' facet, IoC inspects the method and infers the following:
  - The service is of type 'MyService' - *inferred from the return type*
  - The unique ID is 'myPod::MyService' - *inferred from the return type's qualified name*
 
-We could now retrieve an instance of 'MyService' with the following:
+We can now retrieve an instance of 'MyService' with the following:
 
   myService := (MyService) registry.serviceById(MyService#.qname)
 
-  myService := (MyService) registry.dependencyByType(MyService#)
+or
+
+    myService := (MyService) registry.dependencyByType(MyService#)
 
 What if 'MyService' created penguins? Well, it'd be useful to have a 'Penguins' class / service to hold them in. We'll pass that into 'MyService'. We'll also tell 'MyService' how many penguins it should make:
 
@@ -294,7 +301,7 @@ The 'AppModule' now needs updating with a builder method for the 'Penguins' serv
 pre>
 using afIoc
 
-// example 2
+// Example 2
 class AppModule {
 
     @Build
@@ -339,6 +346,8 @@ It may look simple, but several things are inferred from the above code:
  - The unique ID is 'myPod::MyService' - *inferred from the service type's qualified name*
  - 'MyService' may be instantiated by IoC.
 
+Note how we didn't create an instance of 'MyService', just told IoC that it exists. When a service is defined in this way, IoC will inspect it an choose a suitable ctor to create it with.
+
 Now lets replace 'example 2':
 
 pre>
@@ -352,12 +361,19 @@ class AppModule {
 }
 <pre
 
-That's a lot more succinct! But wait! We gave 'MyService' a ctor arg of '3', but what about 'Penguins'? All supplied ctor arguments must come first in the parameter list, because all non-supplied ctor args are taken to be services. These services, same as in method injection, are resolved, built if needed, and handed to the ctor. This is an example of *ctor injection*.
+That's a lot more succinct! But wait! We gave 'MyService' a ctor arg of '3', but what about 'Penguins'? Just like method injection, IoC
+
+All supplied ctor arguments must come first in the parameter list, because all non-supplied ctor args are taken to be services. These services, same as in method injection, are resolved, built if needed, and handed to the ctor. This is an example of *ctor injection*.
 
 
 
 Dependency Injection [#dependencyInjection]
 *******************************************
+
+
+Ctor Injection
+==============
+
 IoC performs both ctor and field injection, for normal and const fields.
 
 Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.

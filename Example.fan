@@ -2,46 +2,51 @@ using afIoc
 
 // ---- Services are plain Fantom classes -------------------------------------
 
-class MyService1 {
-    ** Inject services into services!
-    @Inject MyService2? service2
-}
-
-class MyService2 {
+** A reusable piece of code
+class PokerService {
     Void poke() { echo("Poking ${this.toStr}") }
 }
 
+** PokerService is reused here
+class MyService {
+    ** Inject services into services!
+    @Inject PokerService? poker
+}
 
 
-// ---- Modules are where services are defined and configured -----------------
 
-** Every application needs a module class
+// ---- Modules - every IoC application / library needs one -------------------
+
+** This is the central place where services are defined and configured
 class MyModule {
     static Void defineServices(ServiceDefinitions defs) {
-        defs.add(MyService1#)
-        defs.add(MyService2#)
+        defs.add(MyService#)
+        defs.add(PokerService#)
     }
 }
 
 
 
-// ---- Build and start the IoC Registry --------------------------------------
+// ---- Use the IoC Registry to access the services ---------------------------
 
 class Main {
     Void main() {
+		// create the registry, passing in our module 
         registry := RegistryBuilder().addModule(MyModule#).build().startup()
 
-        test1 := (MyService1) registry.serviceById("myservice1")       // returns a singleton
-        test2 := (MyService1) registry.dependencyByType(MyService1#)   // returns the same singleton
-        test3 := (MyService1) registry.autobuild(MyService1#)          // build a new instance
-        test4 := (MyService1) registry.injectIntoFields(MyService1())  // inject into existing Objs
+		// different ways to access services
+        test1 := (MyService) registry.serviceById("myService")       // returns a service instance
+        test2 := (MyService) registry.dependencyByType(MyService#)   // returns the same instance
+        test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
+        test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
 
-        // all test classes poke the same instantce of Service2
-        test1.service2.poke
-        test2.service2.poke
-        test3.service2.poke
-        test4.service2.poke
+        // all test classes poke the same instance of Service2
+        test1.poker.poke()
+        test2.poker.poke()
+        test3.poker.poke()
+        test4.poker.poke()
 
+		// clean up
         registry.shutdown()
     }
 }
