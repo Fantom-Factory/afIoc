@@ -247,6 +247,8 @@ Note that IoC does not want an instance of your service. Instead it wants to kno
 
 If nobody ever asks for your service, it is never created. When the service is explicitly asked for, either by you or by anther service, only then is it created.
 
+Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
+
 ### Build Your Own
 
 If we have a class `MyService` that we wish to use as a service, then we need to tell IoC how to build it. The simplest way is to declare a static *build* method in the module that creates the instance for us:
@@ -316,7 +318,7 @@ Service builder methods are a very powerful pattern as they give you complete co
 
 Modules may declare a `defineServices()` static method. It may be of any visibility but must be called `defineServices` and it must define a single parameter of `ServiceDefinitions`. The method lets you create and add service definitions in place of writing builder methods.
 
-We could replace the previous `example 1` with the following:
+We could replace the previous `Example 1` with the following:
 
 ```
 using afIoc
@@ -336,7 +338,7 @@ It may look simple, but several things are inferred from the above code:
 
 Note how we didn't create an instance of `MyService`, just told IoC that it exists. When a service is defined in this way, IoC will inspect it an choose a suitable ctor to create it with.
 
-Now lets replace `example 2`:
+Now lets replace the builder methods in `Example 2` with service definitions:
 
 ```
 using afIoc
@@ -349,45 +351,218 @@ class AppModule {
 }
 ```
 
-That's a lot more succinct! But wait! We gave `MyService` a ctor arg of `3`, but what about `Penguins`? Just like method injection, IoC
-
-All supplied ctor arguments must come first in the parameter list, because all non-supplied ctor args are taken to be services. These services, same as in method injection, are resolved, built if needed, and handed to the ctor. This is an example of *ctor injection*.
+That's a lot more succinct! But wait! `MyService` has a ctor arg of `3` and it's easy to see how that is passed in, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in	the relevant section.
 
 ## Dependency Injection
 
+This section looks at how to inject one service into another; the different ways of injecting the `Penguins` service into `MyService`. The examples assume that both services have been defined or have builder methods.
+
+### Field Injection
+
+Field injection requires the least amount of work on your behalf, but has a couple of drawbacks. To use, simply mark the fields to be injected with `@Inject`. And that's it!
+
+```
+using afIoc
+
+class MyService {
+    @Inject private Penguins?     penguins
+    @Inject private OtherService? otherService
+
+    ...
+}
+```
+
+When you request `MyService` from the registry:
+
+    myService := (MyService) registry.dependencyByType(MyService#)
+
+IoC creates an instance of `MyService` and then sets the fields. As simple as it sounds, it does have a couple of drawbacks:
+
+1. **Services not available in the ctor**
+
+  Because fields are set *after* the service is constructed, they are not available during the constructor call. Attempting to use injected field in the ctor will result in a `NullErr`.
+
+
+
+        using afIoc
+        
+        class MyService {
+            @Inject private Penguins?     penguins
+            @Inject private OtherService? otherService
+        
+            new make() {
+                penguins.save(...)  // Runtime NullErr --> penguins is null
+            }
+        
+            ...
+        }
+
+
+2. **Fields *must* be nullable**
+
+  Because the fields are set *after* the service is constructed, they need to be nullable. This is a shame because one of the nice features of Fantom is being able to specify non-nullable types.
+
+
+3. **Fields cannot be const**
+
+  Because the fields are set *after* the service is constructed, they cannot be `const`. This poses a problem for services that are to be shared between threads, because these services need to be `const` - therefore all their fields need to be `const` too.
+
+
+
+How can we overcome these little niggles? Why, by setting the fields inside the ctor!
+
 ### Ctor Injection
 
-IoC performs both ctor and field injection, for normal and const fields.
-
-Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
-
-When IoC autobuilds a service it locates a suitable ctor. This is either the one donned with the `@Inject` facet or the one with the most parameters. Ctor parameters are taken to be dependencies and are resolved appropriately.
-
-Field injection happens *after* the object has been created and so fields must be declared as nullable:
+Ctor injection is where IoC hands the service all the dependencies it needs via ctor arguments. IoC inspects the parameter list of the ctor, resolves each one as a dependency, and passes it in.
 
 ```
 class MyService {
-  @Inject
-  MyService? myService
+    private const Penguins     penguins
+    private const OtherService otherService
+
+    new make(Penguins penguins, OtherService otherService) {
+        this.penguins     = penguins
+        this.otherService = otherService
+    }
+
+    ...
 }
 ```
 
-The exception is if you declare an it-block ctor:
+Ctor injection puts you in complete control. You list which dependencies your service requires as ctor parameters and IoC passes them in. The dependencies may be used there and then or set as fields. Because the fields are set in the ctor, they may be non-nullable and `const`.
+
+When IoC instantiates a class, it will *always* attempt ctor injection. That is, it will always inspect the ctor parameter list and attempt to resolve them as dependencies.
+
+Note how the fields are **not** annotated with `@Inject`. In fact, `afIoc` is not used at all! That's because IoC does not need to touch the fields, we set them ourselves. Which leads to the one downfall of ctor injection:
+
+1. **Fields must be set manually**
+
+  This is not much of an issue for the above example, as it only means 2 extra lines of code. But what if you had a mega service with lots and lots of dependencies? It would be quite tiresome to manually set all the fields.
+
+
+
+Note that ctor's can be of any scope you like: public, protected, internal or private. They are public in these examples purely for brevity.
+
+#### Which ctor?
+
+Sometimes your service may have multiple ctors. Perhaps one for building and another for testing. When this happens, which one should IoC use to create the service?
+
+By default, IoC will choose the ctor with the *most* parameters. But this behaviour can be overridden by annotating a chosen ctor with `@Inject`.
 
 ```
+using afIoc
+
 const class MyService {
-  @Inject
-  const MyService myService
 
-  new make(|This|? f := null) { f?.call(this) }
+    ** By default, IoC would choose this ctor because it has the most parameters
+    new make(Penguins penguins, OtherService otherService) {
+        ....
+    }
+
+    ** But we can force IoC to use this ctor by annotating it with @Inject
+    @Inject
+    new make(|This| in) {
+        ....
+    }
 }
 ```
 
-On calling `f` all injectable fields are set, even fields marked as `const`. The it-block ctor may be abbreviated to:
+### It-Block Injection
+
+The easiest method of field injection is via a [it-block](http://fantom.org/doc/docLang/Fields.html#const) ctor parameter (see [This](http://fantom.org/doc/docLang/Closures.html#thisFunc)):
+
+```
+using afIoc
+
+const class MyService {
+    @Inject private const Penguins     penguins
+    @Inject private const OtherService otherService
 
     new make(|This| f) { f(this) }
 
-After object construction and field injection, any extra setup may be performed via methods annotated with `@PostInjection`. These methods may be of any visibility and all parameters are resolved as dependencies.
+    ...
+}
+```
+
+This is a form of ctor injection where the last parameter is the it-block function, `|This|`. When IoC encounters this special parameter it creates and passes in a function that sets all the fields annotated with `@Inject`. So to set the field in the service, just call the function!
+
+A more verbose example would be:
+
+```
+using afIoc
+
+const class MyService {
+    @Inject private const Penguins penguins
+
+    new make(|This| injectionFunc) {
+        // right here, the users field is null
+
+        // let afIoc set the users field
+        injectionFunc.call(this)
+
+        // now I can use the users field
+        users.setIq("traci", 69)
+    }
+}
+```
+
+Again, because the fields are set in the ctor they may be non-nullable and `const`.
+
+Note this is sometimes referred to as the `serialisation ctor` because it is how the Fantom serialisation mechanism sets fields when it inflates class instances.
+
+### Mixed Injection
+
+If a service is to be only used in the ctor there is no point in creating a field for it; it could just be injected as a ctor parameter. An it-block parameter may also be declared to set all the `@Inject`ed fields. This is an example of mixed injection.
+
+```
+using afIoc
+
+const class MyService {
+    @Inject private const Penguins penguins
+
+    new make(OtherService other, |This| in) {
+
+        // let afIoc inject penguins and any other @Inject fields
+        in(this)
+
+        // use the other service
+        other.doSomthing()
+    }
+}
+```
+
+Note that the it-block parameter is *always* the last parameter in the parameter list.
+
+Ctor parameters should be declared in the following order:
+
+    new make(<config>, <supplied>, <dependencies>, <it-block>) { ... }
+
+Where:
+
+- `config` - service contributions / configuration (see Service Configuration)
+- `supplied` - any ctor args declared by service definitions
+- `dependencies` - dependencies and other services
+- `it-block` - for it-block injection
+
+### Post Injection
+
+Once IoC has instantiated your service, called the ctor, and performed any field injection, it then looks for any methods annotated with `@PostInjection` - and calls them. Similar to ctor injection, `@PostInjection` methods may take dependencies and services as parameters.
+
+```
+using afIoc
+
+const class MyService {
+
+    new make(|This| in) {
+        ....
+    }
+
+    @PostInjection
+    Void doStuff(OtherService otherService) {
+        otherService.doSomting()
+    }
+}
+```
 
 ## Service Scope
 
