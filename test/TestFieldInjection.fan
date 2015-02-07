@@ -5,7 +5,7 @@ internal class TestFieldInjection : IocTest {
 		ThreadStack.pushAndRun(InjectionTracker.trackerId, OpTracker()) |->| {
 			
 			// this code is used in InjectionUtils
-			fields := InjectionUtils.findInjectableFields(T_MyService106_C#, true)
+			fields := InjectionUtils.findInjectableFields(T_MyService106_C#)
 	
 			verifyEq(fields.size, 3)
 			verify(fields.contains(T_MyService106_P#.fields.find { it.name == "obj" }))

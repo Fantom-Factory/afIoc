@@ -249,11 +249,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	override Obj injectIntoFields(Obj object) {
+	override Obj injectIntoFields(Obj target) {
 		return Utils.stackTraceFilter |->Obj| {
 			shutdownLock.check
-			return InjectionTracker.track("Injecting dependencies into fields of ${object.typeof.qname}") |->Obj?| {
-				return injectionUtils.injectIntoFields(object)
+			return InjectionTracker.track("Injecting dependencies into fields of ${target.typeof.qname}") |->Obj?| {
+				injectionUtils.injectIntoFields(target)
+				injectionUtils.callPostInjectMethods(target)
+				return target
 			}
 		}
 	}
@@ -309,7 +311,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		builder	:= threadLocalMgr.createRef("autobuild")
 		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
 		builder.val = serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
-		
+
 		serviceDef := ServiceDef.makeForAutobuild(this) {
 			it.serviceId 		= sid
 			it.serviceType 		= type

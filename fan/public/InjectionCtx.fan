@@ -5,14 +5,15 @@ class InjectionCtx {
 	** The type of injection.
 	const InjectionKind	injectionKind
 	
-	** The 'Type' to be injected
+	** The 'Type' to be injected. This is the declared type of the field or method parameter.    
 		  Type			dependencyType { internal set }
 
 	** The object that will receive the injection. Only available for field and (non-static) method injection.  
-		  Obj?			injectingInto
-
-	** The 'Type' that will receive the injection. Not available during 'dependencyByType'.
-	const Type?			injectingIntoType
+		  Obj?			target { set { &target = it; injectingInto = it } }
+	
+	** The 'Type' that will receive the injection. This is the implementation type and may be different to the 'depenencyType'. 
+	** Not available during 'dependencyByType'.
+	const Type?			targetType
 
 	** The field to be injected. Only available for field injection. 
 	const Field?		field
@@ -28,36 +29,50 @@ class InjectionCtx {
 	** The index of the method 'Param' to be injected. Only available for method injection. 
 		  Int?			methodParamIndex  { internal set }
 
+	@NoDoc @Deprecated { msg="Use 'targetType' instead" }
+	const Type? injectingIntoType
+
+	@NoDoc @Deprecated { msg="Use 'target' instead" }
+		  Obj? injectingInto
+
 		  @NoDoc
 		  [Field:Obj?]?	ctorFieldVals { internal set }
-	
+		
 	@NoDoc	// public to provide a backdoor for DependencyProviders
 	new makeWithType(InjectionKind injectionKind, |This|? in := null) {
 		this.fieldFacets	= Facet#.emptyList
 		this.methodFacets	= Facet#.emptyList
 		in?.call(this)
 		this.injectionKind	= injectionKind
+		this.injectingIntoType = targetType
 	}
 
 	@NoDoc // a common need, esp for efanXtra!
-	new makeFromField(Obj? injectingInto, Field field, |This|? in := null) {
+	new makeFromField(Obj? target, Field field, |This|? in := null) {
 		this.injectionKind		= InjectionKind.fieldInjection
-		this.injectingInto		= injectingInto
-		this.injectingIntoType	= injectingInto?.typeof
+		this.target				= target
+		this.targetType			= target?.typeof
 		this.dependencyType		= field.type
 		this.field				= field
 		this.fieldFacets		= field.facets
 		this.methodFacets		= Facet#.emptyList
 		in?.call(this)
+		this.injectingIntoType = targetType
 	}
 
 	@NoDoc
 	new make(|This|? in := null) {
 		in?.call(this)
+		this.injectingIntoType = targetType
 	}
 
 	** Adds an nested operation description.
 	** This provides contextual information in the event of an Err.
+	** Example:
+	** 
+	**   ctx,track("Doing complicated stuff") |->Obj?| {
+	**      return stuff()
+	**   }
 	Obj? track(Str description, |->Obj?| operation) {
 		InjectionTracker.track(description, operation)
 	}
@@ -76,7 +91,7 @@ class InjectionCtx {
 	
 	@NoDoc
 	override Str toStr() {
-		"Injecting into ${injectingIntoType?.qname}"
+		"Injecting into ${targetType?.qname}"
 	}
 }
 

@@ -83,7 +83,7 @@ internal class TestAutobuild : IocTest {
 		s94 := (T_MyService95) reg.autobuild(T_MyService95#, Obj#.emptyList, [T_MyService95#latex:["Mask!"]])
 		verifyEq(s94.latex[0], "Mask!")
 	}
-	
+
 	Void testCanPassOwnItBlock() {
 		// NOTE: can not use 2 it-blocks to set const fields - its a fantom restriction
 		itBlock := Field.makeSetFunc([T_MyService98#emma:"boobies"])

@@ -47,14 +47,14 @@ internal const class LogProviderImpl : LogProvider {
 	override Bool canProvide(InjectionCtx ctx) {
 		// IoC standards dictate that field injection should be denoted by a facet
 		ctx.injectionKind.isFieldInjection
-			? ctx.dependencyType.fits(Log#) && ctx.injectingIntoType != null && ctx.field.hasFacet(Inject#)
-			: ctx.dependencyType.fits(Log#) && ctx.injectingIntoType != null
+			? ctx.dependencyType.fits(Log#) && ctx.targetType != null && ctx.field.hasFacet(Inject#)
+			: ctx.dependencyType.fits(Log#) && ctx.targetType != null
 	}
 
 	override Obj? provide(InjectionCtx ctx) {
-		ctx.log("Injecting Log for ${ctx.injectingIntoType.qname}")
+		ctx.log("Injecting Log for ${ctx.targetType.qname}")
 		inject	:= (Inject?) ctx.fieldFacets.findType(Inject#).first
 		logId	:= inject?.id
-		return logId != null ? Log.get(logId) : logCreatorFunc.call(ctx.injectingIntoType)
+		return logId != null ? Log.get(logId) : logCreatorFunc.call(ctx.targetType)
 	}
 }

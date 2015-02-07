@@ -5,8 +5,8 @@ internal mixin InjectionTracker {
 
 	static const Str 	trackerId		:= "afIoc.injectionTracker"
 	static const Str 	serviceDefId	:= "afIoc.serviceDef"
-	static const Str 	confProviderId	:= "afIoc.configProvider"
 	static const Str 	injectionCtxId	:= "afIoc.injectionCtx"
+	static const Str 	takenFieldsId	:= "afIoc.takenFields"
 	
 	static Obj? withCtx(OpTracker tracker, |->Obj?| f) {
 		ThreadStack.pushAndRun(trackerId, tracker, f)
@@ -39,7 +39,25 @@ internal mixin InjectionTracker {
 		ThreadStack.peek(trackerId, true)
 	}
 
-	// ---- Recursion Detection ----------------------------------------------------------------------------------------
+	// ---- Taken Fields  ---------------------------------------------------------------------------------------------
+	
+	static Void resetTakenFields() {
+		threadStack := ThreadStack.getOrMakeStack(takenFieldsId)
+		threadStack.stack.push(Field[,])
+	}
+
+	static Field[] takenFields() {
+		ThreadStack.peek(takenFieldsId, false) ?: Field#.emptyList
+	}
+	
+	static Void removeTakenFields() {
+		threadStack := ThreadStack.getOrMakeStack(takenFieldsId)
+		threadStack.stack.pop
+		if (threadStack.stack.isEmpty)
+			Actor.locals.remove(takenFieldsId)			
+	}
+	
+	// ---- Recursion Detection ---------------------------------------------------------------------------------------
 
 	static Obj? recursionCheck(ServiceDef def, Str msg, |->Obj?| operation) {
 		threadStack := ThreadStack.getOrMakeStack(serviceDefId)
@@ -74,20 +92,21 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 	
-	static Obj? doingFieldInjection(Obj? injectingInto, Field field, |InjectionCtx->Obj?| func) {
+	static Obj? doingFieldInjection(Obj? target, Field field, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjection) {
-			it.injectingInto	= injectingInto
-			it.injectingIntoType= injectingInto.typeof
+			it.target			= target
+			it.targetType		= target.typeof
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
 		}
+		
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingFieldInjectionViaItBlock(Type injectingIntoType, Field field, |InjectionCtx->Obj?| func) {
+	static Obj? doingFieldInjectionViaItBlock(Type targetType, Field field, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.fieldInjectionViaItBlock) {
-			it.injectingIntoType= injectingIntoType
+			it.targetType		= targetType
 			it.dependencyType	= field.type
 			it.field			= field
 			it.fieldFacets		= field.facets
@@ -95,10 +114,10 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingMethodInjection(Obj? injectingInto, Method method, |InjectionCtx->Obj?| func) {
+	static Obj? doingMethodInjection(Obj? target, Method method, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.methodInjection) {
-			it.injectingInto	= injectingInto
-			it.injectingIntoType= method.parent
+			it.target			= target
+			it.targetType		= method.parent
 			it.method			= method
 			it.methodFacets		= method.facets
 			// this will get replaced with the param value
@@ -107,9 +126,9 @@ internal mixin InjectionTracker {
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
-	static Obj? doingCtorInjection(Type injectingIntoType, Method ctor, [Field:Obj?]? fieldVals, |InjectionCtx->Obj?| func) {
+	static Obj? doingCtorInjection(Type targetType, Method ctor, [Field:Obj?]? fieldVals, |InjectionCtx->Obj?| func) {
 		ctx := InjectionCtx(InjectionKind.ctorInjection) {
-			it.injectingIntoType= injectingIntoType
+			it.targetType		= targetType
 			it.method			= ctor
 			it.methodFacets		= ctor.facets
 			it.ctorFieldVals	= fieldVals
@@ -127,7 +146,7 @@ internal mixin InjectionTracker {
 	}
 
 	// sigh - this whole injectionCtx stack is only needed for ONE call in ServiceDef.getService()!
-	static InjectionCtx injectionCtx() {
-		ThreadStack.peek(injectionCtxId)
+	static InjectionCtx? injectionCtx(Bool checked := true) {
+		ThreadStack.peek(injectionCtxId, checked)
 	}
 }

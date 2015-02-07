@@ -9,28 +9,31 @@ internal const class InjectionUtils {
 	}
 	
 	** Injects dependencies into fields (of all visibilities) 
-	Obj injectIntoFields(Obj object) {
-		track("Injecting dependencies into fields of $object.typeof.qname") |->| {
-			fields := findInjectableFields(object.typeof, true)
+	Obj injectIntoFields(Obj target) {
+		return InjectionTracker.track("Injecting dependencies into fields of $target.typeof.qname") |->Obj| {
+			fields := findInjectableFields(target.typeof).removeAll(InjectionTracker.takenFields)
 			fields.each |field| {
-				InjectionTracker.doingFieldInjection(object, field) |ctx->Obj?| {
-					valueFunc := |->Obj?| { dependencyProviders.provideDependency(ctx, false) }
-					inject(object, field, valueFunc)
+				InjectionTracker.doingFieldInjection(target, field) |ctx->Obj?| {
+					if (dependencyProviders.canProvideDependency(ctx)) {
+						value := dependencyProviders.provideDependency(ctx)
+						if (field.isConst) {
+							throw IocErr(IocMessages.cannotSetConstFields(field))
+						} else 
+							field.set(target, value)
+					}
 					return null
 				}
 			}
 			if (fields.isEmpty)
 				log("No injection fields found")
+			return target
 		}
-
-		callPostInjectMethods(object)
-		return object
 	}
 
 	Obj? callMethod(Method method, Obj? obj, Obj?[]? providedMethodArgs) {
 		InjectionTracker.doingMethodInjection(obj, method) |ctx->Obj?| {
 			args := findMethodInjectionParams(ctx, method, providedMethodArgs)
-			return track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
+			return InjectionTracker.track("Invoking $method.signature on ${method.parent}...") |->Obj?| {
 				return (obj == null) ? method.callList(args) : method.callOn(obj, args)
 			}
 		}
@@ -67,7 +70,7 @@ internal const class InjectionUtils {
 	Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
 		building := ctor.parent
 		if (ctor == null) {
-			return track("Instantiating $building via ${building.name}()...") |->Obj| {
+			return InjectionTracker.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()
 			}
 		}
@@ -76,7 +79,7 @@ internal const class InjectionUtils {
 			return findMethodInjectionParams(ctx, ctor, providedCtorArgs)
 		}
 		
-		return track("Instantiating $building via ${ctor.signature}...") |->Obj| {
+		return InjectionTracker.track("Instantiating $building via ${ctor.signature}...") |->Obj| {
 			try {
 				return ctor.callList(args)
 			
@@ -88,19 +91,20 @@ internal const class InjectionUtils {
 	}
 
 	Func makeCtorInjectionPlan(InjectionCtx ctx) {
-		track("Creating injection plan for fields of ${ctx.injectingIntoType.qname}") |->Obj| {
+		return InjectionTracker.track("Creating injection plan for fields of ${ctx.targetType.qname}") |->Obj| {
 			dependencyProviders := dependencyProviders
-			building := ctx.injectingIntoType
+			building := ctx.targetType
 			plan := Field:Obj?[:]
-			findInjectableFields(building, true).each |field| {
+			findInjectableFields(building).each |field| {
 				InjectionTracker.doingFieldInjectionViaItBlock(building, field) |ctxNew->Obj?| {
-					dependency := dependencyProviders.provideDependency(ctxNew, false)
-					if (dependency != null)
-						plan[field] = dependency
+					if (dependencyProviders.canProvideDependency(ctxNew)) {
+						plan[field] = dependencyProviders.provideDependency(ctxNew)
+						InjectionTracker.takenFields.add(field)
+					}
 					return null
 				}
 			}
-			ctorFieldVals := InjectionTracker.injectionCtx.ctorFieldVals 
+			ctorFieldVals := ctx.ctorFieldVals 
 			if (ctorFieldVals != null) {
 				ctorFieldVals = ctorFieldVals.map |val, field| {
 					if (!building.fits(field.parent))
@@ -122,11 +126,9 @@ internal const class InjectionUtils {
 		}
 	}
 
-	// ---- Private Methods -----------------------------------------------------------------------
-
 	** Calls methods (of all visibilities) that have the @PostInjection facet
-	private Obj callPostInjectMethods(Obj object) {
-		track("Calling post injection methods of $object.typeof.qname") |->Obj| {
+	internal Obj callPostInjectMethods(Obj object) {
+		return InjectionTracker.track("Calling post injection methods of $object.typeof.qname") |->Obj| {
 			if (!object.typeof.methods
 				.findAll |method| {
 					method.hasFacet(PostInjection#)
@@ -141,8 +143,10 @@ internal const class InjectionUtils {
 		}
 	}
 
+	// ---- Private Methods -----------------------------------------------------------------------
+
 	private Obj?[] findMethodInjectionParams(InjectionCtx ctx, Method method, Obj?[]? providedMethodArgs) {
-		return track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
+		return InjectionTracker.track("Determining injection parameters for ${method.parent.qname} $method.signature") |->Obj?[]| {
 			dependencyProviders := dependencyProviders
 			params := method.params.map |param, index| {
 				log("Parameter ${index+1} = $param.type")
@@ -176,55 +180,22 @@ internal const class InjectionUtils {
 		}
 	}
 
-	private static Void inject(Obj target, Field field, |->Obj?| valueFunc) {
-		track("Injecting ${field.type.qname} into field $field.signature") |->| {
-			try {
-				// TODO: 'null' is the wrong check, we should hold a list of fields (somewhere) that state what fields are accounted for
-				if (field.get(target) != null) {
-					log("Field has non null value. Aborting injection.")
-					return
-				}
-			} catch (Err err) {
-				// be lenient on write-only fields
-				logger.warn(IocMessages.injectionUtils_couldNotReadField(field, err.msg))
-				return
-			}
-
-			value := valueFunc()
-			// BugFix: if we're injecting null (via DepProvider) then don't throw a Const Err
-			if (value == null)
-				return
-			if (field.isConst)
-				throw IocErr(IocMessages.cannotSetConstFields(field))
-			field.set(target, value)
-		}
-	}
-
 	private static Method[] findConstructors(Type type) { 
 		// use fits so nullable types == non-nullable types
 		type.methods.findAll |method| { method.isCtor && method.parent.fits(type) }
 	}
 
 	// internal for testing
-	internal static Field[] findInjectableFields(Type type, Bool includeConst) {
+	internal static Field[] findInjectableFields(Type type) {
 		fieldList	:= (Obj[]) type.inheritance.findAll { it.isClass }.reduce([,]) |Obj[] fields, t| { fields.add(t.fields) } 
 		fieldsAll	:= (Field[]) fieldList.flatten.unique
 		fields		:= fieldsAll.exclude { it.isAbstract || it.isStatic }
 
-		// TODO: it's tricky (not impossible - but too much work for now!) to tell if a field if overridden,
+		// TODO: it's tricky (not impossible - but too much work for now!) to tell if a field is overridden,
 		// so overridden virtual fields appear in the list twice
 		
-		return fields.findAll |field| {
-			if (field.isConst && !includeConst)
-				return false
-
-			log("Found field $field.signature")
-			return true
-		}
-	}
-
-	static Obj? track(Str description, |->Obj?| operation) {
-		InjectionTracker.track(description, operation)
+		fields.each { log("Found field $it.signature") }
+		return fields
 	}
 
 	static Void log(Str msg) {

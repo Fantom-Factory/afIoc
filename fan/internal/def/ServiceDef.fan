@@ -129,7 +129,6 @@ internal const class ServiceDef : LazyProxy {
 	}
 	
 	override Obj getRealService() {
-		
 		if (serviceScope == ServiceScope.perApplication) {
 			if (notBuilt.compareAndSet(true, false)) {
 				makeRealService
@@ -179,7 +178,7 @@ internal const class ServiceDef : LazyProxy {
 	}
 
 	private Obj makeRealService() {
-		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {			
+		return InjectionTracker.recursionCheck(this, "Creating REAL Service '$serviceId'") |->Obj| {
 			service := serviceBuilder.call()
 			incImplCount
 			serviceImplRef.val = service
