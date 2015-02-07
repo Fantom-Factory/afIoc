@@ -17,9 +17,17 @@ internal const class ServiceBuilders {
 	
 	|->Obj| fromCtorAutobuild(Str serviceId, Method ctor, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
 		|->Obj| {
-			InjectionTracker.track("Creating '$serviceId' via ctor autobuild") |->Obj| {				
-				obj := injectionUtils.createViaConstructor(ctor, ctorArgs, fieldVals)
-				return injectionUtils.injectIntoFields(obj)
+			InjectionTracker.track("Creating '$serviceId' via ctor autobuild") |->Obj| {
+				InjectionTracker.resetTakenFields
+				try {
+					target := 
+					injectionUtils.createViaConstructor(ctor, ctorArgs, fieldVals)
+					injectionUtils.injectIntoFields(target)
+					injectionUtils.callPostInjectMethods(target)
+					return target
+				} finally {
+					InjectionTracker.removeTakenFields					
+				}
 			}
 		}
 	}

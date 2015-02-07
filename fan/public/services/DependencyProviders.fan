@@ -23,7 +23,7 @@ const mixin DependencyProviders {
 	
 	abstract Bool canProvideDependency(InjectionCtx injectionCtx)
 
-	abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked)
+	abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked := true)
 }
 
 ** @since 1.1.0
@@ -45,15 +45,15 @@ internal const class DependencyProvidersImpl : DependencyProviders {
 	}
 
 	override Bool canProvideDependency(InjectionCtx ctx) {
-		ctx.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
+		InjectionTracker.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
 			dependencyProviders.any |depPro->Bool| {
 				depPro.canProvide(ctx)
 			}
 		}
 	}
 	
-	override Obj? provideDependency(InjectionCtx ctx, Bool checked) {
-		ctx.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
+	override Obj? provideDependency(InjectionCtx ctx, Bool checked := true) {
+		InjectionTracker.track("Looking for dependency of type $ctx.dependencyType") |->Obj?| {
 			dependency := null
 			
 			found := dependencyProviders.any |depPro->Bool| {
