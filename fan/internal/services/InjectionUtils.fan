@@ -187,9 +187,19 @@ internal const class InjectionUtils {
 
 	// internal for testing
 	internal static Field[] findInjectableFields(Type type) {
-		fieldList	:= (Obj[]) type.inheritance.findAll { it.isClass }.reduce([,]) |Obj[] fields, t| { fields.add(t.fields) } 
-		fieldsAll	:= (Field[]) fieldList.flatten.unique
-		fields		:= fieldsAll.exclude { it.isAbstract || it.isStatic }
+		fields		:= Field[,]
+		fieldNames	:= Str[,]
+		type.inheritance.findAll { it.isClass }.each { it.fields.each {
+			if (!it.isAbstract && !it.isStatic) {
+				if (it.isPrivate)
+					fields.add(it)
+				
+				else if (!fieldNames.contains(it.name)) {
+					fields.add(it)
+					fieldNames.add(it.name)
+				}
+			}
+		} }
 
 		// TODO: it's tricky (not impossible - but too much work for now!) to tell if a field is overridden,
 		// so overridden virtual fields appear in the list twice
