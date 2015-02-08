@@ -106,7 +106,7 @@ class Main {
         test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
         test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
 
-        // all test classes poke the same instance of Service2
+        // all test classes poke the same instance of PokerService
         test1.poker.poke()
         test2.poker.poke()
         test3.poker.poke()
@@ -351,7 +351,7 @@ class AppModule {
 }
 ```
 
-That's a lot more succinct! But wait! `MyService` has a ctor arg of `3` and it's easy to see how that is passed in, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in	the relevant section.
+That's a lot more succinct! But wait! `MyService` has a ctor arg of `3` and it's easy to see how that is passed in, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in the relevant section.
 
 ## Dependency Injection
 
