@@ -25,24 +25,20 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
   - set sensible defaults and let users override them
 
 - **True lazy loading**
-  - services can be proxied to ensure nothing is created until you actually use it
+  - service proxies ensure nothing is created until you actually use it
   - make circular service dependencies a thing of the past!
 
-- **Advise services with aspects**
+- **AOP - Advise your services**
   - intercept method calls to your services
   - apply cross cutting concerns such as authorisation, transactions and logging
 
 - **Extensible**
-  - inject your own objects, not just services
+  - inject your own objects and dependencies, not just services
 
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
   - Extensively tested: - `All tests passed! [37 tests, 221 methods, 482 verifies]`
-
-
-  > **ALIEN-AID:** See [Fantom-Factory](http://www.fantomfactory.org/tags/afIoc) for IoC tutorials.
-
 
 
 ## Install
@@ -564,13 +560,150 @@ const class MyService {
 }
 ```
 
+## Service Configuration
+
+Arguably, services are more useful if they can be configured. IoC has a built-in means to configure, or contribute configuration, to any service defined in any module!
+
+### List Configuration
+
+Lets have our `Penguins` service hold a list of penguin related websites. And lets have other modules be able to contribute their own penguin URLs.
+
+Following the standard principle of dependency injection, these URLs will be handed to the `Penguins` service. In IoC this is done via the ctor:
+
+```
+class Penguins {
+    private Uri[] urls
+
+    new make(Uri[] urls) {
+        this.urls = urls
+    }
+}
+```
+
+If the first parameter of a service's ctor is a List, IoC assumes it is configuration and scans all known modules for appropiate contribution methods:
+
+```
+using afIoc
+
+class AppModule {
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(Penguins#)
+    }
+
+    @Contribute { serviceType=Penguins# }
+    static Void contributePenguinUrls(Configuration config) {
+        config.add(`http://ypte.org.uk/factsheets/penguins/`)
+        config.add(`http://www.kidzone.ws/animals/penguins/`)
+    }
+}
+```
+
+Contribution methods are static methods annotated with `@Contribute`. They may be of any scope and be called anything (although by convention they have a `contributeXXX()` prefix. The `serviceType` facet parameter tells IoC which service the method contributes to. Each contribution method may add as many items to the list as it likes.
+
+Note that any *any* module may define contribution methods for *any* service.
+
+The `Configuration` object is write only. Because contribution methods may be called in any order, being able to *read* contributions would only give partial data. Only when the service is constructed is the full set of configuration known.
+
+If were to build the `Penguins` service via a builder method then the first parameter (if it is a List or a Map) is taken to be service configuration and injected appropriately:
+
+```
+using afIoc
+
+class AppModule {
+    @Build
+    static Penguins buildPenguins(Uri[] penguinUrls) {
+       ...
+    }
+
+    @Contribute { serviceType=Penguins# }
+    static Void contributePenguinUrls(Configuration config) {
+        config.add(`http://ypte.org.uk/factsheets/penguins/`)
+        config.add(`http://www.kidzone.ws/animals/penguins/`)
+    }
+}
+```
+
+Because the service configuration is a list of Uris, the contribution methods must contribute Uri objects. It is an error to add anything else. Example, if we try to add the number 19 we would get the Err message:
+
+    ...
+    [13] Looking for dependency of type acme::Penguins
+    [14] Creating REAL Service 'acme::Penguins'
+    [15] Creating 'acme::Penguins' via ctor autobuild
+    [16] Determining injection parameters for acme::Penguins sys::Void make(Uri[] urls)
+    [17] Looking for dependency of type sys::Uri[]
+    [18] Gathering configuration of type sys::Uri[]
+    [19] Invoking sys::Void contributePenguinUrls(afIoc::Configuration config) on acme::AppModule...
+    afIoc::IocErr: Contribution 'Int' does not match service configuration value of Uri
+
+That said, all contribution values are `coerced` via [afBeanUtils::TypeCoercer](http://repo.status302.com/doc/afBeanUtils/TypeCoercer.html) which gives a little leeway. `TypeCoercer` looks for `toXXX()` and `fromXXX()` methods to *coerce* values from one type to another. This is useful when contributing the likes of `Regex` which has a `fromStr()` method, or `File` which has a Uri ctor:
+
+```
+using afIoc
+
+class AppModule {
+    @Build
+    static MyService buildMyService(File[] file) {
+       ...
+    }
+
+    @Contribute { serviceType=MyService# }
+    static Void contributeFiles(Configuration config) {
+        config.add(File(`/css/styles-1.css`))  // file added as is
+        config.add(`/css/styles-2.css`)        // Uri coerced to File via File(Uri) ctor
+    }
+}
+```
+
+### Ordering
+
+What if the order of the penguin URLs were important? And what if we wanted our URL to appear before others? Luckily service configurations can be ordered.
+
+First we have to give the configurations a unique ID. We do this by using `config.set()` which may be abbreviated to the map construct:
+
+```
+using afIoc
+
+class AppModule {
+    @Contribute { serviceType=Penguins# }
+    static Void contributePenguinUrls(Configuration config) {
+        config["youngPeoplesTrust"] = `http://ypte.org.uk/factsheets/penguins/`
+        config["kidZone"]           = `http://www.kidzone.ws/animals/penguins/`
+
+        // same as above, just a difference syntax
+        config.set("natGeo",           `http://ngkids.co.uk/did-you-know/emperor_penguins`)
+    }
+}
+```
+
+In our module, when we contriture our URL we can use ordering constraints to say where our URL should appear.
+
+```
+using afIoc
+
+class MyModule {
+    @Contribute { serviceType=Penguins# }
+    static Void contributePenguinUrls(Configuration config) {
+        config.set("defenders", `http://www.defenders.org/penguins/basic-facts`).before("youngPeoplesTrust")
+        config.set("wikipedia", `http://en.wikipedia.org/wiki/Penguin`         ).after ("natGeo")
+    }
+}
+```
+
+The above shows how we use the configuration IDs to position our contributions.
+
+### Map Configuration
+
+## Overrides
+
+Override Services
+
+Override Configuration
+
 ## Service Scope
 
 Services are either created once [perApplication](http://repo.status302.com/doc/afIoc/ServiceScope#perApplication.html) (singletons) or once [perThread](http://repo.status302.com/doc/afIoc/ServiceScope#perThread.html). Application scoped services *must* be defined as `const`.
 
 (Using proxies) you can even inject a `perThread` scoped service into a `perApplication` scoped service! Think about it... you can inject your [http request](http://fantom.org/doc/web/WebReq.html) into any static service you desire!
-
-## Service Configuration
 
 Services can solicit configuration from modules simply by declaring a list or a map in their ctor or builder method.
 
