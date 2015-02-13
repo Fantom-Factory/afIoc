@@ -33,7 +33,7 @@ internal class OpTracker {
 		} catch (Err err) {
 			if (!logged) {
 				logged = true
-				opTrace := operations.join("\n") { it.description }
+				opTrace := operations.join("\n") { stripSys(it.description) }
 				throw IocErr(err.msg, err, opTrace)
 			}
 			throw err
@@ -96,6 +96,10 @@ internal class OpTracker {
 	
 	override Str toStr() {
 		"$operations.size operations deep..."
+	}
+	
+	private static Str stripSys(Str str) {
+		str.replace("sys::", "")
 	}
 }
 

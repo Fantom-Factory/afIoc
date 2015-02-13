@@ -2,7 +2,7 @@ using concurrent
 using afConcurrent
 
 ** (Service) -
-** Use to create 'LocalRef / LocalList / LocalMap' instances whose contents can be *cleaned* up. 
+** Use to create 'LocalRef' / 'LocalList' / 'LocalMap' instances whose contents can be *cleaned* up. 
 ** Erm, I mean deleted! 
 **  
 ** This is particularly important in the context of web applications where resources need to be 
