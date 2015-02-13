@@ -20,10 +20,11 @@ facet class Inject {
 	** Usage within IoC is optional:
 	**  - Service injection: the (qualified) id of the service to inject (use when the same mixin has multiple implementations)
 	**  - 'Log' injection: the name of the log to inject 
-	**  - 'LocalRef' injection: the name of the 
+	**  - 'LocalRef' injection: the name used to store the local ref.
 	const Str? id
 	
-	** Not currently used with IoC.  
+	** Usage within IoC is optional:
+	**  - 'LocalRef' injection: the List / Map type. 
 	const Type? type
 	
 	** If 'true' and the dependency / service does not exist then injection should fail silently without causing an Err.

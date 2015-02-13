@@ -32,7 +32,7 @@ const class IocErr : Err {
 	protected Str opTraceStr() {
 		opTrace := ""
 		if (operationTrace != null && !operationTrace.isEmpty) {
-			opTrace += "\nIoc Operation Trace:\n"
+			opTrace += "\nIoC Operation Trace:\n"
 			operationTrace.splitLines.each |op, i| { 
 				opTrace += ("  [${(i+1).toStr.justr(2)}] $op\n")
 			}
