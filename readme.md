@@ -161,7 +161,7 @@ Poking fan.Example_0.Poker@680e2291
 
 ## Terminology
 
-A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Services are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined in multiple modules.
+A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Services are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined by multiple modules.
 
 A **dependency** is any class instance or object that a service depends on. A dependency may or may not be a service. Non service dependencies are managed by user defined [dependency providers](http://repo.status302.com/doc/afIoc/DependencyProvider.html).
 
@@ -173,7 +173,7 @@ The **registry** is the key class in an IoC application. It creates, holds and m
 
 Frameworks such as [BedSheet](http://www.fantomfactory.org/pods/afBedSheet) and [Reflux](http://www.fantomfactory.org/pods/afReflux) are IoC containers. That is, they create and look after a `Registry` instance, using it to create classes and provide access to services.
 
-Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), passing in the module that defines your services:
+Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://repo.status302.com/doc/afIoc/RegistryBuilder.html), passing in the module(s) that define your services:
 
     registry := RegistryBuilder().addModule(AppModule#).build().startup()
     ...
@@ -222,7 +222,7 @@ Where `<module-qname>` is the qualified type name of the pod's main module class
 
 This is how IoC knows what modules each pod has. It is how the `addModulesFromPod("afIocEnv")` line works; IoC inspects the meta-data in the `afIocEnv` pod and looks up the `afIoc.module` key. It then loads the modules listed.
 
-The `afIoc.module` meta may also be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet on a main `AppModule` class.
+The `afIoc.module` meta may also be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://repo.status302.com/doc/afIoc/SubModule.html) facet on a single module class.
 
 ## Services
 
@@ -283,7 +283,7 @@ or
 myService := (MyService) registry.dependencyByType(MyService#)
 ```
 
-We can use the `serviceId` facet attribute to define a service with a different ID:
+The `serviceId` facet attribute allows you to define a service with a different ID.
 
 ```
 @Build { serviceId="wotever" }
@@ -292,7 +292,7 @@ static MyService buildMyService() {
 }
 ```
 
-What if `MyService` created penguins? Well, it'd be useful to have a `Penguins` class / service to hold them in. We'll pass that into `MyService`. We'll also tell `MyService` how many penguins it should make:
+Taking our example further, what if `MyService` created penguins? Well, it'd be useful to have a `Penguins` class / service to hold them in so we'll pass that into the ctor of `MyService`. We'll also tell `MyService` how many penguins it should make. The `MyService` ctor now looks like:
 
 ```
 class MyService {
@@ -300,7 +300,7 @@ class MyService {
 }
 ```
 
-The `AppModule` now needs updating with a builder method for the `Penguins` service, and the `MyService` builder method needs updating also:
+Because we've changed the `MyService` ctor we need to update the `MyService` builder method in the `AppModule`. We need a builder method for the `Penguins` service too. `AppModule` now looks like:
 
 ```
 using afIoc
@@ -320,7 +320,7 @@ class AppModule {
 }
 ```
 
-Before IoC calls `buildMyService()` it looks at the method signature and assumes any parameters are dependant services. In this case, `Penguins`. It then looks up, and creates if it doesn't already exist, the `Penguins` service and passes it to `buildMyService()`. This is an example of *method injection*. All this is automatic, and all builder methods may declare any number of services as a method parameters.
+Before IoC calls `buildMyService()` it looks at the method signature and assumes any parameters are dependencies that need to be passed in. In this case, it is the service `Penguins`. So it looks up, and creates if it doesn't already exist, the `Penguins` service and passes it to `buildMyService()`. This is an example of *method injection*. All this is automatic, and all builder methods may declare any number of services and dependencies as a method parameters.
 
 Note that the `@Build` facet has other attributes that give you control over the service's unique ID, scope and proxy strategy.
 
@@ -348,7 +348,7 @@ It may look simple, but several things are inferred from the above code:
 - The unique ID is `myPod::MyService` - *inferred from the service type's qualified name*
 - `MyService` may be instantiated by IoC.
 
-Note how we didn't create an instance of `MyService`, just told IoC that it exists. When a service is defined in this way, IoC will inspect it an choose a suitable ctor to create it with.
+Note how we didn't create an instance of `MyService`, just told IoC that it exists. When a service is defined in this way, IoC will inspect it and choose a suitable ctor to create it with.
 
 Now lets replace the builder methods in `Example 2` with service definitions:
 
@@ -363,11 +363,11 @@ class AppModule {
 }
 ```
 
-That's a lot more succinct! But wait! `MyService` has a ctor arg of `3` and it's easy to see how that is passed in, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in the relevant section.
+That's a lot more succinct! But wait! The `MyService` definition just declares a ctor arg of `3`, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in the relevant section.
 
 ## Dependency Injection
 
-This section looks at how to inject one service into another; the different ways of injecting the `Penguins` service into `MyService`. The examples assume that both services have been defined or have builder methods.
+This section looks at how to inject one service into another; or in particular, different ways of injecting the `Penguins` service into `MyService`. The examples assume that both services have been defined or have builder methods.
 
 ### Field Injection
 
@@ -392,7 +392,7 @@ IoC creates an instance of `MyService` and then sets the fields. As simple as it
 
 1. **Services not available in the ctor**
 
-  Because fields are set *after* the service is constructed, they are not available during the constructor call. Attempting to use injected field in the ctor will result in a `NullErr`.
+  Because fields are set *after* the service is constructed, they are not available during the constructor call. Attempting to use an injected field in the ctor will result in a `NullErr`.
 
 
 
@@ -445,11 +445,11 @@ Ctor injection puts you in complete control. You list which dependencies your se
 
 When IoC instantiates a class, it will *always* attempt ctor injection. That is, it will always inspect the ctor parameter list and attempt to resolve them as dependencies.
 
-Note how the fields are **not** annotated with `@Inject`. In fact, `afIoc` is not used at all! That's because IoC does not need to touch the fields, we set them ourselves. Which leads to the one downfall of ctor injection:
+Note how the fields are **not** annotated with `@Inject`. (In fact the class doesn't even have a ` using afIoc` statement!) That's because IoC does not need to touch the fields, we set them ourselves. Which leads to the one downfall of ctor injection:
 
 1. **Fields must be set manually**
 
-  This is not much of an issue for the above example, as it only means 2 extra lines of code. But what if you had a mega service with lots and lots of dependencies? It would be quite tiresome to manually set all the fields.
+  This is not much of an issue for the above example, as it only means 2 extra lines of code. But what if you had a mega service with 12 or more dependencies!? It would quickly become quite tiresome to set all the fields manually.
 
 
 
@@ -496,7 +496,7 @@ const class MyService {
 }
 ```
 
-This is a form of ctor injection where the last parameter is the it-block function, `|This|`. When IoC encounters this special parameter it creates and passes in a function that sets all the fields annotated with `@Inject`. So to set the field in the service, just call the function!
+This is a form of ctor injection where the last parameter is the it-block function, `|This|`. When IoC encounters this special parameter it creates and passes in a function that sets all the fields annotated with `@Inject`. So to set all the fields in the service, just call the function!
 
 A more verbose example would be:
 
@@ -507,12 +507,12 @@ const class MyService {
     @Inject private const Penguins penguins
 
     new make(|This| injectionFunc) {
-        // right here, the users field is null
+        // right here, the penguins field is null
 
-        // let afIoc set the users field
+        // let IoC set the penguins field
         injectionFunc.call(this)
 
-        // now I can use the users field
+        // now I can use the penguins field
         users.setIq("traci", 69)
     }
 }
@@ -551,7 +551,7 @@ Ctor parameters should be declared in the following order:
 
 Where:
 
-- `config` - service contributions / configuration (see Service Configuration)
+- `config` - service contributions / configuration (see [Service Configuration](#serviceConfiguration))
 - `supplied` - any ctor args declared by service definitions
 - `dependencies` - dependencies and other services
 - `it-block` - for it-block injection
@@ -578,13 +578,13 @@ const class MyService {
 
 ## Autobuilding
 
-It is common to *autobuild* class instances. There is an `autobuild()` method on the registry, on service configuration objects and there is even an `@Autobuild` facet. But what is *autobuilding*?
+It is common to *autobuild* class instances. So much so, there is an `autobuild()` method on the registry, an `autobuild()` method on service configuration objects and there is even an `@Autobuild` facet. But what is *autobuilding*?
 
 Autobuilding is the act of creating an instance of a class with IoC. That is, IoC will new up the instance and perform any necessary injection as previously outlined.
 
 For example, all services defined via `defineServices()` methods are autobuilt.
 
-Look at this code:
+Let's look at this code:
 
 ```
 Void main() {
@@ -596,11 +596,11 @@ Void main() {
 }
 ```
 
-It uses IoC to create an instance of `MyClass` with all dependencies injected into it. Note that `MyClass` is **not** a service. Why should it be? It has not been defined as a service in any module class.
+It uses IoC to create an instance of `MyClass` with all dependencies injected into it. Note that `MyClass` is **not** a service for it has not been defined as a service in any module class. Instead, `MyClass` is just a simple standalone instance.
 
 Autobuilding a class will **always** create a new instance. This is the difference between a service and an autobuilt class. Services are cached and re-used by IoC. IoC maintains a lifecyle for, and looks after services. Autobuilt instances are your responsibility.
 
-So an autobuilt class *may* be a service (as are those defined via `defineServices()` methods) but the mere act of autobuilding does not make it a service.
+An autobuilt class *may* be a service (such as those defined via `defineServices()` methods) but the mere act of autobuilding does not make it a service.
 
 Now you know the difference, lets look at the `@Autobuild` facet:
 
@@ -620,7 +620,7 @@ class MyClass {
 
 Here the registry service is injected, and a new instance of `otherClass` is created and injected. `arg1` and `arg2` are used as ctor arguments when building `MyOtherClass`.
 
-The `@Autobuild` facet is an example of custom dependency injection. See the relevant section for details.
+The `@Autobuild` facet is an example of custom dependency injection. See [Dependency Providers](#dependecnyProviders) for details.
 
 ## Service Configuration
 
@@ -630,7 +630,7 @@ Arguably, services are more useful if they can be configured. IoC has a built-in
 
 Lets have our `Penguins` service hold a list of penguin related websites. And lets have other modules be able to contribute their own penguin URLs.
 
-Following the standard principle of dependency injection, these URLs will be handed to the `Penguins` service. In IoC this is done via the ctor:
+Following the standard principle of dependency injection, these URLs will be handed to the `Penguins` service. In IoC this is done via ctor injection:
 
 ```
 class Penguins {
@@ -660,13 +660,13 @@ class AppModule {
 }
 ```
 
-Contribution methods are static methods annotated with `@Contribute`. They may be of any scope and be called anything (although by convention they have a `contributeXXX()` prefix. The `serviceType` facet parameter tells IoC which service the method contributes to. Each contribution method may add as many items to the list as it likes.
+Contribution methods are static methods annotated with `@Contribute`. They may be of any scope and be called anything; although by convention they have a `contributeXXX()` prefix. The `serviceType` facet parameter tells IoC which service the method contributes to. Each contribution method may add as many items to the list as it likes.
 
-Note that any *any* module may define contribution methods for *any* service.
+Note that any *any* module may define contribution methods for *any* service. Because the modules may be spread out in multiple pods, this is known as *distributed configuration*.
 
-The `Configuration` object is write only. Because contribution methods may be called in any order, being able to *read* contributions would only give partial data. Only when the service is constructed is the full set of configuration known.
+The `Configuration` object is write only. Only when all the contribution methods have been called, is the full list of configuration data known. Because contribution methods may be called in any order, being able to *read* contributions would only give partial data. Becasuse partial data can be misleading it is deemed better not to give any at all.
 
-If were to build the `Penguins` service via a builder method then the method's first parameter (if it is a List or a Map) is taken to be service configuration and injected appropriately:
+If the `Penguins` service were to built via a builder method then the method's first parameter (if it is a List or a Map) is taken to be service configuration and injected appropriately:
 
 ```
 using afIoc
@@ -712,9 +712,9 @@ class AppModule {
 
 ### Ordering
 
-What if the order of the penguin URLs were important? And what if we wanted our URL to appear before others? Luckily service configurations can be ordered.
+What if the order of the penguin URLs were important? What if we wanted our URL to appear before others? Luckily service configurations can be ordered.
 
-First we have to give the configurations a unique ID. We do this by using `config.set()`. Note that `Configuration.set()` is annotated with `@Operator` which means calls to it may be abbreviated to map syntax:
+First we have to give the configurations a unique ID. We do this by using `Configuration.set()`. Note that `Configuration.set()` is annotated with `@Operator` which means calls to it may be abbreviated using map syntax:
 
 ```
 using afIoc
@@ -722,6 +722,7 @@ using afIoc
 class AppModule {
     @Contribute { serviceType=Penguins# }
     static Void contributePenguinUrls(Configuration config) {
+        // standard call to set()
         config.set("natGeo",          `http://ngkids.co.uk/did-you-know/emperor_penguins`)
 
         // same as above, but using the Map.set() @Operator syntax
@@ -745,7 +746,7 @@ class MyModule {
 }
 ```
 
-The above shows how to use configuration IDs to position the contributions using `before` and `after` notation. If the `Penguins` service were to print the List, it would look like:
+The above shows how to use configuration IDs to position the contributions using `before` and `after` notation. If the `Penguins` service were to print the List it was injected with, it would look like:
 
 ```
 [
@@ -757,7 +758,7 @@ The above shows how to use configuration IDs to position the contributions using
 ]
 ```
 
-Not every piece of configuration needs an ID. If one isn't provided IoC makes up it's own unique ID for the config. But as nobody knows what that ID is, other config can't then be ordered before or after it - obviously!
+Not every piece of configuration needs an ID. If one isn't provided IoC makes up its own unique ID for the config. But as nobody knows what that ID is, other config can't then be ordered before or after it - obviously!
 
 Note that configuration IDs are also used for overriding / removing contributions. See [Configuration Overrides](#overridingConfig) for details.
 
@@ -775,7 +776,7 @@ class Penguins {
 }
 ```
 
-Injected configuration Maps are always ordered. If the `Penguins` service were to print it's Map, it would look like:
+Injected configuration Maps are always ordered. If the `Penguins` service were to print its Map, it would look like:
 
 ```
 [
@@ -791,7 +792,7 @@ As you can see, in effect, we've just configured and injected a Map!
 
 In this `Penguins` example we've been using a `Str` for the key, but we could use any object; `Uris`, `Files`, `MimeTypes`...
 
-When adding map configuration, it is an error to use a key that does not fit the type declared by the service.
+Again, map keys are type coerced to the correct type. If the map key does not fit, or can not be coerced, to the type declared by the service an error is thrown.
 
 ## Overrides
 
