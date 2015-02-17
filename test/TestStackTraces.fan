@@ -40,7 +40,7 @@ internal class TestStackTraces : IocTest {
 				.exclude { it.contains("Operations trace") }
 				.exclude { it.contains("[ ") }
 				.exclude { it.contains(Utils#stackTraceFilter.name) }
-				.exclude { it.contains("Ioc Operation Trace:") }
+				.exclude { it.contains("IoC Operation Trace:") }
 				.exclude { it.contains("Stack Trace:") }
 			verify(stack.size <= 5, stack.join("\n"))
 		}

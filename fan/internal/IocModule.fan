@@ -11,12 +11,16 @@ internal const class IocModule {
 		
 		defs.add(ActorPools#)
 		defs.add(DependencyProviders#)
-		defs.add(LogProvider#)
 		defs.add(PlasticCompiler#)
 		defs.add(ServiceProxyBuilder#)
 		defs.add(ThreadLocalManager#) 
 	}
-	
+
+	@Build
+	static LogProvider buildLogProvider() {
+		LogProvider.withLogFunc { it.pod.log } 
+	}
+
 	@Contribute { serviceType=DependencyProviders# }
 	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
 		config["afIoc.autobuildProvider"]	= config.autobuild(AutobuildProvider#)

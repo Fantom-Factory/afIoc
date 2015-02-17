@@ -852,7 +852,7 @@ Note that all aspects of IoC are determined at registry startup. Once the regist
 
 Overriding Services [#overridingServices]
 =========================================
-Some aspects of Service can not be changed, these are:
+Some aspects of Service **can not** be changed, these are:
 
  - The unique ID
  - The Fantom Type
@@ -925,6 +925,8 @@ static Void contributeMoarPenguinUrls(Configuration config) {
 }
 <pre
 
+Note that when we override a contribution we are able to re-define the ordering constraints.
+
 Or, if we decided we didn't like the wikipedia entry at all, we could remove it.
 
 pre>
@@ -956,7 +958,7 @@ class Module2 {
 
 Becasue modules are loaded in any order, either 'Module1' or 'Module2' could perform the override. Because this behaviour is non-deterministic, it is not allowed.
 
-Instead IoC introduces the concept of an override ID. Whenever an override is performed, you have the option of providing an ID. This ID may be overridden. If the new override provides its own override ID then it, in turn, may also be overriden. And so on.
+Instead IoC introduces the concept of an override ID. Whenever an override is performed, you have the option of providing an ID. This ID may be overridden. If an override provides its own override ID then it, in turn, may also be overriden. And so on.
 
 Rewriting the above example into a legal use case:
 
@@ -1001,7 +1003,7 @@ The service 'Configuration' class also provides a means to set an override ID. O
 
 Dependency Providers [#dependecnyProviders]
 *******************************************
-IoC injects services, but it may also inject other custom classes and objects. By contributing instances of `DependencyProvider` to a (hidden) 'DependencyProviders' service you can inject your own objects:
+IoC injects services, but it can also inject other custom classes and objects. By contributing instances of `DependencyProvider` to the 'DependencyProviders' service you can inject your own objects:
 
 pre>
 @Contribute { serviceType=DependencyProviders# }
@@ -1009,6 +1011,8 @@ static Void contributeDependencyProviders(Configuration config) {
     config["myProvider"] = MyProvider()
 }
 <pre
+
+Note that the 'DependencyProviders' service is currently annotated with '@NoDoc' as, other than being a reciever for contributions, it has no other public use.
 
 'DependencyProvider' defines 2 simple methods:
 
@@ -1028,7 +1032,7 @@ IoC also provides dependency providers for the following:
 
 Log Injection [#logInjection]
 =============================
-Log instances may be injected as dependencies. The `LogProvider` reuses the '@Inject' facet:
+Log instances may be injected as dependencies.
 
 pre>
 class Example {
@@ -1037,6 +1041,8 @@ class Example {
     ...
 }
 <pre
+
+See `LogProvider` for details.
 
 
 
@@ -1065,24 +1071,27 @@ Using 'type' to define the backing List / Map type is optional but recommended. 
     const LocalRef localRef
 
 
+See `ThreadLocalManager` for details.
+
+
 
 Service Scope [#serviceScope]
 *****************************
 Services may either be created just the once - [perApplication]`ServiceScope#perApplication` scope, or created once per thread - [perThread]`ServiceScope#perThread` scope.
 
-The scope of a service may be explicitly set when you define it - either in the '@Build' / '@Override' facet or in the 'defineServices()' method. If not explicitly set then the scope defaults to 'perApplication' for const classes and 'perThread' for non-const classes.
+Service scope defaults to 'perApplication' for const classes and 'perThread' for non-const classes. The scope of a service may be explicitly set when you define it - either in the '@Build' / '@Override' facet or in the 'defineServices()' method.
 
 The article [From One Thread to Another...]`article:from-one-thread-to-another` states a Fantom fact:
 
-> Only instances of 'const' classes can be shared by multiple threads.
+> Only instances of 'const' classes can be shared between multiple threads.
 
-As such, only 'const' classes may have the 'perApplication' scope. The implications of this largely depends on what application you're building.
+As such, only 'const' classes may have the 'perApplication' scope. The implications of this largely depends on the type of application you're building.
 
 
 
 Reflux Applications [#refluxScope]
 ==================================
-If building a [Reflux]`pod:afReflux` application then all the processing happens in the UI thread. In effect, you're building a single threaded application. Therefore, for all intents and purposes, 'perThread' scope *is* the same as 'perApplication' scope. So all your services can non-const and threaded. Happy days!
+If building a [Reflux]`pod:afReflux` application then all the processing happens in the UI thread. In effect, you're building a single threaded application. Therefore, for all intents and purposes, 'perThread' scope *is* the same as 'perApplication' scope. So all your services can be non-const and threaded. Happy days!
 
 
 
@@ -1093,21 +1102,28 @@ Web / REST applications are multi-threaded; each web request is served on a diff
 **Per Thread:**
 A new instance of the service will be created for each thread / web request. [BedSheet's]`pod:afBedSheet` 'HttpRequest' and 'HttpResponse' are good examples of 'perThread' services, with a new instance being created for each request.
 
-In some situations this object creation could be considered wasteful. In other situtations, such as sharing database connections, it is not even viable.
+The `ThreadLocalManager` class is responsible for cleaning up threaded resources at the end of a web request / thread processing. You may add your own cleanup handlers to it, but note that handlers are only cached for the current thread - meaning they have to be re-added in each thread.
 
-The `ThreadLocalManager` class is responsible for cleaning up threaded resources at the end of a web request / thread processing. You may add your own cleanup handlers to it, but note handlers are only cached for the current thread - meaning the same handler has to be added in each thread.
+In some situations this *per thread* object creation could be considered wasteful. In other situtations, such as sharing database connections, it is not even viable. So let's look at:
 
-**Per Application:** Creating 'const' services may be off-putting because they're constant, right!? ** *Wrong!* **
+**Per Application:**
+Only one instance of the service is created for the entire application. *Per Application* services need to be 'const' classes.
 
-Const classes **can** hold *mutable* data and the article [From One Thread to Another...]`article:from-one-thread-to-another` shows you how.
+Writing 'const' services may be off-putting to some - because they're constant, right!? ** *Wrong!* **
 
-The smart ones may be thinking that 'perApplication' scoped services can only hold other 'perApplication' scoped services. Well, they would be wrong also! Using the magic of *Proxies*, 'perThread' scoped services may be injected into 'perApplication' scoped services. See the *Proxies* section for more info.
+Const classes **can** hold *mutable* data. The article [From One Thread to Another...]`article:from-one-thread-to-another` shows you how.
+
+The smart ones may be thinking that 'perApplication' scoped services can only hold other 'perApplication' scoped services. Well, they would also be wrong! Using the magic of *Proxies*, 'perThread' scoped services may be injected into 'perApplication' scoped services. See the [Proxies]`#proxies` section for more info.
 
 
 
 Proxies [#proxies]
 ******************
-IoC has the concept of *Proxies*. A proxy is a thin wrapper class that fronts the real service. Proxies are not created by default but can have real benefits, as outlined below. To front a service with a proxy the service type must be a 'mixin' and the service definition should set the appropriate proxy creation strategy - 'always', 'never', 'asRequired'.
+IoC has the concept of *Proxies*. A proxy is a thin wrapper class that fronts the real service. Proxies can have real benefits (as outlined below) but are **not** created by default.
+
+To force a proxy to be created for a service, the service type must be a 'mixin' and the service definition should set the proxy creation strategy to 'always'.
+
+Proxy classes are dynamically created by IoC at runtime using the [Plastic]`pod:afPlastic` library.
 
 Ignoring the real implementation, if we had a simple service mixin such as:
 
@@ -1117,7 +1133,7 @@ mixin MyService {
 }
 <pre
 
-Then conceptually, you can imagine a proxy for 'MyService' to look like (*):
+Then conceptually, you can imagine the proxy for 'MyService' to look like (*):
 
 pre>
 using afIoc
@@ -1134,20 +1150,19 @@ class MyServiceProxy : MyService {
 }
 <pre
 
-(*) Actual proxy implementations are actually a lot more optimised / complicated but follow a similar pattern.
+(*) Actual proxy implementations are actually a lot more optimised and a bit more complicated but follow a similar pattern.
 
-Proxy classes are dynamically created by IoC at runtime using the [Plastic]`pod:afPlastic` library.
-
-"That's nice." you may be thinking, "But why bother?". Here's why:
+Each method invocation calls out to the 'Registry' to retrieve the *real* service. This has the following benifits:
 
 
 
 Lazy Loading [#lazyLoading]
 ===========================
-As the proxy is injected everywhere that's expecting the real service, then the registry is only asked for the real service when a service method is invoked. That means the real service is only created when a service method is invoked. That means we delay creating the service until the very last minute!
+Because the proxy is injected everywhere in place of the real service, the real service is only created when a service method is invoked. That means service creation is delayed until the very last minute!
 
 That means real lazy loading!
 
+For services that have long startup times (e.g. maybe it establishes 100 database connections) it means this overhead is pushed back to when it is first used. This can significantly decrease application startup times. Invaluable when developing / running tests.
 
 
 Circular Dependencies [#circularDependencies]
@@ -1168,7 +1183,7 @@ This means circular service dependencies are virtually eliminated!
 
 Per Thread Injection [#perThreadInjection]
 ==========================================
-As mentioned earlier, proxies allow 'perThread' scoped services to be injected into 'perApplication' scoped services. Well, to be more precise, the proxy is injected into the 'perApplication' scoped services. All calls to the proxy are then routed to the registry which creates on demand, the threaded version of the service.
+As mentioned earlier, proxies allow 'perThread' scoped services to be injected into 'perApplication' scoped services. Well, to be more precise, the proxy is injected into the 'perApplication' scoped service. All calls to the proxy are then routed to the registry which creates on demand, the threaded version of the service.
 
 Note that the 'perThread' service mixin has to be 'const', otherwise it can't be injected into the 'perApplication' scoped services, which by definition are also 'const'.
 
@@ -1178,14 +1193,13 @@ Aspects / AOP [#aspects]
 ========================
 [Aspect-oriented programming]`http://en.wikipedia.org/wiki/Aspect-oriented_programming` is sometimes a necessary evil, so IoC provides an aspect mechanism.
 
-Method calls to proxied services may be wrapped in your own code, allowing you to:
+Method calls to proxied services may be wrapped witn your own code, allowing you to:
 
  - perform pre & post method logic
- - change the method arguments
+ - change method arguments
  - change the return value
  - catch and process any thrown Errs
- - ignore the method call
- - do something else entirely!
+ - ignore the method call entirely.
 
 See [@Advise]`Advise` for details.
 
@@ -1193,7 +1207,7 @@ See [@Advise]`Advise` for details.
 
 Testing IoC Applications [#testingIocApplications]
 **************************************************
-To test an application that uses IoC it is reccommended to use the following approach:
+To test an application that uses IoC it is reccommended you use the following approach:
 
 pre>
 using afIoc::Inject
@@ -1238,7 +1252,7 @@ The 'setup()' method builds the IoC Registry, passing in the application's 'AppM
 
 See how the registry is used to inject dependencies into the test class. These may then be used in the test methods.
 
-Note that you need to add modules from any other IoC library the application / test uses. For instance, if using the [IocEnv library]`pod:afIocEnv` library, it would need to added to the builder:
+Note that you need to add modules from other IoC libraries the application / test uses. For instance, if using the [IocEnv library]`pod:afIocEnv` library, it would need to added to the builder:
 
     override Void setup() {
         reg = RegistryBuilder()
@@ -1249,12 +1263,14 @@ Note that you need to add modules from any other IoC library the application / t
         ...
     }
 
-Should you fail to add a required module / library, the test will fail with an 'IocErr':
+Should you fail to add a required module / library, the test will fail when IoC attempts to inject a service that hasn't been defined:
 
   TEST FAILED
   afIoc::IocErr: No service matches type XXXX.
 
 Where 'XXXX' is a service in the library you forgot to add.
+
+Note that the 'setup()' and 'teardown()' could be moved into a common base class.
 
 
 
@@ -1281,13 +1297,15 @@ Stack Trace:
   afIoc::RegistryImpl.serviceById (RegistryImpl.fan:218)
   afIoc::RegistryImpl.serviceById (RegistryImpl.fan)
   afIoc::RegistryImpl.startup (RegistryImpl.fan:170)
-  afReflux::Reflux$.start (Reflux.fan:52)
+  acme::MyApplication$.start (MyApplication.fan:52)
   ...
 <pre
 
-If more information if required, you can turn on 'afIoc' debug logging on which would output trace level contextual information.
+From the above you can see that the error was caused by the method 'acme::AppModule.contributeRegustryStartup()' when configuring 'RegistryStartupImpl'.
 
-  Registry#.pod.log.level = LogLevel.debug
+If more information if required, you can turn on 'afIoc' debug logging which outputs trace level contextual information.
+
+  Pod.find("afIoc").log.level = LogLevel.debug
 
 Be warned though - it outputs a lot!
 
