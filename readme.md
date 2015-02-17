@@ -1,7 +1,7 @@
-#IoC v2.0.2
+#IoC v2.0.4
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v2.0.2](http://img.shields.io/badge/pod-v2.0.2-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v2.0.4](http://img.shields.io/badge/pod-v2.0.4-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
@@ -38,7 +38,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [37 tests, 221 methods, 482 verifies]`
+  - Extensively tested: - `All tests passed! [37 tests, 222 methods, 485 verifies]`
 
 
 ## Install
