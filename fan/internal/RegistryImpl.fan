@@ -38,7 +38,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		this.dependencyProviders = DependencyProvidersImpl.makeInternal([
 			AutobuildProvider(this),
 			LocalProvider(threadLocalMgr),
-			LogProviderImpl(),
+			LogProviderImpl(|Type type->Log| { return type.pod.log }),
 			ConfigProvider(),
 			CtorItBlockProvider(this),
 			ServiceProvider(this)

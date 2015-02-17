@@ -6,11 +6,16 @@ using concurrent::AtomicRef
 ** 
 **   @Inject Log log
 **  
-** By default, the class's pod name is used to create the log instance. 
+** By default, the class's pod name is used to create the log instance. In essence this is: 
 ** 
-**   |Type type->Log| { return type.pod.log }
+**   target.typeof.pod.log
 ** 
-** If log instances with different names are desired, override the 'LogProvider' service:
+** Custom log names may be provided via the '@Inject.id' parameter:
+** 
+**   @Inject { id="my.log.name" } Log log
+** 
+** You may also create a 'LogProvider' with a custom log function. Example, to override the default
+** 'LogProvider' with one that generates log names based on the target type (and not pod): 
 ** 
 ** pre>
 ** class AppModule {
@@ -21,26 +26,20 @@ using concurrent::AtomicRef
 **     }
 ** } 
 ** <pre
-** 
-** You may also provide a log name via the '@Inject.id' parameter:
-** 
-**   @Inject { id="my.log.name" } Log log
 **  
 const mixin LogProvider : DependencyProvider {
 	
 	** Creates a 'LogProvider' with the given log creation func.
-	static LogProvider withLogFunc(|Type->Log| func) {
-		LogProviderImpl {
-			it.logCreatorFunc = func
-		}
+	static new withLogFunc(|Type->Log| func) {
+		LogProviderImpl(func)
 	}
 }
 
 internal const class LogProviderImpl : LogProvider {
 	const |Type->Log| logCreatorFunc
 	
-	new make(|This|? in := null) {
-		logCreatorFunc = |Type type->Log| { return type.pod.log }
+	new make(|Type type->Log| logCreatorFunc, |This|? in := null) {
+		this.logCreatorFunc = logCreatorFunc
 		in?.call(this)
 	}
 
