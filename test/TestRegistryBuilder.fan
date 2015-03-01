@@ -26,4 +26,21 @@ internal class TestRegistryBuilder : IocTest {
 			bob.build
 		}
 	}
+	
+	Void testSerialisable() {
+		bob := RegistryBuilder()
+		bob.addModule(IocModule#)
+		bob.set("wot", "ever")
+		buf := Buf()
+		buf.out.writeObj(bob)
+		buf.flip
+		bob2 := (RegistryBuilder) buf.in.readObj
+		verifyEq(bob2.moduleTypes, bob.moduleTypes)
+		verifyEq(bob2.options, bob.options)
+	}
+
+	Void testSerialisable2() {
+		bob := RegistryBuilder()
+		
+	}
 }

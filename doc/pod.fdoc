@@ -1345,6 +1345,10 @@ pre>
 
 Release Notes [#releaseNotes]
 *****************************
+v2.0.6 [#2.0.6]
+===============
+ - Chg: 'RegistryBuilder' is now serializable.
+
 v2.0.4 [#2.0.4]
 ===============
  - New: Documentation - lots of it!
