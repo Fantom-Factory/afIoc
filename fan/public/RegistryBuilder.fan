@@ -1,12 +1,16 @@
 
 ** Use to create an IoC `Registry`. Modules may be added manually, defined by 
 ** [meta-data]`sys::Pod.meta` in dependent pods or defined by [index properties]`docLang::Env#index`
+@Serializable
 class RegistryBuilder {
 	private const static Log	logger	:= Utils.getLog(RegistryBuilder#)
 	
-	private BuildCtx	ctx 		:= BuildCtx("Building IoC Registry")
-	private OneShotLock lock		:= OneShotLock(IocMessages.registryBuilt)
-	private ModuleDef[]	moduleDefs	:= [,]
+	@Transient
+	private BuildCtx	_ctx 			:= BuildCtx("Building IoC Registry")
+	@Transient
+	private OneShotLock _lock			:= OneShotLock(IocMessages.registryBuilt)
+
+	private Type[]		_moduleTypes	:= [,]
 
 	** Use options to pass state into the IoC Registry. 
 	** This map may be later retrieved from the `RegistryMeta` service. 
@@ -26,8 +30,8 @@ class RegistryBuilder {
 	** Any modules defined with the '@SubModule' facet are also added.
 	This addModule(Type moduleType) {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			ctx.track("Adding module definition for '$moduleType.qname'") |->Obj| {
-				lock.check
+			_ctx.track("Adding module definition for '$moduleType.qname'") |->Obj| {
+				_lock.check
 				_addModule(moduleType)
 				return this
 			}
@@ -37,8 +41,8 @@ class RegistryBuilder {
 	** Adds many modules to the registry
 	This addModules(Type[] moduleTypes) {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			ctx.track("Adding module definitions for '$moduleTypes'") |->Obj| {
-				lock.check
+			_ctx.track("Adding module definitions for '$moduleTypes'") |->Obj| {
+				_lock.check
 				moduleTypes.each |moduleType| {
 					_addModule(moduleType)
 				}
@@ -55,8 +59,8 @@ class RegistryBuilder {
 	This addModulesFromPod(Str podName, Bool addDependencies := true) {
 		pod := Pod.find(podName)
 		return (RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
-				lock.check
+			_ctx.track("Adding module definitions from pod '$pod.name'") |->Obj| {
+				_lock.check
 				if (!suppressLogging)
 					logger.info("Adding module definitions from pod '$pod.name'")
 				_addModulesFromPod(pod, addDependencies)
@@ -69,8 +73,8 @@ class RegistryBuilder {
 	** a module to load.
 	This addModulesFromIndexProps() {
 		(RegistryBuilder) Utils.stackTraceFilter |->Obj| {		
-			ctx.track("Adding modules from index properties") |->Obj| {
-				lock.check
+			_ctx.track("Adding modules from index properties") |->Obj| {
+				_lock.check
 
 				if (!suppressLogging)
 					logger.info("Adding modules from index properties")
@@ -88,14 +92,12 @@ class RegistryBuilder {
 	** 
 	** Returns 'true' if the given module was removed.
 	Bool removeModule(Type moduleType) {
-		doomed := moduleDefs.find { it.moduleType == moduleType }
-		moduleDefs.remove(doomed)
-		return doomed != null
+		_moduleTypes.remove(moduleType) != null
 	}
 
-	** Returns a list of modules types currently held by this builder.
+	** Returns the list of modules types currently held by this builder.
 	Type[] moduleTypes() {
-		moduleDefs.map { it.moduleType }
+		_moduleTypes
 	}
 	
 	** Returns a value from the 'options' map.
@@ -116,7 +118,7 @@ class RegistryBuilder {
 	** for invoking `Registry.startup`.
     Registry build() {
 		Utils.stackTraceFilter |->Obj| {
-			lock.lock
+			_lock.lock
 	
 			defaults := Utils.makeMap(Str#, Obj#).addAll([
 				"afIoc.bannerText" : "Alien-Factory IoC v$typeof.pod.version",
@@ -128,8 +130,12 @@ class RegistryBuilder {
 					throw IocErr(IocMessages.invalidRegistryValue(key, optType, val.typeof))
 			}
 
-	        registry := RegistryImpl(ctx.tracker, moduleDefs, defaults.setAll(options))
-			ctx.tracker.end
+			moduleDefs := _moduleTypes.map {
+				ModuleDef(_ctx.tracker, it)
+			}
+			
+	        registry := RegistryImpl(_ctx.tracker, moduleDefs, defaults.setAll(options))
+			_ctx.tracker.end
 			return registry
 		}
     }
@@ -140,54 +146,53 @@ class RegistryBuilder {
 		if (!suppressLogging && !moduleTypes.contains(moduleType))
 			logger.info("Adding module definition for $moduleType.qname")
 
-		ctx.withModule(moduleType) |->| {			
-			if (moduleDefs.find { it.moduleType == moduleType } != null) {
+		_ctx.withModule(moduleType) |->| {			
+			if (_moduleTypes.contains(moduleType)) {
 				// Debug because sometimes you can't help adding the same module twice (via dependencies)
 				// afBedSheet is a prime example
 				logger.debug(IocMessages.regBuilder_moduleAlreadyAdded(moduleType))
 				return
 			}
 
-			moduleDef := ModuleDef(ctx.tracker, moduleType)
-			moduleDefs.add(moduleDef)
+			_moduleTypes.add(moduleType)
 			
 			if (moduleType.hasFacet(SubModule#)) {
 				subModule := (SubModule) Type#.method("facet").callOn(moduleType, [SubModule#])	// Stoopid F4
-				ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
+				_ctx.track("Found SubModule facet on $moduleType.qname : $subModule.modules") |->| {
 					subModule.modules.each { 
 						addModule(it)
 					}
 				}
 			} else
-				ctx.log("No SubModules found")
+				_ctx.log("No SubModules found")
 		}
 	}
 
 	private Void _addModulesFromPod(Pod pod, Bool addDependencies := true) {
-		ctx.withPod(pod) |->| {
+		_ctx.withPod(pod) |->| {
 			moduleTypeNames := pod.meta[IocConstants.podMetaModuleName]
 			_addModulesFromTypeNames(moduleTypeNames)
 
 			if (addDependencies) {
-				ctx.track("Adding dependencies of '${pod.name}'") |->| {
+				_ctx.track("Adding dependencies of '${pod.name}'") |->| {
 					pod.depends.each |depend| {
 						dependency := Pod.find(depend.name)
 						_addModulesFromPod(dependency)
 					}
 				} 
 			} else
-				ctx.log("Not inspecting dependencies")
+				_ctx.log("Not inspecting dependencies")
 		}
 	}
 	
 	private Void _addModulesFromTypeNames(Str? moduleTypeNames) {
 		if (moduleTypeNames == null) {
-			ctx.log("No modules found")
+			_ctx.log("No modules found")
 			return
 		}
 		
 		moduleTypeNames.split(',', true).each |moduleTypeName| {
-			ctx.track("Found module '${moduleTypeName}'") |->| {
+			_ctx.track("Found module '${moduleTypeName}'") |->| {
 				moduleType := Type.find(moduleTypeName)
 				_addModule(moduleType)
 			}
