@@ -59,6 +59,12 @@ const class IocService : Service {
 		return this
 	}
 
+	** Convenience for `RegistryBuilder.options`
+	Str:Obj? options() {
+		checkServiceNotStarted
+		return builder.options
+	}
+
 	// ---- Service Lifecycle Methods ------------------------------------------------------------- 
 
 	** Builds and starts up the registry.
