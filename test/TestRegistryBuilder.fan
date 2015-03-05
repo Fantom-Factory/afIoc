@@ -38,9 +38,4 @@ internal class TestRegistryBuilder : IocTest {
 		verifyEq(bob2.moduleTypes, bob.moduleTypes)
 		verifyEq(bob2.options, bob.options)
 	}
-
-	Void testSerialisable2() {
-		bob := RegistryBuilder()
-		
-	}
 }

@@ -1347,6 +1347,8 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.6 [#2.0.6]
 ===============
+ - New: Added 'RegistryBuilder.dup()'.
+ - New: Added 'IocService.options()'.
  - Chg: 'RegistryBuilder' is now serializable.
 
 v2.0.4 [#2.0.4]
@@ -1361,7 +1363,7 @@ v2.0.2 [#2.0.2]
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
  - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
  - Chg: 'RegistryBuilder.addModulesFromPod()' now takes a Str (pod name), not a pod instance.
- - Chg: 'DependencyProviders' is more accessible for efanXtra.
+ - Chg: 'DependencyProviders' is more accessible for [efanXtra]`pod:afEfanXtra`.
  - Bug: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
 
 v2.0.0 [#2.0.0]

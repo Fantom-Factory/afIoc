@@ -114,6 +114,15 @@ class RegistryBuilder {
 		return this
 	}
 	
+	** Returns a copy of this 'RegistryBuilder'. 
+	This dup() {
+		RegistryBuilder() {
+			it.options = this.options.dup
+			it._moduleTypes = this._moduleTypes.dup
+			it.suppressLogging = this.suppressLogging
+		}
+	}
+	
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
 	** for invoking `Registry.startup`.
     Registry build() {
