@@ -1,7 +1,7 @@
-#IoC v2.0.4
+#IoC v2.0.6
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v2.0.4](http://img.shields.io/badge/pod-v2.0.4-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v2.0.6](http://img.shields.io/badge/pod-v2.0.6-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
