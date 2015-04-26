@@ -28,7 +28,9 @@ internal const class IocModule {
 		config["afIoc.logProvider"]			= logProvider
 		config["afIoc.configProvider"]		= config.autobuild(ConfigProvider#)
 		config["afIoc.ctorItBlockProvider"]	= config.autobuild(CtorItBlockProvider#)
-		config["afIoc.serviceProvider"]		= config.autobuild(ServiceProvider#)
+		
+		// @Deprecated 
+		config.addPlaceholder("afIoc.serviceProvider")
 	}	
 
 	@Contribute { serviceType=ActorPools# }

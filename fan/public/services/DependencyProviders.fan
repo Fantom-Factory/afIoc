@@ -35,8 +35,9 @@ internal const class DependencyProvidersImpl : DependencyProviders {
 	}
 
 	@Inject
-	new make(DependencyProvider[] dependencyProviders) {
-		this.dependencyProviders = dependencyProviders.toImmutable
+	new make(DependencyProvider[] dependencyProviders, Registry registry) {
+		serviceProvider := (ServiceProvider) registry.autobuild(ServiceProvider#)
+		this.dependencyProviders = dependencyProviders.add(serviceProvider).toImmutable
 		
 		// eager load all dependency providers else recursion err (app hangs) when creating DPs 
 		// with lazy services
