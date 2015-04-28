@@ -1345,6 +1345,10 @@ pre>
 
 Release Notes [#releaseNotes]
 *****************************
+v2.0.8 [#2.0.8]
+===============
+ - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
+
 v2.0.6 [#2.0.6]
 ===============
  - New: Added 'RegistryBuilder.dup()'.

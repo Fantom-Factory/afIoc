@@ -154,8 +154,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			this.typeLookup			= CachingTypeLookup(serviceDefs.vals)
 			this.dependencyProviders= trackServiceById(DependencyProviders#.qname, true)
 		}
+
+		tracker.track("Validating configuration contributions") |->| {
+			serviceDefs.each { it.validate }
+		}
 	}
 
+	
 
 	// ---- Registry Methods ----------------------------------------------------------------------
 
@@ -307,11 +312,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 		
 		sid		:= "${type.name}"
-		ctor 	:= InjectionUtils.findAutobuildConstructor(implType)
 		builder	:= threadLocalMgr.createRef("autobuild")
 		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
-		builder.val = serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
-
+		builder.val = serviceBuilders.fromCtorAutobuild(sid, implType, ctorArgs, fieldVals)
+		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof })
+		
 		serviceDef := ServiceDef.makeForAutobuild(this) {
 			it.serviceId 		= sid
 			it.serviceType 		= type
@@ -323,6 +328,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				builder.cleanUp
 				return func.call 
 			}
+			// this allows autobuilt objs to have config... hmm...
+			it.configTypeGot.val = true
+			it.configTypeRef.val = it.findConfigType(ctor)
 		}
 		
 		return serviceDef.autobuild
@@ -344,10 +352,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 
 		// TODO: pass in proxy scope
 		sid		:= "${implT.name}"
-		ctor 	:= InjectionUtils.findAutobuildConstructor(implT)
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
-		builder.val	= serviceBuilders.fromCtorAutobuild(sid, ctor, ctorArgs, fieldVals)
+		builder.val	= serviceBuilders.fromCtorAutobuild(sid, implT, ctorArgs, fieldVals)
+		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implT, ctorArgs?.map { it?.typeof })
 
 		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr) {
 			it.serviceId 		= sid
@@ -360,6 +368,9 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				builder.cleanUp
 				return func.call 
 			}
+			// this allows autobuilt objs to have config... hmm...
+			it.configTypeGot.val = true
+			it.configTypeRef.val = it.findConfigType(ctor)
 		}
 		return serviceDef.autoproxy
 	}

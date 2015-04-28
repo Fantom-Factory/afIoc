@@ -39,34 +39,6 @@ internal const class InjectionUtils {
 		}
 	}
 
-	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
-	static Method? findAutobuildConstructor(Type type) {
-		constructors := findConstructors(type)
-
-		if (constructors.isEmpty)
-			return null
-
-		if (constructors.size == 1)
-			return constructors[0]
-
-		annotated := constructors.findAll |c| {
-			c.hasFacet(Inject#)
-		}
-		if (annotated.size == 1)
-			return annotated[0]
-		if (annotated.size > 1)
-			throw IocErr(IocMessages.onlyOneCtorWithInjectFacetAllowed(type, annotated.size))				
-		
-		// Choose a constructor with the most parameters.
-		params := constructors.sortr |c1, c2| {
-			c1.params.size <=> c2.params.size
-		}
-		if (params[0].params.size == params[1].params.size)
-			throw IocErr(IocMessages.ctorsWithSameNoOfParams(type, params[1].params.size))				
-
-		return params[0]
-	}
-
 	Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
 		building := ctor.parent
 		if (ctor == null) {
@@ -178,11 +150,6 @@ internal const class InjectionUtils {
 				log("No injection parameters found")
 			return params
 		}
-	}
-
-	private static Method[] findConstructors(Type type) { 
-		// use fits so nullable types == non-nullable types
-		type.methods.findAll |method| { method.isCtor && method.parent.fits(type) }
 	}
 
 	// internal for testing

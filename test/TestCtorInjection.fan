@@ -3,7 +3,8 @@ internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
 		verifyIocErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
-			RegistryBuilder().addModule(T_MyModule104#).build.startup
+			reg := RegistryBuilder().addModule(T_MyModule104#).build.startup
+			reg.dependencyByType(T_MyService04#)
 		}
 	}
 
@@ -16,7 +17,8 @@ internal class TestCtorInjection : IocTest {
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
 		verifyIocErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) {
-			RegistryBuilder().addModule(T_MyModule105#).build.startup
+			reg := RegistryBuilder().addModule(T_MyModule105#).build.startup
+			reg.dependencyByType(T_MyService05#)
 		}
 	}
 

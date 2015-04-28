@@ -14,15 +14,17 @@ internal const class ServiceDef : LazyProxy {
 	
 	// -- null for BareBones ctor --
 	private const ObjLocator?	objLocator
-			const Type?			configType
+			const AtomicBool	configTypeGot	:= AtomicBool(false)
+			const AtomicRef		configTypeRef	:= AtomicRef()
+			const |->Type?|?	configTypeFunc
 			const Method[]?		contribMethods
 			const Method[]?		adviceMethods
-	private const AtomicInt?	implCountRef	:= AtomicInt(0)
+	private const AtomicInt		implCountRef	:= AtomicInt(0)
 	private const ObjectRef?	lifecycleRef
 	private const ObjectRef?	serviceImplRef
 	private const ObjectRef?	serviceProxyRef
-	private const AtomicRef?	adviceMap		:= AtomicRef()
-	private const AtomicBool?	notBuilt		:= AtomicBool(true)
+	private const AtomicRef		adviceMap		:= AtomicRef()
+	private const AtomicBool	notBuilt		:= AtomicBool(true)
 	
 	private const Str 	unqualifiedServiceId
 	private const Type 	serviceTypeNonNull
@@ -62,18 +64,23 @@ internal const class ServiceDef : LazyProxy {
 		
 		if (srvDef.buildData is Type) {
 			serviceImplType		:= (Type) srvDef.buildData
-			ctor 				:= InjectionUtils.findAutobuildConstructor(serviceImplType)
 			ctorArgs			:= srvDef.ctorArgs
 			fieldVals			:= srvDef.fieldVals
-			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, ctor, ctorArgs, fieldVals).toImmutable
+			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, serviceImplType, ctorArgs, fieldVals).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
-			this.configType		= findConfigType(ctor)
+			this.configTypeFunc	= |->Type?| {
+				// because we're gonna search through the services looking for ctor param matches, we need to delay
+				// ctor finding until all the services are defined
+				ctor := objLocator.serviceBuilders.findAutobuildConstructor(serviceImplType, ctorArgs?.map { it?.typeof })
+				return findConfigType(ctor)
+			}
 		} 	
 		else if (srvDef.buildData is Method) {
-			builderMethod		:= (Method) srvDef.buildData
-			this.serviceBuilder	= objLocator.serviceBuilders.fromBuildMethod(serviceId, builderMethod).toImmutable
-			this.description	= "$serviceId : via Builder Method (${builderMethod.qname})"
-			this.configType		= findConfigType(builderMethod)
+			builderMethod			:= (Method) srvDef.buildData
+			this.serviceBuilder		= objLocator.serviceBuilders.fromBuildMethod(serviceId, builderMethod).toImmutable
+			this.description		= "$serviceId : via Builder Method (${builderMethod.qname})"
+			this.configTypeGot.val	= true
+			this.configTypeRef.val	= findConfigType(builderMethod)
 		} 
 		else		
 			this.serviceBuilder	= srvDef.buildData
@@ -101,10 +108,7 @@ internal const class ServiceDef : LazyProxy {
 		defLifecycle		:= srvDef.builtIn ? ServiceLifecycle.builtin : ServiceLifecycle.defined
 		this.lifecycleRef	= ObjectRef(localManager.createRef("{$serviceId}.lifecycle"),	serviceScope, null, defLifecycle)
 		this.serviceImplRef	= ObjectRef(localManager.createRef("{$serviceId}.impl"), 		serviceScope, serviceImpl)
-		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope)
-		
-		if (configType == null && contribMethods != null && !contribMethods.isEmpty)
-			throw IocErr(IocMessages.contributionMethodsNotWanted(serviceId, contribMethods))
+		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope)		
 	}
 	
 	
@@ -195,7 +199,21 @@ internal const class ServiceDef : LazyProxy {
 
 	// ---- Service Configuration Methods ---------------------------------------------------------
 
+	Void validate() {
+		if (configType == null && contribMethods != null && !contribMethods.isEmpty)
+			throw IocErr(IocMessages.contributionMethodsNotWanted(serviceId, contribMethods))
+	}
+
+	Type? configType() {
+		if (configTypeGot.val == false) {
+			configTypeRef.val = configTypeFunc()
+			configTypeGot.val = true
+		}
+		return configTypeRef.val
+	}
+	
 	Obj? gatherConfiguration() {
+		configType := configType
 		if (configType == null)
 			return null
 		
@@ -316,8 +334,8 @@ internal const class ServiceDef : LazyProxy {
 		id.contains("::") ? id[(id.index("::")+2)..-1] : id
 	}
 	
-	private Type? findConfigType(Method buildMethod) {
-		if (buildMethod.params.isEmpty)
+	internal Type? findConfigType(Method? buildMethod) {
+		if (buildMethod == null || buildMethod.params.isEmpty)
 			return null
 		
 		// Config HAS to be the first param
