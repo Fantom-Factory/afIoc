@@ -23,11 +23,11 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		this.startTime		= tracker.startTime
 		threadLocalMgr 		= ThreadLocalManagerImpl()
 		injectionUtils		= InjectionUtils(this)
-		serviceBuilders		= ServiceBuilders(injectionUtils)
+		serviceBuilders		= ServiceBuilders(this, injectionUtils)
 		serviceDefs			:= (Str:ServiceDef) Utils.makeMap(Str#, ServiceDef#)
 		builtInModuleDef	:= (ModuleDef?) null
 
-		readyMade 		:= [
+		readyMade	 		:= [
 			Registry#			: this,
 			RegistryMeta#		: RegistryMetaImpl(options, moduleDefs.map { it.moduleType }),
 			ThreadLocalManager#	: threadLocalMgr,
@@ -142,12 +142,12 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		tracker.track("Solidifying service definitions") |->| {
 			moduleDefs.each |moduleDef| {
 				moduleDef.serviceDefs.each |def| {
-					impl := readyMade.get(def.type)
+					impl := readyMade[def.type]
 					sdef := def.toServiceDef(this, threadLocalMgr, impl)
 					serviceDefs[sdef.serviceId] = sdef
 				}
 			}
-		}		
+		}
 
 		InjectionTracker.withCtx(tracker) |->| {
 			this.serviceDefs 		= serviceDefs
@@ -395,6 +395,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		!typeLookup.findChildren(serviceType).isEmpty ||
 		// because we don't always know what the impl type is (think build methods) all we can do is check the id
 		serviceDefById(serviceType.qname, false) != null
+	}
+
+	override Bool typeMatchesDependency(InjectionCtx ctx) {
+		dependencyProviders.canProvideDependency(ctx)
 	}
 
 	override ServiceDef? serviceDefByType(Type serviceType) {

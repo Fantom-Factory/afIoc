@@ -1,10 +1,12 @@
 
 internal const class ServiceBuilders {
 
-	private const InjectionUtils injectionUtils
+	private const ObjLocator		objLocator
+	private const InjectionUtils	injectionUtils
 	
-	new make(InjectionUtils injectionUtils) {
+	new make(ObjLocator objLocator, InjectionUtils injectionUtils) {
 		this.injectionUtils = injectionUtils 
+		this.objLocator		= objLocator 
 	}
 
 	|->Obj| fromBuildMethod(Str serviceId, Method method, Obj? instance := null, Obj[]? args := null) {
@@ -37,29 +39,60 @@ internal const class ServiceBuilders {
 	Method? findAutobuildConstructor(Type type, Type?[]? paramTypes) {
 		constructors := findConstructors(type)
 
+		// if no ctors, use Type.make()
 		if (constructors.isEmpty)
 			return null
 
-		if (constructors.size == 1)
-			return constructors[0]
-
-		annotated := constructors.findAll |c| {
-			c.hasFacet(Inject#)
-		}
+		// return the @Inject annotated cotor
+		annotated := constructors.findAll |c| { c.hasFacet(Inject#) }
 		if (annotated.size == 1)
 			return annotated[0]
 		if (annotated.size > 1)
 			throw IocErr(IocMessages.onlyOneCtorWithInjectFacetAllowed(type, annotated.size))				
 
-//		// choose the best fit ctor
-//		params := constructors.findAll |c1, c2| {
-//			
-//			return false
-////			fix me
-//		}
+		// find the best fitting ctors
+		ctors := constructors.findAll |ctor| {
+			pTypeIndex := 0
+			return ctor.params.all |param, i| {
+				
+				// check config type
+				if (i == 0) {
+					if (param.type.name == "List")
+						return true
+					if (param.type.name == "Map")
+						return true
+				}
+				
+				// check provided params
+				if (paramTypes != null && pTypeIndex < paramTypes.size) {
+					pType := paramTypes[pTypeIndex++]
+					if (pType == null)
+						return param.type.isNullable
+					return pType.fits(param.type)
+				}
+				
+				if (ctor.parent == AutobuildProvider#)
+					echo("AUTOBUILD!")
+				
+				// check service
+				a:= InjectionTracker.doingCtorInjection(type, ctor, null) |ctx1->Bool| {
+					InjectionTracker.doingParamInjection(ctx1, param, i) |ctx2->Bool| {
+						return objLocator.typeMatchesDependency(ctx2)
+					}
+				}
+				return a
+			}
+		}
 
+		if (ctors.isEmpty)
+			throw IocErr("Could not find a suitable autobuild ctor for ${type.qname}")
+		
+		// there can be only one!
+		if (ctors.size == 1)
+			return ctors.first
+		
 		// Choose a constructor with the most parameters.
-		params := constructors.sortr |c1, c2| {
+		params := ctors.sortr |c1, c2| {
 			c1.params.size <=> c2.params.size
 		}
 
