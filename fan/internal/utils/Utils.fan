@@ -32,6 +32,7 @@ internal class Utils {
 	** on all internal afIoc Errs.
 	** @see http://fantom.org/sidewalk/topic/2147
 	static Obj? stackTraceFilter(|->Obj?| func) {
+//		return func.call
 		try {
 			return func.call
 
@@ -51,7 +52,7 @@ internal class Utils {
 			// throw a new afIoc Err (with NO cause) keeping the orig msg and opTrace. 
 			if (unwrapped is IocErr)
 				throw IocErr(iocErr.msg, null, iocErr.operationTrace)
-			
+
 			// wrap root err in an afIoc Err, giving extra opTrace info and any helpful ioc Err 
 			throw IocErr(iocErr.msg, unwrapped, iocErr.operationTrace)
 		}

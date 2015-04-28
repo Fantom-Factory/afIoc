@@ -10,6 +10,7 @@ internal const mixin ObjLocator {
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType)
 	abstract Bool typeMatchesService(Type serviceType)
+	abstract Bool typeMatchesDependency(InjectionCtx ctx)
 
 	abstract Str[] serviceIds()
 

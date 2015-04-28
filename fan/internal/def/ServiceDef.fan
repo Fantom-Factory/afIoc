@@ -82,9 +82,15 @@ internal const class ServiceDef : LazyProxy {
 			this.configTypeGot.val	= true
 			this.configTypeRef.val	= findConfigType(builderMethod)
 		} 
-		else		
+		else
 			this.serviceBuilder	= srvDef.buildData
-		
+
+		// don't validate builtin services - they're already built!
+		if (serviceImpl != null) {
+			this.configTypeGot.val	= true
+			this.configTypeRef.val	= null
+		}
+
 		if (srvDef.overridden)
 			this.description	+= " (Overridden)"
 		

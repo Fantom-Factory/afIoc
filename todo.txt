@@ -1,14 +1,3 @@
-Fandoc
-
- - Dependency Injection
- - Configuration
- - Overrides
-   - Services, @Override / serviceDefs
-   - Configuration Contributions
- - Lazy Loading
- - Service Scope
- - Advicing / AOP
- - Testing
 
 v2.0.6 Maybe...?
 ----------------
@@ -50,6 +39,11 @@ Make Js compatible...?
 
 Just Plain Bad Ideas:
 ---------------------
+Make all nullable services optional
+ - sounds nice until...
+ - you realise field injection via non-itblock need to be nullable
+ - maybe just make it for ctor & method injection? 
+
 Allow other @Inject facets
  - so BedSheet can define its own, for fewer pod import statements
  - but if afIoc and afBedSheet are imported at same time ~ conflict!
