@@ -109,5 +109,4 @@ internal class T_MyModule106 {
 
 @NoDoc class T_MyService76 {
 	new make() { }
-
 }
