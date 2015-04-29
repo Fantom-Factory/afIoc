@@ -31,7 +31,7 @@ internal class TestStackTraces : IocTest {
 	Void verifyReducedStack(|Obj| func) {
 		try {
 			func.call(69)
-			fail
+			fail("No Err thrown...?")
 		} catch (IocErr e) {
 			stack  := (Str[]) e.traceToStr.split('\n')
 				.exclude { it.contains(TestStackTraces#.name) }

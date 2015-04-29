@@ -8,11 +8,19 @@ internal const class ServiceProvider : DependencyProvider {
 
 	override Bool canProvide(InjectionCtx ctx) {
 		// IoC standards dictate that field injection should be denoted by a facet
-		ctx.injectionKind.isFieldInjection
-			? ctx.field.hasFacet(Inject#)
-			// this is a catch all provider
-			// means we get a more meaningful err msg from provide() rather than just; can't find a ctor
-			: true	
+		if (ctx.injectionKind.isFieldInjection)
+			// we should always be able to inject an @Inject field - it's an error if we can't
+			return (ctx.field.hasFacet(Inject#))
+
+		serviceDef := objLocator.serviceDefByType(ctx.dependencyType)
+		if (serviceDef != null)
+			return true
+		
+		if (ctx.injectionKind.isMethodInjection && ctx.dependencyType.isNullable)
+			// we don't inject default values
+			return !ctx.methodParam.hasDefault
+			
+		return false
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {
@@ -54,8 +62,8 @@ internal const class ServiceProvider : DependencyProvider {
 				return null				
 			}
 			
-			// for when looking for an @Inject field
-			throw IocErr(IocMessages.serviceTypeNotFound(ctx.dependencyType))
+			// we should always be able to inject an @Inject field - it's an error if we can't
+			throw IocErr(IocMessages.dependencyNotFound(ctx.dependencyType))
 		}
 
 		ctx.log("Found Service '$serviceDef.serviceId'")

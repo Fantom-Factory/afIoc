@@ -77,7 +77,7 @@ internal const class DependencyProvidersImpl : DependencyProviders {
 			if (found)
 				return dependency
 	
-			return checked ? throw IocErr(IocMessages.noDependencyMatchesType(ctx.dependencyType)) : null
+			return checked ? throw IocErr(IocMessages.dependencyNotFound(ctx.dependencyType)) : null
 		}
 	}
 }

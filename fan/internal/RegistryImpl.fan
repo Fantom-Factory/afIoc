@@ -153,7 +153,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		InjectionTracker.withCtx(tracker) |->| {
 			this.serviceDefs 		= serviceDefs
 			this.typeLookup			= CachingTypeLookup(serviceDefs.vals)
-			this.dependencyProviders= serviceDefById(DependencyProviders#.qname, true).autobuild
+			this.dependencyProviders= serviceDefById(DependencyProviders#.qname).autobuild
 		}
 
 		tracker.track("Validating service builders") |->| {
@@ -291,7 +291,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	// ---- ObjLocator Methods --------------------------------------------------------------------
 
 	override Obj? trackServiceById(Str serviceId, Bool checked) {
-		serviceDefById(serviceId, checked)?.getService
+		serviceDefById(serviceId)?.getService
+			?: (checked ? throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds) : null)
 	}
 
 	Obj? trackDependencyByType(Type dependencyType, Bool checked) {
@@ -325,14 +326,13 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceScope		= null	// efanXtra dies when perThread and Pillow / BedSheet dies when perApplication!
 			it.serviceProxy		= ServiceProxy.never
 			it.description 		= "$type.qname (Autobuild)"
+			it.configTypeGot.val = true
+			it.configTypeRef.val = null
 			it.serviceBuilder	= |->Obj| {
 				func := (|->Obj|) builder.val
 				builder.cleanUp
 				return func.call 
 			}
-			// this allows autobuilt objs to have config... hmm...
-			it.configTypeGot.val = true
-			it.configTypeRef.val = it.findConfigType(ctor)
 		}
 		
 		return serviceDef.autobuild
@@ -365,19 +365,18 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			it.serviceScope		= scope
 			it.serviceProxy		= ServiceProxy.always
 			it.description 		= "$implT.qname (Proxy)"
+			it.configTypeGot.val = true
+			it.configTypeRef.val = null
 			it.serviceBuilder	= |->Obj| {
 				func := (|->Obj|) builder.val
 				builder.cleanUp
 				return func.call 
 			}
-			// this allows autobuilt objs to have config... hmm...
-			it.configTypeGot.val = true
-			it.configTypeRef.val = it.findConfigType(ctor)
 		}
 		return serviceDef.autoproxy
 	}
 	
-	ServiceDef? serviceDefById(Str serviceId, Bool checked) {
+	override ServiceDef? serviceDefById(Str serviceId) {
 		// attempt a qualified search first
 		serviceDef := serviceDefs[serviceId]
 		if (serviceDef != null)
@@ -387,8 +386,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		if (serviceDefs.size > 1)
 			throw IocErr(IocMessages.multipleServicesDefined(serviceId, serviceDefs.map { it.serviceId }))
 		
-		if (serviceDefs.isEmpty && checked)
-			throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds)
+//		if (serviceDefs.isEmpty && checked)
+//			throw ServiceNotFoundErr(IocMessages.serviceIdNotFound(serviceId), serviceIds)
 
 		return serviceDefs.first
 	}
@@ -396,7 +395,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 	override Bool typeMatchesService(Type serviceType) {
 		!typeLookup.findChildren(serviceType).isEmpty ||
 		// because we don't always know what the impl type is (think build methods) all we can do is check the id
-		serviceDefById(serviceType.qname, false) != null
+		serviceDefById(serviceType.qname) != null
 	}
 
 	override Bool typeMatchesDependency(InjectionCtx ctx) {
@@ -416,7 +415,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			return serviceDefs.first
 		
 		// because we don't always know what the impl type is (think build methods) all we can do is check the id
-		serviceDef := serviceDefById(serviceType.qname, false)
+		serviceDef := serviceDefById(serviceType.qname)
 		if (serviceDef != null)
 			return serviceDef
 		

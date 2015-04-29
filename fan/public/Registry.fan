@@ -13,14 +13,14 @@ const mixin Registry {
 	abstract This shutdown()
 	
 	** Obtains a service via its unique service id. 
-    abstract Obj? serviceById(Str serviceId, Bool checked := true)
+	abstract Obj? serviceById(Str serviceId, Bool checked := true)
 
 	// The search takes into account inheritance of the service mixin, not the service *implementation*.
 	** Locates a dependency of the given type. 
-    abstract Obj? dependencyByType(Type dependencyType, Bool checked := true)
+	abstract Obj? dependencyByType(Type dependencyType, Bool checked := true)
 
 	** Autobuilds an instance of the given type, resolving all dependencies: 
-	**  - create instance via ctor marked with '@Inject' or the ctor with the *most* parameters
+	**  - create instance via ctor marked with '@Inject' or the best fitting ctor with the *most* parameters
 	**  - inject dependencies into fields (of all visibilities) marked with '@Inject'
 	**  - call any methods annotated with '@PostInjection'
 	** 
@@ -48,6 +48,7 @@ const mixin Registry {
 	** 
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
     abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
+	
 //	abstract Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true)
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
