@@ -140,7 +140,7 @@ internal const class InjectionUtils {
 					if (!dependencyProviders.canProvideDependency(ctxNew)) {
 						if (param.hasDefault)
 							return "afIoc.exclude.me.please!"
-						throw IocErr(IocMessages.noDependencyMatchesType(param.type))
+						throw IocErr(IocMessages.dependencyNotFound(param.type))
 					}
 					return dependencyProviders.provideDependency(ctxNew, true)
 				}

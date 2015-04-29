@@ -77,8 +77,8 @@ internal const class IocMessages {
 		"Error invoking service definition method ${methodId}: ${cause}"
 	}
 
-	static Str noDependencyMatchesType(Type type) {
-		"No dependency matches type ${type.signature}."
+	static Str dependencyNotFound(Type type) {
+		"No dependency matches type ${type.signature}. Did you forget to define it as a service in your AppModule?"
 	}
 
 	static Str couldNotFindImplType(Type serviceType) {
@@ -93,11 +93,7 @@ internal const class IocMessages {
 	}
 
 	static Str serviceIdNotFound(Str serviceId) {
-		"Service id '${serviceId}' is not defined."
-	}
-
-	static Str serviceTypeNotFound(Type type) {
-		"No service matches type ${type.signature}. Did you forget to define it in your AppModule?"
+		"Service id '${serviceId}' is not defined. Did you forget to define it in your AppModule?"
 	}
 
 	static Str onlyOneCtorWithInjectFacetAllowed(Type serviceType, Int noOfCtors) {

@@ -9,6 +9,7 @@ internal const mixin ObjLocator {
 	abstract Obj trackCreateProxy(Type mixinType, Type? implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals)
 	
 	abstract ServiceDef? serviceDefByType(Type serviceType)
+	abstract ServiceDef? serviceDefById(Str serviceId)
 	abstract Bool typeMatchesService(Type serviceType)
 	abstract Bool typeMatchesDependency(InjectionCtx ctx)
 

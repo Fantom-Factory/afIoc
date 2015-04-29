@@ -9,7 +9,7 @@ internal class TestCtorInjection : IocTest {
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
-		verifyIocErrMsg(IocMessages.serviceTypeNotFound(T_MyService02#)) {
+		verifyIocErrMsg(IocMessages.couldNotFindAutobuildCtor(T_MyService30#, null)) {
 			reg := RegistryBuilder().addModule(T_MyModule109#).build.startup
 			reg.dependencyByType(T_MyService30#)
 		}
