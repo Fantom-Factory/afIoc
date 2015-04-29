@@ -469,7 +469,9 @@ Note how the fields are **not** annotated with '@Inject'. (In fact the class doe
 
   This is not much of an issue for the above example, as it only means 2 extra lines of code. But what if you had a mega service with 12 or more dependencies!? It would quickly become quite tiresome to set all the fields manually.
 
-Note that ctor's can be of any scope you like: public, protected, internal or private. In the following examples, the ctors are public purely for brevity.
+Ctor's can be of any scope you like: public, protected, internal or private. In the following examples, the ctors are public purely for brevity.
+
+Note that nullable ctor parameters are deemed *optional* and don't throw an Err if a dependency cannot found.
 
 
 
@@ -1372,6 +1374,7 @@ Release Notes [#releaseNotes]
 v2.0.8 [#2.0.8]
 ===============
  - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
+ - Chg: Nullable ctor and method parameters are noe deemed *optional* and don't throw an Err if not found.
  - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
  - Bug: Some combination of autobuilding and service creation could cause IoC to hang indefinitely instead of throwing a service recursion error.
 

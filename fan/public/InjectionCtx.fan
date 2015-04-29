@@ -106,9 +106,14 @@ enum class InjectionKind {
 	** Calling a method.
 	methodInjection;
 	
-	** Returns true if a field injection (of any kind) is taking place
+	** Returns 'true' if 'fieldInjection' or 'fieldInjectionViaItBlock'.
 	Bool isFieldInjection() {
 		this == fieldInjection || this == fieldInjectionViaItBlock 
+	}
+
+	** Returns 'true' if 'methodInjection' or 'ctorInjection'.
+	Bool isMethodInjection() {
+		this == methodInjection || this == ctorInjection 
 	}
 }
 
