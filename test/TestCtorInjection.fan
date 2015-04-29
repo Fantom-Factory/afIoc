@@ -9,7 +9,7 @@ internal class TestCtorInjection : IocTest {
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
-		verifyIocErrMsg(IocMessages.couldNotFindAutobuildCtor(T_MyService30#, null)) {
+		verifyIocErrMsg(IocMessages.serviceTypeNotFound(T_MyService02#)) {
 			reg := RegistryBuilder().addModule(T_MyModule109#).build.startup
 			reg.dependencyByType(T_MyService30#)
 		}
@@ -66,13 +66,20 @@ internal class TestCtorInjection : IocTest {
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
 		reg.serviceById("s38")
 	}
-	
+
 	Void testFieldNotSetErrIsConvertedToIocErr() {
 		// this is such a common err we treat it as our own, to remove Ioc stack frames
 		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
 		verifyIocErrMsg(IocMessages.fieldNotSetErr(T_MyService53#judge.qname, T_MyService53#make)) {			
 			reg.autobuild(T_MyService53#)
 		}
+	}
+
+	Void testNullableCtorTypesAreOptional() {
+		reg := RegistryBuilder().build.startup
+		s108 := (T_MyService108) reg.autobuild(T_MyService108#)
+		verifyNull(s108.judge)
+		verifyEq(reg, reg)
 	}
 }
 
@@ -184,4 +191,10 @@ internal const class T_MyService38 { }
 internal const class T_MyService53 {
 	const Str judge
 	new make(|This|in) { in(this) }
+}
+
+internal const class T_MyService108 {
+	const Str? judge
+	const Registry reg
+	new make(Str? judge, Registry reg) { this.judge = judge; this.reg = reg }
 }

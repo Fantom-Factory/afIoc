@@ -10,7 +10,9 @@ internal const class ServiceProvider : DependencyProvider {
 		// IoC standards dictate that field injection should be denoted by a facet
 		ctx.injectionKind.isFieldInjection
 			? ctx.field.hasFacet(Inject#)
-			: objLocator.typeMatchesService(ctx.dependencyType)
+			// this is a catch all provider
+			// means we get a more meaningful err msg from provide() rather than just; can't find a ctor
+			: true	
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {
@@ -45,6 +47,13 @@ internal const class ServiceProvider : DependencyProvider {
 				ctx.log("Service not found - failing silently...")
 				return null
 			}
+			
+			if (ctx.injectionKind.isMethodInjection && ctx.dependencyType.isNullable) {
+				ctx.log("Method / ctor param is nullable")
+				ctx.log("Service not found - failing silently...")
+				return null				
+			}
+			
 			// for when looking for an @Inject field
 			throw IocErr(IocMessages.serviceTypeNotFound(ctx.dependencyType))
 		}
