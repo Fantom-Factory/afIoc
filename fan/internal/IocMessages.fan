@@ -85,6 +85,13 @@ internal const class IocMessages {
 		"Could not find default implementation type '${serviceType}Impl'. Please provide this type, or bind the service mixin to a specific implementation type."
 	}
 
+	static Str couldNotFindAutobuildCtor(Type type, Type?[]? paramTypes) {
+		val := "Could not find an autobuild ctor for ${type.qname}"
+		if (paramTypes != null && !paramTypes.isEmpty)
+			val += " with args " + paramTypes.map { it?.signature ?: "null" }
+		return stripSys(val)
+	}
+
 	static Str serviceIdNotFound(Str serviceId) {
 		"Service id '${serviceId}' is not defined."
 	}

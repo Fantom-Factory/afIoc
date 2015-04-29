@@ -82,7 +82,7 @@ internal const class ServiceBuilders {
 		}
 
 		if (ctors.isEmpty)
-			throw IocErr("Could not find a suitable autobuild ctor for ${type.qname}")
+			throw IocErr(IocMessages.couldNotFindAutobuildCtor(type, paramTypes))
 		
 		// there can be only one!
 		if (ctors.size == 1)

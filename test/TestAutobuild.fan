@@ -32,7 +32,7 @@ internal class TestAutobuild : IocTest {
 
 	Void testAutobuildWithWrongParams() {
 		reg := RegistryBuilder().addModule(T_MyModule75#).build.startup
-		verifyIocErrMsg(IocMessages.providerMethodArgDoesNotFit(Str#, Int#)) {			
+		verifyIocErrMsg(IocMessages.couldNotFindAutobuildCtor(T_MyService47#, [Str#])) {			
 			reg.autobuild(T_MyService47#, ["Oops!"])
 		}
 	}
@@ -114,6 +114,19 @@ internal class TestAutobuild : IocTest {
 		s105 := reg.serviceById(T_MyService105#.qname) as T_MyService105
 		verifyEq(T_MyService105.built.val,  1)
 		verifyEq(T_MyService105A.built.val, 1)
+	}
+	
+	Void testAutobuildCtorSelection() {
+		reg := RegistryBuilder().build.startup
+		
+		srv := (T_MyService107) reg.autobuild(T_MyService107#, ["whoop"])
+		verifyEq(srv.ctor, "make1")
+		
+		srv = (T_MyService107) reg.autobuild(T_MyService107#, ["whoop", 89])
+		verifyEq(srv.ctor, "make2")
+
+		srv = (T_MyService107) reg.autobuild(T_MyService107#, [null, 89])
+		verifyEq(srv.ctor, "make2")
 	}
 }
 
@@ -211,5 +224,11 @@ internal class T_MyService105 {
 internal class T_MyService105A {
 	static const AtomicInt built := AtomicInt(0)
 	new make() { built.incrementAndGet}
+}
+
+internal class T_MyService107 {
+	Str ctor
+	new make1(Str str) { ctor = "make1" }
+	new make2(Str? str, Int int) { ctor = "make2" }
 }
 
