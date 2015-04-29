@@ -71,9 +71,6 @@ internal const class ServiceBuilders {
 					return pType.fits(param.type)
 				}
 				
-				if (ctor.parent == AutobuildProvider#)
-					echo("AUTOBUILD!")
-				
 				// check service
 				a:= InjectionTracker.doingCtorInjection(type, ctor, null) |ctx1->Bool| {
 					InjectionTracker.doingParamInjection(ctx1, param, i) |ctx2->Bool| {

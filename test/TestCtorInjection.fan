@@ -9,8 +9,8 @@ internal class TestCtorInjection : IocTest {
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
 		verifyIocErrMsg(IocMessages.noDependencyMatchesType(T_MyService02#)) {
+			reg := RegistryBuilder().addModule(T_MyModule109#).build.startup
 			reg.dependencyByType(T_MyService30#)
 		}
 	}
@@ -83,6 +83,7 @@ internal class T_MyModule104 {
 }
 internal class T_MyModule105 {
 	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService01#)
 		defs.add(T_MyService05#)
 	}	
 }
@@ -146,9 +147,14 @@ internal class T_MyModule42 {
 	static Void defineServices(ServiceDefinitions defs) {
 		defs.add(T_MyService24#).withId("s24")
 		defs.add(T_MyService25#).withId("s25")
-		defs.add(T_MyService30#).withId("s30")
 		defs.add(T_MyService38#).withId("s38")
 		defs.add(T_MyService53#).withId("s53")
+	}
+}
+
+internal class T_MyModule109 {
+	static Void defineServices(ServiceDefinitions defs) {
+		defs.add(T_MyService30#).withId("s30")
 	}
 }
 

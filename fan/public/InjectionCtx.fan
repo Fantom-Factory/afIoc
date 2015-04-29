@@ -82,13 +82,6 @@ class InjectionCtx {
 		InjectionTracker.log(msg)
 	}
 	
-	internal Bool isForConfigType(Type? configType) {
-		(injectionKind == InjectionKind.ctorInjection || injectionKind == InjectionKind.methodInjection) && 
-		methodParamIndex == 0 && 
-		configType != null && 
-		dependencyType.fits(configType)
-	}
-	
 	@NoDoc
 	override Str toStr() {
 		"Injecting into ${targetType?.qname}"
