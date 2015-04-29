@@ -148,8 +148,11 @@ internal const class ServiceDef : LazyProxy {
 			}
 			
 			// if being built by another thread, wait for it to finish
-			while (serviceImplRef.val == null)
-				Actor.sleep(10ms)
+			while (serviceImplRef.val == null) {
+				InjectionTracker.recursionCheck(this, "Waiting for ${serviceId} to be built") |->| {
+					Actor.sleep(10ms)
+				}
+			}
 			
 			return serviceImplRef.val
 		}
