@@ -156,7 +156,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			this.dependencyProviders= serviceDefById(DependencyProviders#.qname, true).autobuild
 		}
 
-		tracker.track("Validating configuration contributions") |->| {
+		tracker.track("Validating service builders") |->| {
+			// validate config types and autobuild ctors
 			serviceDefs.each { it.validate }
 		}
 	}

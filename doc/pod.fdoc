@@ -477,7 +477,7 @@ Which ctor? [#whichCtor]
 ------------------------
 Sometimes your service may have multiple ctors. Perhaps one for building and another for testing. When this happens, which one should IoC use to create the service?
 
-By default, IoC will choose the ctor with the *most* parameters. But this behaviour can be overridden by annotating a chosen ctor with '@Inject'.
+By default, IoC will choose the best fitting ctor with the most parameters. But this behaviour can be overridden by annotating a chosen ctor with '@Inject'.
 
 pre>
 syntax: fantom
@@ -486,17 +486,41 @@ using afIoc
 const class MyService {
 
     ** By default, IoC would choose this ctor because it has the most parameters
-    new make(Penguins penguins, OtherService otherService) {
+    new make1(Penguins penguins, OtherService otherService) {
         ....
     }
 
     ** But we can force IoC to use this ctor by annotating it with @Inject
     @Inject
-    new make(|This| in) {
+    new make2(|This| in) {
         ....
     }
 }
 <pre
+
+Note that IoC is clever enough to find the *best fitting* ctor. That is, it looks for a ctor that has the most injectable parameters. So given we have a *Penguins* service, when we try to build this class:
+
+pre>
+syntax: fantom
+using afIoc
+
+const class CtorTest {
+
+    new make1(Int not_a_service, Penguins penguins) { .... }
+
+    new make2(Penguins penguins) { .... }
+}
+<pre
+
+Then IoC would choose 'make2()' because it doesn't know how to inject 'Int not_a_service'. But if we define 'CtorTest' with:
+
+pre>
+static Void defineServices(ServiceDefinitions defs) {
+    defs.add(CtorTest#).withCtorArgs([69])
+}
+<pre
+
+Then IoC would then choose 'make1()'.
 
 
 
@@ -1347,6 +1371,7 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.8 [#2.0.8]
 ===============
+ - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
  - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
 
 v2.0.6 [#2.0.6]
