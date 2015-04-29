@@ -133,7 +133,10 @@ internal class T_MyModule96 {
 internal const class T_DependencyProvider4 : DependencyProvider {
 	@Inject const T_MyService84 s84
 	new make(|This|in) { in(this) }
-	override Bool canProvide(InjectionCtx ctx) {s84.judge; return ctx.dependencyType.fits(Str?#) }
+	override Bool canProvide(InjectionCtx ctx) {
+		s84.judge
+		return ctx.dependencyType.fits(Str?#) 
+	}
 	override Obj? provide(InjectionCtx ctx) { s84.judge }
 }
 @NoDoc

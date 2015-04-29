@@ -89,6 +89,9 @@ internal const class ServiceDef : LazyProxy {
 		if (serviceImpl != null) {
 			this.configTypeGot.val	= true
 			this.configTypeRef.val	= null
+			// hardcode fudge for DependencyProviders
+			if (serviceImpl.typeof == DependencyProvidersImpl#)
+				this.configTypeRef.val	= DependencyProvider[]#
 		}
 
 		if (srvDef.overridden)
@@ -163,7 +166,8 @@ internal const class ServiceDef : LazyProxy {
 
 	Obj getProxyService() {
 		exisiting := serviceProxyRef.val
-		if (exisiting != null)
+		if (exisiting 
+			!= null)
 			return exisiting
 	
 		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
@@ -201,6 +205,9 @@ internal const class ServiceDef : LazyProxy {
 		objLocator.trackServiceById(ServiceProxyBuilder#.qname, true)
 	}
 
+//	Void terminate() {
+//		serviceLifecycle   = ServiceLifecycle.builtin		
+//	}
 
 
 	// ---- Service Configuration Methods ---------------------------------------------------------

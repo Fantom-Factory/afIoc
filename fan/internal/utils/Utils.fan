@@ -16,7 +16,7 @@ internal class Utils {
 		Utils#.pod.log.level = logLevel
 	}
 	
-	static Void debugOperation(|->| operation) {
+	static Void debug(|->| operation) {
 		setLoglevel(LogLevel.debug)
 		try {
 			operation()

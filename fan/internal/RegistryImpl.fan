@@ -43,6 +43,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			CtorItBlockProvider(this),
 			ServiceProvider(this)
 		])
+		readyMade[DependencyProviders#] = this.dependencyProviders
 
 		// new up Built-In services ourselves (where we can) to cut down on debug noise
 		tracker.track("Defining Built-In services") |->| {
@@ -152,7 +153,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		InjectionTracker.withCtx(tracker) |->| {
 			this.serviceDefs 		= serviceDefs
 			this.typeLookup			= CachingTypeLookup(serviceDefs.vals)
-			this.dependencyProviders= trackServiceById(DependencyProviders#.qname, true)
+			this.dependencyProviders= serviceDefById(DependencyProviders#.qname, true).autobuild
 		}
 
 		tracker.track("Validating configuration contributions") |->| {
@@ -307,7 +308,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 				throw IocErr(IocMessages.autobuildTypeHasToInstantiable(type))
 		}
 		
-		existing := serviceDefByType(implType) 
+		existing := serviceDefByType(type) 
 		if (existing != null)
 			log.warn(IocMessages.warnAutobuildingService(existing.serviceId, existing.serviceType))
 		
