@@ -1373,6 +1373,7 @@ v2.0.8 [#2.0.8]
 ===============
  - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
  - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
+ - Bug: Some combination of autobuilding and service creation could cause IoC to hang indefinitely instead of throwing a service recursion error.
 
 v2.0.6 [#2.0.6]
 ===============
