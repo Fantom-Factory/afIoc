@@ -315,7 +315,13 @@ internal const class IocMessages {
 		"@Inject { type=${type.signature}# } on field ${field.qname} should be a map type, e.g. @Inject { type=[Int:Str]# }"
 	}
 
+	
+	
+	// ---- Func Provider Messages ----------------------------------------------------------------
 
+	static Str funcProvider_mustNotHaveArgs(Type type) {
+		stripSys("LazyFuncs for services must not declare arguments: ${type.signature}")
+	}
 	
 	// ---- Helper Methods ------------------------------------------------------------------------
 	

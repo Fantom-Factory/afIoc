@@ -28,6 +28,7 @@ internal const class IocModule {
 		config["afIoc.logProvider"]			= logProvider
 		config["afIoc.configProvider"]		= config.autobuild(ConfigProvider#)
 		config["afIoc.ctorItBlockProvider"]	= config.autobuild(CtorItBlockProvider#)
+		config["afIoc.funcProvider"]		= config.autobuild(FuncProvider#)
 		
 		// @Deprecated 
 		config.addPlaceholder("afIoc.serviceProvider")

@@ -11,9 +11,9 @@ internal const class LocalProvider : DependencyProvider {
 
 	override Bool canProvide(InjectionCtx ctx) {
 		// IoC standards dictate that field injection should be denoted by a facet
-		ctx.injectionKind.isFieldInjection
-			? localTypes.contains(ctx.dependencyType.toNonNullable) && ctx.targetType != null && ctx.field.hasFacet(Inject#)
-			: localTypes.contains(ctx.dependencyType.toNonNullable) && ctx.targetType != null
+		if (ctx.injectionKind.isFieldInjection && !ctx.field.hasFacet(Inject#))
+			return false
+		return localTypes.contains(ctx.dependencyType.toNonNullable) && ctx.targetType != null
 	}
 	
 	override Obj? provide(InjectionCtx ctx) {

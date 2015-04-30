@@ -11,7 +11,7 @@ class InjectionCtx {
 	** The object that will receive the injection. Only available for field and (non-static) method injection.  
 		  Obj?			target { set { &target = it; &injectingInto = it } }
 	
-	** The 'Type' that will receive the injection. This is the implementation type and may be different to the 'depenencyType'. 
+	** The 'Type' of the object that will receive the injection. 
 	** Not available during 'dependencyByType'.
 	const Type?			targetType
 

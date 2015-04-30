@@ -39,8 +39,7 @@ internal const class InjectionUtils {
 		}
 	}
 
-	Obj createViaConstructor(Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
-		building := ctor.parent
+	Obj createViaConstructor(Type building, Method? ctor, Obj?[]? providedCtorArgs, [Field:Obj?]? fieldVals) {
 		if (ctor == null) {
 			return InjectionTracker.track("Instantiating $building via ${building.name}()...") |->Obj| {
 				return building.make()

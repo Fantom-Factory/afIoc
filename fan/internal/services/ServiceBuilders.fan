@@ -24,7 +24,7 @@ internal const class ServiceBuilders {
 				try {
 					ctor	:= findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof })
 					target	:= 
-					injectionUtils.createViaConstructor(ctor, ctorArgs, fieldVals)
+					injectionUtils.createViaConstructor(implType, ctor, ctorArgs, fieldVals)
 					injectionUtils.injectIntoFields(target)
 					injectionUtils.callPostInjectMethods(target)
 					return target
@@ -53,7 +53,7 @@ internal const class ServiceBuilders {
 		// find the best fitting ctors
 		ctors := constructors.findAll |ctor| {
 			pTypeIndex := 0
-			return ctor.params.all |param, i| {
+			fits := ctor.params.all |param, i| {
 				
 				// check config type
 				if (i == 0) {
@@ -79,6 +79,10 @@ internal const class ServiceBuilders {
 				}
 				return a
 			}
+			// make sure we use ALL the provided ctor arguments
+			if (pTypeIndex < (paramTypes?.size ?: 0))
+				fits = false
+			return fits
 		}
 
 		if (ctors.isEmpty)

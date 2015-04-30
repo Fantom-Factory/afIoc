@@ -41,6 +41,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 			LogProviderImpl(|Type type->Log| { return type.pod.log }),
 			ConfigProvider(),
 			CtorItBlockProvider(this),
+			FuncProvider(this),
 			ServiceProvider(this)
 		])
 		readyMade[DependencyProviders#] = this.dependencyProviders
