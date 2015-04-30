@@ -8,9 +8,12 @@ internal const class ServiceProvider : DependencyProvider {
 
 	override Bool canProvide(InjectionCtx ctx) {
 		// IoC standards dictate that field injection should be denoted by a facet
+		if (ctx.injectionKind.isFieldInjection && !ctx.field.hasFacet(Inject#))
+			return false
+
+		// we should always be able to inject an @Inject field - it's an error if we can't
 		if (ctx.injectionKind.isFieldInjection)
-			// we should always be able to inject an @Inject field - it's an error if we can't
-			return (ctx.field.hasFacet(Inject#))
+			return true
 
 		serviceDef := objLocator.serviceDefByType(ctx.dependencyType)
 		if (serviceDef != null)

@@ -49,7 +49,10 @@ const mixin Registry {
 	** 'fieldVals' set (and potentially overwrite) the value of any const fields set by an it-block function.
     abstract Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 	
-//	abstract Obj? autobuildFromServiceDef(Str serviceId, Bool checked := true)
+	// do we, or do we not pass in ctor args!? ServiceDef says no, as they've been fixed in the ModuleDefs,
+	// but practical usage say, yes! That's why we're autobuilding! 
+	// Workaround is for the service to expose it's config, and we inject *that* service into an autobuilt class!
+//	abstract Obj? autobuildService(Str serviceId, Obj?[]? ctorArgs := null, Bool checked := true)
 
 	** A companion method to 'autobuild'. Creates an instance of the given mixin, which creates the real instance 
 	** whenever a mixin method is invoked.

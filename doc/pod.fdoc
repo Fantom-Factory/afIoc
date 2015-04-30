@@ -1374,7 +1374,7 @@ Release Notes [#releaseNotes]
 v2.0.8 [#2.0.8]
 ===============
  - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
- - Chg: Nullable ctor and method parameters are noe deemed *optional* and don't throw an Err if not found.
+ - Chg: Nullable ctor and method parameters are now deemed *optional* and don't throw an Err if not found.
  - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
  - Bug: Some combination of autobuilding and service creation could cause IoC to hang indefinitely instead of throwing a service recursion error.
 
