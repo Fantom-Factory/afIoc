@@ -141,7 +141,7 @@ afPlastic::PlasticCompiler: Builtin
   / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
  / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
 /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                            Alien-Factory IoC v2.0.4 /___/
+                            Alien-Factory IoC v2.0.8 /___/
 
 IoC Registry built in 205ms and started up in 11ms
 
@@ -680,6 +680,99 @@ class MyClass {
 Here the registry service is injected, and a new instance of 'otherClass' is created and injected. 'arg1' and 'arg2' are used as ctor arguments when building 'MyOtherClass'.
 
 The '@Autobuild' facet is an example of custom dependency injection. See [Dependency Providers]`#dependecnyProviders` for details.
+
+
+
+Lazy Functions [#lazyFunctions]
+*******************************
+To defer building services until they are used, you can inject *Lazy Functions*. These are funcs that return a service:
+
+pre>
+syntax: fantom
+@Inject |->MyService| myServiceFunc
+<pre
+
+or
+
+pre>
+syntax: fantom
+myServiceFunc := (|->MyService|) registry.dependencyByType(|->MyService|#)
+<pre
+
+When the function is called, the service is retreived from the registry. This essentially defers service creation until it is used:
+
+pre>
+// get the service from the IoC registry, creating it if it doesn't exist
+myService := myServiceFunc()
+<pre
+
+Lazy Funcs are immutable, which means thety're also useful when injecting non-const classes into const classes. Consider this:
+
+pre>
+using afIoc
+
+const class ConstService {
+
+    // --> Compiler Err!
+    // --> Const type 'ConstService' cannot contain non-const field 'nonConstService'
+    @Inject const NonConstService nonConstService
+
+    new make(|This| in) { in(this) }
+}
+
+class NonConstService {
+    ...
+}
+<pre
+
+To get around the compilation error you can inject a Lazy Func instead:
+
+pre>
+using afIoc
+
+const class ConstService {
+
+    @Inject const |->NonConstService|? nonConstService
+
+    new make(|This| in) { in(this) }
+}
+
+class NonConstService {
+    ...
+}
+<pre
+
+An alternative, non-invasive, way of lazily creating services is to use [Proxies]`#proxies`.
+
+
+
+Factory Functions [#factoryFuncions]
+************************************
+To perform an autobuild you usually need an instance of the IoC 'Registry'. As it is not always convenient to inject / pass around the Registry you may also autobuild using *Factory Functions*.
+
+Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define paramters, the values of which get passed to the autobuild ctor:
+
+pre>
+syntax: fantom
+using afIoc
+
+class BuildMe {
+    new make(Str name, SomeService someService) { ... }
+}
+
+class Builder {
+    @Inject |Str->BuildMe| buildMeFunc
+
+    Void stuff() {
+        bob1 := buildMeFunc("Judge")	// "Judge" gets passed to the BuildMe ctor
+        bob2 := buildMeFunc("Dredd")	// "Dredd" gets passed to the BuildMe ctor
+    }
+}
+<pre
+
+Any non-declared arguments in the autobuild ctor are resolved as dependencies as usual.
+
+So, as seen in the example above, the strings 'Judge' and 'Dredd' get passed to the 'BuildMe' ctor and IoC resolves the 'SomeService' class.
 
 
 
@@ -1373,6 +1466,8 @@ Release Notes [#releaseNotes]
 *****************************
 v2.0.8 [#2.0.8]
 ===============
+ - New: Factory Functions! Autobuild instances without passing around the 'Registry'.
+ - New: Lazy Functions! An easier way to defer creation than using proxies.
  - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
  - Chg: Nullable ctor and method parameters are now deemed *optional* and don't throw an Err if not found.
  - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.

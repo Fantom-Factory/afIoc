@@ -1,6 +1,14 @@
 
-v2.0.6 Maybe...?
+v2.0.8 Maybe...?
 ----------------
+Allow module instances to be passed in - makes it easier to build custom classes
+need to be const to build perApp services
+Update all docs to use non-static version - don't deprecate the old way, just barely mention it. 
+
+const mixin IocModule {
+	virtual Void defineServices(ServiceDefinitions serviceDefs) {  }
+}
+
 make ServiceDefinitions.overrideByType more intelligent than type.qname
 
 update aspects to wrap fields
