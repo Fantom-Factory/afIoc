@@ -143,7 +143,7 @@ afPlastic::PlasticCompiler: Builtin
   / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
  / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
 /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                            Alien-Factory IoC v2.0.4 /___/
+                            Alien-Factory IoC v2.0.8 /___/
 
 IoC Registry built in 205ms and started up in 11ms
 
@@ -453,13 +453,15 @@ Note how the fields are **not** annotated with `@Inject`. (In fact the class doe
 
 
 
-Note that ctor's can be of any scope you like: public, protected, internal or private. In the following examples, the ctors are public purely for brevity.
+Ctor's can be of any scope you like: public, protected, internal or private. In the following examples, the ctors are public purely for brevity.
+
+Note that nullable ctor parameters are deemed *optional* and don't throw an Err if a dependency cannot found.
 
 #### Which ctor?
 
 Sometimes your service may have multiple ctors. Perhaps one for building and another for testing. When this happens, which one should IoC use to create the service?
 
-By default, IoC will choose the ctor with the *most* parameters. But this behaviour can be overridden by annotating a chosen ctor with `@Inject`.
+By default, IoC will choose the best fitting ctor with the most parameters. But this behaviour can be overridden by annotating a chosen ctor with `@Inject`.
 
 ```
 using afIoc
@@ -467,17 +469,40 @@ using afIoc
 const class MyService {
 
     ** By default, IoC would choose this ctor because it has the most parameters
-    new make(Penguins penguins, OtherService otherService) {
+    new make1(Penguins penguins, OtherService otherService) {
         ....
     }
 
     ** But we can force IoC to use this ctor by annotating it with @Inject
     @Inject
-    new make(|This| in) {
+    new make2(|This| in) {
         ....
     }
 }
 ```
+
+Note that IoC is clever enough to find the *best fitting* ctor. That is, it looks for a ctor that has the most injectable parameters. So given we have a *Penguins* service, when we try to build this class:
+
+```
+using afIoc
+
+const class CtorTest {
+
+    new make1(Int not_a_service, Penguins penguins) { .... }
+
+    new make2(Penguins penguins) { .... }
+}
+```
+
+Then IoC would choose `make2()` because it doesn't know how to inject `Int not_a_service`. But if we define `CtorTest` with:
+
+```
+static Void defineServices(ServiceDefinitions defs) {
+    defs.add(CtorTest#).withCtorArgs([69])
+}
+```
+
+Then IoC would then choose `make1()`.
 
 ### It-Block Injection
 
@@ -621,6 +646,45 @@ class MyClass {
 Here the registry service is injected, and a new instance of `otherClass` is created and injected. `arg1` and `arg2` are used as ctor arguments when building `MyOtherClass`.
 
 The `@Autobuild` facet is an example of custom dependency injection. See [Dependency Providers](#dependecnyProviders) for details.
+
+## Lazy Functions
+
+To defer building services until they are used, you can inject *lazy functions*. These are funcs that return a service:
+
+```
+@Inject |->MyService| myServiceFunc
+```
+
+or
+
+```
+myServiceFunc := (|->MyService|) registry.dependencyByType(|->MyService|#)
+```
+
+When the function is called, the service is created; if an instance doesn't exist already:
+
+```
+myService := myServiceFunc()
+```
+
+Lazy funcs are also useful when injecting non-const classes into const classes. Consider:
+
+```
+using afIoc
+
+const class ConstService {
+
+    // --> Compiler Err!
+    // --> Const type 'ConstService' cannot contain non-const field 'nonConstService'
+    @Inject NonConstService? nonConstService
+}
+
+class NonConstService {
+    ...
+}
+```
+
+## Factory Functions
 
 ## Service Configuration
 
