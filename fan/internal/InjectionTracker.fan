@@ -100,7 +100,6 @@ internal mixin InjectionTracker {
 			it.field			= field
 			it.fieldFacets		= field.facets
 		}
-		
 		return ThreadStack.pushAndRun(injectionCtxId, ctx, func)
 	}
 
