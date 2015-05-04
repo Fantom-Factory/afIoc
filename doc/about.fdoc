@@ -1,13 +1,12 @@
-'IoC' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java.
+'IoC' is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
 
-Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *IoC!*
+Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Use [Autofac]`http://autofac.org/`? Then you'll love *IoC!*
 
-- Field injection
 - Ctor injection
+- Field injection
+- Factory functions
 - Distributed service configuration
-- Lazy loading
-- Service advising
+- Lazy services
+- Service aspects
 - Simple API
-
-'IoC' is the modular framework that binds your application together.
 
