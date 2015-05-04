@@ -20,7 +20,10 @@ using afBeanUtils
 // this service makes for a handy backdoor for field injection for efanXtra
 @NoDoc	// don't overwhelm the masses
 const mixin DependencyProviders {
-	
+
+	@NoDoc	// used for internal testing
+	abstract DependencyProvider[] dependencyProviders()
+
 	abstract Bool canProvideDependency(InjectionCtx injectionCtx)
 
 	abstract Obj? provideDependency(InjectionCtx injectionCtx, Bool checked := true)
@@ -28,7 +31,7 @@ const mixin DependencyProviders {
 
 ** @since 1.1.0
 internal const class DependencyProvidersImpl : DependencyProviders {
-	private const DependencyProvider[] dependencyProviders
+	override const DependencyProvider[] dependencyProviders
 
 	new makeInternal(DependencyProvider[] dependencyProviders) {
 		this.dependencyProviders = dependencyProviders

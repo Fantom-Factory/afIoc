@@ -39,6 +39,14 @@ internal class TestDependencyProvider : IocTest {
 		verifyEq(s72.oops, "Dredd")
 	}
 
+	Void testDependencyProvidersServiceIsNotTheBootStrapImp() {
+		reg := RegistryBuilder().addModule(T_MyModule57#).build
+		dp	:= (DependencyProviders) reg.serviceById(DependencyProviders#.qname)
+		dps	:= dp.dependencyProviders.map { it.typeof }
+		// Bugfix: T_DependencyProvider2# existed in the impl held in RegistryImpl, but not in the version injected into other classes!
+		verifyTrue(dps.contains(T_DependencyProvider2#))
+	}
+	
 	private Void verifyCtx(Registry reg, Type type, Type[] facets, Type into) {
 		dp 	:= reg.serviceById("dp") as T_DependencyProvider2
 		ctx := dp.ls["ctx"] as InjectionCtx

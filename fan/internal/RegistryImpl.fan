@@ -154,7 +154,10 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		InjectionTracker.withCtx(tracker) |->| {
 			this.serviceDefs 		= serviceDefs
 			this.typeLookup			= CachingTypeLookup(serviceDefs.vals)
-			this.dependencyProviders= serviceDefById(DependencyProviders#.qname).autobuild
+			dpServiceDef			:= serviceDefById(DependencyProviders#.qname)
+			newDp					:= dpServiceDef.autobuild
+			dpServiceDef.swapServiceImpl(newDp)
+			this.dependencyProviders= newDp
 		}
 
 		tracker.track("Validating service builders") |->| {
@@ -163,7 +166,7 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		}
 	}
 
-	
+
 
 	// ---- Registry Methods ----------------------------------------------------------------------
 
