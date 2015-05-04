@@ -5,12 +5,12 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A powerful Dependency Injection / Inversion Of Control framework"
-		version = Version("2.0.7")
+		version = Version("2.0.8")
 
 		meta = [	
 			"proj.name"		: "IoC",
 			"tags"			: "system",
-			"repo.private"	: "true"
+			"repo.private"	: "false"
 		]
 
 		depends = [
@@ -22,7 +22,7 @@ class Build : BuildPod {
 			"afConcurrent 1.0.8  - 1.0",
 			"afPlastic    1.0.16 - 1.0"
 		]
-		
+
 		srcDirs = [`test/`, `fan/`, `fan/public/`, `fan/public/services/`, `fan/public/facets/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/providers/`, `fan/internal/def/`]
 		resDirs = [`doc/about.fdoc`]
 	}

@@ -1,19 +1,19 @@
-#IoC v2.0.6
+#IoC v2.0.8
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v2.0.6](http://img.shields.io/badge/pod-v2.0.6-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v2.0.8](http://img.shields.io/badge/pod-v2.0.8-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
 
-`IoC` is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html).
+`IoC` is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
 
-Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Then you'll love *IoC*!
+Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Use [Autofac](http://autofac.org/)? Then you'll love *IoC*!
 
 - **Injection - any way *you* want it!**
   - field injection
   - ctor injection
-  - it-block ctor injection - `new make(|This|in) { in(this) }`
+  - it-block ctor injection
 
 - **Distributed service configuration**
   - configure *any* service *from* any **pod** / **module**
@@ -38,8 +38,10 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [37 tests, 222 methods, 485 verifies]`
+  - Extensively tested: - `All tests passed! [38 tests, 231 methods, 503 verifies]`
 
+
+IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html) for Java.
 
 ## Install
 
@@ -102,7 +104,7 @@ class Main {
         test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
         test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
 
-        // all test classes poke the same instance of PokerService
+        // all these test instances poke the same instance of PokerService
         test1.poker.poke()
         test2.poker.poke()
         test3.poker.poke()
@@ -649,7 +651,7 @@ The `@Autobuild` facet is an example of custom dependency injection. See [Depend
 
 ## Lazy Functions
 
-To defer building services until they are used, you can inject *lazy functions*. These are funcs that return a service:
+To defer building services until they are used, you can inject *Lazy Functions*. These are funcs that return a service:
 
 ```
 @Inject |->MyService| myServiceFunc
@@ -661,13 +663,14 @@ or
 myServiceFunc := (|->MyService|) registry.dependencyByType(|->MyService|#)
 ```
 
-When the function is called, the service is created; if an instance doesn't exist already:
+When the function is called, the service is retreived from the registry. This essentially defers service creation until it is used:
 
 ```
+// get the service from the IoC registry, creating it if it doesn't exist
 myService := myServiceFunc()
 ```
 
-Lazy funcs are also useful when injecting non-const classes into const classes. Consider:
+Lazy Funcs are immutable, which means thety're also useful when injecting non-const classes into const classes. Consider this:
 
 ```
 using afIoc
@@ -676,7 +679,9 @@ const class ConstService {
 
     // --> Compiler Err!
     // --> Const type 'ConstService' cannot contain non-const field 'nonConstService'
-    @Inject NonConstService? nonConstService
+    @Inject const NonConstService nonConstService
+
+    new make(|This| in) { in(this) }
 }
 
 class NonConstService {
@@ -684,7 +689,51 @@ class NonConstService {
 }
 ```
 
+To get around the compilation error you can inject a Lazy Func instead:
+
+```
+using afIoc
+
+const class ConstService {
+
+    @Inject const |->NonConstService|? nonConstService
+
+    new make(|This| in) { in(this) }
+}
+
+class NonConstService {
+    ...
+}
+```
+
+An alternative, non-invasive, way of lazily creating services is to use [Proxies](#proxies).
+
 ## Factory Functions
+
+To perform an autobuild you usually need an instance of the IoC `Registry`. As it is not always convenient to inject / pass around the Registry you may also autobuild using *Factory Functions*.
+
+Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define paramters, the values of which get passed to the autobuild ctor:
+
+```
+using afIoc
+
+class BuildMe {
+    new make(Str name, SomeService someService) { ... }
+}
+
+class Builder {
+    @Inject |Str->BuildMe| buildMeFunc
+
+    Void stuff() {
+        bob1 := buildMeFunc("Judge")    // "Judge" gets passed to the BuildMe ctor
+        bob2 := buildMeFunc("Dredd")    // "Dredd" gets passed to the BuildMe ctor
+    }
+}
+```
+
+Any non-declared arguments in the autobuild ctor are resolved as dependencies as usual.
+
+So, as seen in the example above, the strings `Judge` and `Dredd` get passed to the `BuildMe` ctor and IoC resolves the `SomeService` class.
 
 ## Service Configuration
 

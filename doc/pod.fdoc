@@ -1,13 +1,13 @@
 Overview [#overview]
 ********************
-'IoC' is an Inversion of Control (IoC) container and Dependency Injection (DI) framework inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html`.
+'IoC' is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
 
-Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Then you'll love *IoC*!
+Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Use [Autofac]`http://autofac.org/`? Then you'll love *IoC*!
 
 - **Injection - any way *you* want it!**
   - field injection
   - ctor injection
-  - it-block ctor injection - 'new make(|This|in) { in(this) }'
+  - it-block ctor injection
 
 - **Distributed service configuration**
   - configure *any* service *from* any **pod** / **module**
@@ -33,6 +33,8 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
   - Extensively tested: - 'All tests passed! [38 tests, 231 methods, 503 verifies]'
+
+IoC was inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java.
 
 
 
@@ -100,7 +102,7 @@ class Main {
         test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
         test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
 
-        // all test classes poke the same instance of PokerService
+        // all these test instances poke the same instance of PokerService
         test1.poker.poke()
         test2.poker.poke()
         test3.poker.poke()
@@ -764,8 +766,8 @@ class Builder {
     @Inject |Str->BuildMe| buildMeFunc
 
     Void stuff() {
-        bob1 := buildMeFunc("Judge")	// "Judge" gets passed to the BuildMe ctor
-        bob2 := buildMeFunc("Dredd")	// "Dredd" gets passed to the BuildMe ctor
+        bob1 := buildMeFunc("Judge")    // "Judge" gets passed to the BuildMe ctor
+        bob2 := buildMeFunc("Dredd")    // "Dredd" gets passed to the BuildMe ctor
     }
 }
 <pre
@@ -1467,11 +1469,11 @@ Release Notes [#releaseNotes]
 v2.0.8 [#2.0.8]
 ===============
  - New: Factory Functions! Autobuild instances without passing around the 'Registry'.
- - New: Lazy Functions! An easier way to defer creation than using proxies.
+ - New: Lazy Functions! An easy way to defer service creation.
  - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
  - Chg: Nullable ctor and method parameters are now deemed *optional* and don't throw an Err if not found.
- - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider.
- - Bug: Some combination of autobuilding and service creation could cause IoC to hang indefinitely instead of throwing a service recursion error.
+ - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider to simplify config contributions.
+ - Bug: Some combinations of autobuilding and service creation caused IoC to hang indefinitely instead of throwing a service recursion error.
 
 v2.0.6 [#2.0.6]
 ===============
