@@ -120,8 +120,11 @@ internal const class ServiceDef : LazyProxy {
 		this.serviceProxyRef= ObjectRef(localManager.createRef("{$serviceId}.proxy"),		serviceScope)		
 	}
 	
+	// a fudge for bootstrapping DependencyProviders
+	Void swapServiceImpl(Obj newImpl) {
+		serviceImplRef.val = newImpl
+	}
 	
-
 	// ---- Service Build Methods -----------------------------------------------------------------
 
 	Obj getService() {
@@ -174,7 +177,7 @@ internal const class ServiceDef : LazyProxy {
 			return exisiting
 	
 		return InjectionTracker.track("Creating PROXY for Service '$serviceId'") |->Obj| {
-	        proxy	:= proxyBuilder.createProxyForService(this) 
+			proxy	:= proxyBuilder.createProxyForService(this) 
 
 			serviceProxyRef.val	= proxy
 			serviceLifecycle 	= ServiceLifecycle.proxied
