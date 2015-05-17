@@ -1,5 +1,5 @@
 
-const class FuncProvider : DependencyProvider {
+internal const class FuncProvider : DependencyProvider {
 	private const ObjLocator objLocator
 
 	new make(Registry registry) { 
