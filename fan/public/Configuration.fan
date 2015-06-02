@@ -28,7 +28,7 @@ class Configuration {
 		config.registry
 	}
 
-	** Fantom Bug: http://fantom.org/sidewalk/topic/2163#c13978
+	** Fantom Bug: `http://fantom.org/sidewalk/topic/2163#c13978`
 	@Operator 
 	private Obj? get(Obj key) { null }
 
@@ -58,9 +58,10 @@ class Configuration {
 	** Adds a placeholder. Placeholders are empty configurations used to aid ordering of actual values:
 	** 
 	** pre>
-	**   config.placeholder("end")
-	**   config.set("wot", ever).before("end")
-	**   config.set("last", last).after("end")
+	** syntax: fantom
+	** config.placeholder("end")
+	** config.set("wot", ever).before("end")
+	** config.set("last", last).after("end")
 	** <pre
 	** 
 	** While not very useful in the same contribution method, they become very powerful when used across multiple modules and pods.

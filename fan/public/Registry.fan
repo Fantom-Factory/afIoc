@@ -28,6 +28,7 @@ const mixin Registry {
 	** Handy when you wish the ctor to take a mixture of plain objects and services. e.g. for a `fwt::Command`:
 	** 
 	** pre>
+	**   syntax: fantom
 	**   registry.autobuild(MySaveCommand#, [entityToSave])
 	**   ...
 	**   class MySaveCommand {

@@ -7,6 +7,7 @@
 ** If your service is a class named 'MyServiceClass' then it may be defined as follows:
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 **     static Void defineServices(ServiceDefinitions defs) {
 **         defs.add(MyServiceClass#)
@@ -17,6 +18,7 @@
 ** If your service is a mixin with a default implementation class then it may be defined as follows: 
 ** 
 ** pre>
+** syntax: fantom
 ** static Void defineServices(ServiceDefinitions defs) {
 **     defs.add(MyService#, MyServiceImpl#)
 ** } 
@@ -25,6 +27,7 @@
 ** If the implementation class has the same name as the mixin but with an 'Impl' suffix (as does the example above) then it may be defined with the shorthand notation of:
 ** 
 ** pre>
+** syntax: fantom
 ** static Void defineServices(ServiceDefinitions defs) {
 **     defs.add(MyService#)
 ** } 

@@ -4,6 +4,7 @@
 ** Contribute 'DependencyProvider' instances to the 'DependencyProviders' service.
 ** 
 ** pre>
+** syntax: fantom
 ** @Contribute { serviceType=DependencyProviders# }
 ** static Void contributeDependencyProviders(Configuration config) {
 **     config["myProvider"] = MyProvider()

@@ -7,6 +7,7 @@ using afConcurrent::LocalMap
 ** Example usage:
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 **     @Contribute { serviceType=RegistryStartup# }
 **     static Void contributeRegistryStartup(Configuration conf, MyService myService) {

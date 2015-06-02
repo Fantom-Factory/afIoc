@@ -8,9 +8,10 @@ using afBeanUtils
 ** See [@LogProvider]`LogProvider` for a builtin example. 
 ** 
 ** pre>
+** syntax: fantom
 ** @Contribute { serviceType=DependencyProviders# }
-** static Void contributeDependencyProviders(Configuration conf) {
-**   conf["myProvider"] = MyProvider()
+** static Void contributeDependencyProviders(Configuration config) {
+**     config["myProvider"] = MyProvider()
 ** }
 ** <pre
 ** 
