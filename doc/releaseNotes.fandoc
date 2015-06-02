@@ -212,11 +212,11 @@ v1.3.10
 
 v1.3.8
 ======
- - New: Added `TypeCoercer` util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
- - Chg: `OrderedConfig` contributions are coerced to the contrib type.
- - Chg: `MappedConfig` key and value contributions are coerced to their required types.
- - Chg: Added shortcut '@Operator This add(obj)' to `OrderedConfig` and '@Deprecated Void addUnordered(obj)'.
- - Chg: Added shortcut '@Operator This set(key, val)' to `MappedConfig` and '@Deprecated Void addMapped(key, val)'.
+ - New: Added 'TypeCoercer' util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
+ - Chg: 'OrderedConfig' contributions are coerced to the contrib type.
+ - Chg: 'MappedConfig' key and value contributions are coerced to their required types.
+ - Chg: Added shortcut '@Operator This add(obj)' to 'OrderedConfig' and '@Deprecated Void addUnordered(obj)'.
+ - Chg: Added shortcut '@Operator This set(key, val)' to 'MappedConfig' and '@Deprecated Void addMapped(key, val)'.
  - Chg: Public method on 'OrderedConfig' and 'MappedConfig' now return 'this' and other tweaks.
  - Chg: Exposed '@NoDoc PlasticPodCompiler' so it may be used outside of afIoc.
 
@@ -229,9 +229,9 @@ v1.3.6
 v1.3.4
 ======
  - Chg: `DependencyProvider`s may now provide 'null' values.
- - Chg: `OrderedConfig` values may be 'null'.
- - Chg: `MappedConfig` values may be 'null'.
- - Chg: Tweaked `OrderedConfig` placeholder default ordering logic.
+ - Chg: 'OrderedConfig' values may be 'null'.
+ - Chg: 'MappedConfig' values may be 'null'.
+ - Chg: Tweaked 'OrderedConfig' placeholder default ordering logic.
  - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.
 
 v1.3.2
@@ -264,12 +264,12 @@ v1.2.2
 
 v1.2.0
 ======
- - New: Browse defined services via `ServiceStats`
+ - New: Browse defined services via 'ServiceStats'.
  - New: Override defined services with your own implementations via the new powerful 'ServiceOverrides' feature.
  - New: Override any existing 'OrderedConfig' contribution with you own, via 'OrderedConfig.addOverride'.
  - New: Override any existing 'MappedConfig' contribution with you own, via 'MappedConfig.addOverride'.
  - New: Ordered configurations may define 'Placeholders'.
- - Chg: [Registry shutdown listeners]`RegistryShutdownHub` may now be ordered.
+ - Chg: [Registry shutdown listeners]'RegistryShutdownHub' may now be ordered.
  - Chg: Improved Registry startup times by only inspecting Pods (for modules) the once.
  - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
 
@@ -278,12 +278,12 @@ v1.1.0
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
  - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
- - New: [Ordered configuration]`OrderedConfig.addOrdered` contributions are ordered across modules.
+ - New: [Ordered configuration]'OrderedConfig.addOrdered' contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
 
 v1.0.0
 ======
- - New: Added 'addUnorderedAll' and 'addMappedAll' to `OrderedConfig` and `MappedConfig`.
+ - New: Added 'addUnorderedAll' and 'addMappedAll' to 'OrderedConfig' and 'MappedConfig'.
  - Chg: Multiple instances of 'ConcurrentState' can be created with the same state class.
  - Bug: Made public the 'withState()' and 'getState()' methods on 'ConcurrentState'.
  - Bug: NPE could be thrown if ctor depdendency not found.
