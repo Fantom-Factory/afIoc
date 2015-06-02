@@ -13,7 +13,8 @@
 ** all service ids in the registry. This allows a single advisor method to match and advise 
 ** multiple services. e.g. to advise all DAOs you might define:
 ** 
-**     @Advise { serviceId="*DAO" } 
+**   syntax: fantom
+**   @Advise { serviceId="*DAO" } 
 ** 
 ** The advisor method may be called anything you like. The first argument needs to be a list of 
 ** `MethodAdvisor`, any other arguments are taken to be dependent services and are injected as 
@@ -23,6 +24,7 @@
 ** methods on *all* DAO services. 
 ** 
 ** pre>
+** syntax: fantom
 ** @Advise { serviceId="*DAO" }
 ** static Void addTransations(MethodAdvisor[] methodAdvisors, MyTransactionManager transManager) {
 **     methodAdvisors

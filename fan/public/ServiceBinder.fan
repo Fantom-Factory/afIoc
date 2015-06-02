@@ -3,6 +3,7 @@
 ** your service implementation is fronted by a mixin, then pass them both in: 
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 **     static Void defineServices(ServiceDefinitions defs) {
 **         defs.add(MyService#, MyServiceImpl#)
@@ -13,6 +14,7 @@
 ** If your service is just an impl class then you can use the shorter form:
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 **     static Void defineServices(ServiceDefinitions defs) {
 **         defs.add(MyServiceImpl#)

@@ -4,20 +4,24 @@ using concurrent::AtomicRef
 ** 
 ** For field injection 'LogProvider' reuses the '@Inject' facet:
 ** 
+**   syntax: fantom
 **   @Inject Log log
 **  
 ** By default, the class's pod name is used to create the log instance. In essence this is: 
 ** 
+**   syntax: fantom
 **   target.typeof.pod.log
 ** 
 ** Custom log names may be provided via the '@Inject.id' parameter:
 ** 
+**   syntax: fantom
 **   @Inject { id="my.log.name" } Log log
 ** 
 ** You may also create a 'LogProvider' with a custom log function. Example, to override the default
 ** 'LogProvider' with one that generates log names based on the target type (and not pod): 
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 ** 
 **     @Override

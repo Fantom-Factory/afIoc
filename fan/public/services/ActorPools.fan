@@ -8,9 +8,10 @@ using afBeanUtils::NotFoundErr
 ** IoC itself uses an 'ActorPool' named 'afIoc.system'. Contribute your own via your 'AppModule':
 ** 
 ** pre>
+** syntax: fantom
 ** @Contribute { serviceType=ActorPools# }
 ** static Void contributeActorPools(Configuration config) {
-**   config["myPool"] = ActorPool() { it.name = "MyPool" }
+**     config["myPool"] = ActorPool() { it.name = "MyPool" }
 ** }
 ** <pre  
 ** 

@@ -6,6 +6,7 @@ using afConcurrent::SynchronizedState
 ** Example usage:
 ** 
 ** pre>
+** syntax: fantom
 ** class AppModule {
 **     @Contribute { serviceType=RegistryShutdown# }
 **     static Void contributeRegistryShutdown(Configuration config, MyService myService) {
@@ -16,6 +17,7 @@ using afConcurrent::SynchronizedState
 ** 
 ** If your shutdown method depends on other services still being available, add a constraint on their shutdown functions: 
 ** 
+**   syntax: fantom
 **   shutdownFunc := |->| { myService.shutdown() }
 **   config.set("myShutdownFunc", shutdownFunc).before("otherShutdownFunc")
 ** 

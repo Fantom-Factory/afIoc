@@ -17,24 +17,26 @@ using afConcurrent
 ** Where possible, the field name is used as the *local* name. 
 ** 
 ** pre>
+** syntax: fantom
 ** const class Example {
-**   @Inject const LocalMap localMap
+**     @Inject const LocalMap localMap
 ** 
-**   new make(|This|in) { in(this) }
+**     new make(|This|in) { in(this) }
 ** }
 ** <pre
 ** 
 ** '@Inject.type' may be used to declare the underlying parameters of the 'LocalList / LocalMap':
 ** 
 ** pre>
+** syntax: fantom
 ** const class Example {
-**   @Inject { type=Str[]# }
-**   const LocalList localList
+**     @Inject { type=Str[]# }
+**     const LocalList localList
 ** 
-**   @Inject { type=[Str:Slot?]# }
-**   const LocalMap localMap
+**     @Inject { type=[Str:Slot?]# }
+**     const LocalMap localMap
 ** 
-**   new make(|This|in) { in(this) }
+**     new make(|This|in) { in(this) }
 ** }
 ** <pre
 ** 

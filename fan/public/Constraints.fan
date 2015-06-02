@@ -4,6 +4,7 @@
 ** Constraints are keys of other contributions that this contribution must appear before or after. 
 ** 
 ** pre>
+**   syntax: fantom
 **   config["Breakfast"] = eggs
 **   config["Dinner"]    = pie
 **   ...

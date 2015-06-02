@@ -5,6 +5,7 @@ facet class Build {
 	** If not specified, the service id is taken to be the qualified name of the returned type. 
 	** Example:
 	** 
+	**   syntax: fantom
 	**   @Build
 	**   static acme::MyService buildPenguin() { ... }
 	** 
