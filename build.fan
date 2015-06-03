@@ -9,7 +9,7 @@ class Build : BuildPod {
 
 		meta = [	
 			"proj.name"		: "IoC",
-			"tags"			: "system",
+			"repo.tags"		: "system",
 			"repo.public"	: "false"
 		]
 
