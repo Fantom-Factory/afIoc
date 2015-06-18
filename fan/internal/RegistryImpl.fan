@@ -321,8 +321,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		sid		:= "${type.name}"
 		builder	:= threadLocalMgr.createRef("autobuild")
 		// so we can pass mutable parameters into Autobuilds - they're gonna be used straight away
-		builder.val = serviceBuilders.fromCtorAutobuild(sid, implType, ctorArgs, fieldVals)
-		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof })
+		builder.val = serviceBuilders.fromCtorAutobuild(sid, implType, ctorArgs, fieldVals, false)
+		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof }, false)
 		
 		serviceDef := ServiceDef.makeForAutobuild(this) {
 			it.serviceId 		= sid
@@ -360,8 +360,8 @@ internal const class RegistryImpl : Registry, ObjLocator {
 		sid		:= "${implT.name}"
 		scope	:= mixinT.isConst ? ServiceScope.perApplication : ServiceScope.perThread
 		builder	:= ObjectRef(threadLocalMgr.createRef("createProxy"), scope, null)
-		builder.val	= serviceBuilders.fromCtorAutobuild(sid, implT, ctorArgs, fieldVals)
-		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implT, ctorArgs?.map { it?.typeof })
+		builder.val	= serviceBuilders.fromCtorAutobuild(sid, implT, ctorArgs, fieldVals, false)
+		ctor 	:= this.serviceBuilders.findAutobuildConstructor(implT, ctorArgs?.map { it?.typeof }, false)
 
 		serviceDef := ServiceDef.makeForProxybuild(this, threadLocalMgr) {
 			it.serviceId 		= sid

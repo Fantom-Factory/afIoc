@@ -128,6 +128,15 @@ internal class TestAutobuild : IocTest {
 		srv = (T_MyService107) reg.autobuild(T_MyService107#, [null, 89])
 		verifyEq(srv.ctor, "make2")
 	}
+	
+	Void testAutobuildWithListAsFirstParam() {
+		reg := RegistryBuilder().build.startup
+		
+		// because lists as 1st param clash with service config
+		srv := (T_MyService111) reg.autobuild(T_MyService111#, [Str["Judge", "Dredd"], 89])
+		verifyEq(srv.str, Str["Judge", "Dredd"])
+		verifyEq(srv.int, 89)
+	}
 }
 
 internal class T_MyModule75 {
@@ -230,5 +239,11 @@ internal class T_MyService107 {
 	Str ctor
 	new make1(Str str) { ctor = "make1" }
 	new make2(Str? str, Int int) { ctor = "make2" }
+}
+
+internal class T_MyService111 {
+	Str[] str
+	Int	int
+	new make(Str[] str, Int int) { this.str = str; this.int = int }
 }
 
