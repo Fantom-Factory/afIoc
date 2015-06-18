@@ -722,12 +722,10 @@ const class ConstService {
     new make(|This| in) { in(this) }
 }
 
-class NonConstService {
-    ...
-}
+class NonConstService { ... }
 <pre
 
-To get around the compilation error you can inject a Lazy Func instead:
+To get around the compilation error you can inject the 'Registry' and replace 'nonConstService' with a method:
 
 pre>
 syntax: fantom
@@ -735,17 +733,31 @@ using afIoc
 
 const class ConstService {
 
-    @Inject const |->NonConstService|? nonConstService
+    @Inject const Registry registry
 
     new make(|This| in) { in(this) }
-}
 
-class NonConstService {
-    ...
+    NonConstService nonConstService() {
+        registry.serviceById(NonConstService#.qname)
+    }
 }
 <pre
 
-An alternative, non-invasive, way of lazily creating services is to use [Proxies]`#proxies`.
+Or a better way would be to inject a Lazy Func instead which, behind the scences, does exactly the same service call:
+
+pre>
+syntax: fantom
+using afIoc
+
+const class ConstService {
+
+    @Inject const |->NonConstService| nonConstService
+
+    new make(|This| in) { in(this) }
+}
+<pre
+
+Or another alternative, non-invasive, way of lazily creating services is to use [Proxies]`#proxies`.
 
 
 
