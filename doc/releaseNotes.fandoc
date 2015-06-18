@@ -273,7 +273,7 @@ v1.2.0
  - New: Override any existing 'OrderedConfig' contribution with you own, via 'OrderedConfig.addOverride'.
  - New: Override any existing 'MappedConfig' contribution with you own, via 'MappedConfig.addOverride'.
  - New: Ordered configurations may define 'Placeholders'.
- - Chg: [Registry shutdown listeners]'RegistryShutdownHub' may now be ordered.
+ - Chg: 'Registry shutdown listeners' may now be ordered.
  - Chg: Improved Registry startup times by only inspecting Pods (for modules) the once.
  - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
 
@@ -282,7 +282,7 @@ v1.1.0
  - New: Extend IoC by defining your own `DependencyProvider`s.
  - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
  - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
- - New: [Ordered configuration]'OrderedConfig.addOrdered' contributions are ordered across modules.
+ - New: Ordered configuration contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
 
 v1.0.0
