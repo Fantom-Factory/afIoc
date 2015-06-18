@@ -17,12 +17,12 @@ internal const class ServiceBuilders {
 		}
 	}
 	
-	|->Obj| fromCtorAutobuild(Str serviceId, Type implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals) {
+	|->Obj| fromCtorAutobuild(Str serviceId, Type implType, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals, Bool forService) {
 		|->Obj| {
 			InjectionTracker.track("Creating '$serviceId' via ctor autobuild") |->Obj| {
 				InjectionTracker.resetTakenFields
 				try {
-					ctor	:= findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof })
+					ctor	:= findAutobuildConstructor(implType, ctorArgs?.map { it?.typeof }, forService)
 					target	:= 
 					injectionUtils.createViaConstructor(implType, ctor, ctorArgs, fieldVals)
 					injectionUtils.injectIntoFields(target)
@@ -36,7 +36,7 @@ internal const class ServiceBuilders {
 	}
 	
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
-	Method? findAutobuildConstructor(Type type, Type?[]? paramTypes) {
+	Method? findAutobuildConstructor(Type type, Type?[]? paramTypes, Bool forService) {
 		constructors := findConstructors(type)
 
 		// if no ctors, use Type.make()
@@ -56,12 +56,13 @@ internal const class ServiceBuilders {
 			fits := ctor.params.all |param, i| {
 				
 				// check config type
-				if (i == 0) {
-					if (param.type.name == "List")
-						return true
-					if (param.type.name == "Map")
-						return true
-				}
+				if (forService)
+					if (i == 0) {
+						if (param.type.name == "List")
+							return true
+						if (param.type.name == "Map")
+							return true
+					}
 				
 				// check provided params
 				if (paramTypes != null && pTypeIndex < paramTypes.size) {

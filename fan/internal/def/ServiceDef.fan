@@ -66,12 +66,12 @@ internal const class ServiceDef : LazyProxy {
 			serviceImplType		:= (Type) srvDef.buildData
 			ctorArgs			:= srvDef.ctorArgs
 			fieldVals			:= srvDef.fieldVals
-			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, serviceImplType, ctorArgs, fieldVals).toImmutable
+			this.serviceBuilder	= objLocator.serviceBuilders.fromCtorAutobuild(serviceId, serviceImplType, ctorArgs, fieldVals, true).toImmutable
 			this.description	= "$serviceId : via Ctor Autobuild (${serviceImplType.qname})"
 			this.configTypeFunc	= |->Type?| {
 				// because we're gonna search through the services looking for ctor param matches, we need to delay
 				// ctor finding until all the services are defined
-				ctor := objLocator.serviceBuilders.findAutobuildConstructor(serviceImplType, ctorArgs?.map { it?.typeof })
+				ctor := objLocator.serviceBuilders.findAutobuildConstructor(serviceImplType, ctorArgs?.map { it?.typeof }, true)
 				return findConfigType(ctor)
 			}
 		} 	
