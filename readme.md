@@ -38,7 +38,7 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - **Designed to help YOU the developer!**
   - simple API - 1 facet and 2 registry methods is all you need!
   - over 70 bespoke and informative Err messages!
-  - Extensively tested: - `All tests passed! [38 tests, 231 methods, 503 verifies]`
+  - Extensively tested: - `All tests passed! [38 tests, 232 methods, 505 verifies]`
 
 
 IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html) for Java.
@@ -683,29 +683,40 @@ const class ConstService {
     new make(|This| in) { in(this) }
 }
 
-class NonConstService {
-    ...
-}
+class NonConstService { ... }
 ```
 
-To get around the compilation error you can inject a Lazy Func instead:
+To get around the compilation error you can inject the `Registry` and replace `nonConstService` with a method:
 
 ```
 using afIoc
 
 const class ConstService {
 
-    @Inject const |->NonConstService|? nonConstService
+    @Inject const Registry registry
 
     new make(|This| in) { in(this) }
-}
 
-class NonConstService {
-    ...
+    NonConstService nonConstService() {
+        registry.serviceById(NonConstService#.qname)
+    }
 }
 ```
 
-An alternative, non-invasive, way of lazily creating services is to use [Proxies](#proxies).
+Or a better way would be to inject a Lazy Func instead which, behind the scences, does exactly the same service call:
+
+```
+using afIoc
+
+const class ConstService {
+
+    @Inject const |->NonConstService| nonConstService
+
+    new make(|This| in) { in(this) }
+}
+```
+
+Or another alternative, non-invasive, way of lazily creating services is to use [Proxies](#proxies).
 
 ## Factory Functions
 
