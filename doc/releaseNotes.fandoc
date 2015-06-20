@@ -121,7 +121,7 @@ v1.6.0
  - Chg: Deprecated 'ConcurrentState, ConcurrentCache, ThreadStash' in favour of [Concurrent]`pod:afConcurrent` classes.
  - Chg: Attempting to '@Inject' into a static field will now throw an Err.
  - Chg: Renamed 'ThreadStashManager' -> 'ThreadLocalManager'
- - Chg: Renamed 'RegistryOptions' -> 'RegistryMeta'
+ - Chg: Renamed RegistryOptions -> 'RegistryMeta'
  - Chg: Re-jigged 'RegistryBuilder' logic and API.
  - Chg: Re-jigged 'StrategyRegistry' to add 'findAllChildren()'.
  - Chg: 'TypeCoercer' is now 'const'.
@@ -280,7 +280,7 @@ v1.2.0
 v1.1.0
 ======
  - New: Extend IoC by defining your own `DependencyProvider`s.
- - New: [@ServiceId]`ServiceId` lets you disambiguate between different implmentations of the same service mixin.
+ - New: '@ServiceId' lets you disambiguate between different implmentations of the same service mixin.
  - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
  - New: Ordered configuration contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
