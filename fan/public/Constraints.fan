@@ -1,5 +1,5 @@
 
-** Returned from 'AppModule' `Configuration` methods to add ordering constraints to your contributions.
+** Use to add ordering constraints to service configurations.
 ** 
 ** Constraints are keys of other contributions that this contribution must appear before or after. 
 ** 
@@ -12,41 +12,43 @@
 ** <pre
 ** 
 ** Constraints become very powerful when used across multiple modules and pods.
-abstract class Constraints {
+@Js
+mixin Constraints {
 	
 	** Specify a key your contribution should appear *before*.
 	** 
 	** This may be called multiple times to add multiple constraints.
-	abstract This before(Obj key)
+	abstract This before(Obj key, Bool optional := false)
 
 	** Specify a key your contribution should appear *after*.
 	** 
 	** This may be called multiple times to add multiple constraints.
-	abstract This after(Obj key)
+	abstract This after(Obj key, Bool optional := false)
 }
 
+@Js
 internal class Contrib : Constraints {
 	Obj key; Obj? val
 	Bool unordered
 
-	Obj[]? befores;	Obj[]? afters
+	ContribCont[]? befores;	ContribCont[]? afters
 
 	new make(Obj key, Obj? val) {
 		this.key = key
 		this.val = val
 	}
 	
-	override This before(Obj key) {
+	override This before(Obj key, Bool optional := false) {
 		if (befores == null)
-			befores = [,]
-		befores.add(key)
+			befores = ContribCont[,]
+		befores.add(ContribCont(key, optional))
 		return this
 	}
 
-	override This after(Obj key) {
+	override This after(Obj key, Bool optional := false) {
 		if (afters == null)
-			afters = [,]
-		afters.add(key)
+			afters = ContribCont[,]
+		afters.add(ContribCont(key, optional))
 		return this
 	}
 	
@@ -58,8 +60,8 @@ internal class Contrib : Constraints {
 		if (implied == null)
 			return		
 		if (afters == null)
-			afters = [,]
-		afters.add(implied.key)
+			afters = ContribCont[,]
+		afters.add(ContribCont(implied.key, false))
 	}
 	
 	Void finalise() {
@@ -69,4 +71,34 @@ internal class Contrib : Constraints {
 	override Str toStr() {
 		"[$key:$val]"
 	}	
+}
+
+@Js
+internal class GroupConstraints : Constraints {
+	Contrib[] contribs
+
+	new make(Contrib[] contribs) {
+		this.contribs = contribs
+	}
+	
+	override This before(Obj key, Bool optional := false) {
+		contribs.each { it.before(key, optional) }
+		return this
+	}
+
+	override This after(Obj key, Bool optional := false) {
+		contribs.each { it.after(key, optional) }
+		return this
+	}	
+}
+
+@Js
+internal class ContribCont {
+	Obj	 key
+	Bool optional
+	
+	new make(Obj key, Bool optional) {
+		this.key = key
+		this.optional = optional
+	}
 }

@@ -4,26 +4,33 @@ class Build : BuildPod {
 	
 	new make() {
 		podName = "afIoc"
-		summary = "A powerful Dependency Injection / Inversion Of Control framework"
-		version = Version("2.0.11")
+		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
+		version = Version("3.0.0")
 
 		meta = [	
-			"proj.name"		: "IoC",
+			"proj.name"		: "IoC 3",
 			"repo.tags"		: "system",
 			"repo.public"	: "false"
 		]
 
 		depends = [
-			"sys 1.0", 
-			"concurrent 1.0", 
-			"compiler 1.0", 
+			"sys          1.0.67 - 1.0",	// FIXME: actually 1.0.68 for Js 
+			"concurrent   1.0.67 - 1.0", 	// used for Actor.locals, Actor.sleep, AtomicInt, AtomicBool
+			"afBeanUtils  1.0.6  - 1.0",	// used for ReflectUtils, NotFoundErr, TypeCoercer
 			
-			"afBeanUtils  1.0.2  - 1.0",
-			"afConcurrent 1.0.8  - 1.0",
-			"afPlastic    1.0.16 - 1.0"
+			// ---- Test ----
+			"afConcurrent 1.0.10 - 1.0"
 		]
 
-		srcDirs = [`test/`, `fan/`, `fan/public/`, `fan/public/services/`, `fan/public/facets/`, `fan/internal/`, `fan/internal/utils/`, `fan/internal/services/`, `fan/internal/providers/`, `fan/internal/def/`]
+		srcDirs = [`test/`, `fan/`, `fan/public/`, `fan/public/services/`, `fan/public/facets/`, `fan/public/advanced/`, `fan/internal/`, `fan/internal/providers/`, `fan/internal/inspectors/`, `fan/internal/def/`]
 		resDirs = [`doc/`]
+	}
+	
+	@Target
+	override Void compile() {
+		// remove test pods from final build
+		testPods := "afConcurrent".split
+		depends = depends.exclude { testPods.contains(it.split.first) }
+		super.compile
 	}
 }

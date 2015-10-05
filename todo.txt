@@ -1,85 +1,12 @@
 
-v2.0.8 Maybe...?
-----------------
-Allow module instances to be passed in - makes it easier to build custom classes
-need to be const to build perApp services
 Update all docs to use non-static version - don't deprecate the old way, just barely mention it. 
+
+Allow config to done without referencing IoC!
 
 const mixin IocModule {
 	virtual Void defineServices(ServiceDefinitions serviceDefs) {  }
 }
 
-make ServiceDefinitions.overrideByType more intelligent than type.qname
 
-update aspects to wrap fields
-
-Relocate RegistryStartup.printServiceList() and 
-         RegistryStartup.printBanner() so they can be called externally! 
-
-Duvet needs: make 'optional' contribution of: .after("afPillow.pillowPages")
- - ordered contributions
- - not backwards binary compatible
-
-Somehow group constraints together:
-	config.addPlaceholder("afExplorer.start").after("afReflux.save")
-	config["afExplorer.rename"]		= MenuItem.makeCommand(globalCmds["afExplorer.cmdRenameFile"].command)
-	config["afExplorer.delete"]		= MenuItem.makeCommand(globalCmds["afExplorer.cmdDeleteFile"].command)
-	config["separator.02"]			= MenuItem { it.mode = MenuItemMode.sep }
-	config.addPlaceholder("afExplorer.end").before("separator.01")
-
-
-
-Meh... can't be arsed
---------------------- 
-Make Service Advice orderable
- - just have MethodAdvisor.addAdvice return a Constraints impl
-
-InjectionUtils 
- - tidy up the handling of default parameters
-
-Service disambiguation via facets 
- - is just another dep pro: map of services keyed by type & facet
-
-Make Js compatible...?
- - Phew! It's a biggie!
-
-
-
-Just Plain Bad Ideas:
----------------------
-Make all nullable services optional
- - sounds nice until...
- - you realise field injection via non-itblock need to be nullable
- - maybe just make it for ctor & method injection? 
-
-Allow other @Inject facets
- - so BedSheet can define its own, for fewer pod import statements
- - but if afIoc and afBedSheet are imported at same time ~ conflict!
-
-Remove tracker info to improve performance
- - tried it.
- - deleted ALL tracker calls -> NO discernable speed difference!
-
-Maybe add a means to delete / reset a service lifecycle?
- - people can create their own service lifecycle.
- - WHY!???
- - could fudge it with just a depProvider and autobuild!
-
-@Local (local to the module of the serviceDef in ctx stack) - use case? Annotate method?
- - just a convenience for serviceById
- - now that serviceIds are qualified, what's the point?
- 
-OrderConfig wildcards - e.g. "before: *" NO WILDCARDS
- - use placeholders instead
-
-Create PerThreadService 
- - is just a registry.get()!
-
-IocHelper.eagerLoadBuiltInServices
- - I mean, why?
- 
-On RegistryShutdown
- - kill ALL ActorPools: 
-   - No, lets users be in charge of their own pools.  
- - clean up ALL threads:
-   - Can't! Can only clean up up current thread.
+v3.0.2
+======

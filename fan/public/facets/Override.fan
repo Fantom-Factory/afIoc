@@ -1,5 +1,6 @@
 
 ** Use in 'AppModule' classes to denote a service override method.
+@Js
 facet class Override {
 	
 	** The service Id (or override Id) to be overridden. 
@@ -12,12 +13,12 @@ facet class Override {
 	** Use either this or 'serviceId', not both.
 	const Type?	serviceType	:= null
 	
-	** If specified this will override the service's scope setting.
-	const ServiceScope? scope	:= null
-	
-	** If specified this will override the service's proxy setting.
-	const ServiceProxy? proxy	:= null
-	
+	** Override the list of scopes the service may be created in.
+	const Str[]? scopes		:= null
+
+	** Override the list of service ID aliases.
+	const Str[]? aliases	:= null
+
 	** An optional reference to this override, so others may override this override.
 	** 3rd party libraries should always supply an 'overrideId'. 
 	const Str? overrideId	:= null

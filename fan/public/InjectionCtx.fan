@@ -1,119 +1,136 @@
 
 ** Passed to [DependencyProviders]`DependencyProvider` to give contextual injection information.
-class InjectionCtx {
+@Js
+mixin InjectionCtx {
 	
-	** The type of injection.
-	const InjectionKind	injectionKind
-	
-	** The 'Type' to be injected. This is the declared type of the field or method parameter.    
-		  Type			dependencyType { internal set }
+	** The id of the service (if any) that is being created. 
+	abstract Str?		serviceId()
 
-	** The object that will receive the injection. Only available for field and (non-static) method injection.  
-		  Obj?			target { set { &target = it; &injectingInto = it } }
+	** The object that will receive the injection.
+	abstract Obj?		targetInstance()
 	
-	** The 'Type' of the object that will receive the injection. 
-	** Not available during 'dependencyByType'.
-	const Type?			targetType
+	** The 'Type' of object that will receive the injection. 
+	** This is the parent 'Type' that contains the field or method.
+	** Is 'null' when resolving parameters for a pure / non-method func.
+	abstract Type?		targetType()
 
 	** The field to be injected. Only available for field injection. 
-	const Field?		field
-	** The facets of the field to be injected. Is never null, but may be empty. 
-	const Facet[]		fieldFacets
+	abstract Field?		field()
 
-	** The method to be injected. Only available for method injection. 
-	const Method?		method
-	** The facets of the method to be injected. Is never null, but may be empty. 
-	const Facet[]		methodFacets
-	** The method 'Param' to be injected. Only available for method injection. 
-		  Param?		methodParam  { internal set }
-	** The index of the method 'Param' to be injected. Only available for method injection. 
-		  Int?			methodParamIndex  { internal set }
+	** The method to be injected. Only available for some func injection.
+	** 
+	** Convenience for 'func?.method'. 
+	Method?	method()	{ func?.method }
 
-	@NoDoc @Deprecated { msg="Use 'targetType' instead" }
-	const Type? injectingIntoType
+	** The func to be injected. Only available for func injection. 
+	abstract Func?		func()
 
-	@NoDoc @Deprecated { msg="Use 'target' instead" }
-		  Obj? injectingInto { set { &injectingInto = it; &target = it; } }
+	** Provided arguments to call the func with. 
+	abstract Obj?[]?	funcArgs()
+	
+	** The func 'Param' to be injected. Only available for func injection. 
+	abstract Param?		funcParam()
 
-		  @NoDoc
-		  [Field:Obj?]?	ctorFieldVals { internal set }
-		
-	@NoDoc	// public to provide a backdoor for DependencyProviders
-	new makeWithType(InjectionKind injectionKind, |This|? in := null) {
-		this.fieldFacets	= Facet#.emptyList
-		this.methodFacets	= Facet#.emptyList
-		in?.call(this)
-		this.injectionKind	= injectionKind
-		this.injectingIntoType = targetType
+	** The index of the func 'Param' to be injected. Only available for func injection. 
+	abstract Int?		funcParamIndex()
+
+	** Returns 'true' if performing field injection.
+	Bool isFieldInjection() {
+		field != null 
 	}
 
-	@NoDoc // a common need, esp for efanXtra!
-	new makeFromField(Obj? target, Field field, |This|? in := null) {
-		this.injectionKind		= InjectionKind.fieldInjection
-		this.target				= target
-		this.targetType			= target?.typeof
-		this.dependencyType		= field.type
-		this.field				= field
-		this.fieldFacets		= field.facets
-		this.methodFacets		= Facet#.emptyList
-		in?.call(this)
-		this.injectingIntoType = targetType
+	** Returns 'true' if performing func (or method) injection.
+	** 
+	** Convenience for 'func != null'. 
+	Bool isFuncInjection() {
+		func != null 
 	}
+
+	** Returns 'true' if performing func or method injection.
+	** 
+	** Convenience for 'func != null && func.method != null'. 
+	Bool isMethodInjection() {
+		func != null && func.method != null
+	}
+
+	** Returns 'true' if the first parameter of the func should be a 'Map' or 'List' service configuration.
+	virtual Bool funcTakesServiceConfig() {
+		serviceId != null &&
+		func != null && method != null &&
+		(method.isCtor || method.hasFacet(Build#)) &&
+		(func.params.first?.type?.name == "List" || func.params.first?.type?.name == "Map")
+	}
+
+	** Returns the index into 'funcArgs' should it be applicable, 'null' otherwise. 
+	** This takes into account any service configuration injection (if applicable).
+	Int? funcArgIndex() {
+		if (!isFuncInjection || funcArgs == null)
+			return null
+		if (funcTakesServiceConfig && funcParamIndex == 0)
+			return null
+		funcArgIndex := funcTakesServiceConfig ? funcParamIndex - 1 : funcParamIndex
+		return funcArgIndex >= funcArgs.size ? null : funcArgIndex
+	}
+
+	** Returns 'true' if injecting a 'Map' or 'List' service configuration.
+	Bool isFuncArgServiceConfig() {
+		funcTakesServiceConfig && funcParamIndex == 0
+	}
+
+	** Returns 'true' if an argument has been provided for this func parameter injection.
+	Bool isFuncArgProvided() {
+		funcArgIndex != null
+	}
+
+	** Returns 'true' if injecting a ctor it-block
+	Bool isFuncArgItBlock() {
+		func != null && method != null &&
+		method.isCtor &&
+		funcParamIndex == func.params.size - 1 &&
+		funcParam.type.toNonNullable.fits(|This|#)		
+	}
+
+	** Returns 'true' if the func argument has been reserved by system providers; namely if the parameter is:
+	**  - service configuration
+	**  - a provider func argument
+	**  - a ctor it-block 
+	Bool isFuncArgReserved() {
+		isFuncArgServiceConfig || isFuncArgProvided || isFuncArgItBlock
+	}
+}
+
+@Js
+internal class InjectionCtxImpl : InjectionCtx {
+	
+	override Str?		serviceId
+	override Obj?		targetInstance
+	override Type?		targetType
+	override Field?		field
+	override Func?		func
+	override Obj?[]?	funcArgs
+	override Param?		funcParam
+	override Int?		funcParamIndex
+	override Bool 		funcTakesServiceConfig
 
 	@NoDoc
 	new make(|This|? in := null) {
 		in?.call(this)
-		this.injectingIntoType = targetType
+		
+		funcTakesServiceConfig = 
+			serviceId != null &&
+			func != null && method != null &&
+			(method.isCtor || method.hasFacet(Build#)) &&
+			(func.params.first?.type?.name == "List" || func.params.first?.type?.name == "Map")
 	}
 
-	** Adds an nested operation description.
-	** This provides contextual information in the event of an Err.
-	** Example:
-	** 
-	**   ctx,track("Doing complicated stuff") |->Obj?| {
-	**      return stuff()
-	**   }
-	Obj? track(Str description, |->Obj?| operation) {
-		InjectionTracker.track(description, operation)
-	}
-
-	** Logs the message at IoC debug level.
-	Void log(Str msg) {
-		InjectionTracker.log(msg)
-	}
-	
 	@NoDoc
 	override Str toStr() {
-		"Injecting into ${targetType?.qname}"
+		if (isFieldInjection)
+			return "Field Injection: ${field.qname}"
+		if (isMethodInjection)
+			return "Method Injection: ${funcParam.type.qname} into ${method.qname}"
+		if (isFuncInjection)
+			return "Func Injection: ${funcParam.type.qname} into ${func.typeof.signature}"
+		return "Unknown Injection"
 	}
 }
-
-** As returned by `InjectionCtx` to inform 'DependencyProviders' what kind of injection is occurring.
-enum class InjectionKind {
-	
-	** A direct call to 'Registry.dependencyByType()' 
-	dependencyByType,
-	
-	** Field injection.
-	fieldInjection,
-	
-	** Field injection via a ctor it-block.
-	fieldInjectionViaItBlock,
-	
-	** Ctor Injection.
-	ctorInjection,
-
-	** Calling a method.
-	methodInjection;
-	
-	** Returns 'true' if 'fieldInjection' or 'fieldInjectionViaItBlock'.
-	Bool isFieldInjection() {
-		this == fieldInjection || this == fieldInjectionViaItBlock 
-	}
-
-	** Returns 'true' if 'methodInjection' or 'ctorInjection'.
-	Bool isMethodInjection() {
-		this == methodInjection || this == ctorInjection 
-	}
-}
-

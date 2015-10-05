@@ -1,63 +1,46 @@
-using concurrent
-using afPlastic
 
+@Js
 internal const class IocModule {
-
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(Registry#) 
-		defs.add(RegistryMeta#) 
-		defs.add(RegistryStartup#).withScope(ServiceScope.perThread)	// for non-const listeners 
-		defs.add(RegistryShutdown#)
+	
+	Void build(RegistryBuilder bob) {
 		
-		defs.add(ActorPools#)
-		defs.add(DependencyProviders#)
-		defs.add(PlasticCompiler#)
-		defs.add(ServiceProxyBuilder#)
-		defs.add(ThreadLocalManager#) 
-	}
-
-	@Build
-	static LogProvider buildLogProvider() {
-		LogProvider.withLogFunc { it.pod.log } 
-	}
-
-	@Contribute { serviceType=DependencyProviders# }
-	static Void contributeDependencyProviders(Configuration config, LogProvider logProvider) {
-		config["afIoc.autobuildProvider"]	= config.autobuild(AutobuildProvider#)
-		config["afIoc.localProvider"]		= config.autobuild(LocalProvider#)
-		config["afIoc.logProvider"]			= logProvider
-		config["afIoc.configProvider"]		= config.autobuild(ConfigProvider#)
-		config["afIoc.ctorItBlockProvider"]	= config.autobuild(CtorItBlockProvider#)
-		config["afIoc.funcProvider"]		= config.autobuild(FuncProvider#)
+		bob.addScope("builtIn", false)
+		bob.addScope("root", false)
 		
-		// @Deprecated 
-		config.addPlaceholder("afIoc.serviceProvider")
-	}	
+		// need to define services upfront so we (and others) can contribute to it
+		bob.addService { it.withType(DependencyProviders#)	.withScopes(["builtIn"]) }
+		bob.addService { it.withType(AutoBuilder#)			.withScopes(["builtIn"]).addAlias("afIoc::AutoBuilderHooks.onBuild") }
+		bob.addService { it.withType(Registry#)				.withScopes(["builtIn"]) }
+		bob.addService { it.withType(RegistryMeta#)			.withScopes(["builtIn"]) }
 
-	@Contribute { serviceType=ActorPools# }
-	static Void contributeActorPools(Configuration config) {
-		config[IocConstants.systemActorPool] = ActorPool() { it.name = IocConstants.systemActorPool } 
-	}
+		bob.contributeToService(DependencyProviders#.qname) |Configuration config| {
+			config.keepInOrder {
+				config["afIoc.autobuild"]	= AutobuildProvider()
+				config["afIoc.func"]		= FuncProvider()
+				config["afIoc.log"]			= LogProvider()
+				config["afIoc.scope"]		= ScopeProvider()
 
-	@Contribute { serviceType=RegistryStartup# }
-	static Void contributeRegistryStartup(Configuration config) {
-		reg := (RegistryImpl) config.registry
-
-		config["afIoc.logServices"] = |->| {
-			reg.logServices.val = true
+				config["afIoc.config"]		= ConfigProvider()
+				config["afIoc.funcArg"]		= FuncArgProvider()
+				config["afIoc.service"]		= ServiceProvider()
+				config["afIoc.ctorItBlock"]	= CtorItBlockProvider()
+			}
 		}
-		config["afIoc.logBanner"] = |->| {
-			reg.logBanner.val = true
+		
+		bob.onRegistryStartup |config| {
+			config.keepInOrder {				
+				config["afIoc.logServices"] = |Scope scope| {
+					IocModule#.pod.log.info(scope.registry.printServices)
+				}
+				config["afIoc.logBanner"] = |Scope scope| {
+					IocModule#.pod.log.info(scope.registry.printBanner)
+				}
+				config["afIoc.logStartupTimes"] = |Scope scope| { /* placeholder */ }
+			}
 		}
-	}
 
-	@Contribute { serviceType=RegistryShutdown# }
-	static Void contributeIocShutdownPlaceholder(Configuration config) {
-		reg := (RegistryImpl) config.registry
-
-		config.addPlaceholder("afIoc.shutdown")
-		config["afIoc.sayGoodbye"] = |->| {
-			reg.sayGoodbye.val = true
+		bob.onRegistryShutdown |config| {
+			config["afIoc.sayGoodbye"] = |Scope scope| { /* placeholder */ }
 		}
 	}
 }

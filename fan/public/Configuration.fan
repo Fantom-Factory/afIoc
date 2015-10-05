@@ -1,32 +1,37 @@
+using afBeanUtils::TypeCoercer
 
-** Passed to 'AppModule' [@Contribute]`Contribute` methods to allow the method to contribute configuration.
+** Use to add create and override service configuration contributions. 
+** 
+** Every service may receive a list or ordered map of values; called its configuration.
+** Any (external) module may contribute to this using in a configuration method.
 ** 
 ** The service defines the *type* of contribution by declaring a parameterised list or map in its 
-** ctor or builder method. Contributions must be compatible with the type.
+** ctor or builder method. Contributions must be compatible with this type. 
+** Example, the service 'SeaLions' may define a configuration map of '[Str:Penguin]' with the following ctor:
 ** 
-** @since 1.7.0
-class Configuration {
-	private ConfigurationImpl config
+** pre>
+** class SeaLion {
+**     new make(Str:Penguin foodGroups) {
+**         ...
+**     }
+** }
+** <pre
+** 
+@Js
+mixin Configuration {
 
-	** By using this wrapped, all the internals are hidden from IDE auto-complete proposals.
-	internal new make(ConfigurationImpl config) {
-		this.config = config
-	}
-	
-	** A convenience method for `Registry.autobuild`.  
+	@NoDoc @Deprecated { msg="use 'build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		registry.autobuild(type, ctorArgs, fieldVals)
+		scope.build(type, ctorArgs, fieldVals)
 	}
 
-	** A convenience method for `Registry.autobuild`.  
-	Obj createProxy(Type mixinType, Type? implType := null, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		registry.createProxy(mixinType, implType, ctorArgs, fieldVals)
+	** Convenience method for `Scope.build`; builds an instance of the given 'Type' injecting in all dependencies.  
+	Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+		scope.build(type, ctorArgs, fieldVals)
 	}
 
-	** A convenience method that returns the IoC Registry.
-	Registry registry() {
-		config.registry
-	}
+	** Returns the active scope that will create the service.
+	abstract Scope scope()
 
 	** Fantom Bug: `http://fantom.org/sidewalk/topic/2163#c13978`
 	@Operator 
@@ -40,10 +45,11 @@ class Configuration {
 	** Configuration contributions are ordered across modules. 
 	** 
 	** 'key' and 'value' are coerced to the service's contribution type.
+	** 
+	**   syntax: fantom
+	**   config["key"] = value
 	@Operator
-	Constraints set(Obj key, Obj? value) {
-		config.set(key, value)
-	}
+	abstract Constraints set(Obj key, Obj? value)
 
 	** Adds a value to the service configuration with optional ordering constraints.
 	** 
@@ -51,25 +57,24 @@ class Configuration {
 	** For that reason it is advised to use 'set()' instead. 
 	**  
 	** 'value' is coerced to the service's contribution type.
-	Constraints add(Obj value) {
-		config.add(value)
-	}
+	** 
+	**   syntax: fantom
+	** 	 config.add(value)
+	abstract Constraints add(Obj value)
 
-	** Adds a placeholder. Placeholders are empty configurations used to aid ordering of actual values:
+	** Adds a placeholder. Placeholders are empty configurations used to aid the ordering of actual values:
 	** 
 	** pre>
 	** syntax: fantom
 	** config.placeholder("end")
-	** config.set("wot", ever).before("end")
-	** config.set("last", last).after("end")
+	** config.set("foo", val1).before("end")
+	** config.set("bar", val2).after("end")
 	** <pre
 	** 
 	** While not very useful in the same contribution method, they become very powerful when used across multiple modules and pods.
 	** 
 	** Placeholders do not appear in the the resulting configuration and are never seen by the end service. 
-	Constraints addPlaceholder(Str key) {
-		config.addPlaceholder(key)
-	}
+	abstract Constraints addPlaceholder(Str key)
 	
 	** Overrides and replaces a contributed value. 
 	** The existing key must exist.
@@ -83,9 +88,7 @@ class Configuration {
 	** 'newKey' may be any 'Obj' instance but sane and intelligent people will *always* pass in a 'Str'.  
 	** 
 	** 'newValue' is coerced to the service's contribution type.
-	Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
-		config.overrideValue(existingKey, newValue, newKey)
-	}
+	abstract Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null)
 	
 	** A special kind of override whereby, should this be the last override applied, the value is 
 	** removed from the configuration.
@@ -97,67 +100,83 @@ class Configuration {
 	** It is only used as reference to this override, so this override itself may be overridden.
 	** 3rd party libraries, when overriding, should always supply a 'newKey'. 
 	** 'newKey' may be any 'Obj' instance but sane and intelligent people will *always* pass in a 'Str'.  
-	Void remove(Obj existingKey, Obj? newKey := null) {
-		config.remove(existingKey, newKey)
-	}
+	abstract Void remove(Obj existingKey, Obj? newKey := null)
 
-	@NoDoc
-	override Str toStr() {
-		config.toStr
-	}	
+
+	** Defines a block where defined contributions are kept in the same order. 
+	** The block itself may be ordered *before* and / or *after* other contributions:
+	** 
+	** pre>
+	** syntax: fantom
+	** config.keepInOrder { 
+	**     config["b-1"] = 1
+	**     config["b-2"] = 1
+	**     config.addPlaceholder("separator")
+	**     config["b-3"] = 1
+	** }.before("c-1").after("a-1")
+	** <pre
+	abstract Constraints keepInOrder(|This| f)
 }
 
-internal class ConfigurationImpl {
+@Js
+internal class ConfigurationImpl : Configuration {
 	
 	internal const	Type 				contribType
-	private  const 	ServiceDef 			serviceDef
-	private 	  	ObjLocator 			objLocator
+	override 	  	Scope	 			scope
+	private	const	Str					serviceId
 	private			Int					impliedCount
 	private			Str?				impliedConstraint
 	private			Obj:Contrib			allConfig
 	private			Obj:Contrib			modConfig
 	private			Obj:Contrib			overrides
 	private			Int					overrideCount
-	private			CachingTypeCoercer	typeCoercer
+	private			TypeCoercer			typeCoercer
+	private			Contrib[]?			orderedContribs
 
-	internal new make(ObjLocator objLocator, ServiceDef serviceDef, Type contribType) {
+	internal new make(Scope scope, Type contribType, Str serviceId) {
 		if (contribType.name != "Map" && contribType.name != "List")
-			throw WtfErr("Contributions Type is NOT a Map or a List ???")
+			throw Err("Contributions Type is NOT a Map or a List ???")
 		if (contribType.isGeneric)
-			throw IocErr(IocMessages.contributions_configTypeIsGeneric(contribType, serviceDef.serviceId)) 
+			throw IocErr(ErrMsgs.contributions_configTypeIsGeneric(contribType, serviceId)) 
 
+		this.serviceId		= serviceId
 		this.contribType	= contribType
-		this.serviceDef 	= serviceDef
-		this.objLocator 	= objLocator
+		this.scope 			= scope
 		this.impliedCount	= 1
-		this.allConfig		= Utils.makeMap(Obj#, Contrib#)
-		this.modConfig		= Utils.makeMap(Obj#, Contrib#)
-		this.overrides		= Utils.makeMap(Obj#, Contrib#)
+		this.allConfig		= makeMap(Obj#, Contrib#)
+		this.modConfig		= makeMap(Obj#, Contrib#)
+		this.overrides		= makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
-		this.typeCoercer	= CachingTypeCoercer()
+		this.typeCoercer	= TypeCoercer()
 	}
 
-	Registry registry() {
-		(Registry) objLocator
-	}
-
-	Constraints set(Obj key, Obj? value) {
+	override Constraints set(Obj key, Obj? value) {
 		key   = validateKey(key, false)
 		value = validateVal(value)
 		
 		if (modConfig.containsKey(key))
-			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr, modConfig[key].val))
+			throw IocErr(ErrMsgs.contributions_configKeyAlreadyDefined(key.toStr, modConfig[key].val))
 		if (allConfig.containsKey(key))
-			throw IocErr(IocMessages.contributions_configKeyAlreadyDefined(key.toStr, allConfig[key].val))
+			throw IocErr(ErrMsgs.contributions_configKeyAlreadyDefined(key.toStr, allConfig[key].val))
 
 		contrib := Contrib(key, value)
 		modConfig[key] = contrib 
+		
+		if (orderedContribs != null) {
+			last := orderedContribs.last
+			if (last != null) {
+				last.before(key)
+				contrib.after(last.key)
+			}
+			orderedContribs.add(contrib)
+		}
+		
 		return contrib
 	}
 
-	Constraints add(Obj value) {
+	override Constraints add(Obj value) {
 		if (keyType != Str#)
-			throw IocErr(IocMessages.contributions_keyTypeNotKnown(keyType))
+			throw IocErr(ErrMsgs.contributions_keyTypeNotKnown(keyType))
 
 		key := "afIoc.unordered-" + impliedCount.toStr.padl(2)
 		impliedCount++
@@ -165,11 +184,11 @@ internal class ConfigurationImpl {
 		return set(key, value)
 	}
 
-	Constraints addPlaceholder(Str key) {
+	override Constraints addPlaceholder(Str key) {
 		set(key, Orderer.PLACEHOLDER)
 	}
 	
-	Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
+	override Constraints overrideValue(Obj existingKey, Obj? newValue, Obj? newKey := null) {
 		if (newKey == null)
 			newKey = "afIoc.override-" + overrideCount.toStr.padl(2)
 		overrideCount = overrideCount + 1
@@ -179,28 +198,38 @@ internal class ConfigurationImpl {
 		newValue	= validateVal(newValue)
 
 		if (overrides.containsKey(existingKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
+		 	throw IocErr(ErrMsgs.contributions_configOverrideKeyAlreadyDefined(existingKey.toStr, overrides[existingKey].key.toStr))
 
 		if (modConfig.containsKey(newKey) || allConfig.containsKey(newKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
+		 	throw IocErr(ErrMsgs.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
 		if (overrides.vals.map { it.key }.contains(newKey))
-		 	throw IocErr(IocMessages.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
+		 	throw IocErr(ErrMsgs.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
 		contrib := Contrib(newKey, newValue)
 		overrides[existingKey] = contrib
 		return contrib
 	}
 	
-	Void remove(Obj existingKey, Obj? newKey := null) {
+	override Void remove(Obj existingKey, Obj? newKey := null) {
 		overrideValue(existingKey, Orderer.DELETE, newKey)
 	}
 
+	override Constraints keepInOrder(|This| f) {
+		orderedContribs	= Contrib[,]
+		
+		f(this)
+		
+		contraints := GroupConstraints(orderedContribs)
+		orderedContribs	= null
+		
+		return contraints
+	}
 
 	
 	// ---- Internal Methods ----------------------------------------------------------------------
 	
-	internal Void cleanupAfterModule() {
+	internal Void cleanupAfterMethod() {
 		modConfig.each { it.finalise }
 		modConfig.each { it.findImplied(modConfig) }
 		modConfig.each |v, k| { allConfig[k] = v }
@@ -211,7 +240,7 @@ internal class ConfigurationImpl {
 	}
 
 	internal List toList() {
-		contribs := orderedContribs
+		contribs := orderedContributions
 		config   := (Obj?[]) List.make(valueType, contribs.size)
 		contribs.each { config.add(it.val) }
 		return config
@@ -219,63 +248,57 @@ internal class ConfigurationImpl {
 
 	internal Map toMap() {
 		mapType := Map#.parameterize(["K":keyType, "V":valueType])
-		config  := (Obj:Obj?) Map.make(mapType) { ordered = true }
+		config  := (Obj:Obj?) Map.make(mapType) { it.ordered = true }
 		
-		orderedContribs.each {
+		orderedContributions.each {
 			config[it.key] = it.val
 		}
 		return config
 	}
 
-	private Contrib[] orderedContribs() {
-		keys := Utils.makeMap(keyType, keyType)
+	private Contrib[] orderedContributions() {
+		keys := makeMap(keyType, keyType)
 		allConfig.each |val, key| { keys[key] = key }
 		
 		// don't alter the class state so getConfig() may be called more than once
 		config := (Obj:Contrib) this.allConfig.dup
 
-		InjectionTracker.track("Applying config overrides to '$serviceDef.serviceId'") |->| {
-			// normalise keys -> map all keys to orig key and apply overrides
-			norm := (Obj:Contrib) this.overrides.dup 
-			found := true
-			while (!norm.isEmpty && found) {
-				found = false
-				norm = norm.exclude |val, existingKey| {
-					overrideKey := val.key
-					if (keys.containsKey(existingKey)) {
-						keys[overrideKey] = keys[existingKey]
-						found = true
-						
-						InjectionTracker.log("'${overrideKey}' overrides '${existingKey}'")
-						config[keys[existingKey]] = val
-						
-						// dispose of the override key
-						val.key = keys[existingKey]
-						return true
-					} else {
-						return false
-					}
+		// normalise keys -> map all keys to orig key and apply overrides
+		norm := (Obj:Contrib) this.overrides.dup 
+		found := true
+		while (!norm.isEmpty && found) {
+			found = false
+			norm = norm.exclude |val, existingKey| {
+				overrideKey := val.key
+				if (keys.containsKey(existingKey)) {
+					keys[overrideKey] = keys[existingKey]
+					found = true
+					
+					config[keys[existingKey]] = val
+					
+					// dispose of the override key
+					val.key = keys[existingKey]
+					return true
+				} else {
+					return false
 				}
 			}
+		}
 
-			if (!norm.isEmpty) {
-				overrideKeys := norm.vals.map { it.key.toStr }.join(", ")
-				existingKeys := norm.keys.map { it.toStr }.join(", ")
-				throw IocErr(IocMessages.contributions_overrideDoesNotExist(existingKeys, overrideKeys))
-			}
-		}			
-		
-		ordered := (Contrib[]) InjectionTracker.track("Ordering configuration contributions") |->Contrib[]| {
-			configKeys := config.keys
-			orderer := Orderer()
-			config.each |val, key| {
-				value := (val.val === Orderer.DELETE || val.val === Orderer.PLACEHOLDER) ? val.val : val
-				orderer.addOrdered(key, value, val.befores, val.afters)
-			}
-			return orderer.toOrderedList
+		if (!norm.isEmpty) {
+			overrideKeys := norm.vals.map { it.key.toStr }.join(", ")
+			existingKeys := norm.keys.map { it.toStr }.join(", ")
+			throw IocErr(ErrMsgs.contributions_overrideDoesNotExist(existingKeys, overrideKeys))
 		}
 		
-		return ordered
+		configKeys := config.keys
+		orderer := Orderer()
+		config.each |val, key| {
+			value := (val.val === Orderer.DELETE || val.val === Orderer.PLACEHOLDER) ? val.val : val
+			orderer.addOrdered(key, value, val.befores, val.afters)
+		}
+
+		return orderer.toOrderedList
 	}	
 	
 	
@@ -293,7 +316,7 @@ internal class ConfigurationImpl {
 		if (typeCoercer.canCoerce(key.typeof, keyType))
 			return typeCoercer.coerce(key, keyType)
 
-		throw IocErr(IocMessages.contributions_configTypeMismatch("key", key.typeof, keyType))
+		throw IocErr(ErrMsgs.contributions_configTypeMismatch("key", key.typeof, keyType))
 	}
 
 	private Obj? validateVal(Obj? val) {
@@ -302,7 +325,7 @@ internal class ConfigurationImpl {
 		
 		if (val == null) {
 			if (!valueType.isNullable)
-				throw IocErr(IocMessages.contributions_configTypeMismatch("value", null, valueType))
+				throw IocErr(ErrMsgs.contributions_configTypeMismatch("value", null, valueType))
 			return val
 		}
 
@@ -313,7 +336,7 @@ internal class ConfigurationImpl {
 		// empty lists and maps can always be converted
 		if (!isEmptyList(val) && !isEmptyMap(val))
 			if (!typeCoercer.canCoerce(val.typeof, valueType))
-				throw IocErr(IocMessages.contributions_configTypeMismatch("value", val.typeof, valueType))
+				throw IocErr(ErrMsgs.contributions_configTypeMismatch("value", val.typeof, valueType))
 
 		return typeCoercer.coerce(val, valueType)
 	}
@@ -334,8 +357,13 @@ internal class ConfigurationImpl {
 		contribType.params["V"]
 	}
 
+	private Obj:Obj? makeMap(Type keyType, Type valType) {
+		mapType := Map#.parameterize(["K":keyType, "V":valType])
+		return keyType.fits(Str#) ? Map.make(mapType) { caseInsensitive = true } : Map.make(mapType) { ordered = true }
+	}
+
 	@NoDoc
 	override Str toStr() {
-		"${contribType.name} Configuration of '${contribType.signature}' for '${serviceDef.serviceId}'".replace("sys::", "")
+		"${contribType.name} configuration of ${contribType.signature} for '$serviceId'".replace("sys::", "")
 	}	
 }

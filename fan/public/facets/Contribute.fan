@@ -5,6 +5,7 @@
 ** Either 'serviceId' or 'serviceType' should be defined, not both. Or as a last resort, if neither 
 ** are given, the service id is derived from the method name, removing the prefix "contribute". 
 ** Though this latter approach is not re-factor safe.
+@Js
 facet class Contribute {
 
 	** The id of the service to be configured. 

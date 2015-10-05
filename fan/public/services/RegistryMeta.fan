@@ -1,5 +1,6 @@
 
 ** (Service) - Holds meta information on how the IoC registry was built.
+@Js
 const mixin RegistryMeta {
 	
 	** The options map as defined by `RegistryBuilder`. 
@@ -24,6 +25,7 @@ const mixin RegistryMeta {
 	abstract Pod[] modulePods()
 }
 
+@Js
 internal const class RegistryMetaImpl : RegistryMeta {
 	
 	override const [Str:Obj?]	options

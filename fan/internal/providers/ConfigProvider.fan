@@ -1,19 +1,15 @@
 
+@Js
 internal const class ConfigProvider : DependencyProvider {
 
-	override Bool canProvide(InjectionCtx ctx) {
-		if (ctx.injectionKind == InjectionKind.ctorInjection || ctx.injectionKind == InjectionKind.methodInjection)
-			if (ctx.methodParamIndex == 0)
-				if (ctx.dependencyType.name == "List" || ctx.dependencyType.name == "Map") {
-					configType := InjectionTracker.peekServiceDef?.configType
-					if (configType != null && ctx.dependencyType.fits(configType))
-						return true
-				}
-		return false
+	override Bool canProvide(Scope currentScope, InjectionCtx ctx) {
+		ctx.isFuncArgServiceConfig
 	}
 	
-	override Obj? provide(InjectionCtx ctx) {
-		ctx.log("Found Configuration '$ctx.dependencyType.signature'")
-		return InjectionTracker.peekServiceDef.gatherConfiguration
-	}	
+	override Obj? provide(Scope currentScope, InjectionCtx ctx) {
+		// I'm happy calling internal methods here, 'cos this is an internal operation!
+		scope		:= (ScopeImpl) currentScope
+		serviceDef	:= scope.serviceDefById(ctx.serviceId, true)
+		return serviceDef.gatherConfiguration(currentScope, ctx.funcParam.type)
+	}
 }

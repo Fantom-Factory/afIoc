@@ -1,4 +1,5 @@
 
+@Js
 class TestMisc : Test {
 
 	// see `RegistryImpl.trackDependencyByType`
