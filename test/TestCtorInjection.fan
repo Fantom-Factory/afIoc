@@ -1,123 +1,107 @@
 
+@Js
 internal class TestCtorInjection : IocTest {
 	
 	Void testErrThrownWhenTooManyCtorsHaveTheInjectFacet() {
-		verifyIocErrMsg(IocMessages.onlyOneCtorWithInjectFacetAllowed(T_MyService04#, 2)) { 
-			reg := RegistryBuilder().addModule(T_MyModule104#).build.startup
-			reg.dependencyByType(T_MyService04#)
+		verifyIocErrMsg(ErrMsgs.autobuilder_ctorsWithSameNoOfParams(T_MyService04#, 0)) {
+			scope := rootScope { it.addService(T_MyService04#) }
+			scope.serviceByType(T_MyService04#)
 		}
 	}
 
 	Void testCorrectErrThrownWithWrongParams() {
-		verifyIocErrMsg(IocMessages.couldNotFindAutobuildCtor(T_MyService30#, null)) {
-			reg := RegistryBuilder().addModule(T_MyModule109#).build.startup
-			reg.dependencyByType(T_MyService30#)
+		verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService30#, null)) {
+			scope := rootScope { it.addService(T_MyService30#) { withId("s30") } }
+			scope.serviceByType(T_MyService30#)
 		}
 	}
 
 	Void testErrThrownWhenTooManyCtorsHaveTheSameNoOfParams() {
-		verifyIocErrMsg(IocMessages.ctorsWithSameNoOfParams(T_MyService05#, 1)) {
-			reg := RegistryBuilder().addModule(T_MyModule105#).build.startup
-			reg.dependencyByType(T_MyService05#)
+		verifyIocErrMsg(ErrMsgs.autobuilder_ctorsWithSameNoOfParams(T_MyService05#, 1)) {
+			scope := threadScope { 
+				addService(T_MyService01#) 
+				addService(T_MyService05#)				
+			}
+			scope.serviceByType(T_MyService05#)
 		}
 	}
 
 	Void testCtorWithMostParamsIsPicked() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		verifyEq(reg.dependencyByType(T_MyService06#)->picked, "2 params" )
+		scope := threadScope { addModule(T_MyModule06#) }
+		verifyEq(scope.serviceByType(T_MyService06#)->picked, "2 params" )
 	}
 
 	Void testCtorWithInjectFacetIsPicked() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		verifyEq(reg.dependencyByType(T_MyService07#)->picked, "1 param" )
+		scope := threadScope { addModule(T_MyModule06#) }
+		verifyEq(scope.serviceByType(T_MyService07#)->picked, "1 param" )
 	}
 
 	Void testCtorWithFieldInjector() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		T_MyService08 ser8 := reg.dependencyByType(T_MyService08#)
-		verifyEq(ser8.service2.kick, "ASS!" )
+		scope := threadScope { addModule(T_MyModule06#) }
+		s08   := (T_MyService08) scope.serviceByType(T_MyService08#)
+		verifyEq(s08.service2.kick, "ASS!" )
 	}
 
 	Void testFieldsAreNotInjectedTwice() {
-		reg := RegistryBuilder().addModule(T_MyModule06#).build.startup
-		T_MyService09 ser9 := reg.dependencyByType(T_MyService09#)
-		verifyEq(ser9.service2.kick, "Can't Touch This!" )
+		scope := threadScope { addModule(T_MyModule06#) }
+		s09   := (T_MyService09) scope.serviceByType(T_MyService09#)
+		verifyEq(s09.service2.kick, "Can't Touch This!" )
 	}
 	
 	Void testConstCtorInjectionForService() {
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		T_MyService25 s25 := reg.serviceById("s25")
+		scope := threadScope { addModule(T_MyModule42#) }
+		s25   := (T_MyService25) scope.serviceById("s25")
 		verifyEq(s25.s24.judge, "DREDD" )
 	}
 
 	Void testConstCtorInjectionForAutobuild() {
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		T_MyService25 s25 := reg.autobuild(T_MyService25#)
+		scope := threadScope { addModule(T_MyModule42#) }
+		s25   := (T_MyService25) scope.build(T_MyService25#)
 		verifyEq(s25.s24.judge, "DREDD" )
 	}
 
 	Void testConstCtorInjectionForAutobuildNullable() {
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		T_MyService26 s26 := reg.autobuild(T_MyService26#)
+		scope := threadScope { addModule(T_MyModule42#) }
+		s26   := (T_MyService26) scope.build(T_MyService26#)
 		verifyEq(s26.s24.judge, "DREDD" )
 	}
 
 	Void testTypeCreationWithNoCtor() {
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		reg.serviceById("s38")
-	}
-
-	Void testFieldNotSetErrIsConvertedToIocErr() {
-		// this is such a common err we treat it as our own, to remove Ioc stack frames
-		reg := RegistryBuilder().addModule(T_MyModule42#).build.startup
-		verifyIocErrMsg(IocMessages.fieldNotSetErr(T_MyService53#judge.qname, T_MyService53#make)) {			
-			reg.autobuild(T_MyService53#)
-		}
+		scope := threadScope { addModule(T_MyModule42#) }
+		scope.serviceById("s38")
 	}
 
 	Void testNullableCtorTypesAreOptional() {
-		reg := RegistryBuilder().build.startup
-		s108 := (T_MyService108) reg.autobuild(T_MyService108#)
+		s108 := (T_MyService108) rootScope.build(T_MyService108#)
 		verifyNull(s108.judge)
-		verifyEq(reg, reg)
 	}
 }
 
-internal class T_MyModule104 {
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(T_MyService04#)
-	}	
-}
-internal class T_MyModule105 {
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(T_MyService01#)
-		defs.add(T_MyService05#)
-	}	
-}
-
-internal class T_MyModule06 {
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(T_MyService01#)
-		defs.add(T_MyService02#)
-		defs.add(T_MyService06#)
-		defs.add(T_MyService07#)
-		defs.add(T_MyService08#)
-		defs.add(T_MyService09#)
+@Js
+internal const class T_MyModule06 {
+	Void defineServices(RegistryBuilder defs) {
+		defs.addService(T_MyService01#)
+		defs.addService(T_MyService02#)
+		defs.addService(T_MyService06#)
+		defs.addService(T_MyService07#)
+		defs.addService(T_MyService08#)
+		defs.addService(T_MyService09#)
 	}
 }
 
-internal class T_MyService04 {
-	@Inject
-	new make1() { }
-	@Inject
-	new make2() { }
+@Js
+internal const class T_MyService04 {
+	@Inject	new make1() { }
+	@Inject	new make2() { }
 }
 
-internal class T_MyService05 {
+@Js
+internal const class T_MyService05 {
 	new make1(T_MyService01 ser) { }
 	new make2(T_MyService01 ser) { }
 }
 
+@Js
 internal class T_MyService06 {
 	Str picked
 	new make0() { picked = "0 params" }
@@ -125,6 +109,7 @@ internal class T_MyService06 {
 	new make2(T_MyService01 ser, T_MyService01 ser2) { picked = "2 params" }
 }
 
+@Js
 internal class T_MyService07 {
 	Str picked
 	new make0() { picked = "0 params" }
@@ -133,66 +118,65 @@ internal class T_MyService07 {
 	new make2(T_MyService01 ser, T_MyService01 ser2) { picked = "2 params" }
 }
 
+@Js
 internal class T_MyService08 {
-	@Inject
-	T_MyService02 service2
-	new make(|This| injectInto) { injectInto(this) }
+	@Inject	T_MyService02 service2
+	new make(|This| in) { in(this) }
 }
 
+@Js
 internal class T_MyService09 {
-	@Inject
-	T_MyService02 service2
-	new make(|This| injectInto) { 
-		injectInto(this)
+	@Inject	T_MyService02 service2
+	new make(|This| in) { 
+		in(this)
 		// override the injector
-		service2 = T_MyService02()
 		service2.kick = "Can't Touch This!"
 	}
 }
 
-internal class T_MyModule42 {
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(T_MyService24#).withId("s24")
-		defs.add(T_MyService25#).withId("s25")
-		defs.add(T_MyService38#).withId("s38")
-		defs.add(T_MyService53#).withId("s53")
+@Js
+internal const class T_MyModule42 {
+	Void defineServices(RegistryBuilder defs) {
+		defs.addService(T_MyService24#) { withId("s24") }
+		defs.addService(T_MyService25#) { withId("s25") }
+		defs.addService(T_MyService38#) { withId("s38") }
+		defs.addService(T_MyService53#) { withId("s53") }
 	}
 }
 
-internal class T_MyModule109 {
-	static Void defineServices(ServiceDefinitions defs) {
-		defs.add(T_MyService30#).withId("s30")
-	}
-}
-
+@Js
 internal const class T_MyService24 {
 	const Str judge	:= "DREDD"
 	new make(|This|in) { in(this) }
 }
 
+@Js
 internal const class T_MyService25 {
-	@Inject
-	const T_MyService24 s24	
+	@Inject	const T_MyService24 s24	
 	new make(|This|in) { in(this) }
 }
 
+@Js
 internal const class T_MyService26 {
-	@Inject
-	const T_MyService24 s24	
+	@Inject	const T_MyService24 s24	
 	new make(|This|in) { in(this) }
 }
 
+@Js
 internal const class T_MyService30 {
 	new make(T_MyService02 s2) { }
 }
 
+@Js
 internal const class T_MyService38 { }
 
+@Js
 internal const class T_MyService53 {
 	const Str judge
 	new make(|This|in) { in(this) }
 }
 
+@Js
 internal const class T_MyService108 {
 	const Str? judge
 	const Registry reg

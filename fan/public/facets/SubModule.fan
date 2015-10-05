@@ -8,6 +8,7 @@
 **     ...
 **   }
 ** <pre
+@Js
 facet class SubModule {
 	
 	** A list of additional modules to be loaded.

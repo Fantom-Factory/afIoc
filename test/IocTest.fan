@@ -1,8 +1,18 @@
+using afConcurrent::AtomicList
 
+@Js
 abstract internal class IocTest : Test {
-	
+	static	const AtomicList logs		:= AtomicList()
+			const Unsafe handlerRef		:= Unsafe(|LogRec rec| { logs.add(rec) })
+				  |LogRec rec| handler() { handlerRef.val }
+
 	override Void setup() {
-		Log.get("afIoc").level = LogLevel.warn
+		// immutable funcs don't exist in JS - can't add log handlers
+		if (Env.cur.runtime != "js") {
+			logs.clear
+			Log.addHandler(handler)
+		}
+		typeof.pod.log.level = LogLevel.warn
 		
 //		echo("Free Modules Names")
 //		(1..100).each {
@@ -11,7 +21,7 @@ abstract internal class IocTest : Test {
 //			catch echo("$typeName is free!")
 //		}
 //		// Gone!
-//		
+		
 //		echo("Free Service Names")
 //		(1..100).each {
 //			typeName := "T_MyService" + it.toStr.padl(2, '0')
@@ -20,7 +30,11 @@ abstract internal class IocTest : Test {
 //		}
 //		// Gone!
 	}
-	
+
+	override Void teardown() {
+		Log.removeHandler(handler)		
+	}
+
 	Void verifyIocErrMsg(Str errMsg, |Obj| func) {
 		verifyErrMsg(IocErr#, errMsg, func)
 	}
@@ -29,4 +43,21 @@ abstract internal class IocTest : Test {
 		verifyErrMsg(ServiceNotFoundErr#, errMsg, func)
 	}
 
+	Scope rootScope(|RegistryBuilder|? bobFunc := null) {
+		bob := RegistryBuilder()
+		bobFunc?.call(bob)
+		return bob.build.rootScope
+	}
+	
+	Scope threadScope(|RegistryBuilder| bobFunc) {
+		bob := RegistryBuilder() { addScope("thread", true) }
+		bobFunc.call(bob)
+		
+		thread := null
+		bob.build.rootScope.createChildScope("thread") {
+			thread = it.jailBreak
+		}
+
+		return thread
+	}
 }

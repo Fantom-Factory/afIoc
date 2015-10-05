@@ -1,19 +1,30 @@
-using concurrent
 
-internal class TestRegistryShutdownHub : IocTest {
-	
-	Void testRegistryShutdownHub() {
-		RegistryBuilder().addModule(T_MyModule03#).build.startup.shutdown
-		verifyEq(T_MyModule03.called.val, true)
+@Js
+internal class TestRegistryShutdown : IocTest {
+
+	Void testRegistryIsDisabledOnceShutdown() {
+		reg := RegistryBuilder() { addScope("thread", true) }.addModule(T_MyModule01#).build
+		
+		thread := (Scope?) null
+		reg.rootScope.createChildScope("thread") {
+			thread = it.jailBreak
+		}
+		
+		// assert methods are okay before shutdown
+		thread.serviceById(T_MyService01#.qname)
+		thread.serviceByType(T_MyService01#)
+		thread.build(T_MyService01#)
+		thread.inject(T_MyService01())
+
+		reg.shutdown
+		reg.shutdown
+
+		verifyErr(RegistryShutdownErr#) { reg.rootScope }
 	}
-
-}
-
-internal class T_MyModule03 {
-	static const AtomicBool called	:= AtomicBool()
-
-	@Contribute { serviceType=RegistryShutdown# }
-	static Void contributeShutdown(Configuration config) {
-		config.set("TestShutdown", |->| { called.val = true }).before("afIoc.shutdown")
+	
+	Void testServiceIdConflict() {
+		verifyErr(IocErr#) { 
+			RegistryBuilder().addModule(T_MyModule13#).addModule(T_MyModule14#).build
+		}
 	}
 }

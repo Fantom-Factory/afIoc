@@ -1,37 +1,31 @@
 
+@Js
 internal class TestFieldInjection : IocTest {
 
-	Void testFieldGathering() {
-		ThreadStack.pushAndRun(InjectionTracker.trackerId, OpTracker()) |->| {
-			
-			// this code is used in InjectionUtils
-			fields := InjectionUtils.findInjectableFields(T_MyService106_C#)
-	
-			verifyEq(fields.size, 3)
-			verify(fields.contains(T_MyService106_P#.fields.find { it.name == "obj" }))
-			verify(fields.contains(T_MyService106_C#.fields.find { it.name == "obj" }))
-			verify(fields.contains(T_MyService106_C#obj2))
-		}		
-	}
-
-	// fails due to http://fantom.org/forum/topic/2383
 	Void testPrivateFieldsAreNotHidden() {
-		reg := RegistryBuilder().build.startup
-		srv := reg.autobuild(T_MyService106_C#) as T_MyService106_C
-		
-		verifyEq(srv.parentObj.typeof, RegistryStartupImpl#)
-		verifyEq(srv.childObj.typeof,  RegistryShutdownImpl#)
+		reg := threadScope { addService(T_MyService54#); addService(T_MyService55#) }
+		srv := reg.build(T_MyService106_C#) as T_MyService106_C
 
+		verifyEq(srv.parentObj.typeof, T_MyService54#)
+		verifyEq(srv.childObj.typeof,  T_MyService55#)
+
+		// TODO: ensure fields are set parent first, child last (search field.set ) 
 		// test metadata (facet values) are taken from the subclass
-		verifyEq(srv.obj2.typeof, RegistryShutdownImpl#)
+		verifyEq(srv.obj2.typeof, T_MyService55#)
 	}
 }
 
+@Js
+internal class T_MyService54 { }
+@Js
+internal class T_MyService55 { }
+
+@Js
 internal abstract class T_MyService106_P {
-	@Inject { id="afIoc::RegistryStartup" }
+	@Inject { type=T_MyService54# }
 	private Obj? obj
 
-	@Inject { id="afIoc::RegistryStartup" }
+	@Inject { type=T_MyService54# }
 	abstract Obj? obj2
 	
 	Obj? parentObj() {
@@ -39,11 +33,12 @@ internal abstract class T_MyService106_P {
 	}
 }
 
+@Js
 internal class T_MyService106_C : T_MyService106_P, MyService106_M {
-	@Inject { id="afIoc::RegistryShutdown" }
+	@Inject { type=T_MyService55# }
 	private Obj? obj
 	
-	@Inject { id="afIoc::RegistryShutdown" }
+	@Inject { type=T_MyService55# }
 	override Obj? obj2
 
 	Obj? childObj() {
@@ -51,6 +46,7 @@ internal class T_MyService106_C : T_MyService106_P, MyService106_M {
 	}
 }
 
+@Js
 internal mixin MyService106_M {
 	static const Str name := "wotever"
 	abstract Obj? obj2
@@ -83,7 +79,5 @@ internal mixin MyService106_M {
 //
 //		echo( childField .get(child) )  // --> child
 //		echo( parentField.get(child) )  // --> child, should be parent
-//
-//
 //	}
 //}

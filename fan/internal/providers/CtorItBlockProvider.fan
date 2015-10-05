@@ -1,17 +1,13 @@
 
+@Js
 internal const class CtorItBlockProvider : DependencyProvider {
-	private const InjectionUtils injectionUtils
-
-	new make(Registry registry) { 
-		objLocator := (ObjLocator) registry
-		this.injectionUtils = objLocator.injectionUtils
-	}
-
-	override Bool canProvide(InjectionCtx ctx) {
-		ctx.injectionKind == InjectionKind.ctorInjection && ctx.dependencyType.fits(|This|#) && ctx.methodParamIndex == ctx.method.params.size - 1
+	
+	override Bool canProvide(Scope currentScope, InjectionCtx ctx) {
+		ctx.isFuncArgItBlock
 	}
 	
-	override Obj? provide(InjectionCtx ctx) {
-		injectionUtils.makeCtorInjectionPlan(ctx)
+	override Obj? provide(Scope currentScope, InjectionCtx ctx) {
+//		return Obj#with.func	// a sweet idea, but 'undefined' in javascript 
+		return |Obj o|{}		// this fits |This| and is handled specially
 	}
 }
