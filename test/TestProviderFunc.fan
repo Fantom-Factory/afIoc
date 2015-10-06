@@ -60,44 +60,54 @@ internal class TestProviderFunc : IocTest {
 	
 	// This tests the REAL POWER behind Lazy Funcs - who needs proxies!?
 	Void testLazyFuncsUseActiveScope() {
+		// we would normally use just root and thread scopes, but JS can't handle immutable funcs
+		// so make 2 threaded scopes instead		
 		reg := RegistryBuilder() {
-			addScope("thread", true) 
-			addService(T_MyService60#).withId("s60").withScope("root")
-			addService(T_MyService02#).withId("s02").withScope("thread")
+			addScope("thread-1", true) 
+			addScope("thread-2", true) 
+			addService(T_MyService60#).withId("s60").withScope("thread-1")
+			addService(T_MyService02#).withId("s02").withScope("thread-2")
 		}.build
-		
-		s60 := (T_MyService60) reg.rootScope.serviceById("s60")
-		
-		verifyErrMsg(ServiceNotFoundErr#, ErrMsgs.scope_couldNotFindServiceByType(T_MyService02#, "builtIn root".split)) {
-			s60.lazyFunc()
-		}
 
-		// --==%% -- FEEL THE POWER!!! -- %%==--
-		reg.rootScope.createChildScope("thread") {
-			s02 := s60.lazyFunc()
-			verifyType(s02, T_MyService02#)
+		reg.rootScope.createChildScope("thread-1") |threadScope| {			
+			s60 := (T_MyService60) threadScope.serviceById("s60")
+	
+			verifyErrMsg(ServiceNotFoundErr#, ErrMsgs.scope_couldNotFindServiceByType(T_MyService02#, "builtIn root thread-1".split)) {
+				s60.lazyFunc()
+			}
+	
+			// --==%% -- FEEL THE POWER!!! -- %%==--
+			threadScope.createChildScope("thread-2") {
+				s02 := s60.lazyFunc()
+				verifyType(s02, T_MyService02#)
+			}
 		}
 	}
 
 	// This tests the REAL POWER behind Factory Funcs - who needs proxies!?
 	Void testFactoryFuncsUseActiveScope() {
+		// we would normally use just root and thread scopes, but JS can't handle immutable funcs
+		// so make 2 threaded scopes instead		
 		reg := RegistryBuilder() {
-			addScope("thread", true) 
-			addService(T_MyService60#).withId("s60").withScope("root")
-			addService(T_MyService02#).withId("s02").withScope("thread")
+			addScope("thread-1", true) 
+			addScope("thread-2", true) 
+			addService(T_MyService60#).withId("s60").withScope("thread-1")
+			addService(T_MyService02#).withId("s02").withScope("thread-2")
 		}.build
 		
-		s60 := (T_MyService60) reg.rootScope.serviceById("s60")
-		
-		verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService64#, [Str#])) {
-			s60.factoryFunc("Dude!")
-		}
-
-		// --==%% -- FEEL THE POWER!!! -- %%==--
-		reg.rootScope.createChildScope("thread") {
-			s64 := (T_MyService64) s60.factoryFunc("Dude!")
-			verifyEq(s64.str, "Dude!")
-			verifyType(s64.s02, T_MyService02#)
+		reg.rootScope.createChildScope("thread-1") |threadScope| {			
+			s60 := (T_MyService60) threadScope.serviceById("s60")
+			
+			verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService64#, [Str#])) {
+				s60.factoryFunc("Dude!")
+			}
+	
+			// --==%% -- FEEL THE POWER!!! -- %%==--
+			reg.rootScope.createChildScope("thread-2") {
+				s64 := (T_MyService64) s60.factoryFunc("Dude!")
+				verifyEq(s64.str, "Dude!")
+				verifyType(s64.s02, T_MyService02#)
+			}
 		}
 	}
 }
@@ -129,9 +139,9 @@ internal class T_MyService52 {
 }
 
 @Js
-internal const class T_MyService60 {
-	@Inject const |->T_MyService02| lazyFunc
-	@Inject const |Str->T_MyService64| factoryFunc
+internal class T_MyService60 {
+	@Inject |->T_MyService02| lazyFunc
+	@Inject |Str->T_MyService64| factoryFunc
 	new make(|This|in) { in(this) }
 }
 

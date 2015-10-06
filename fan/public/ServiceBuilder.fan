@@ -131,7 +131,7 @@ internal class ServiceBuilderImpl : ServiceBuilder {
 		return this
 	}
 	
-	private Obj? toImmutableObj(Obj? obj) {
+	private static Obj? toImmutableObj(Obj? obj) {
 		if (obj is Func)
 			return Env.cur.runtime == "js" ? obj : obj.toImmutable
 		return obj?.toImmutable

@@ -113,7 +113,7 @@ internal mixin ErrMsgs {
 	}
 
 	static Str serviceBuilder_scopeIsThreaded(Str serviceId, Str scopeId) {
-		"Service ${serviceId} can NOT match threaded scope '${scopeId}' unless it is const."
+		"Service ${serviceId} can NOT match scope '${scopeId}' unless it is const."
 	}
 	
 	static Str serviceBuilder_noScopesMatched(Str serviceId, Str[] scopes) {

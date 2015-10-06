@@ -58,7 +58,7 @@ const class DependencyProviders {
 		else if (dependency != null && ReflectUtils.fits(dependency.typeof, type).not)
 			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(dependency.typeof, type))
 		
-		plan[ctx.field] = ctx.field.isConst ? dependency.toImmutable : dependency
+		plan[ctx.field] = ctx.field.isConst ? toImmutableObj(ctx.field, dependency) : dependency
 		
 		return plan
 	}
@@ -109,5 +109,11 @@ const class DependencyProviders {
 		}
 		
 		return args
+	}
+	
+	private static Obj? toImmutableObj(Field key, Obj? obj) {
+		if (obj is Func && Env.cur.runtime == "js")
+			throw Err("Immutable funcs are not available in Javascript: ${key.qname}\nSee http://fantom.org/forum/topic/114 for details.")
+		return obj?.toImmutable
 	}
 }
