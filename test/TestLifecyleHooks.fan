@@ -8,11 +8,11 @@ internal class TestLifecyleHooks : IocTest {
 		RegistryBuilder().onRegistryStartup |Configuration config| {
 			config["test"] = |Scope scope| {
 				// allow mutable funcs on startup
-				onStartup = "registryShutdownHook - ${scope.id}"
+				onStartup = "registryStartupHook - ${scope.id}"
 			}
 		}.build
 		
-		verifyEq(onStartup, "registryShutdownHook - root")
+		verifyEq(onStartup, "registryStartupHook - root")
 	}
 
 	Void testRegistryShutdown() {
@@ -81,16 +81,31 @@ internal class TestLifecyleHooks : IocTest {
 		
 		reg.rootScope.createChildScope("thread") |thread| {
 			T_ConstClass.eventRef.val = null
-				thread.build(T_MyService02#)
-				verifyEq(T_ConstClass.eventRef.val, null)
-			}
+			thread.build(T_MyService02#)
+			verifyEq(T_ConstClass.eventRef.val, null)
 		}
 	}
+
+	Void testRegistryLifecyleMethods() {
+		reg := RegistryBuilder() {
+			addModule(T_MyModule09())
+		}.build
+	
+		verifyEq(T_ConstClass.eventRef.val, "registryStartupHook - root")
+		
+		reg.shutdown
+		verifyEq(T_ConstClass.eventRef.val, "registryShutdownHook - root")
+	}
+}
 
 @Js
 internal const class T_ConstClass {
 	const static AtomicRef eventRef	:= AtomicRef(null)
 	
+	static Void registryStartupHook(Scope scope) {
+		eventRef.val = "registryStartupHook - ${scope.id}"
+	}
+
 	static Void registryShutdownHook(Scope scope) {
 		eventRef.val = "registryShutdownHook - ${scope.id}"
 	}
@@ -105,5 +120,21 @@ internal const class T_ConstClass {
 
 	static Void serviceBuildHook(Scope scope, ServiceDef serviceDef, Obj serviceInstance) {
 		eventRef.val = "serviceBuildHook - ${serviceDef.id}"
+	}
+}
+
+@Js
+internal const class T_MyModule09 {
+
+	Void onRegistryStartup(Configuration config, Scope scope) {
+		config["test"] = |->| {
+			T_ConstClass.registryStartupHook(scope)
+		}
+	}
+	
+	static Void onRegistryShutdown(Configuration config, Scope scope) {
+		config["test"] = |->| {
+			T_ConstClass.registryShutdownHook(scope)
+		}
 	}
 }

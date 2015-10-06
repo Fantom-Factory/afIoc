@@ -106,6 +106,7 @@ internal const class ServiceInstance {
 	Void setInstance(Obj instance) {
 		this.instance.val = Unsafe(instance)
 		this.def.noOfInstancesRef.incrementAndGet
+		echo("$def.serviceIds = ${this.def.noOfInstancesRef.val}")
 	}
 	
 	private Obj build(Scope currentScope) {

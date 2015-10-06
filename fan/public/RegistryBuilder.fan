@@ -72,7 +72,7 @@ class RegistryBuilder {
 		}
 		
 		if (!suppressLogging)
-			_logger.info("Adding module definition for ${moduleType.qname}")
+			_logger.info("Adding module ${moduleType.qname}")
 
 		if (module is Type) 
 			module = ((Type) module).make
@@ -206,6 +206,13 @@ class RegistryBuilder {
 		return this
 	}
 	
+	** Sets a value in the 'options' map. 
+	** Returns 'this' so it may be used as a builder method. 		
+	This setOption(Str name, Obj? value) {
+		options.set(name, value)
+		return this
+	}
+
 	** Constructs and returns the registry; this may only be done once. The caller is responsible 
 	** for invoking `Registry.startup`.
     Registry build() {

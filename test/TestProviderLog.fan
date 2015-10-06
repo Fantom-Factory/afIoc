@@ -1,4 +1,3 @@
-//using afConcurrent
 
 // Can't test logging in JS
 internal class TestProviderLog : IocTest {
@@ -53,7 +52,7 @@ internal const class T_MyModule97 {
 }
 
 internal const class T_MyModule103 {
-	Void doStuff(RegistryBuilder registryBuilder) {
+	Void defineServices(RegistryBuilder registryBuilder) {
 		registryBuilder.contributeToServiceType(DependencyProviders#) |Configuration config| {
 			config.remove("afIoc.log")
 			config.add(MyLogProvider())

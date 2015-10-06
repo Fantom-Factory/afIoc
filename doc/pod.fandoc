@@ -18,21 +18,10 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
   - replace real services with test services
   - set sensible defaults and let users override them
 
-- **True lazy loading**
-  - service proxies ensure nothing is created until you actually use it
-  - make circular service dependencies a thing of the past!
-
-- **AOP - Advise your services**
-  - intercept method calls to your services
-  - apply cross cutting concerns such as authorisation, transactions and logging
-
 - **Extensible**
   - inject your own objects and dependencies, not just services
 
-- **Designed to help YOU the developer!**
-  - simple API - 1 facet and 2 registry methods is all you need!
-  - over 70 bespoke and informative Err messages!
-  - Extensively tested: - 'All tests passed! [38 tests, 232 methods, 505 verifies]'
+Create Ioc compatibile libraries without even referencing IoC!
 
 IoC was inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java.
 
@@ -144,13 +133,15 @@ Quick Start
 
 Terminology
 ***********
-A **service** is a Fantom class whose instances are created and managed by IoC. It ensures only a single instance is created for the whole application or thread. Services are identified by a unique ID (usually the qualified class name). Services must be defined in a **module**. Services may solicit, and be instantiated with, configuration data defined by multiple modules.
+The **registry** is the top level object in an IoC application. It holds service definitions and the root scope.
 
-A **dependency** is any class instance or object that a service depends on. A dependency may or may not be a service. Non service dependencies are managed by user defined [dependency providers]`DependencyProvider`.
+**Scopes** are responsible for creating and managing service instances. They build class instances and perform dependency injection. Scopes may also create child scopes.
 
-A **module** is a class whose static methods define and configure services.
+A **service** is a Fantom class whose instances are created and managed by IoC Scopes. Services are identified by a unique ID, typically the qualified class name. A service may also be referenced by its Type. Multiple services may share the same Type as long as their IDs are different. Services may solicit, and be instantiated with, a configuration list or map.
 
-The **registry** is the key class in an IoC application. It creates, holds and manages the service instances.
+A **dependency** is any object a service depends on. A dependency may or may not be a service. Dependencies are provided by [dependency providers]`DependencyProvider`.
+
+A **module** is a class whose methods define and configure services.
 
 
 

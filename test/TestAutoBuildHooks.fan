@@ -20,6 +20,9 @@ internal class TestAutoBuildHooks : IocTest {
 	}
 
 	Void testImmutableFuncErr() {
+		// we forego immutable checks in JS 
+		if (Env.cur.runtime == "js") return
+
 		meh := 0
 		mod := T_MyModule03()
 		verifyErrMsg(ArgErr#, ErrMsgs.autobuilder_funcNotImmutable("afIoc::AutoBuilderHooks.onBuild", "oops")) {

@@ -2,7 +2,7 @@
 @Js
 internal const class IocModule {
 	
-	Void build(RegistryBuilder bob) {
+	Void defineModule(RegistryBuilder bob) {
 		
 		bob.addScope("builtIn", false)
 		bob.addScope("root", false)

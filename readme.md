@@ -1,7 +1,7 @@
-#IoC v2.0.10
+#IoC 3 v3.0.0
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v2.0.10](http://img.shields.io/badge/pod-v2.0.10-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v3.0.0](http://img.shields.io/badge/pod-v3.0.0-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
@@ -45,13 +45,13 @@ IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.o
 
 ## Install
 
-Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
+Install `IoC 3` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
 
-    C:\> fanr install -r http://repo.status302.com/fanr/ afIoc
+    C:\> fanr install -r http://pods.fantomfactory.org/fanr/ afIoc
 
 To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan`:
 
-    depends = ["sys 1.0", ..., "afIoc 2.0"]
+    depends = ["sys 1.0", ..., "afIoc 3.0"]
 
 ## Documentation
 
