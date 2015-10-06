@@ -64,7 +64,6 @@ internal const class FuncProvider : DependencyProvider {
 					: (mySerId != null ? reg.activeScope.serviceById(mySerId, myOpt.not) : reg.activeScope.serviceByType(myDepType, myOpt.not))
 			}
 			
-			echo("returning func $funcType")
 			return func.retype(funcType.toNonNullable)
 		}
 		
@@ -85,7 +84,6 @@ internal const class FuncProvider : DependencyProvider {
 			default: throw UnsupportedErr("Too many arguments: ${funcType.signature}")
 		}
 		
-		echo("returning func $funcType")
 		// .toNonNullable cos nullable types aren't function types
 		return func.retype(funcType.toNonNullable)
 	}
