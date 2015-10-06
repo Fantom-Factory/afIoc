@@ -30,7 +30,8 @@ const class AutoBuilder {
 		
 		plan := findFieldVals(currentScope, impl, null, serviceId, fieldVals?.keys)
 		fieldVals?.each |val, key| {
-			plan.add(key, key.isConst ? val.toImmutable : val)
+			// add and convert provided values
+			plan.add(key, key.isConst ? toImmutableObj(key, val) : val)
 		}
 
 		inst := null
@@ -186,5 +187,11 @@ const class AutoBuilder {
 			throw IocErr(ErrMsgs.autobuilder_bindImplDoesNotFit(serviceType, serviceImplType))
 
 		return serviceImplType
+	}
+	
+	private static Obj? toImmutableObj(Field key, Obj? obj) {
+		if (obj is Func && Env.cur.runtime == "js")
+			throw Err("Immutable funcs are not available in Javascript: ${key.qname}\nSee http://fantom.org/forum/topic/114 for details.")
+		return obj?.toImmutable
 	}
 }
