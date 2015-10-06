@@ -3,6 +3,12 @@
 internal class BugFixes : IocTest {
 	
 	Void testServiceImplsCanBeInjected() {
+		int1:=22
+		int2:=2
+		echo("dude")
+		d:=100f * int1 / int2
+		echo(d)
+		echo("dude2")
 		reg := threadScope { addService(T_MyService79#).withId(T_MyService79Impl#.qname).addAliasType(T_MyService79Impl#) }
 		
 		// should have always worked

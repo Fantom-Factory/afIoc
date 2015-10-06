@@ -23,10 +23,19 @@ const mixin Scope {
 	abstract Obj? serviceByType(Type serviceType, Bool checked := true)
 	
 	abstract Void createChildScope(Str scopeId, |Scope| f)
-		
 
 	abstract This jailBreak()
+	
 	abstract Void destroy()
+
+	@NoDoc @Deprecated { msg="Use 'build()' instead" }
+	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) { build(type, ctorArgs, fieldVals) }
+
+	@NoDoc @Deprecated { msg="Use 'inject()' instead" }
+	Obj injectIntoFields(Obj obj) { inject(obj) }
+
+	@NoDoc @Deprecated { msg="Use 'serviceByType()' instead" }
+	Obj? dependencyByType(Type objType, Bool checked := true) {	serviceByType(objType, checked) }
 }
 
 

@@ -1,4 +1,5 @@
 using concurrent::AtomicInt
+using concurrent::AtomicRef
 
 ** (Service) - 
 @Js
@@ -18,12 +19,16 @@ const mixin Registry {
 
 	abstract Str printBanner()
 	
+	// used by Reflux to set the default active scope (to uiThread)
+	@NoDoc
+	abstract Scope? setDefaultScope(Scope? defaultScope)
+	
 	@NoDoc @Deprecated { msg="Use 'rootScope.build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		rootScope.build(type, ctorArgs, fieldVals)
 	}
 
-	@NoDoc @Deprecated { msg="Use 'rootScope.build()' instead" }
+	@NoDoc @Deprecated { msg="Use 'rootScope.inject()' instead" }
 	Obj injectIntoFields(Obj obj) {
 		rootScope.inject(obj)
 	}
@@ -61,6 +66,7 @@ internal const class RegistryImpl : Registry {
 	const RegistryMeta			regMeta
 	const ActiveScopeStack		activeScopeStack
 	const ServiceInjectStack	serviceInjectStack
+	const AtomicRef				defScopeRef		:= AtomicRef()
 
 	override const Str:ScopeDef		scopeDefs
 	override const Str:ServiceDef	serviceDefs
@@ -95,12 +101,7 @@ internal const class RegistryImpl : Registry {
 		
 		this.scopeIdLookup 		= scopeIdLookup
 		this.scopeTypeLookup	= scopeTypeLookup
-		
-		serviceDefs_ 		:= srvDefs.map |srvDef->ServiceDefImpl| { srvDef.toServiceDef.validate(this) }
-		
-		this.serviceDefs_	= serviceDefs_
-			 buildDuration	:= Duration.now - buildStart
-			 startStart		:= Duration.now
+		this.serviceDefs_		= srvDefs.map |srvDef->ServiceDefImpl| { srvDef.toServiceDef.validate(this) }
 		
 		// sort scopeDefs and serviceDefs alphabetically - it's a slower lookup, so keep them in a different ref
 		scopeKeys := this.scopeDefs_.keys.sort
@@ -116,12 +117,17 @@ internal const class RegistryImpl : Registry {
 
 	
 		// ---- Fire up the Scopes ----
+
+		now				:= Duration.now
+		buildDuration	:= now - buildStart
+		startStart		:= now
 		
 		builtInScopeDef	:= findScopeDef("builtIn", null)
 		builtInScope	= ScopeImpl(this, null, builtInScopeDef)
 		
 		rootScopeDef	:= findScopeDef("root", builtInScope)
 		rootScope_	 	= ScopeImpl(this, builtInScope, rootScopeDef)
+		defScopeRef.val	= rootScope_
 
 	
 		
@@ -220,21 +226,22 @@ internal const class RegistryImpl : Registry {
 
 	override Scope activeScope() {
 		shutdownLock.check
-		return activeScopeStack.peek ?: rootScope_
+		return (activeScopeStack.peek ?: defScopeRef.val) ?: rootScope_
 	}
 	
 	override Str printServices() {
 		stats := serviceDefs_.vals
 		srvcs := "\n\n${stats.size} Services:\n\n"
 		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.id.size) }
-		unreal:= 0
+		built := 0
 		stats.each {
-			srvcs	+= it.id.padl(maxId) + ": " + it.matchedScopes.join(", ") + "\n"
-			if (it.noOfInstancesBuilt == 0)
-				unreal++
+			sep	  := it.noOfInstancesBuilt > 0 ? "|" : ":"
+			srvcs += it.id.padl(maxId) + "${sep} " + it.matchedScopes.join(", ") + "\n"
+			if (it.noOfInstancesBuilt > 0)
+				built++
 		}
-		perce := (100d * unreal / stats.size).toLocale("0.00")
-		srvcs += "\n${perce}% of services are unrealised (${unreal}/${stats.size})\n"
+		perce := (100f * built / stats.size).toLocale("0.00")
+		srvcs += "\n${perce}% of services were built on startup (${built}/${stats.size})\n"
 		return srvcs
 	}
 
@@ -257,6 +264,11 @@ internal const class RegistryImpl : Registry {
 		title 	+= "\n"
 
 		return title
+	}
+	
+	override Scope? setDefaultScope(Scope? scope) {
+		this.defScopeRef.val = scope
+		return scope
 	}
 	
 	ScopeDefImpl findScopeDef(Str scopeId, ScopeImpl? currentScope) {
