@@ -45,7 +45,9 @@ internal class SrvDef {
 		return scopeDef.id == "builtIn"
 			? "builtIn" == scopeIds.first
 			: (scopeIds.isEmpty
-				? scopeDef.threaded || type.isConst
+				// const classes are only matched to root and 
+				// non-const classes are only matched to threaded scopes
+				? (type.isConst.xor(scopeDef.threaded)) 
 				: scopeIds.any |id| { scopeDef.scopeIds.any { id.equalsIgnoreCase(it) && (scopeDef.threaded || type.isConst) } }
 			)
 	}

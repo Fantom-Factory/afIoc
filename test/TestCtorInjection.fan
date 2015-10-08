@@ -20,7 +20,7 @@ internal class TestCtorInjection : IocTest {
 		verifyIocErrMsg(ErrMsgs.autobuilder_ctorsWithSameNoOfParams(T_MyService05#, 1)) {
 			scope := threadScope { 
 				addService(T_MyService01#) 
-				addService(T_MyService05#)				
+				addService(T_MyService05#).withScope("thread")	// const classes don't automatically match thread scopes		
 			}
 			scope.serviceByType(T_MyService05#)
 		}
