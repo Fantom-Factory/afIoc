@@ -10,6 +10,9 @@ const mixin ServiceDef {
 	abstract Str[]		declaredScopes()
 	abstract Str[]		matchedScopes()
 	abstract Int		noOfInstancesBuilt()
+	
+	abstract Bool matchesId(Str serviceId)
+	abstract Bool matchesType(Type serviceType)
 }
 
 @Js
@@ -46,11 +49,11 @@ internal const class ServiceDefImpl : ServiceDef {
 		noOfInstancesRef.val
 	}
 	
-	Bool matchesId(Str serviceId) {
+	override Bool matchesId(Str serviceId) {
 		serviceIds.any { it.equalsIgnoreCase(serviceId) }
 	}
 
-	Bool matchesType(Type serviceType) {
+	override Bool matchesType(Type serviceType) {
 		serviceTypes.any { it == serviceType }
 	}
 

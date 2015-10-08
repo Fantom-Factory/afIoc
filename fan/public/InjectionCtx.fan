@@ -97,6 +97,17 @@ mixin InjectionCtx {
 	Bool isFuncArgReserved() {
 		isFuncArgServiceConfig || isFuncArgProvided || isFuncArgItBlock
 	}
+	
+	@NoDoc
+	override Str toStr() {
+		if (isFieldInjection)
+			return "Field Injection: ${field.qname}"
+		if (isMethodInjection)
+			return "Method Injection: ${funcParam.type.qname} into ${method.qname}"
+		if (isFuncInjection)
+			return "Func Injection: ${funcParam.type.qname} into ${func.typeof.signature}"
+		return "Unknown Injection"
+	}
 }
 
 @Js
@@ -121,16 +132,5 @@ internal class InjectionCtxImpl : InjectionCtx {
 			func != null && method != null &&
 			(method.isCtor || method.hasFacet(Build#)) &&
 			(func.params.first?.type?.name == "List" || func.params.first?.type?.name == "Map")
-	}
-
-	@NoDoc
-	override Str toStr() {
-		if (isFieldInjection)
-			return "Field Injection: ${field.qname}"
-		if (isMethodInjection)
-			return "Method Injection: ${funcParam.type.qname} into ${method.qname}"
-		if (isFuncInjection)
-			return "Func Injection: ${funcParam.type.qname} into ${func.typeof.signature}"
-		return "Unknown Injection"
 	}
 }

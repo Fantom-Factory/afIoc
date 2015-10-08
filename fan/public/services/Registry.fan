@@ -28,6 +28,9 @@ const mixin Registry {
 		rootScope.build(type, ctorArgs, fieldVals)
 	}
 
+	@NoDoc @Deprecated { msg="Removed without replacement" }
+	This startup() { this }
+
 	@NoDoc @Deprecated { msg="Use 'rootScope.inject()' instead" }
 	Obj injectIntoFields(Obj obj) {
 		rootScope.inject(obj)
@@ -230,7 +233,7 @@ internal const class RegistryImpl : Registry {
 	}
 	
 	override Str printServices() {
-		stats := serviceDefs_.vals
+		stats := serviceDefs.vals
 		srvcs := "\n\n${stats.size} Services:\n\n"
 		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.id.size) }
 		built := 0

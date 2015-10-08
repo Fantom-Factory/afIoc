@@ -118,7 +118,7 @@ class RegistryBuilder {
 		return this
 	}
 
-	ScopeBuilder addScope(Str scopeId, Bool threaded) {
+	ScopeBuilder addScope(Str scopeId, Bool threaded := true) {
 		_lock.check
 		scopeDef := ScpDef {
 			it.moduleId	= _currentModule
@@ -129,6 +129,11 @@ class RegistryBuilder {
 		return ScopeBuilderImpl { it.scopeDef = scopeDef }
 	}
 	
+	@NoDoc @Deprecated { msg="Use 'addService()' instead" }
+	ServiceBuilder add(Type? serviceType := null, Type? serviceImplType := null) {
+		addService(serviceType, serviceImplType)
+	}
+
 	ServiceBuilder addService(Type? serviceType := null, Type? serviceImplType := null) {
 		_lock.check
 		bob := ServiceBuilderImpl(_currentModule)
