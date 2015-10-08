@@ -21,25 +21,25 @@ const class DependencyProviders {
 		}
 	}
 	
-//	Obj? provide(Scope currentScope, InjectionCtx ctx, Bool checked := true) {
-//
-//		depPro := dependencyProviders.find {
-//			it.canProvide(currentScope, ctx)
-//		}
-//
-//		if (depPro == null)
-//			return checked ? throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx)) : null
-//		
-//		dependency := depPro.provide(currentScope, ctx)
-//		
-//		type := ctx.field?.type ?: ctx.methodParam?.type
-//		if (dependency == null && type.isNullable.not)
-//			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(null, type))
-//		else if (ReflectUtils.fits(dependency.typeof, type).not)
-//			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(dependency.typeof, type))
-//		
-//		return dependency
-//	}
+	Obj? provide(Scope currentScope, InjectionCtx ctx, Bool checked := true) {
+
+		depPro := dependencyProviders.find {
+			it.canProvide(currentScope, ctx)
+		}
+
+		if (depPro == null)
+			return checked ? throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx)) : null
+		
+		dependency := depPro.provide(currentScope, ctx)
+		
+		type := ctx.field?.type ?: ctx.funcParam?.type
+		if (dependency == null && type.isNullable.not)
+			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(null, type))
+		else if (dependency != null && ReflectUtils.fits(dependency.typeof, type).not)
+			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(dependency.typeof, type))
+		
+		return dependency
+	}
 
 	Field:Obj? provideFieldValue(Scope currentScope, InjectionCtx ctx, Field:Obj? plan) {
 
