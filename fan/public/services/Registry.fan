@@ -233,21 +233,59 @@ internal const class RegistryImpl : Registry {
 	}
 	
 	override Str printServices() {
-		stats := serviceDefs.vals
-		srvcs := "\n\n${stats.size} Services:\n\n"
-		maxId := (Int) stats.reduce(0) |size, stat| { ((Int) size).max(stat.id.size) }
-		built := 0
-		stats.each {
-			sep	  := it.noOfInstancesBuilt > 0 ? "|" : ":"
-			srvcs += it.id.padl(maxId) + "${sep} " + it.matchedScopes.join(", ") + "\n"
-			if (it.noOfInstancesBuilt > 0)
-				built++
+		print := "\n"
+		
+		buckets := groupBy(serviceDefs.vals) |ServiceDef def->Obj| { def.type.pod.name }
+		buckets = buckets.keys.sort.reduce(Str:Obj[:] { it.ordered = true }) |Str:Obj map, key| { map[key] = buckets[key] }
+		
+		
+		maxSize := 0
+		buckets.each |ServiceDef[] serviceDefs, Str podName| {
+			serSize := (Int) serviceDefs.reduce(0) |size, stat| { ((Int) size).max(stat.id.replace("${podName}::", "").size) }
+			maxSize = maxSize.max(serSize)
 		}
-		perce := (100f * built / stats.size).toLocale("0.00")
-		srvcs += "\n${perce}% of services were built on startup (${built}/${stats.size})\n"
-		return srvcs
-	}
+		
+		built := 0
+		buckets.each |ServiceDef[] serviceDefs, Str podName| {
+			srvcs	:= "" 
+			noOfPub := 0
+			noOfPri := 0
+			serviceDefs.each |ServiceDefImpl def| {
+				pub := def.serviceTypes.any { isPublic }
+				if (pub) {
+					sep	  := def.noOfInstancesBuilt > 0 ? "|" : ":"
+					srvcs += def.id.replace("${podName}::", "").padl(maxSize + 2) + "${sep} " + def.matchedScopes.join(", ") + "\n"
+					noOfPub++
+				} else
+					noOfPri++
+				if (def.noOfInstancesBuilt > 0) built++
+			}
+			
+			print += noOfPub == 1
+				? "\n1 public service in ${podName}"
+				: "\n${noOfPub} public services in ${podName}"
+			if (noOfPri > 0)
+				print += " (and ${noOfPri} private)"
+			print += ":\n\n"
+			print += srvcs
+		}
 
+		stats := serviceDefs.vals
+		perce := (100f * built / stats.size).toLocale("0.00")
+		print += "\n${perce}% of services were built on startup (${built}/${stats.size})\n"
+		
+		return print
+	}
+	
+	// see http://fantom.org/forum/topic/2296
+	static Obj:Obj[] groupBy(Obj[] list, |Obj item, Int index->Obj| keyFunc) {
+		list.reduce(Obj:Obj[][:] { it.ordered = true}) |Obj:Obj[] bucketList, val, i| {
+			key := keyFunc(val, i)
+			bucketList.getOrAdd(key) { Obj[,] }.add(val)
+			return bucketList
+		}
+	}
+	
 	override Str printBanner() {
 		heading := (Str) (regMeta.options["afIoc.bannerText"] ?: "Err...")
 		title := "\n"
