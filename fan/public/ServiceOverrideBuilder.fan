@@ -42,6 +42,8 @@ internal class ServiceOverrideBuilderImpl : ServiceOverrideBuilder {
 		if (serviceImplType != null) {
 			ovrDef.autobuild	= true
 			ovrDef.builder		= null
+			if (ovrDef.overrideId == null)
+				ovrDef.overrideId = serviceImplType.qname
 		} else
 			ovrDef.autobuild	= false
 

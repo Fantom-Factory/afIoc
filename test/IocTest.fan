@@ -21,7 +21,7 @@ abstract internal class IocTest : Test {
 //			catch echo("$typeName is free!")
 //		}
 //		// Gone!
-		
+//		
 //		echo("Free Service Names")
 //		(1..100).each {
 //			typeName := "T_MyService" + it.toStr.padl(2, '0')

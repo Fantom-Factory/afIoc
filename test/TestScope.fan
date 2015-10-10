@@ -65,4 +65,28 @@ internal class TestScope : IocTest {
 			}.build
 		}
 	}
+
+	Void testScopeMatching() {
+		reg := RegistryBuilder() {
+			addScope("t1", true)
+			addScope("t2", true)
+			addScope("r1", false)
+			addScope("r2", false)
+			addService(T_MyService75#)	// const
+			addService(T_MyService02#)	// non-const
+		}.build
+		
+		scopes := reg.serviceDefs[T_MyService75#.qname].matchedScopes
+		verify(scopes.contains("root"))
+		verify(scopes.contains("r1"))
+		verify(scopes.contains("r2"))
+		verify(scopes.size == 3)
+
+		scopes = reg.serviceDefs[T_MyService02#.qname].matchedScopes
+		verify(scopes.contains("t1"))
+		verify(scopes.contains("t2"))
+		verify(scopes.size == 2)
+	}
 }
+
+internal const class T_MyService75 {}
