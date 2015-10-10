@@ -21,7 +21,7 @@ internal const class LegacyInspector : ModuleInspector {
 	}
 }
 
-@Js @NoDoc @Deprecated
+@Js @NoDoc @Deprecated { msg="Use 'RegistryBuilder' instead" }
 class ServiceDefinitions {
 	
 	private Type		_moduleId

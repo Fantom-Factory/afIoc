@@ -46,7 +46,7 @@ internal const class NonInvasiveInspector : ModuleInspector {
 				// a cheap hack for IoCs only implementation mixin
 				if (serviceId == DependencyProviders#.qname)
 					value = DependencyProviderProxy(value)
-				
+
 				constraints := (Constraints?) null
 				if (key == null)
 					constraints = config.add(value)
