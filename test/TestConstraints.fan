@@ -17,21 +17,21 @@ internal class TestConstraints : IocTest {
 		s82 := (T_MyService12) threadScope { 
 			addService(T_MyService12#)
 			contributeToServiceType(T_MyService12#) |Configuration config| {
-				config.keepInOrder { 
+				config.inOrder { 
 					config["a-1"] = 1
 					config["a-2"] = 1
 					config["a-3"] = 1
 				}.after("afIoc.unordered- 2")
 			}
 			contributeToServiceType(T_MyService12#) |Configuration config| {
-				config.keepInOrder { 
+				config.inOrder { 
 					config["b-1"] = 1
 					config["b-2"] = 1
 					config["b-3"] = 1
 				}.after("a-2").after("afIoc.unordered- 2")
 			}
 			contributeToServiceType(T_MyService12#) |Configuration config| {
-				config.keepInOrder { 
+				config.inOrder { 
 					config.add("c-1")
 					config.add("c-2")
 					config.add("c-3")

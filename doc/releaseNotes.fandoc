@@ -1,6 +1,11 @@
 Versions
 ********
 
+v3.0.0
+======
+ - New: IoC now availble in Javascript!
+ - New: IoC v3 is a re-write - it's lightweight, fast, and more cusomisable than ever before!
+
 v2.0.10
 =======
  - Bug: Could not autobuild types that had a 'List' or a 'Map' as the first ctor param - it was clashing with service config.

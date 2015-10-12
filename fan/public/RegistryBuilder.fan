@@ -118,6 +118,7 @@ class RegistryBuilder {
 		return this
 	}
 
+	** Defines a new scope to be used with the registry.
 	ScopeBuilder addScope(Str scopeId, Bool threaded := true) {
 		_lock.check
 		scopeDef := ScpDef {
@@ -134,6 +135,42 @@ class RegistryBuilder {
 		addService(serviceType, serviceImplType)
 	}
 
+	** Defines a new service to be added to the registry.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(T_MyModule03#) |ServiceBuilder bob| {
+	**     bob.withId("penguins")
+	**     bob.withScope("root")
+	** }
+	** <pre
+	** 
+	** Or more succinctly with it-blocks:
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(T_MyModule03#) {
+	**     withId("penguins")
+	**     withScope("root")
+	** }
+	** <pre
+	**
+	** Note if 'serviceType' is a mixin then, if none given, the builder looks for an 
+	** implementation class named the same as the mixin but with an 'Impl' suffix.
+	** 
+	** Hence:
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguins#, PenguinsImpl#)
+	** <pre
+	** 
+	** is the same as:
+	**  
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguins#)
+	** <pre
+	** 
 	ServiceBuilder addService(Type? serviceType := null, Type? serviceImplType := null) {
 		_lock.check
 		bob := ServiceBuilderImpl(_currentModule)
@@ -147,7 +184,14 @@ class RegistryBuilder {
 
 	** Override values in an existing service definition.
 	** 
-	** The given id may be a service id to override a service, or an override id to override an override.  
+	** The given id may be a service id to override a service, or an override id to override an override.
+	**   
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguins#).withCtorArgs(["fishLegs"])
+	** regBuilder.overrideService(Penguins#.qname).withCtorArgs(["fishHands"])
+	** <pre
+	** 
 	ServiceOverrideBuilder overrideService(Str serviceId) {
 		_lock.check
 		serviceBuilder := ServiceOverrideBuilderImpl(_currentModule)
@@ -157,6 +201,14 @@ class RegistryBuilder {
 		return serviceBuilder
 	}
 
+	** Override values in an existing service definition.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguins#).withCtorArgs(["fishLegs"])
+	** regBuilder.overrideServiceType(Penguins#).withCtorArgs(["fishHands"])
+	** <pre
+	** 
 	ServiceOverrideBuilder overrideServiceType(Type serviceType) {
 		_lock.check
 		serviceBuilder := ServiceOverrideBuilderImpl(_currentModule)
@@ -166,6 +218,26 @@ class RegistryBuilder {
 		return serviceBuilder
 	}
 
+	** Lets you contribute to a service configuration via its ID.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.contributeToService("acme::Penguins") |Configuration config| {
+	**     config["food"] = Fish()
+	** }
+	** <pre
+	** 
+	** The service ID you're contributing to has to exist. If the service may, or may not exist, 
+	** (for example, if you're contributing to an optional 3rd party library) then you may mark 
+	** the contribution as *optional*. That way, no Err is thrown should the service not exist.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.contributeToService("acme::Penguins", |Configuration config| {
+	**     config["food"] = Fish()
+	** }, true)
+	** <pre
+	** 
 	This contributeToService(Str serviceId, |Configuration| configFunc, Bool optional := false) {
 		_contribDefs.add(ContribDef {
 			it.moduleId			= _currentModule
@@ -176,6 +248,15 @@ class RegistryBuilder {
 		return this
 	}
 
+	** Lets you contribute to a service configuration by its Type.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.contributeToServiceType(Penguins#) |Configuration config| {
+	**     config["food"] = Fish()
+	** }
+	** <pre
+	** 
 	This contributeToServiceType(Type serviceType, |Configuration| configFunc, Bool optional := false) {
 		_contribDefs.add(ContribDef {
 			it.moduleId			= _currentModule
@@ -186,26 +267,120 @@ class RegistryBuilder {
 		return this
 	}
 	
+	** Hook for executing funcs when the Registry starts up.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onRegistryStartup |Configuration config| {
+	**     config["log.hello"] = |Scope rootScope| {
+	**         penguin := rootScope.serviceById("acme::Penguin")
+	**         Log.get("afIoc").info("Hello ${penguin.name}!")
+	**     }
+	** }
+	** <pre
+	** 
+	** Note that the *root scope* is always passed into startup funcs.
+	** 
+	** An alternative to this method is to use an 'AppModule' method named 'onRegistryStartup()', 
+	** the advantage of which is that the arguments are dependency resolved.
+	** 
+	** pre>
+	** syntax: fantom
+	** Void onRegistryStartup(Configuration config, Penguin penguin) {
+	**     config["log.hello"] = |Scope rootScope| {
+	**         Log.get("afIoc").info("Hello ${penguin.name}!")
+	**     }
+	** }
+	** <pre
+	** 
 	This onRegistryStartup(|Configuration| startupHook) {
 		_registryStartupHooks.add(startupHook)
 		return this
 	}
 
+	** Hook for executing funcs when the Registry shuts down.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onRegistryShutdown |Configuration config| {
+	**     config["log.bye"] = |Scope rootScope| {
+	**         penguin := rootScope.serviceById("acme::Penguin")
+	**         Log.get("afIoc").info("Goodbye ${penguin.name}!")
+	**     }
+	** }
+	** <pre
+	** 
+	** Note that the *root scope* is always passed into shutdown funcs.
+	** 
+	** An alternative to this method is to use an 'AppModule' method named 'onRegistryShutdown()', 
+	** the advantage of which is that the arguments are dependency resolved.
+	** 
+	** pre>
+	** syntax: fantom
+	** Void onRegistryShutdown(Configuration config, Penguin penguin) {
+	**     config["log.bye"] = |Scope rootScope| {
+	**         Log.get("afIoc").info("Goodbye ${penguin.name}!")
+	**     }
+	** }
+	** <pre
+	** 
 	This onRegistryShutdown(|Configuration| shutdownHook) {
 		_registryShutdownHooks.add(_toImmutableObj(shutdownHook))
 		return this
 	}
-	
+
+	** Hook for executing funcs when a scope is created.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onScopeCreate("ro*") |Configuration config| {
+	**     config["log.hello"] = |Scope scope| {
+	**         Log.get("afIoc").info("BEGIN ${scope.id}")
+	**     }
+	** }
+	** <pre
+	** 
+	** Where 'scopeGlob' is a not a scope ID, but a regex glob that is used to match 
+	** against scope IDs and their aliases.
 	This onScopeCreate(Str scopeGlob, |Configuration| createHook) {
 		_scopeCreateHooks.add([Regex.glob(scopeGlob), _toImmutableObj(createHook)])
 		return this
 	}
 
+	** Hook for executing funcs when a scope is created.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onScopeDestroy("ro*") |Configuration config| {
+	**     config["log.bye"] = |Scope scope| {
+	**         Log.get("afIoc").info("END ${scope.id}")
+	**     }
+	** }
+	** <pre
+	** 
+	** Where 'scopeGlob' is a not a scope ID, but a regex glob that is used to match 
+	** against scope IDs and their aliases.
 	This onScopeDestroy(Str scopeGlob, |Configuration| destroyHook) {
 		_scopeDestroyHooks.add([Regex.glob(scopeGlob), _toImmutableObj(destroyHook)])
 		return this
 	}
 
+	** Hook for executing funcs when a service is created.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onServiceBuild("*penguin*") |Configuration config| {
+	**     config["log.hello"] = |Scope scope, ServiceDef def, Obj instance| {
+	**         Log.get("afIoc").info("HELLO WORLD from ${def.id}")
+	**     }
+	** }
+	** <pre
+	** 
+	** Where 'scopeGlob' is a not a service ID, but a regex glob that is used to match 
+	** against service IDs and their aliases.
+	** 
+	** Note there is also a hook available for when class is autobuilt - 
+	** see the src for 'AutoBuilder' for details.
 	This onServiceBuild(Str serviceGlob, |Configuration| buildHook) {
 		_serviceBuildHooks.add([Regex.glob(serviceGlob), _toImmutableObj(buildHook)])
 		return this
@@ -218,8 +393,7 @@ class RegistryBuilder {
 		return this
 	}
 
-	** Constructs and returns the registry; this may only be done once. The caller is responsible 
-	** for invoking `Registry.startup`.
+	** Builds and returns the registry; this may only be done once.  
     Registry build() {
 
 		defaults := Str:Obj?[:] { it.caseInsensitive = true }.addAll([

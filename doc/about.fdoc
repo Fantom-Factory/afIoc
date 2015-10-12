@@ -1,4 +1,4 @@
-'IoC' is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
+'IoC' is a modular Dependency Injection framework that binds your application together.
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Use [Autofac]`http://autofac.org/`? Then you'll love *IoC!*
 
@@ -7,6 +7,5 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
 - Factory functions
 - Distributed service configuration
 - Lazy services
-- Service aspects
 - Simple API
 

@@ -12,7 +12,7 @@ abstract internal class IocTest : Test {
 			logs.clear
 			Log.addHandler(handler)
 		}
-		typeof.pod.log.level = LogLevel.warn
+//		typeof.pod.log.level = LogLevel.warn
 		
 //		echo("Free Modules Names")
 //		(1..100).each {
