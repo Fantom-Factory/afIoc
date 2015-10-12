@@ -1,6 +1,6 @@
 
-@Js	// if someone wants their own log provider, they can remove this one and provide their own
-internal const class LogProvider : DependencyProvider {
+@Js	@NoDoc // if someone wants their own log provider, they can remove this one and provide their own
+const class LogProvider : DependencyProvider {
 
 	override Bool canProvide(Scope currentScope, InjectionCtx ctx) {
 		if (ctx.targetType == null)

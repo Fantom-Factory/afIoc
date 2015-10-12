@@ -1,10 +1,20 @@
 
+** Contribute to 'afIoc::AutoBuilderHooks.onBuild' to add funcs that get called whenever a class is autobuilt:
+** 
+** pre>
+** @Contribute{ serviceId="afIoc::AutoBuilderHooks.onBuild" }
+** Void cont(Configuration config) {
+**     config["me"] = |Scope scope, Obj instance| {
+**         ...
+**     }
+** }
+** <pre
 @Js @NoDoc	// Advanced use only
 const class AutoBuilder {
 	private const Log 					log 				:= AutoBuilder#.pod.log
 	private const DependencyProviders	dependencyProviders
 	private const Unsafe 				buildHooksRef		// 'cos JS has no notion of immutable funcs
-	
+
 	new make(Str:|Scope, Obj| buildHooks, DependencyProviders dependencyProviders) {
 		if (Env.cur.runtime != "js")
 			buildHooks.each |val, key| {

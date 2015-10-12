@@ -16,6 +16,31 @@ using afBeanUtils::TypeCoercer
 **     }
 ** }
 ** <pre
+**
+** Contribute to the 'SeaLion' service in the 'AppModule':
+** 
+** pre>
+** const class AppModule {
+**     Void defineServices(RegistryBuilder bob) {
+**         bob.addService(SeaLion#)
+**     }
+** 
+**     @Contribute { serviceType=SeaLion# }
+**     Void contributeSeaLion(Configuration config) {
+**         config["kevin"] = Penguin()
+**     }
+** } 
+** <pre
+**  
+** Or use the 'RegistryBuilder':
+** 
+** pre>
+** bob := RegistryBuilder()
+** bob.addService(
+** bob.contributeToServiceType(SeaLion#) |Configuration config| {
+**     config["kevin"] = Penguin()
+** }
+** <pre
 ** 
 @Js
 mixin Configuration {
@@ -108,14 +133,14 @@ mixin Configuration {
 	** 
 	** pre>
 	** syntax: fantom
-	** config.keepInOrder { 
+	** config.inOrder { 
 	**     config["b-1"] = 1
 	**     config["b-2"] = 1
 	**     config.addPlaceholder("separator")
 	**     config["b-3"] = 1
 	** }.before("c-1").after("a-1")
 	** <pre
-	abstract Constraints keepInOrder(|This| f)
+	abstract Constraints inOrder(|This| f)
 }
 
 @Js
@@ -215,7 +240,7 @@ internal class ConfigurationImpl : Configuration {
 		overrideValue(existingKey, Orderer.DELETE, newKey)
 	}
 
-	override Constraints keepInOrder(|This| f) {
+	override Constraints inOrder(|This| f) {
 		orderedContribs	= Contrib[,]
 		
 		f(this)

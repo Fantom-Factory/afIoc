@@ -14,7 +14,7 @@ internal const class IocModule {
 		bob.addService { it.withType(RegistryMeta#)			.withScopes(["builtIn"]) }
 
 		bob.contributeToService(DependencyProviders#.qname) |Configuration config| {
-			config.keepInOrder {
+			config.inOrder {
 				config["afIoc.autobuild"]	= AutobuildProvider()
 				config["afIoc.func"]		= FuncProvider()
 				config["afIoc.log"]			= LogProvider()
@@ -30,7 +30,7 @@ internal const class IocModule {
 		bob.onRegistryStartup |config| {
 			log :=IocModule#.pod.log
 
-			config.keepInOrder {				
+			config.inOrder {				
 				config["afIoc.logServices"] = |Scope scope| {
 					if (log.isInfo)
 						log.info(scope.registry.printServices)
