@@ -1,8 +1,15 @@
 
+** Definition of a Scope.
 @Js
 const mixin ScopeDef {
+	
+	** The Scope's unique ID.
 	abstract Str 	id()
+	
+	** Any aliases (IDs) given to the Scope.
 	abstract Str[]	aliases()
+	
+	** Returns 'true' if this scope is threaded.
 	abstract Bool	threaded()
 }
 
