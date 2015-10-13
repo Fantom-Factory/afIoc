@@ -1,31 +1,153 @@
 
+** Use to define an IoC service.
+** 
+** pre>
+** syntax: fantom
+** serviceBuilder := regBuilder.addService()
+** serviceBuilder
+**     .withId("acme::penguins")
+**     .withType(Penguins#)
+**     .withImplType(PenguinsImpl#)
+**     .withScope("root")
+** <pre
+** 
+** Or could inline the above and take advantage of defaults:
+** 
+** pre>
+** syntax: fantom
+** regBuilder.addService(Penguins#).withRootScope
+** <pre
 @Js
 mixin ServiceBuilder {
+
+	** Sets the unique service ID.
+	** If not set explicitly it is taken to be the qualified Type name.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService.withId("thread")
+	** <pre
+	abstract This withId(Str? id)
+
+	** Sets the type of the service. May also be set via 'addService()'. 
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguin#)
+	** 
+	** regBuilder.addService.withType(Penguin#)
+	** <pre
+	** 
+	** If the service type is a mixin then either an implementation type or a builder must be subsequently set.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(IPenguin#).withImplType(PenguinImpl#)
+	** <pre
+	** 
+	abstract This withType(Type type)
+
+	** Sets the implementation of the service. Used when the service is autobuilt. May also be set via 'addService()'.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(IPenguin#, PenguinImpl#)
+	** 
+	** regBuilder.addService(Penguin#).withImplType(PenguinImpl#)
+	** <pre
+	** 
+	** 'ImplType' is used, along with 'ctorArgs' and 'fieldVals' to autobuild an instance of the service.
+	abstract This withImplType(Type? implType)
 	
-	abstract This withId(Str? serviceId)
+	** Creates an alias ID that this service is also known as.
+	** 
+	** pre>
+	** syntax: fantom
+	** reg := regBuilder { 
+	**     addService(Wolf#).withAlias("acme::Sheep") 
+	** }.build
+	** 
+	** reg.rootScope.serviceById("acme::Wolf")
+	** 
+	** reg.rootScope.serviceById("acme::Sheep")  // --> same service as 'acme::wolf'
+	** <pre
+	abstract This withAlias(Str alias)
 
-	abstract This withType(Type serviceType)
+	** Creates multiple aliases that this service is also known as.
+	abstract This withAliases(Str[]? aliases)
 
-	abstract This withImplType(Type? serviceImplType)
-	
-	abstract This addAlias(Str serviceAlias)
+	** Adds an alias Type that this service is also known as.
+	** 
+	** pre>
+	** syntax: fantom
+	** reg := regBuilder { 
+	**     addService(Wolf#).withAliasType(Sheep#) 
+	** }.build
+	** 
+	** reg.rootScope.serviceByType(Wolf#)
+	** 
+	** reg.rootScope.serviceByType(Sheep#)  // --> same service as Wolf
+	** <pre
+	abstract This withAliasType(Type aliasType)
 
-	abstract This addAliasType(Type serviceAliasType)
+	** Sets many Types that this service is also known as.
+	abstract This withAliasTypes(Type[]? aliasTypes)
 
 //	abstract This addScope(Str scope)
 
+	** Sets the scope that the service can be created in.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Wolf#).withScope("thread")
+	** <pre
 	abstract This withScope(Str scope)
 
-	abstract This withScopes(Str[]? serviceScopes)
+	** Sets multiple scopes that the service can be created in.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Wolf#).withScopes(["root", "thread"])
+	** <pre
+	abstract This withScopes(Str[]? scopes)
 
+	** Convenience for 'withScope("root")'. 
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Wolf#).withRootScope
+	** <pre
 	abstract This withRootScope()
 	
+	** Sets a func that creates instances of the services. 
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Wolf#).withBuilder |Scope scope -> Obj| {
+	**     return Penguin()
+	** }
+	** <pre
+	** 
+	** 'Scope' is the current scope the service is being built in.
 	abstract This withBuilder(|Scope -> Obj|? serviceBuilder)
 	
-	** Passed as args to the service ctor. The args must be immutable.
+	** Set constructor arguments to be used when the service is autobuilt. 
+	** Note the args must be immutable.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguin#).withCtorArgs([arg1, arg2])
+	** <pre
 	abstract This withCtorArgs(Obj?[]? args)
 
-	** Field values to set in the service impl. An alternative to using ctor args. All vals must be immutable.
+	** Set field values to used when the service is autobuilt. 
+	** An alternative to using ctor args. 
+	** Note all vals must be immutable.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addService(Penguin#).withFieldVals([Penguin#arg1 : "val1", Penguin#arg2 : "val2"])
+	** <pre
 	abstract This withFieldVals([Field:Obj?]? fieldVals)
 }
 
@@ -67,17 +189,23 @@ internal class ServiceBuilderImpl : ServiceBuilder {
 		return this
 	}
 
-	override This addAlias(Str serviceAlias) {
-		if (srvDef.aliases == null)
-			srvDef.aliases = Str[,]
-		srvDef.aliases.add(serviceAlias)
+	override This withAlias(Str alias) {
+		srvDef.aliases = [alias]
 		return this
 	}
 
-	override This addAliasType(Type serviceAliasType) {
-		if (srvDef.aliasTypes == null)
-			srvDef.aliasTypes = Type[,]
-		srvDef.aliasTypes.add(serviceAliasType)
+	override This withAliases(Str[]? aliases) {
+		srvDef.aliases = aliases
+		return this
+	}
+
+	override This withAliasType(Type aliasType) {
+		srvDef.aliasTypes = [aliasType]
+		return this
+	}
+
+	override This withAliasTypes(Type[]? aliasTypes) {
+		srvDef.aliasTypes = aliasTypes
 		return this
 	}
 

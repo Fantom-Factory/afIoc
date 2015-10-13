@@ -1,25 +1,67 @@
 
+** Use to override definitions of an IoC service.
+** 
+** pre>
+** syntax: fantom
+** overrideBuilder := regBuilder.overrideService("acme::Sheep")
+** overrideBuilder
+**     .withImplType(WolfImpl#)
+**     .withCtorVals(["teeth"])
+**     .withScope("root")
+** <pre
 @Js
 mixin ServiceOverrideBuilder {
 	
-	abstract This withImplType(Type? serviceImplType)
+	** Overrides the service implementation.
+	abstract This withImplType(Type? implType)
 	
-	abstract This addAlias(Str serviceAlias)
+	** Overrides service aliases with the given ID.
+	abstract This withAlias(Str alias)
 
-	abstract This addAliasType(Type serviceAliasType)
+	** Overrides service aliases with the given list.
+	abstract This withAliases(Str[]? aliases)
 
-	abstract This withScopes(Str[]? serviceScopes)
+	** Overrides service alias types with the given type.
+	abstract This withAliasType(Type aliasType)
+
+	** Overrides service alias types with the given list.
+	abstract This withAliasTypes(Type[]? aliasTypes)
+
+	** Overrides service scopes with the given scope ID.
+	abstract This withScope(Str scope)
+
+	** Overrides service scopes with the given scope list.
+	abstract This withScopes(Str[]? scopes)
 	
+	** Overrides the service builder func. 
 	abstract This withBuilder(|Scope -> Obj|? serviceBuilder)
 	
-	** Passed as args to the service ctor. The args must be immutable.
+	** Overrides the service ctor args. 
 	abstract This withCtorArgs(Obj?[]? args)
 
-	** Field values to set in the service impl. An alternative to using ctor args. All vals must be immutable.
+	** Overrides the service field vals. 
 	abstract This withFieldVals([Field:Obj?]? fieldVals)
 
+	** Marks this override as *optional*. That is, should the service you're attempting to override 
+	** not exist, no errors are thrown and this override is silently ignored.
+	** 
+	** Useful for overriding 3rd party libraries that may not be part of the current project.
 	abstract This optional(Bool optional := true)
 
+	** Sets an override ID so others may override this override.
+	** 
+	** pre>
+	** syntax: fantom
+	** // override the sheep service
+	** regBuilder.overrideService("acme::Sheep").withOverrideId("wolf").withImplType(WolfImpl#)
+	** 
+	** // override the wolf override
+	** regBuilder.overrideService("wolf").withOverrideId("bear").withImplType(BearImpl#)
+	** 
+	** // override the bear override
+	** regBuilder.overrideService("bear").withOverrideId("frog").withImplType(FrogImpl#)
+	** 
+	** <pre
 	abstract This withOverrideId(Str overrideId)
 }
 
@@ -50,20 +92,30 @@ internal class ServiceOverrideBuilderImpl : ServiceOverrideBuilder {
 		return this
 	}
 
-	override This addAlias(Str serviceAlias) {
-		if (ovrDef.aliases == null)
-			ovrDef.aliases = Str[,]
-		ovrDef.aliases.add(serviceAlias)
+	override This withAlias(Str alias) {
+		ovrDef.aliases = Str[alias]
 		return this
 	}
 
-	override This addAliasType(Type serviceAliasType) {
-		if (ovrDef.aliasTypes == null)
-			ovrDef.aliasTypes = Type[,]
-		ovrDef.aliasTypes.add(serviceAliasType)
+	override This withAliases(Str[]? aliases) {
+		ovrDef.aliases = aliases
+		return this
+	}
+
+	override This withAliasType(Type aliasType) {
+		ovrDef.aliasTypes = [aliasType]
 		return this
 	}
 	
+	override This withAliasTypes(Type[]? aliasTypes) {
+		ovrDef.aliasTypes = aliasTypes
+		return this
+	}
+	
+	override This withScope(Str serviceScope) {
+		withScopes([serviceScope])
+	}
+
 	override This withScopes(Str[]? serviceScopes) {
 		ovrDef.scopes = toImmutableObj(serviceScopes)
 		return this

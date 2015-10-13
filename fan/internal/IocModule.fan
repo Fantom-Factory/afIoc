@@ -9,7 +9,7 @@ internal const class IocModule {
 		
 		// need to define services upfront so we (and others) can contribute to it
 		bob.addService { it.withType(DependencyProviders#)	.withScopes(["builtIn"]) }
-		bob.addService { it.withType(AutoBuilder#)			.withScopes(["builtIn"]).addAlias("afIoc::AutoBuilderHooks.onBuild") }
+		bob.addService { it.withType(AutoBuilder#)			.withScopes(["builtIn"]).withAlias("afIoc::AutoBuilderHooks.onBuild") }
 		bob.addService { it.withType(Registry#)				.withScopes(["builtIn"]) }
 		bob.addService { it.withType(RegistryMeta#)			.withScopes(["builtIn"]) }
 

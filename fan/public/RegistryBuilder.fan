@@ -119,6 +119,11 @@ class RegistryBuilder {
 	}
 
 	** Defines a new scope to be used with the registry.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.addScope("thread")
+	** <pre
 	ScopeBuilder addScope(Str scopeId, Bool threaded := true) {
 		_lock.check
 		scopeDef := ScpDef {
@@ -139,7 +144,7 @@ class RegistryBuilder {
 	** 
 	** pre>
 	** syntax: fantom
-	** regBuilder.addService(T_MyModule03#) |ServiceBuilder bob| {
+	** regBuilder.addService(Penguin#) |ServiceBuilder bob| {
 	**     bob.withId("penguins")
 	**     bob.withScope("root")
 	** }
@@ -149,7 +154,7 @@ class RegistryBuilder {
 	** 
 	** pre>
 	** syntax: fantom
-	** regBuilder.addService(T_MyModule03#) {
+	** regBuilder.addService(Penguin#) {
 	**     withId("penguins")
 	**     withScope("root")
 	** }

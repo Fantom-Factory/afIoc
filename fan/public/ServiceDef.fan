@@ -3,16 +3,16 @@ using concurrent::AtomicInt
 @Js
 const mixin ServiceDef {
 	
-	abstract Str		id()
-	abstract Type		type()
-	abstract Str[]		aliases()
-	abstract Type[]		aliasTypes()
-	abstract Str[]		declaredScopes()
-	abstract Str[]		matchedScopes()
-	abstract Int		noOfInstancesBuilt()
-	
-	abstract Bool matchesId(Str serviceId)
-	abstract Bool matchesType(Type serviceType)
+	abstract Str	id()
+	abstract Type	type()
+	abstract Str[]	aliases()
+	abstract Type[]	aliasTypes()
+	abstract Str[]	declaredScopes()
+	abstract Str[]	matchedScopes()
+	abstract Int	noOfInstancesBuilt()
+
+	abstract Bool 	matchesId(Str serviceId)
+	abstract Bool 	matchesType(Type serviceType)
 }
 
 @Js

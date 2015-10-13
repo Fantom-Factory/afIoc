@@ -9,7 +9,7 @@ internal class BugFixes : IocTest {
 		d:=100f * int1 / int2
 		echo(d)
 		echo("dude2")
-		reg := threadScope { addService(T_MyService79#).withId(T_MyService79Impl#.qname).addAliasType(T_MyService79Impl#) }
+		reg := threadScope { addService(T_MyService79#).withId(T_MyService79Impl#.qname).withAliasType(T_MyService79Impl#) }
 		
 		// should have always worked
 		s79 := reg.serviceById(T_MyService79Impl#.qname)
