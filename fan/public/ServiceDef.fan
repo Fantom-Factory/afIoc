@@ -1,17 +1,34 @@
 using concurrent::AtomicInt
 
+** Definition of a Scope.
 @Js
 const mixin ServiceDef {
-	
+
+	** The service's unique ID.
 	abstract Str	id()
+
+	** The Type of the service.
 	abstract Type	type()
+
+	** Any aliases the service is also known as (IDs).
 	abstract Str[]	aliases()
+
+	** Any aliases the service is also known as (Types).
 	abstract Type[]	aliasTypes()
+
+	** The scopes this service was declared with.
 	abstract Str[]	declaredScopes()
+
+	** The scopes this service has been matched with (and is able to be created in).
 	abstract Str[]	matchedScopes()
+
+	** The number of services (to date) that have been built.
 	abstract Int	noOfInstancesBuilt()
 
+	** Returns 'true' if the service ID or any aliases matches the given ID.
 	abstract Bool 	matchesId(Str serviceId)
+
+	** Returns 'true' if the service type or any aliases matches the given type.
 	abstract Bool 	matchesType(Type serviceType)
 }
 

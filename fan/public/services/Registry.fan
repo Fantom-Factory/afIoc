@@ -2,24 +2,53 @@ using concurrent::AtomicInt
 using concurrent::AtomicRef
 
 ** (Service) - 
+** The top level IoC object that holds service definitions and the root scope.
+** 
+** The 'Registry' instance may be dependency injected.  
 @Js
 const mixin Registry {
 	
+	** Destroys all active scopes and shuts down the registry.
 	abstract This shutdown()
 
+	** Returns the *root* scope.
 	abstract Scope rootScope()
 	
+	** Returns the current *active* scope.
 	abstract Scope activeScope()
 	
+	** Returns a map of all defined scopes, keyed by qualified name.
 	abstract Str:ScopeDef scopeDefs()
 	
+	** Returns a map of all defined services, keyed by qualified name.
 	abstract Str:ServiceDef	serviceDefs()
 
+	** Returns a pretty printed list of service definitions. 
+	** This is logged to standard out at registry startup. 
+	** Remove the startup contribution to prevent the logging:
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onRegistryStartup() |Configuration config| {
+	**     config.remove("afIoc.logServices")
+	** }
+	** <pre
 	abstract Str printServices()
 
+	** Returns the ALien-Factory ASCII art banner.
+	** This is logged to standard out at registry startup. 
+	** Remove the startup contribution to prevent the logging:
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.onRegistryStartup() |Configuration config| {
+	**     config.remove("afIoc.logBanner")
+	** }
+	** <pre
 	abstract Str printBanner()
 	
 	// used by Reflux to set the default active scope (to uiThread)
+	** Sets the default active scope. Defaults to *root scope*.
 	@NoDoc
 	abstract Scope? setDefaultScope(Scope? defaultScope)
 	
@@ -194,6 +223,7 @@ internal const class RegistryImpl : Registry {
 	override This shutdown() {
 		if (shuttingdownLock.lock) return this
 
+		// call the Shutdown hooks first so services (and shutdown contributions!) can still access the registry
 		then 	:= Duration.now
 		config	:= ConfigurationImpl(rootScope_, Str:|Scope|#, "afIoc::Registry.onShutdown")
 		configs	:= (Func[]) shutdownHooksRef.val
@@ -206,7 +236,15 @@ internal const class RegistryImpl : Registry {
 		sayGoodbye := hooks.containsKey("afIoc.sayGoodbye")
 			
 		hooks.each { it.call(rootScope_) }
-				
+		
+		// destroy all active scopes and their children...!
+		scope := (Scope?) activeScope
+		while (scope != null) {
+			scope.destroy
+			scope = scope.parent
+		}
+
+		// ensure the core scopes are destoyed - for wotever reason they may not have been part of the scope hierarchy
 		rootScope_.destroy
 		builtInScope.destroy
 		

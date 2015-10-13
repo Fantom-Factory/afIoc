@@ -1,5 +1,5 @@
 
-** Use in 'AppModule' classes to denote a service override method.
+** Use in 'AppModule' classes to override a service builder.
 @Js
 facet class Override {
 	
@@ -18,6 +18,9 @@ facet class Override {
 
 	** Override the list of service ID aliases.
 	const Str[]? aliases	:= null
+
+	** Override the list of service types aliases.
+	const Type[]? aliasTypes	:= null
 
 	** An optional reference to this override, so others may override this override.
 	** 3rd party libraries should always supply an 'overrideId'. 

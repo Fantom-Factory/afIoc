@@ -2,9 +2,7 @@
 ** Use in 'AppModule' classes to denote a service contribution method. The service to be contributed to 
 ** is derived from either the serviceId, serviceType, or the method name. 
 ** 
-** Either 'serviceId' or 'serviceType' should be defined, not both. Or as a last resort, if neither 
-** are given, the service id is derived from the method name, removing the prefix "contribute". 
-** Though this latter approach is not re-factor safe.
+** Either 'serviceId' or 'serviceType' should be defined, not both. 
 @Js
 facet class Contribute {
 
