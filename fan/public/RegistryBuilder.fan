@@ -1,7 +1,7 @@
 
 ** Use to create an IoC `Registry`. 
 ** 
-** Modules may be added manually or defined by [meta-data]`sys::Pod.meta` in dependent pods.
+** Add module classes, scopes, services, and contributions.
 @Js
 class RegistryBuilder {
 	private const Log		_logger			:= RegistryBuilder#.pod.log

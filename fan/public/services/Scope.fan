@@ -1,31 +1,98 @@
 using concurrent::AtomicBool
 
-** (Service) - 
+** (Service) -
+** Creates and manages service instances, builds class instances, and performs dependency injection.
+** Scopes also create child scopes.
+** 
 @Js
 const mixin Scope {
-	
+
+	** Returns the unique 'id' of this Scope. 
 	abstract Str 		id()
+	
+	** Returns the parent scope.
 	abstract Scope?		parent()
+	
+	** Returns the registry instance this scope belongs to.
 	abstract Registry	registry()
 	
+	** Autobuilds an instance of the given type. Autobuilding performs the following:
+	** 
+	**  - creates an instance via the ctor marked with '@Inject' or the *best* fitting ctor with the most parameters
+	**  - inject dependencies into fields (of all visibilities)
+	**  - call any methods annotated with '@PostInjection'
+	** 
+	** 'ctorArgs' (if provided) will be passed as arguments to the constructor.
+	** Constructor parameters should be defined in the following order:
+	** 
+	**   new make(<config>, <ctorArgs>, <dependencies>, <it-block>) { ... }
+	** 
+	** Note that 'fieldVals' are set by an it-block function, should the ctor define one.
 	abstract Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 	
+	** Injects services and dependencies into fields of all visibilities.
+	** 
+	** Returns the object passed in for method chaining.
 	abstract Obj inject(Obj obj)
 	
+	** Calls the given method. Any method arguments not given are resolved as dependencies. 
+	** 'instance' may be 'null' if calling a static method.
+	** Method parameters should be defined in the following order:
+	** 
+	**   Void myMethod(<args>, <dependencies>, <default params>) { ... }
+	** 
+	** Note that nullable and default parameters are treated as optional dependencies.
+	** 
+	** Returns the result of calling the method.
 	abstract Obj? callMethod(Method method, Obj? instance, Obj?[]? args := null)
 
+	** Calls the given func. Any func arguments not given are resolved as dependencies. 
+	** Func parameters should be defined in the following order:
+	** 
+	**   |<args>, <dependencies>, <default params>| { ... }
+	** 
+	** Note that nullable and default parameters are treated as optional dependencies.
+	** 
+	** Returns the result of calling the func.
 	abstract Obj? callFunc(Func func, Obj?[]? args := null)
 
-	** Resolves a serivce by its ID.
+	** Resolves a service by its ID. Throws 'IocErr' if the service is not found, unless 'checked' is 'false'.
 	abstract Obj? serviceById(Str serviceId, Bool checked := true)
 
-	** Resolves a serivce by its Type.
+	** Resolves a service by its Type. Throws 'IocErr' if the service is not found, unless 'checked' is 'false'.
 	abstract Obj? serviceByType(Type serviceType, Bool checked := true)
 	
+	** Creates a nested child scope and makes it available to the given function.
+	** 
+	** pre>
+	** syntax: fantom
+	** scope.createChildScope("childScopeId") |Scope childScope| {
+	**     ...
+	** }
+	** <pre
+	**   
 	abstract Void createChildScope(Str scopeId, |Scope| f)
 
+	** Jail breaks a scope so it may be used from outside its closure.
+	** 
+	** pre>
+	** syntax: fantom
+	** <pre
+	** childScope := (Scope?) null
+	** 
+	** scope.createChildScope("childScopeId") |childScopeInClosure| {
+	**     childScope = childScopeInClosure.jailbreak
+	** }
+	** 
+	** ... use childScope here ...
+	** 
+	** childScope.destroy
+	** <pre
+	** 
+	** Once jailbroken, you are responsible for calling 'destroy()'.
 	abstract This jailBreak()
 	
+	** Destroys this scope and releases references to any services created. Calls any scope destroy hooks. 
 	abstract Void destroy()
 
 	@NoDoc @Deprecated { msg="Use 'build()' instead" }

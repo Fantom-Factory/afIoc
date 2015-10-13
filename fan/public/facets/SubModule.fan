@@ -1,13 +1,15 @@
 
-** Use on 'AppModule' classes to define other modules to be loaded. Example
+** Use on 'AppModule' classes to define other modules to be loaded. 
 ** 
 ** pre>
 **   syntax: fantom
 **   @SubModule { modules=[AnotherModule#] }
-**   class MainModule {
+**   const class MainModule {
 **     ...
 **   }
 ** <pre
+** 
+** Note all class modules need to be const.
 @Js
 facet class SubModule {
 	

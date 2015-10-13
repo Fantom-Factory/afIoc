@@ -61,6 +61,7 @@ internal const class FacetInspector : ModuleInspector {
 		ovrDef.serviceType	= overType
 		ovrDef.scopes 		= overFacet.scopes 
 		ovrDef.aliases		= overFacet.aliases
+		ovrDef.aliasTypes	= overFacet.aliasTypes
 		ovrDef.optional		= overFacet.optional
 		ovrDef.overrideId	= overFacet.overrideId ?: ovrDef.overrideId
 		ovrDef.gotService = |Str serviceId, Type serviceType| {
