@@ -11,7 +11,7 @@
 **     .withScope("root")
 ** <pre
 ** 
-** Or could inline the above and take advantage of defaults:
+** The above could be inlined and, taking advantage of defaults, could be shortened to just:
 ** 
 ** pre>
 ** syntax: fantom

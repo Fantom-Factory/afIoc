@@ -17,7 +17,7 @@
 @Js
 mixin ScopeBuilder {
 	
-	** Add an alias. An alias is a different name the Scope may be known by.
+	** Add an alias. An alias is a different ID the Scope may also be known by.
 	** 
 	** pre>
 	** syntax: fantom

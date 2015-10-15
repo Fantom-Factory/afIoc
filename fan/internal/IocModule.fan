@@ -26,7 +26,7 @@ internal const class IocModule {
 				config["afIoc.ctorItBlock"]	= CtorItBlockProvider()
 			}
 		}
-		
+	
 		bob.onRegistryStartup |config| {
 			log :=IocModule#.pod.log
 

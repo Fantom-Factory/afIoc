@@ -1,6 +1,7 @@
 using concurrent::AtomicInt
 
-** Definition of a Scope.
+** Definition of a Service.
+** 'ServiceDefs' are returned from [Registry.serviceDefs()]`Registry.serviceDefs`.
 @Js
 const mixin ServiceDef {
 

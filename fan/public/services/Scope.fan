@@ -1,8 +1,21 @@
 using concurrent::AtomicBool
 
 ** (Service) -
-** Creates and manages service instances, builds class instances, and performs dependency injection.
-** Scopes also create child scopes.
+** Creates and manages service instances, and performs dependency injection.
+** Scopes may also create child scopes.
+** 
+** Scopes may be dependency injected. 
+** Use standard injection to receive the Scope used to create the class instance.
+** 
+**   syntax: fantom
+**   @Inject
+**   private Scope scope
+** 
+** Or to always receive the current active Scope, use a Lazy Func.
+**  
+**   syntax: fantom
+**   @Inject
+**   private |->Scope| scope
 ** 
 @Js
 const mixin Scope {
@@ -77,7 +90,6 @@ const mixin Scope {
 	** 
 	** pre>
 	** syntax: fantom
-	** <pre
 	** childScope := (Scope?) null
 	** 
 	** scope.createChildScope("childScopeId") |childScopeInClosure| {

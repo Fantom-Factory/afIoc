@@ -1,27 +1,17 @@
 Overview
 ********
-'IoC' is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
+IoC is a fast, lightweight, and highly customisable Dependency Injection framework that binds your application together.
 
 Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.springsource.org/spring-framework`? Use [Autofac]`http://autofac.org/`? Then you'll love *IoC*!
 
-- **Injection - any way *you* want it!**
-  - field injection
-  - ctor injection
-  - it-block ctor injection
-
-- **Distributed service configuration**
-  - configure *any* service *from* any **pod** / **module**
-  - configure via simple Lists and Maps
-
-- **Override everything**
-  - override services and configuration, even override your overrides!
-  - replace real services with test services
-  - set sensible defaults and let users override them
-
-- **Extensible**
-  - inject your own objects and dependencies, not just services
-
-Create Ioc compatibile libraries without even referencing IoC!
+ - Ctor injection
+ - Field injection
+ - Distributed service configuration
+ - Non-invasive usage
+ - Lazy services
+ - Simple API
+ - Extensible
+ - **Runs in Javascript!**
 
 IoC was inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java.
 
