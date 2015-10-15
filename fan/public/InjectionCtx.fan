@@ -46,7 +46,7 @@ mixin InjectionCtx {
 		func != null 
 	}
 
-	** Returns 'true' if performing func or method injection.
+	** Returns 'true' if performing method injection.
 	** 
 	** Convenience for 'func != null && func.method != null'. 
 	Bool isMethodInjection() {

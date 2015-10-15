@@ -1,5 +1,7 @@
 
-** (Service) - Holds meta information on how the IoC registry was built.
+** (Service) - Holds meta information on how the 'Registry' was built.
+** 
+** 'RegistryMeta' may be dependency injected.  
 @Js
 const mixin RegistryMeta {
 	

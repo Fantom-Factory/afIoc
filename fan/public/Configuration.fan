@@ -32,7 +32,7 @@ using afBeanUtils::TypeCoercer
 ** } 
 ** <pre
 **  
-** Or use the 'RegistryBuilder':
+** Or use 'RegistryBuilder':
 ** 
 ** pre>
 ** bob := RegistryBuilder()
@@ -55,7 +55,7 @@ mixin Configuration {
 		scope.build(type, ctorArgs, fieldVals)
 	}
 
-	** Returns the active scope that will create the service.
+	** Returns the active scope.
 	abstract Scope scope()
 
 	** Fantom Bug: `http://fantom.org/sidewalk/topic/2163#c13978`
@@ -72,6 +72,8 @@ mixin Configuration {
 	** 'key' and 'value' are coerced to the service's contribution type.
 	** 
 	**   syntax: fantom
+	**   config.set("key", value)
+	** 
 	**   config["key"] = value
 	@Operator
 	abstract Constraints set(Obj key, Obj? value)

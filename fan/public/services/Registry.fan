@@ -17,10 +17,10 @@ const mixin Registry {
 	** Returns the current *active* scope.
 	abstract Scope activeScope()
 	
-	** Returns a map of all defined scopes, keyed by qualified name.
+	** Returns a map of all defined scopes, keyed by scope ID.
 	abstract Str:ScopeDef scopeDefs()
 	
-	** Returns a map of all defined services, keyed by qualified name.
+	** Returns a map of all defined services, keyed by service ID.
 	abstract Str:ServiceDef	serviceDefs()
 
 	** Returns a pretty printed list of service definitions. 
@@ -35,7 +35,7 @@ const mixin Registry {
 	** <pre
 	abstract Str printServices()
 
-	** Returns the ALien-Factory ASCII art banner.
+	** Returns the Alien-Factory ASCII art banner.
 	** This is logged to standard out at registry startup. 
 	** Remove the startup contribution to prevent the logging:
 	** 

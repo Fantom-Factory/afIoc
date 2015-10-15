@@ -1,5 +1,6 @@
 
-** Definition of a Scope.
+** Definition of a Scope. 
+** 'ScopeDefs' are returned from [Registry.scopeDefs()]`Registry.scopeDefs`.
 @Js
 const mixin ScopeDef {
 	

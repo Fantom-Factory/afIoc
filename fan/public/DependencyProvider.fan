@@ -1,7 +1,7 @@
 
 ** A hook to provide custom dependency resolution and extend the capabilities of IoC.  
 ** 
-** Contribute 'DependencyProvider' instances to the 'DependencyProviders' service.
+** Create an instance of your 'DependencyProvider' and contribute it to the 'DependencyProviders' (*) service.
 ** 
 ** pre>
 ** syntax: fantom
@@ -11,8 +11,10 @@
 ** }
 ** <pre
 ** 
-** Note that 'conProvide()' is called for *all* fields, not just those annotated with '@Inject'.
+** Note that 'canProvide()' is called for *all* fields, not just those annotated with '@Inject'.
 ** 
+** (*) The 'DependencyProviders' service is annotated with '@NoDoc' and is not listed in the API. 
+** This is because it's only used as a configuration point, so it's not very interesting!
 @Js
 const mixin DependencyProvider {
 
