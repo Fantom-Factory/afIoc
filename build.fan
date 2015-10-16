@@ -3,7 +3,7 @@ using build
 class Build : BuildPod {
 	
 	new make() {
-		podName = "afIoc"
+		podName = "afIoc3"
 		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
 		version = Version("3.0.0")
 
@@ -25,7 +25,7 @@ class Build : BuildPod {
 		srcDirs = [`test/`, `fan/`, `fan/public/`, `fan/public/services/`, `fan/public/facets/`, `fan/public/advanced/`, `fan/internal/`, `fan/internal/providers/`, `fan/internal/inspectors/`, `fan/internal/def/`]
 		resDirs = [`doc/`]
 	}
-	
+
 	@Target
 	override Void compile() {
 		// remove test pods from final build
