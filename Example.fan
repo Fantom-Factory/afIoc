@@ -15,10 +15,10 @@ class MyService {
 
 
 
-// ---- Modules - every IoC application / library needs one -------------------
+// ---- AppModule - every IoC application / library should have one ---------
 
 ** This is the central place where services are defined and configured
-class MyModule {
+class AppModule {
     static Void defineServices(ServiceDefinitions defs) {
         defs.add(MyService#)
         defs.add(PokerService#)
