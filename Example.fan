@@ -1,52 +1,69 @@
-using afIoc
-
-// ---- Services are plain Fantom classes -------------------------------------
-
-** A reusable piece of code
-class PokerService {
-    Void poke() { echo("Poking ${this.toStr}") }
-}
-
-** PokerService is reused here
-class MyService {
-    ** Inject services into services!
-    @Inject PokerService? poker
-}
-
-
-
-// ---- AppModule - every IoC application / library should have one ---------
-
-** This is the central place where services are defined and configured
-class AppModule {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.add(MyService#)
-        defs.add(PokerService#)
+    using afIoc
+    
+    // ---- Services are plain Fantom classes -------------------------------------
+    
+    const class DinnerMenu {
+        
+        @Inject
+        const ChefsSpecials chefsSpecials
+        
+        const Str[] dishes
+        
+        new make(Str[] dishes, |This| in) {
+            in(this)  // this it-block performs the actual injection
+            this.dishes = dishes
+        }
+        
+        Void printMenu() {
+            echo("\nDinner Menu:")
+            dishes.rw.addAll(chefsSpecials.dishes).each { echo(it) }
+        }
     }
-}
-
-
-
-// ---- Use the IoC Registry to access the services ---------------------------
-
-class Main {
-    Void main() {
-		// create the registry, passing in our module 
-        registry := RegistryBuilder().addModule(MyModule#).build().startup()
-
-		// different ways to access services
-        test1 := (MyService) registry.serviceById("myService")       // returns a service instance
-        test2 := (MyService) registry.dependencyByType(MyService#)   // returns the same instance
-        test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
-        test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
-
-        // all test classes poke the same instance of Service2
-        test1.poker.poke()
-        test2.poker.poke()
-        test3.poker.poke()
-        test4.poker.poke()
-
-		// clean up
-        registry.shutdown()
+    
+    const class ChefsSpecials {
+        const Str[] dishes := ["Lobster Thermadore"]
     }
-}
+    
+    
+    
+    // ---- Every IoC application / library should have an AppModule --------------
+    
+    ** This is the central place where services are defined and configured
+    const class AppModule {
+        Void defineServices(RegistryBuilder bob) {
+            bob.addService(DinnerMenu#).withRootScope
+            bob.addService(ChefsSpecials#).withRootScope
+        }
+        
+        @Contribute { serviceType=DinnerMenu# }
+        Void contributeDinnerMenu(Configuration config) {
+            config.add("Fish'n'Chips")
+            config.add("Pie'n'Mash")
+        }
+    }
+    
+    
+    
+    // ---- Use the IoC Registry to access the services ---------------------------
+    
+    class Main {
+        Void main() {
+            // create the registry, passing in our module 
+            registry := RegistryBuilder().addModule(AppModule#).build()
+            scope    := registry.rootScope
+    
+            // different ways to access services
+            menu1 := (DinnerMenu) scope.serviceById("Example_0::DinnerMenu")  // returns a service instance
+            menu2 := (DinnerMenu) scope.serviceByType(DinnerMenu#)            // returns the same instance
+            menu3 := (DinnerMenu) scope.build(DinnerMenu#, [["Beef Stew"]])   // build a new instance
+    
+            // print menus
+            menu1.printMenu()
+            menu2.printMenu()
+            menu3.printMenu()
+    
+            // clean up
+            registry.shutdown()
+        }
+    }
+    

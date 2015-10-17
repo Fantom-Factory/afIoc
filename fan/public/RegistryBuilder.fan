@@ -144,22 +144,9 @@ class RegistryBuilder {
 	** 
 	** pre>
 	** syntax: fantom
-	** regBuilder.addService(Penguin#) |ServiceBuilder bob| {
-	**     bob.withId("penguins")
-	**     bob.withScope("root")
-	** }
+	** regBuilder.addService(Penguin#).withId("penguins").withScope("root")
 	** <pre
 	** 
-	** Or more succinctly with it-blocks:
-	** 
-	** pre>
-	** syntax: fantom
-	** regBuilder.addService(Penguin#) {
-	**     withId("penguins")
-	**     withScope("root")
-	** }
-	** <pre
-	**
 	** Note if 'serviceType' is a mixin then, if none given, the builder looks for an 
 	** implementation class named the same as the mixin but with an 'Impl' suffix.
 	** 
