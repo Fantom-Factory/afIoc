@@ -11,7 +11,7 @@ internal class TestInspectorNonInvasive : IocTest {
 
 internal const class T_MyModule08 {
 	
-	Str:Obj defineModule() {
+	Str:Obj nonInvasiveIocModule() {
 		[
 			"services"	: [
 				[
