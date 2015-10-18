@@ -3,7 +3,7 @@ using build
 class Build : BuildPod {
 	
 	new make() {
-		podName = "afIoc3"
+		podName = "afIoc"
 		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
 		version = Version("3.0.0")
 

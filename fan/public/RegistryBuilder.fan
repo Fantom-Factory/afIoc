@@ -17,8 +17,8 @@ class RegistryBuilder {
 	private Pod[]			_pods			:= Pod[,]
 	private Type[]			_moduleStack	:= Type[,]
 	
-	private Func[]			_registryStartupHooks	:= Func[,]
-	private Func[]			_registryShutdownHooks	:= Func[,]
+	private Obj[][]			_registryStartupHooks	:= Obj[][,]
+	private Obj[][]			_registryShutdownHooks	:= Obj[][,]
 	private Obj[][]			_scopeCreateHooks		:= Obj[][,]
 	private Obj[][]			_scopeDestroyHooks		:= Obj[][,]
 	private Obj[][]			_serviceBuildHooks		:= Obj[][,]
@@ -286,7 +286,7 @@ class RegistryBuilder {
 	** <pre
 	** 
 	This onRegistryStartup(|Configuration| startupHook) {
-		_registryStartupHooks.add(startupHook)
+		_registryStartupHooks.add([_currentModule, startupHook])
 		return this
 	}
 
@@ -317,7 +317,7 @@ class RegistryBuilder {
 	** <pre
 	** 
 	This onRegistryShutdown(|Configuration| shutdownHook) {
-		_registryShutdownHooks.add(_toImmutableObj(shutdownHook))
+		_registryShutdownHooks.add([_currentModule, _toImmutableObj(shutdownHook)])
 		return this
 	}
 
@@ -335,7 +335,7 @@ class RegistryBuilder {
 	** Where 'scopeGlob' is a not a scope ID, but a regex glob that is used to match 
 	** against scope IDs and their aliases.
 	This onScopeCreate(Str scopeGlob, |Configuration| createHook) {
-		_scopeCreateHooks.add([Regex.glob(scopeGlob), _toImmutableObj(createHook)])
+		_scopeCreateHooks.add([_currentModule, Regex.glob(scopeGlob), _toImmutableObj(createHook)])
 		return this
 	}
 
@@ -353,7 +353,7 @@ class RegistryBuilder {
 	** Where 'scopeGlob' is a not a scope ID, but a regex glob that is used to match 
 	** against scope IDs and their aliases.
 	This onScopeDestroy(Str scopeGlob, |Configuration| destroyHook) {
-		_scopeDestroyHooks.add([Regex.glob(scopeGlob), _toImmutableObj(destroyHook)])
+		_scopeDestroyHooks.add([_currentModule, Regex.glob(scopeGlob), _toImmutableObj(destroyHook)])
 		return this
 	}
 
@@ -374,7 +374,7 @@ class RegistryBuilder {
 	** Note there is also a hook available for when class is autobuilt - 
 	** see the src for 'AutoBuilder' for details.
 	This onServiceBuild(Str serviceGlob, |Configuration| buildHook) {
-		_serviceBuildHooks.add([Regex.glob(serviceGlob), _toImmutableObj(buildHook)])
+		_serviceBuildHooks.add([_currentModule, Regex.glob(serviceGlob), _toImmutableObj(buildHook)])
 		return this
 	}
 	
@@ -456,12 +456,15 @@ class RegistryBuilder {
 		}
 		
 		// despite best efforts, an inspected module may remove / ignore a module that's already been inspected
-		_scopeDefs		= _scopeDefs.exclude	{ _modulesRemove.contains(it.moduleId) }
-		_serviceDefs	= _serviceDefs.exclude	{ _modulesRemove.contains(it.moduleId) }
-		_overrideDefs	= _overrideDefs.exclude	{ _modulesRemove.contains(it.moduleId) }
-		_contribDefs	= _contribDefs.exclude	{ _modulesRemove.contains(it.moduleId) }
-
-
+		_scopeDefs				= _scopeDefs			.exclude { _modulesRemove.contains(it.moduleId) }
+		_serviceDefs			= _serviceDefs			.exclude { _modulesRemove.contains(it.moduleId) }
+		_overrideDefs			= _overrideDefs			.exclude { _modulesRemove.contains(it.moduleId) }
+		_contribDefs			= _contribDefs			.exclude { _modulesRemove.contains(it.moduleId) }
+		_registryStartupHooks	= _registryStartupHooks	.exclude { _modulesRemove.contains(it[0]) }
+		_registryShutdownHooks	= _registryShutdownHooks.exclude { _modulesRemove.contains(it[0]) }
+		_scopeCreateHooks		= _scopeCreateHooks		.exclude { _modulesRemove.contains(it[0]) }
+		_scopeDestroyHooks		= _scopeDestroyHooks	.exclude { _modulesRemove.contains(it[0]) }
+		_serviceBuildHooks		= _serviceBuildHooks	.exclude { _modulesRemove.contains(it[0]) }
 
 		// we could use Map.addList(), but do it the long way round so we get a nice error on dups
 		services := Str:SrvDef[:] { caseInsensitive = true }
@@ -537,15 +540,15 @@ class RegistryBuilder {
 		}		
 		
 		scopeDefs.each |ScpDef scpDef| {
-			scpDef.createContribs  = _scopeCreateHooks .findAll { scpDef.matchesGlob(it[0]) }.map { it[1] }
-			scpDef.destroyContribs = _scopeDestroyHooks.findAll { scpDef.matchesGlob(it[0]) }.map { it[1] }
+			scpDef.createContribs  = _scopeCreateHooks .findAll { scpDef.matchesGlob(it[1]) }.map { it[2] }
+			scpDef.destroyContribs = _scopeDestroyHooks.findAll { scpDef.matchesGlob(it[1]) }.map { it[2] }
 		}
 
 		services.each |srvDef| {
-			srvDef.buildContribs  = _serviceBuildHooks .findAll { srvDef.matchesGlob(it[0]) }.map { it[1] }
+			srvDef.buildContribs  = _serviceBuildHooks .findAll { srvDef.matchesGlob(it[1]) }.map { it[2] }
 		}
 		
-		return RegistryImpl(_buildStart, scopeDefs, services, moduleTypes, options, _registryStartupHooks, _registryShutdownHooks)
+		return RegistryImpl(_buildStart, scopeDefs, services, moduleTypes, options, _registryStartupHooks.map { it[1] }, _registryShutdownHooks.map { it[1] })
 	}
 	
 	private Obj? _toImmutableObj(Obj? obj) {
