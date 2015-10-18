@@ -37,6 +37,7 @@ internal const class NonInvasiveInspector : ModuleInspector {
 			serviceId	:= (Str)		it["serviceId"]
 			key			:= (Str?)		it["key"]
 			value		:= (Obj?)		it["value"]
+			valueFunc	:= (Func?)		it["valueFunc"]
 			build		:= (Type?)		it["build"]
 			before		:= (Obj?)		it["before"]
 			after		:= (Obj?)		it["after"]
@@ -44,10 +45,15 @@ internal const class NonInvasiveInspector : ModuleInspector {
 				if (build != null)
 					value = config.build(build)
 
+				// used by afSlim
+				if (valueFunc != null)
+					value = config.scope.callFunc(valueFunc)
+
 				// a cheap hack for IoCs only implementation mixin
+				// used by afConcurrent for its LocalRefProvider
 				if (serviceId == DependencyProviders#.qname)
 					value = DependencyProviderProxy(value)
-
+				
 				constraints := (Constraints?) null
 				if (key == null)
 					constraints = config.add(value)
