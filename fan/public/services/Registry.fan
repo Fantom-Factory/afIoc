@@ -204,7 +204,7 @@ internal const class RegistryImpl : Registry {
 		hooks := (Str:Func) config.toMap
 		
 		// ensure system messages are printed at the end 
-		order	:= "afIoc.logServices afIoc.logBanner".split
+		order	:= "afIoc.logBanner".split
 		hooks.keys.sort |k1, k2| {
 			(order.index(k1) ?: -1) <=> (order.index(k2) ?: -1)
 		}.each {
@@ -300,8 +300,8 @@ internal const class RegistryImpl : Registry {
 			}
 			
 			print += noOfPub == 1
-				? "\n1 public service in ${podName}"
-				: "\n${noOfPub} public services in ${podName}"
+				? "\nPod '${podName}' has 1 public service"
+				: "\nPod '${podName}' has ${noOfPub} public services"
 			if (noOfPri > 0)
 				print += " (and ${noOfPri} private)"
 			print += ":\n\n"

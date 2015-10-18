@@ -749,7 +749,7 @@ Also note that once jail broken, the scopes is no longer returned as the registr
 
 
 
-Lazy Functions
+Lazy Functions [#lazyFunctions]
 **************
 To defer building services until they are used, you can inject *Lazy Functions*. These are funcs that return a service:
 

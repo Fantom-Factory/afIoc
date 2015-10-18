@@ -30,17 +30,17 @@ internal const class IocModule {
 		bob.onRegistryStartup |config| {
 			log :=IocModule#.pod.log
 
-			config.inOrder {				
-				config["afIoc.logServices"] = |Scope scope| {
-					if (log.isInfo)
-						log.info(scope.registry.printServices)
-				}
-				config["afIoc.logBanner"] = |Scope scope| {
-					if (log.isInfo)
-						log.info(scope.registry.printBanner)
-				}
-				config["afIoc.logStartupTimes"] = |Scope scope| { /* placeholder */ }
+			config["afIoc.logServices"] = |Scope scope| {
+				if (log.isInfo)
+					log.info(scope.registry.printServices)
 			}
+			
+			// these get hard-sorted to be run at the end
+			config["afIoc.logBanner"] = |Scope scope| {
+				if (log.isInfo)
+					log.info(scope.registry.printBanner)
+			}
+			config["afIoc.logStartupTimes"] = |Scope scope| { /* placeholder */ }
 		}
 
 		bob.onRegistryShutdown |config| {

@@ -6,29 +6,17 @@
 
 ## Overview
 
-`IoC` is a modular Dependency Injection / Inversion Of Control framework that binds your application together.
+IoC is a fast, lightweight, and highly customisable Dependency Injection framework that binds your application together.
 
 Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.springsource.org/spring-framework)? Use [Autofac](http://autofac.org/)? Then you'll love *IoC*!
 
-- **Injection - any way *you* want it!**
-  - field injection
-  - ctor injection
-  - it-block ctor injection
-
-- **Distributed service configuration**
-  - configure *any* service *from* any **pod** / **module**
-  - configure via simple Lists and Maps
-
-- **Override everything**
-  - override services and configuration, even override your overrides!
-  - replace real services with test services
-  - set sensible defaults and let users override them
-
-- **Extensible**
-  - inject your own objects and dependencies, not just services
-
-
-Create Ioc compatibile libraries without even referencing IoC!
+- Ctor injection
+- Field injection
+- Distributed service configuration
+- Non-invasive usage
+- Lazy services
+- Simple API
+- **Runs in Javascript!**
 
 IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html) for Java.
 
@@ -54,49 +42,65 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
         
         // ---- Services are plain Fantom classes -------------------------------------
         
-        ** A reusable piece of code
-        class PokerService {
-            Void poke() { echo("Poking ${this.toStr}") }
+        const class DinnerMenu {
+        
+            @Inject
+            const ChefsSpecials chefsSpecials
+        
+            const Str[] dishes
+        
+            new make(Str[] dishes, |This| in) {
+                in(this)  // this it-block performs the actual injection
+                this.dishes = dishes
+            }
+        
+            Void printMenu() {
+                echo("\nDinner Menu:")
+                dishes.rw.addAll(chefsSpecials.dishes).each { echo(it) }
+            }
         }
         
-        ** PokerService is reused here
-        class MyService {
-            ** Inject services into services!
-            @Inject PokerService? poker
+        const class ChefsSpecials {
+            const Str[] dishes := ["Lobster Thermadore"]
         }
         
         
         
-        // ---- Modules - every IoC application / library needs one -------------------
+        // ---- Every IoC application / library should have an AppModule --------------
         
         ** This is the central place where services are defined and configured
-        class MyModule {
-            static Void defineServices(ServiceDefinitions defs) {
-                defs.add(MyService#)
-                defs.add(PokerService#)
+        const class AppModule {
+            Void defineServices(RegistryBuilder bob) {
+                bob.addService(DinnerMenu#).withRootScope
+                bob.addService(ChefsSpecials#).withRootScope
+            }
+        
+            @Contribute { serviceType=DinnerMenu# }
+            Void contributeDinnerMenu(Configuration config) {
+                config.add("Fish'n'Chips")
+                config.add("Pie'n'Mash")
             }
         }
         
         
         
-        // ---- Use the IoC Registry to access the services ---------------------------
+        // ---- Use Sopes to access the services --------------------------------------
         
         class Main {
             Void main() {
                 // create the registry, passing in our module
-                registry := RegistryBuilder().addModule(MyModule#).build().startup()
+                registry := RegistryBuilder().addModule(AppModule#).build()
+                scope    := registry.rootScope
         
                 // different ways to access services
-                test1 := (MyService) registry.serviceById("myService")       // returns a service instance
-                test2 := (MyService) registry.dependencyByType(MyService#)   // returns the same instance
-                test3 := (MyService) registry.autobuild(MyService#)          // build a new instance
-                test4 := (MyService) registry.injectIntoFields(MyService())  // inject into existing objects
+                menu1 := (DinnerMenu) scope.serviceById("Example_0::DinnerMenu")  // returns a service instance
+                menu2 := (DinnerMenu) scope.serviceByType(DinnerMenu#)            // returns the same instance
+                menu3 := (DinnerMenu) scope.build(DinnerMenu#, [["Beef Stew"]])   // build a new instance
         
-                // all these test instances poke the same instance of PokerService
-                test1.poker.poke()
-                test2.poker.poke()
-                test3.poker.poke()
-                test4.poker.poke()
+                // print menus
+                menu1.printMenu()
+                menu2.printMenu()
+                menu3.printMenu()
         
                 // clean up
                 registry.shutdown()
@@ -108,44 +112,49 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
 
         C:\> fan Example.fan
         
-        [info] [afIoc] Adding module definition for Example_0::MyModule
-        [info] [afIoc] Starting IoC...
+        [info] [afIoc] Adding module afIoc::IocModule
+        [info] [afIoc] Adding module Example_0::AppModule
         
-        12 Services:
+        2 public services in Example_0:
         
-             Example_0::MyService1: Defined
-             Example_0::MyService2: Defined
-                 afIoc::ActorPools: Builtin
-        afIoc::DependencyProviders: Builtin
-                afIoc::LogProvider: Builtin
-                   afIoc::Registry: Builtin
-               afIoc::RegistryMeta: Builtin
-           afIoc::RegistryShutdown: Builtin
-            afIoc::RegistryStartup: Builtin
-        afIoc::ServiceProxyBuilder: Builtin
-         afIoc::ThreadLocalManager: Builtin
-        afPlastic::PlasticCompiler: Builtin
+                ChefsSpecials: root
+                   DinnerMenu: root
         
-        16.67% of services are unrealised (2/12)
+        4 public services in afIoc:
+        
+                  AutoBuilder| builtIn
+          DependencyProviders| builtIn
+                     Registry| builtIn
+                 RegistryMeta| builtIn
+        
+        66.67% of services were built on startup (4/6)
         
            ___    __                 _____        _
           / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
          / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
         /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                                    Alien-Factory IoC v2.0.8 /___/
+                                    Alien-Factory IoC v3.0.0 /___/
         
-        IoC Registry built in 205ms and started up in 11ms
+        IoC Registry built in 75ms and started up in 20ms
         
-        [warn] [afIoc] Autobuilding type 'Example_0::MyService1' which is *also* defined as service 'Example_0::MyService1 - unusual!
+        [warn] Building Example_0::DinnerMenu which is *also* defined as service 'Example_0::DinnerMenu - unusual!
         
-        Poking fan.Example_0.Poker@680e2291
-        Poking fan.Example_0.Poker@680e2291
-        Poking fan.Example_0.Poker@680e2291
-        Poking fan.Example_0.Poker@680e2291
+        Dinner Menu:
+        Fish'n'Chips
+        Pie'n'Mash
+        Lobster Thermadore
         
-        [info] [afIoc] Stopping IoC...
-        [info] [afIoc] IoC shutdown in 19ms
-        [info] [afIoc] "Goodbye!" from afIoc!
+        Dinner Menu:
+        Fish'n'Chips
+        Pie'n'Mash
+        Lobster Thermadore
+        
+        Dinner Menu:
+        Beef Stew
+        Lobster Thermadore
+        
+        [info] [afIoc] IoC shutdown in 2ms
+        [info] [afIoc] IoC says, "Goodbye!"
 
 
 
@@ -155,7 +164,7 @@ The **registry** is the top level object in an IoC application. It holds service
 
 **Scopes** are responsible for creating and managing service instances. They build class instances and perform dependency injection. Scopes may also create child scopes.
 
-A **service** is a Fantom class whose instances are created and managed by IoC Scopes. Services are identified by a unique ID, typically the qualified class name. A service may also be referenced by its Type. Multiple services may share the same Type as long as their IDs are different. Services may solicit, and be instantiated with, a configuration list or map.
+A **service** is a Fantom class whose instances are created and managed by IoC Scopes. Services are identified by a unique ID, typically the qualified class name. A service may also be referenced by its Type. Multiple services may share the same Type as long as their IDs are different. Services may solicit, and be instantiated with, a configuration map or or map.
 
 A **dependency** is any object a service depends on. A dependency may or may not be a service. Dependencies are provided by [dependency providers](http://pods.fantomfactory.org/pods/afIoc/api/DependencyProvider).
 
@@ -167,40 +176,23 @@ Frameworks such as [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) and
 
 Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://pods.fantomfactory.org/pods/afIoc/api/RegistryBuilder), passing in the module(s) that define your services:
 
-    registry := RegistryBuilder().addModule(AppModule#).build().startup()
+    registry := RegistryBuilder().addModule(AppModule()).build()
+    scope    := registry.rootScope
     ...
-    service  := registry.serviceById("serviceId")
+    service  := scope.serviceById("serviceId")
     ...
     registry.shutdown
 
 If your code uses other IoC libraries, make sure modules from these pods are added too. Example, if using the [IocEnv library](http://pods.fantomfactory.org/pods/afIocEnv) then add a dependency on the `afIocEnv` pod:
 
     registry := RegistryBuilder()
-        .addModule(MyModule#)
+        .addModule(MyModule())
         .addModulesFromPod("afIocEnv")
-        .build().startup()
-
-### Fantom Services
-
-The Fantom language has the notion of application wide [services](http://fantom.org/doc/sys/Service.html). Should your application make use of this mechanism, IoC provides the [IocService](http://pods.fantomfactory.org/pods/afIoc/api/IocService) wrapper class that holds a `Registry` instance and extends Fantom's [Service](http://fantom.org/doc/sys/Service.html). It also contains convenience methods for creating and accessing the registry.
-
-For example, to create and start a Fantom IoC Service:
-
-    IocService([ MyModule# ]).start()
-
-Then, from anywhere in your code, use the standard Fantom service methods to locate the `IocService` instance and query the registry:
-
-    iocService := (IocService) Service.find(IocService#)
-    ...
-    myService  := iocService.dependencyByType(MyService#)
-
-Uninstall `IocService` like any other:
-
-    Service.find(IocService#).uninstall()
+        .build()
 
 ## Modules
 
-Every IoC application / library will have a module class. Module classes are where services are defined and configured. Module classes declare static methods with special facets that tell IoC what they do.
+Most IoC applications / libraries will have a module class. Module classes are where services are defined and configured. Module classes declare methods with special facets that tell IoC what they do.
 
 By convention an application will call its module `AppModule` and libraries will name modules after themselves, but with a `Module` suffix. Example, BedSheet has a module named `BedSheetModule`.
 
@@ -212,50 +204,45 @@ It is good practice, when writing an IoC application or library, to always inclu
 
 Where `<module-qname>` is the qualified type name of the pod's main module class.
 
-This is how IoC knows what modules each pod has. It is how the `addModulesFromPod("afIocEnv")` line works; IoC inspects the meta-data in the `afIocEnv` pod and looks up the `afIoc.module` key. It then loads the modules listed.
+This is how IoC knows what modules are in each pod. It is how the `addModulesFromPod("afIocEnv")` method works; IoC inspects the meta-data in the `afIocEnv` pod and looks up the `afIoc.module` key. It then loads the modules listed.
 
-The `afIoc.module` meta may also be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://pods.fantomfactory.org/pods/afIoc/api/SubModule) facet on a single module class.
+The `afIoc.module` meta may be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://pods.fantomfactory.org/pods/afIoc/api/SubModule) facet on a single module class.
 
 ## Services
 
-A service can be any old Fantom class. What differentiates a *service* from any other class is that you typically want to reuse a service in multiple places. An IoC Service is a class that is created and held by the IoC Registry. IoC may then inject that service into other classes, which may themselves be services.
+A service can be any old Fantom class. What differentiates a *service* from any other class is that you typically want to reuse a service in multiple places. An IoC Service is a class that is created and held by an IoC scope. IoC may then inject that service into other classes; which may themselves be services.
 
 For IoC to instantiate and manage a service it needs to know:
 
 - How to build the service
 - What unique ID to store it under
 - What Fantom `Type` the service is
-- What scope it has (application or threaded)
-- What its proxy strategy is.
-
-(Scopes and proxy strategies are covered later, as they're kinda advanced topics.)
+- Which scopes it may be created by
 
 All these details are defined in the application's module.
 
-Note that IoC does not want an instance of your service. Instead it wants to know how to make it. That is because IoC will defer creating your service for as long as possible (lazy loading).
+Note that IoC does not want an instance of your service. Instead it wants to know how to make it. That is because IoC will defer creating your service for as long as possible (lazy instantiation).
 
 If nobody ever asks for your service, it is never created. When the service is explicitly asked for, either by you or by anther service, only then is it created.
 
-Note that under the covers, all services are resolved via their unique service ids, injection by type is merely a layer on top, added for convenience.
-
 ### Build Your Own
 
-If we have a class `MyService` that we wish to use as a service, then we need to tell IoC how to build it. The simplest way is to declare a static *build* method in the module that creates the instance for us:
+If we we wish to use `MyService` as an IoC service, then we need to tell IoC how to build it. The simplest way is to declare a *build* method in `AppModule` that creates the instance for us:
 
 ```
 using afIoc
 
 // Example 1
-class AppModule {
+const class AppModule {
 
     @Build
-    static MyService buildMyService() {
+    MyService buildMyService() {
         return MyService()
     }
 }
 ```
 
-The method may be called anything you like and be of any scope (internal or even private), but it needs to be `static` and it needs the `@Build` facet.
+The method may be called anything you like and be of any scope (internal or even private), but it needs the `@Build` facet.
 
 Because of the `@Build` facet, IoC inspects the method and infers the following:
 
@@ -266,20 +253,20 @@ Because of the `@Build` facet, IoC inspects the method and infers the following:
 We can now retrieve an instance of `MyService` with the following:
 
 ```
-myService := (MyService) registry.serviceById(MyService#.qname)
+myService := (MyService) scope.serviceById(MyService#.qname)
 ```
 
 or
 
 ```
-myService := (MyService) registry.dependencyByType(MyService#)
+myService := (MyService) scope.serviceByType(MyService#)
 ```
 
-The `serviceId` facet attribute allows you to define a service with a different ID.
+The facet attribute `serviceId` allows you to define a service with a different ID.
 
 ```
 @Build { serviceId="wotever" }
-static MyService buildMyService() {
+MyService buildMyService() {
     return MyService()
 }
 ```
@@ -301,12 +288,12 @@ using afIoc
 class AppModule {
 
     @Build
-    static Penguins buildPenguins() {
+    Penguins buildPenguins() {
        return Penguins()
     }
 
     @Build
-    static MyService buildMyService(Penguins penguins) {
+    MyService buildMyService(Penguins penguins) {
         return MyService(3, penguins)
     }
 }
@@ -314,13 +301,13 @@ class AppModule {
 
 Before IoC calls `buildMyService()` it looks at the method signature and assumes any parameters are dependencies that need to be passed in. In this case, it is the service `Penguins`. So it looks up, and creates if it doesn't already exist, the `Penguins` service and passes it to `buildMyService()`. This is an example of *method injection*. All this is automatic, and all builder methods may declare any number of services and dependencies as a method parameters.
 
-Note that the `@Build` facet has other attributes that give you control over the service's unique ID, scope and proxy strategy.
+Note that the `@Build` facet has other attributes that give you control over the service's unique ID and scopes.
 
-Service builder methods are a very powerful pattern as they give you complete control over how the service is created. But they are also very verbose and require a lot of code. So lets look at an easier way; the `defineServices()` method...
+Service builder methods are a very powerful pattern as they give you complete control over how the service is created. But they are also very verbose and require a lot of code. So lets look at an easier way; the `defineXXXX()` method...
 
 ### Defining Services
 
-Modules may declare a `defineServices()` static method. It may be of any visibility but must be called `defineServices` and it must define a single parameter of `ServiceDefinitions`. The method lets you create and add service definitions in place of writing builder methods.
+Modules may declare a `defineXXXX()` method. It may be of any visibility but must have the prefix `define` and it must define a single parameter of `RegitryBuilder`. The method lets you create and add service definitions in place of writing builder methods.
 
 We could replace the previous `Example 1` with the following:
 
@@ -328,8 +315,8 @@ We could replace the previous `Example 1` with the following:
 using afIoc
 
 class AppModule {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.add(MyService#)
+    Void defineServices(RegistryBuilder bob) {
+        bob.addService(MyService#)
     }
 }
 ```
@@ -348,14 +335,14 @@ Now lets replace the builder methods in `Example 2` with service definitions:
 using afIoc
 
 class AppModule {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.add(MyService#).withCtorArgs([ 3 ])
-        defs.add(Penguins#)
+    Void defineServices(RegistryBuilder bob) {
+        bob.add(MyService#).withCtorArgs([ 3 ])
+        bob.add(Penguins#)
     }
 }
 ```
 
-That's a lot more succinct! But wait! The `MyService` definition just declares a ctor arg of `3`, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are services and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in the relevant section.
+That's a lot more succinct! But wait! The `MyService` definition just declares a ctor arg of `3`, but what about the `Penguins` service? Just like method injection, IoC will assume all unknown parameters are dependencies and will attempt to resolve them as such. This is an example of *ctor injection* and more is said in the relevant section.
 
 ## Dependency Injection
 
@@ -376,9 +363,9 @@ class MyService {
 }
 ```
 
-When you request `MyService` from the registry:
+When you request `MyService` from a scope:
 
-    myService := (MyService) registry.dependencyByType(MyService#)
+    myService := (MyService) scope.serviceByType(MyService#)
 
 IoC creates an instance of `MyService` and then sets the fields. As simple as it sounds, it does have a couple of drawbacks:
 
@@ -489,8 +476,8 @@ const class CtorTest {
 Then IoC would choose `make2()` because it doesn't know how to inject `Int not_a_service`. But if we define `CtorTest` with:
 
 ```
-static Void defineServices(ServiceDefinitions defs) {
-    defs.add(CtorTest#).withCtorArgs([69])
+Void defineServices(RegistyBuilder bob) {
+    bob.add(CtorTest#).withCtorArgs([69])
 }
 ```
 
@@ -593,21 +580,20 @@ const class MyService {
 }
 ```
 
-## Autobuilding
+## AutoBuilding
 
-It is common to *autobuild* class instances. So much so, there is an `autobuild()` method on the registry, an `autobuild()` method on service configuration objects and there is even an `@Autobuild` facet. But what is *autobuilding*?
+It is common to *autobuild* class instances. So much so, there is a `build()` method on `Scope`, a `build()` method on service `Configuration` objects, and there's even an `@Autobuild` facet. But what is *auto-building*?
 
 Autobuilding is the act of creating an instance of a class with IoC. That is, IoC will new up the instance and perform any necessary injection as previously outlined.
-
-For example, all services defined via `defineServices()` methods are autobuilt.
 
 Let's look at this code:
 
 ```
 Void main() {
-    registry := RegistryBuilder().build().startup()
+    registry := RegistryBuilder().build()
+    scope    := registry.rootScope
 
-    myClass := (MyClass) registry.autobuild(MyClass#)
+    myClass := (MyClass) scope.build(MyClass#)
 
     registry.shutdown()
 }
@@ -639,45 +625,100 @@ Here the registry service is injected, and a new instance of `otherClass` is cre
 
 The `@Autobuild` facet is an example of custom dependency injection. See [Dependency Providers](#dependecnyProviders) for details.
 
+## Service Scopes
+
+Services are created just once per `Scope`, but may be created in multiple scopes. Scopes are nested and, if a service can not be found in one scope, the search is delegated to the parent scope.
+
+IoC defines just one scope - the **root scope**. All other scopes are derived from the root scope. The root scope is a non-threaded scope, meaning it can only hold instances of `const` classes and services. Threaded scopes are created and destroyed in the same thread, hence they may only contain non-const classes and services.
+
+Non-threaded scopes (like the root scope) may create and contain any type of scope, but threaded scopes may only contain other threaded scopes.
+
+The scope of a *service* may be explicitly set when you define the service - either in the `@Build` / `@Override` facet or in the `RegistryBuilder.addService()` method. If no scope is explicitly set then, by default, const classes are matched to *all* non-threaded scopes. And non-const classes are matched to *all* threaded scopes.
+
+You can define custom scopes via `RegistryBuilder.addScope()` method and create it with `Scope.createChildScope()`. But largely, it is just IoC containers that define and creates scopes. Both [Reflux](http://pods.fantomfactory.org/pods/afReflux) and [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) are examples of IoC containers.
+
+### Reflux Applications
+
+In a [Reflux](http://pods.fantomfactory.org/pods/afReflux) application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called `uiThread` and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
+
+*Happy days!*
+
+### BedSheet Applications
+
+[BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called `request`.
+
+**Request Scope:** Here a new instance of the service will be created for each thread / web request. BedSheet's `WebReq` and `WebRes` are good examples of `request` services. Note in some situations this *per thread* object creation could be considered wasteful. In other situations, such as sharing database connections, it is not even viable.
+
+**Root Scope:** In IoC's default scope, only one instance of the service is created for the entire application. *Root scoped* services need to be `const` classes.
+
+Writing `const` services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) shows you how.
+
+The smart ones may be thinking that `root` scoped services can only hold other `root` scoped services. Well, they would be wrong too! Using the magic of *Lazy Funcs*, `request` scoped services may be injected into `root` scoped services. See [Lazy Functions](#lazyFunctions) for more info.
+
+### Custom Applications
+
+Here is a quick example of how to create and use your own threaded scope, running in its own Actor:
+
+```
+registry := RegistryBuilder() {
+    addScope("thread")
+    addService(MyService#).withScope("thread")
+}.build
+
+rootScope := registry.rootScope
+
+Actor(ActorPool()) |->| {
+    rootScope.createChildScope("thread") |threadScope| {
+        myService := threadScope.serviceById("serviceId")
+        ...
+    }
+}.send(null).get
+
+registry.shutdown
+```
+
+### Jail Breaking
+
+As you can see above, the `thread` scope is constrained to the closure passed into `Scope.createChildScope()`. Sometimes this is not desirable. If so, it is possible to *jail break* the child scope from the closure:
+
+```
+registry := RegistryBuilder() {
+	addScope("thread")
+	addService(MyService#).withScope("thread")
+}.build
+
+rootScope   := registry.rootScope
+threadScope := (Scope?) null
+
+rootScope.createChildScope("thread") |tScope| {
+    threadScope = tScope.jailBreak
+}
+
+// use thread scope from outside the defining closure
+myService := threadScope.serviceById("serviceId")
+
+...
+
+threadScope.destroy
+registry.shutdown
+```
+
+Note that if you jail break a scope then it is your responsibility to `destroy()` it! Also note that once jail broken, the scopes is no longer returned as the registry's *active* scope.
+
 ## Lazy Functions
 
 To defer building services until they are used, you can inject *Lazy Functions*. These are funcs that return a service:
 
 ```
-@Inject |->MyService| myServiceFunc
+@Inject
+|->MyService| myServiceFunc
 ```
 
-or
+Lazy funcs always query the current *active* scope to find the service instance. The active scope may be different to the scope that the containing class was created in. This important distinction allows threaded services to be injected into non-threaded services.
 
-```
-myServiceFunc := (|->MyService|) registry.dependencyByType(|->MyService|#)
-```
+(Note that Lazy Funcs are immutable.)
 
-When the function is called, the service is retreived from the registry. This essentially defers service creation until it is used:
-
-```
-// get the service from the IoC registry, creating it if it doesn't exist
-myService := myServiceFunc()
-```
-
-Lazy Funcs are immutable, which means thety're also useful when injecting non-const classes into const classes. Consider this:
-
-```
-using afIoc
-
-const class ConstService {
-
-    // --> Compiler Err!
-    // --> Const type 'ConstService' cannot contain non-const field 'nonConstService'
-    @Inject const NonConstService nonConstService
-
-    new make(|This| in) { in(this) }
-}
-
-class NonConstService { ... }
-```
-
-To get around the compilation error you can inject the `Registry` and replace `nonConstService` with a method:
+So instead of writing this:
 
 ```
 using afIoc
@@ -688,47 +729,71 @@ const class ConstService {
 
     new make(|This| in) { in(this) }
 
-    NonConstService nonConstService() {
-        registry.serviceById(NonConstService#.qname)
+    Void doStuff() {
+        oldSkoolLazyFunc().doStuff()
+    }
+
+    NonConstService oldSkoolLazyFunc() {
+        // returns a non-const service from the active scope
+        registry.activeScope.serviceById(NonConstService#.qname)
     }
 }
 ```
 
-Or a better way would be to inject a Lazy Func instead which, behind the scences, does exactly the same service call:
+You can just write this:
 
 ```
 using afIoc
 
 const class ConstService {
 
-    @Inject const |->NonConstService| nonConstService
+    @Inject const |->NonConstService| lazyFunc
 
     new make(|This| in) { in(this) }
+
+    Void doStuff() {
+        lazyFunc().doStuff()
+    }
 }
 ```
 
-Or another alternative, non-invasive, way of lazily creating services is to use [Proxies](#proxies).
+### Circular Dependencies
+
+Sometimes it can't be helped. Sometimes you have a circular dependency in your services:
+
+    ServiceA -> ServiceB -> ServiceC -> ServiceA
+
+This makes creating an instance of `ServiceA` impossible, because to create `ServiceA` you first create `ServiceA` to inject into `ServiceC`!
+
+But by turning just one of the service injections into a Lazy Func, the chain is broken!
+
+    ServiceA -> ServiceBLazyFunc ...... ServiceB -> ServiceC -> ServiceA
+
+The chain is broken because when IoC creates `ServiceA` it injects a func for `ServiceB`. `ServiceB` is only created when that func is called. By which time, `ServiceA` has already been created! So when the Lazy Func is called, IoC happily creates `ServiceC`, injecting in `ServiceA`.
+
+This means circular service dependencies are virtually eliminated!
 
 ## Factory Functions
 
-To perform an autobuild you usually need an instance of the IoC `Registry`. As it is not always convenient to inject / pass around the Registry you may also autobuild using *Factory Functions*.
+To perform an autobuild you need a `Scope` instance. As it is not always convenient to inject / pass around the Scope you may also autobuild using *Factory Functions*.
 
-Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define paramters, the values of which get passed to the autobuild ctor:
+Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define parameters, the values of which get passed to the autobuild ctor:
 
 ```
 using afIoc
 
-class BuildMe {
-    new make(Str name, SomeService someService) { ... }
-}
-
 class Builder {
-    @Inject |Str->BuildMe| buildMeFunc
+    @Inject |Str->BuildMe| factoryFunc
 
     Void stuff() {
-        bob1 := buildMeFunc("Judge")    // "Judge" gets passed to the BuildMe ctor
-        bob2 := buildMeFunc("Dredd")    // "Dredd" gets passed to the BuildMe ctor
+        bob1 := factoryFunc("Judge")  // "Judge" gets passed to the BuildMe ctor
+        bob2 := factoryFunc("Dredd")  // "Dredd" gets passed to the BuildMe ctor
     }
+}
+
+class BuildMe {
+    // name is passed in from the factory func, someService is injected
+    new make(Str name, SomeService someService) { ... }
 }
 ```
 
@@ -761,22 +826,22 @@ If the first parameter of a service's ctor is a List, IoC assumes it is configur
 ```
 using afIoc
 
-class AppModule {
-    static Void defineServices(ServiceDefinitions defs) {
+const class AppModule {
+    Void defineServices(ServiceDefinitions defs) {
         defs.add(Penguins#)
     }
 
     @Contribute { serviceType=Penguins# }
-    static Void contributePenguinUrls(Configuration config) {
+    Void contributePenguinUrls(Configuration config) {
         config.add(`http://ypte.org.uk/factsheets/penguins/`)
         config.add(`http://www.kidzone.ws/animals/penguins/`)
     }
 }
 ```
 
-Contribution methods are static methods annotated with `@Contribute`. They may be of any scope and be called anything; although by convention they have a `contributeXXX()` prefix. The `serviceType` facet parameter tells IoC which service the method contributes to. Each contribution method may add as many items to the list as it likes.
+Contribution methods are module methods annotated with `@Contribute`. They may be of any scope and be called anything; although by convention they;re named `contributeXXX()`. The `serviceType` facet parameter tells IoC which service the method contributes to. Each contribution method may add as many items to the list as it likes.
 
-Note that any *any* module may define contribution methods for *any* service. Because the modules may be spread out in multiple pods, this is known as *distributed configuration*.
+Note that *any* module may define contribution methods for *any* service. Because the modules may be spread out in multiple pods, this is known as *distributed configuration*.
 
 The `Configuration` object is write only. Only when all the contribution methods have been called, is the full list of configuration data known. Because contribution methods may be called in any order, being able to *read* contributions would only give partial data. Becasuse partial data can be misleading it is deemed better not to give any at all.
 
@@ -785,14 +850,14 @@ If the `Penguins` service were to built via a builder method then the method's f
 ```
 using afIoc
 
-class AppModule {
+const class AppModule {
     @Build
-    static Penguins buildPenguins(Uri[] penguinUrls) {
+    Penguins buildPenguins(Uri[] penguinUrls) {
        ...
     }
 
     @Contribute { serviceType=Penguins# }
-    static Void contributePenguinUrls(Configuration config) {
+    Void contributePenguinUrls(Configuration config) {
         config.add(`http://ypte.org.uk/factsheets/penguins/`)
         config.add(`http://www.kidzone.ws/animals/penguins/`)
     }
@@ -810,14 +875,14 @@ That said, all contribution values are `coerced` via [afBeanUtils::TypeCoercer](
 ```
 using afIoc
 
-class AppModule {
+const class AppModule {
     @Build
-    static MyService buildMyService(File[] file) {
+    MyService buildMyService(File[] file) {
        ...
     }
 
     @Contribute { serviceType=MyService# }
-    static Void contributeFiles(Configuration config) {
+    Void contributeFiles(Configuration config) {
         config.add(File(`/css/styles-1.css`))  // file added as is
         config.add(`/css/styles-2.css`)        // Uri coerced to File via File(Uri) ctor
     }
@@ -833,9 +898,9 @@ First we have to give the configurations a unique ID. We do this by using `Confi
 ```
 using afIoc
 
-class AppModule {
+const class AppModule {
     @Contribute { serviceType=Penguins# }
-    static Void contributePenguinUrls(Configuration config) {
+    Void contributePenguinUrls(Configuration config) {
         // standard call to set()
         config.set("natGeo",          `http://ngkids.co.uk/did-you-know/emperor_penguins`)
 
@@ -851,9 +916,9 @@ Then in a different module, when more URLs are contributed we can use ordering c
 ```
 using afIoc
 
-class MyModule {
+const class MyModule {
     @Contribute { serviceType=Penguins# }
-    static Void contributePenguinUrls(Configuration config) {
+    Void contributePenguinUrls(Configuration config) {
         config.set("defenders", `http://www.defenders.org/penguins/basic-facts`).before("natGeo")
         config.set("wikipedia", `http://en.wikipedia.org/wiki/Penguin`         ).after ("kidZone")
     }
@@ -925,11 +990,11 @@ All other aspects may be. Substituting service implementations can be useful for
 
 Given that `MyService` has already been defined in a module, we can substitute it for our own instance by writing an `@Override` method.
 
-`@Override` methods are similar to builder methods in that they may be of any scope, and be named what you like, but they must be static and be annotated with the `@Override` facet.
+`@Override` methods are similar to builder methods in that they may be of any scope, and be named what you like, but they must annotated with the `@Override` facet.
 
 ```
 @Override
-static MyService overrideMyService() {
+MyService overrideMyService() {
     // build a different instance
     return MyServiceImpl(...)
 }
@@ -939,7 +1004,7 @@ The return type, `MyService` in the above example, is used to find the service t
 
 ```
 @Override { serviceId="acme::MyService" }
-static MyService overrideMyService() {
+MyService overrideMyService() {
     // build a different instance
     return MyServiceImpl(...)
 }
@@ -951,19 +1016,19 @@ Similar to `@Build` methods, method injection is used to resolve method paramete
 
 ```
 @Override
-static MyService overrideMyService(Uri[] urls, Registry registry) {
+MyService overrideMyService(Uri[] urls, Scope scope) {
     // 'urls' is the service configuration
-    // use the registry to build MyServiceImpl
-    return registry.autobuild(MyServiceImpl#, [urls])
+    // use the scope to build MyServiceImpl
+    return scope.build(MyServiceImpl#, [urls])
 }
 ```
 
 `@Override` methods can be a little cumbersome, so services may also be override via the `defineServices()` method:
 
 ```
-static Void defineServices(ServiceDefinitions defs) {
+Void defineServices(ServiceDefinitions defs) {
     // define a different MyService instance
-    defs.overrideByType(MyService#).withImpl(MyServiceImpl#)
+    defs.overrideServiceByType(MyService#).withImpl(MyServiceImpl#)
 }
 ```
 
@@ -973,7 +1038,7 @@ Configuration contributions may be overridden by using the `Configuration.overri
 
 ```
 @Contribute { serviceType=Penguins# }
-static Void contributePenguinUrls(Configuration config) {
+Void contributePenguinUrls(Configuration config) {
     config["wikipedia"] = `http://en.wikipedia.org/wiki/Penguin`
 }
 ```
@@ -982,7 +1047,7 @@ We may override the contribution value with:
 
 ```
 @Contribute { serviceType=Penguins# }
-static Void contributeMoarPenguinUrls(Configuration config) {
+Void contributeMoarPenguinUrls(Configuration config) {
     config.overrideValue("wikipedia", `https://www.youtube.com/watch?v=-SVF1i-7l5k`).before("kidZone")
 }
 ```
@@ -993,7 +1058,7 @@ Or, if we decided we didn't like the wikipedia entry at all, we could remove it.
 
 ```
 @Contribute { serviceType=Penguins# }
-static Void contributeMoarPenguinUrls(Configuration config) {
+Void contributeMoarPenguinUrls(Configuration config) {
     config.remove("wikipedia")
 }
 ```
@@ -1003,35 +1068,35 @@ static Void contributeMoarPenguinUrls(Configuration config) {
 Services and Service contributions can only be overridden the once, because if two different modules tried to override the same service, which one should win!?
 
 ```
-class Module1 {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.overrideByType(MyService#).withImpl(Override1Impl#)
+const class Module1 {
+    Void defineServices(RegistryBuilder bob) {
+        bob.overrideServiceByType(MyService#).withImpl(Override1Impl#)
     }
 }
 
-class Module2 {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.overrideByType(MyService#).withImpl(Override2Impl#)
+const class Module2 {
+    static Void defineServices(RegistryBuilder bob) {
+        bob.overrideServiceByType(MyService#).withImpl(Override2Impl#)
     }
 }
 ```
 
-Becasue modules are loaded in any order, either `Module1` or `Module2` could perform the override. Because this behaviour is non-deterministic, it is not allowed.
+Because modules are loaded in any order, either `Module1` or `Module2` could perform the override. Because this behaviour is non-deterministic, it is not allowed.
 
 Instead IoC introduces the concept of an override ID. Whenever an override is performed, you have the option of providing an ID. This ID may be overridden. If an override provides its own override ID then it, in turn, may also be overriden. And so on.
 
 Rewriting the above example into a legal use case:
 
 ```
-class Module1 {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.overrideByType(MyService#).withImpl(Override1Impl#).withOverrideId("override1")
+const class Module1 {
+    Void defineServices(RegistryBuilder bob) {
+        bob.overrideServiceByType(MyService#).withImpl(Override1Impl#).withOverrideId("override1")
     }
 }
 
-class Module2 {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.overrideById("override1").withImpl(Override2Impl#)
+const class Module2 {
+    Void defineServices(RegistryBuilder bob) {
+        bob.overrideServiceById("override1").withImpl(Override2Impl#)
     }
 }
 ```
@@ -1039,16 +1104,16 @@ class Module2 {
 Now it becomes obvious who overrides who! As mentioned, the override chain may be perpetuated:
 
 ```
-class Module1 {
-    static Void defineServices(ServiceDefinitions defs) {
-        defs.overrideByType(MyService#).withImpl(Override1Impl#).withOverrideId("override1")
+const class Module1 {
+    Void defineServices(RegistryBuilder bob) {
+        bob.overrideServiceByType(MyService#).withImpl(Override1Impl#).withOverrideId("override1")
         ...
-        defs.overrideById("override1").withImpl(Override2Impl#).withOverrideId("override2")
-        defs.overrideById("override2").withImpl(Override3Impl#).withOverrideId("override3")
-        defs.overrideById("override3").withImpl(OverrideNImpl#).withOverrideId("overrideN")
+        bob.overrideServiceById("override1").withImpl(Override2Impl#).withOverrideId("override2")
+        bob.overrideServiceById("override2").withImpl(Override3Impl#).withOverrideId("override3")
+        bob.overrideServiceById("override3").withImpl(OverrideNImpl#).withOverrideId("overrideN")
         ...
         // this cannot be overridden because it does not provide an override ID
-        defs.overrideById("overrideN").withImpl(OverrideZ#)
+        bob.overrideServiceById("overrideN").withImpl(OverrideZ#)
     }
 }
 ```
@@ -1065,7 +1130,7 @@ IoC injects services, but it can also inject other custom classes and objects. B
 
 ```
 @Contribute { serviceType=DependencyProviders# }
-static Void contributeDependencyProviders(Configuration config) {
+Void contributeDependencyProviders(Configuration config) {
     config["myProvider"] = MyProvider()
 }
 ```
@@ -1075,20 +1140,16 @@ Note that the `DependencyProviders` service is currently annotated with `@NoDoc`
 `DependencyProvider` defines 2 simple methods:
 
     ** Should return 'true' if the provider can provide.
-    Bool canProvide(InjectionCtx injectionCtx)
+    Bool canProvide(Scope scope, InjectionCtx injectionCtx)
     
     ** Should return the object to be injected.
-    Obj? provide(InjectionCtx injectionCtx)
+    Obj? provide(Scope scope, InjectionCtx injectionCtx)
 
 The [InjectionCtx](http://pods.fantomfactory.org/pods/afIoc/api/InjectionCtx) class holds details of the injection currently being performed, e.g. ctor / field / method / it-block injection, field / method details, etc...
 
 Note that `canProvide()` is called for *all* fields of a class, not just those annotated with `@Inject`. The `@Autobuild` facet is an example of this. IoC has an (internal) `AutobuildDependencyProvider` that looks for fields annotated with `@Autobuild`. It then autobuilds the field value as required and returns it for injection.
 
-IoC also provides dependency providers for the following:
-
-### Log Injection
-
-Log instances may be injected as dependencies.
+IoC also provides dependency providers for `Log` objects:
 
 ```
 class Example {
@@ -1097,147 +1158,6 @@ class Example {
     ...
 }
 ```
-
-See [LogProvider](http://pods.fantomfactory.org/pods/afIoc/api/LogProvider) for details.
-
-### LocalRef Injection
-
-`LocalRefs`, `LocalLists`, and `LocalMaps` from Alien-Factory's [Concurrent](http://pods.fantomfactory.org/pods/afConcurrent) library may be injected as dependencies.
-
-```
-const class Example {
-    @Inject
-    const LocalRef localRef
-
-    @Inject { type=Str[]# }
-    const LocalList localList
-
-    @Inject { type=[Str:Slot?]# }
-    const LocalMap localMap
-
-    ...
-}
-```
-
-Using `type` to define the backing List / Map type is optional but recommended. By default the field name is used as the *local* name, this may be overridden by declaring an ID in `@Inject`:
-
-    @Inject { id="localName" }
-    const LocalRef localRef
-
-See [ThreadLocalManager](http://pods.fantomfactory.org/pods/afIoc/api/ThreadLocalManager) for details.
-
-## Service Scope
-
-Services may either be created just the once - [perApplication](http://pods.fantomfactory.org/pods/afIoc/api/ServiceScope.perApplication) scope, or created once per thread - [perThread](http://pods.fantomfactory.org/pods/afIoc/api/ServiceScope.perThread) scope.
-
-Service scope defaults to `perApplication` for const classes and `perThread` for non-const classes. The scope of a service may be explicitly set when you define it - either in the `@Build` / `@Override` facet or in the `defineServices()` method.
-
-The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) states a Fantom fact:
-
-> Only instances of `const` classes can be shared between multiple threads.
-
-As such, only `const` classes may have the `perApplication` scope. The implications of this largely depends on the type of application you're building.
-
-### Reflux Applications
-
-If building a [Reflux](http://pods.fantomfactory.org/pods/afReflux) application then all the processing happens in the UI thread. In effect, you're building a single threaded application. Therefore, for all intents and purposes, `perThread` scope *is* the same as `perApplication` scope. So all your services can be non-const and threaded. Happy days!
-
-### Web / REST Applications
-
-Web / REST applications are multi-threaded; each web request is served on a different thread. This gives you a choice when defining a service:
-
-**Per Thread:** A new instance of the service will be created for each thread / web request. [BedSheet's](http://pods.fantomfactory.org/pods/afBedSheet) `HttpRequest` and `HttpResponse` are good examples of `perThread` services, with a new instance being created for each request.
-
-The [ThreadLocalManager](http://pods.fantomfactory.org/pods/afIoc/api/ThreadLocalManager) class is responsible for cleaning up threaded resources at the end of a web request / thread processing. You may add your own cleanup handlers to it, but note that handlers are only cached for the current thread - meaning they have to be re-added in each thread.
-
-In some situations this *per thread* object creation could be considered wasteful. In other situtations, such as sharing database connections, it is not even viable. So let's look at:
-
-**Per Application:** Only one instance of the service is created for the entire application. *Per Application* services need to be `const` classes.
-
-Writing `const` services may be off-putting to some - because they're constant, right!? ** *Wrong!* **
-
-Const classes **can** hold *mutable* data. The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) shows you how.
-
-The smart ones may be thinking that `perApplication` scoped services can only hold other `perApplication` scoped services. Well, they would also be wrong! Using the magic of *Proxies*, `perThread` scoped services may be injected into `perApplication` scoped services. See the [Proxies](#proxies) section for more info.
-
-## Proxies
-
-IoC has the concept of *Proxies*. A proxy is a thin wrapper class that fronts the real service. Proxies can have real benefits (as outlined below) but are **not** created by default.
-
-To force a proxy to be created for a service, the service type must be a `mixin` and the service definition should set the proxy creation strategy to `always`.
-
-Proxy classes are dynamically created by IoC at runtime using the [Plastic](http://pods.fantomfactory.org/pods/afPlastic) library.
-
-Ignoring the real implementation, if we had a simple service mixin such as:
-
-```
-mixin MyService {
-    abstract Void doStuff(Str arg)
-}
-```
-
-Then conceptually, you can imagine the proxy for `MyService` to look like (*):
-
-```
-using afIoc
-
-class MyServiceProxy : MyService {
-    @Inject Registry registry
-
-    new make(|This| f) { f(this) }
-
-    override Void doStuff(Str arg) {
-        myService := (MyService) registry.serviceById(MyService#.qname)
-        myService.doStuff()
-    }
-}
-```
-
-(*) Actual proxy implementations are actually a lot more optimised and a bit more complicated but follow a similar pattern.
-
-Each method invocation calls out to the `Registry` to retrieve the *real* service. This has the following benifits:
-
-### Lazy Loading
-
-Because the proxy is injected everywhere in place of the real service, the real service is only created when a service method is invoked. That means service creation is delayed until the very last minute!
-
-That means real lazy loading!
-
-For services that have long startup times (e.g. maybe it establishes 100 database connections) it means this overhead is pushed back to when it is first used. This can significantly decrease application startup times. Invaluable when developing / running tests.
-
-### Circular Dependencies
-
-Sometimes it can't be helped. Sometimes you have a circular dependency in your services:
-
-    ServiceA -> ServiceB -> ServiceC -> ServiceA
-
-But by giving just one of the services a proxy, the chain is broken!
-
-    ServiceA -> ServiceBProxy
-
-The chain is broken because when IoC creates `ServiceA` it injects a proxy for `ServiceB`. `ServiceB` is only created when a method is called on the proxy. By which time, `ServiceA` has already been created, so IoC happily creates `ServiceC`, injecting in `ServiceA`.
-
-This means circular service dependencies are virtually eliminated!
-
-### Per Thread Injection
-
-As mentioned earlier, proxies allow `perThread` scoped services to be injected into `perApplication` scoped services. Well, to be more precise, the proxy is injected into the `perApplication` scoped service. All calls to the proxy are then routed to the registry which creates on demand, the threaded version of the service.
-
-Note that the `perThread` service mixin has to be `const`, otherwise it can't be injected into the `perApplication` scoped services, which by definition are also `const`.
-
-### Aspects / AOP
-
-[Aspect-oriented programming](http://en.wikipedia.org/wiki/Aspect-oriented_programming) is sometimes a necessary evil, so IoC provides an aspect mechanism.
-
-Method calls to proxied services may be wrapped witn your own code, allowing you to:
-
-- perform pre & post method logic
-- change method arguments
-- change the return value
-- catch and process any thrown Errs
-- ignore the method call entirely.
-
-See [@Advise](http://pods.fantomfactory.org/pods/afIoc/api/Advise) for details.
 
 ## Testing IoC Applications
 
@@ -1258,10 +1178,10 @@ class TestExample : Test {
         reg = RegistryBuilder()
                   .addModule(AppModule#)
                   .addModule(TestModule#)
-                  .build.startup
+                  .build
 
         // set MyService and other @Inject'ed fields
-        reg.injectIntoFields(this)
+        reg.rootScope.inject(this)
     }
 
     override Void teardown() {
@@ -1277,7 +1197,7 @@ class TestExample : Test {
     }
 }
 
-class TestModule {
+const class TestModule {
     // define any service / test overrides here
 }
 ```
@@ -1293,14 +1213,14 @@ Note that you need to add modules from other IoC libraries the application / tes
                   .addModule(AppModule#)
                   .addModule(TestModule#)
                   .addModulesFromPod("afIocEnv")
-                  .build.startup
+                  .build
         ...
     }
 
 Should you fail to add a required module / library, the test will fail when IoC attempts to inject a service that hasn't been defined:
 
     TEST FAILED
-    afIoc::IocErr: No service matches type XXXX.
+    afIoc::ServiceNotFoundErr: Could not find service of Type XXXX.
 
 Where `XXXX` is a service in the library you forgot to add.
 
@@ -1308,68 +1228,28 @@ Note that the `setup()` and `teardown()` could be moved into a common base class
 
 ## Debugging
 
-Recursively creating and injecting services into services can become surprisingly complex. So much so, when a error occurs it can be difficult to track down. For this reason IoC wraps all Errs thrown and provides an Operations Stack that gives insight into what IoC was attempting to do (and to what) when the error occured.
+Recursively creating and injecting services into services can become surprisingly complex. So much so, when a error occurs it can be difficult to track down. For this reason IoC wraps Errs thrown and provides an Operations Stack that gives insight into what IoC was attempting to do (and to what) when the error occured.
 
-For example, if you try to contribute a number instead of a func to `RegistryStartup` you would get the following error:
+For example, if you tried to build an instance of `MyClass`, which depended on the `Penguins` service, which referenced `MyService02` - but `MyService02` had not been defined as a service; you would see:
 
 ```
-afIoc::IocErr: Contribution 'Int' does not match service configuration value of |->Void|
+afIoc::ServiceNotFoundErr: Could not find service of Type acme::MyService02 in scopes: root, builtIn
+IoC Operation Trace:
+  [ 3] Resolving Type: acme::MyService02
+  [ 2] Resolving Type: acme::Penguins
+  [ 1] Building:       acme::MyClass
 
-Ioc Operation Trace:
-  [ 1] Locating service by ID 'afIoc::RegistryStartup'
-  [ 2] Creating REAL Service 'afIoc::RegistryStartup'
-  [ 3] Creating 'afIoc::RegistryStartup' via ctor autobuild
-  [ 4] Determining injection parameters for afIoc::RegistryStartupImpl Void make([Str:|->Void|] startups, |This->Void| in)
-  [ 5] Looking for dependency of type [Str:|->Void|]
-  [ 6] Gathering configuration of type [Str:|->Void|]
-  [ 7] Invoking Void contributeRegustryStartup(afIoc::Configuration config) on acme::AppModule...
+Available Service IDs:
+  builtIn - afIoc::AutoBuilder
+  builtIn - afIoc::DependencyProviders
+  builtIn - afIoc::Registry
+  builtIn - afIoc::RegistryMeta
+  root - acme::Penguins
 
 Stack Trace:
-  afIoc::Utils.stackTraceFilter (Utils.fan:53)
-  afIoc::RegistryImpl.serviceById (RegistryImpl.fan:218)
-  afIoc::RegistryImpl.serviceById (RegistryImpl.fan)
-  afIoc::RegistryImpl.startup (RegistryImpl.fan:170)
-  acme::MyApplication$.start (MyApplication.fan:52)
+  afIoc::ScopeImpl.serviceByType_ (Scope.fan:152)
+  afIoc::ScopeImpl.serviceByType_ (Scope.fan:151)
+  afIoc::ScopeImpl.serviceByType (Scope.fan:142)
   ...
-```
-
-From the above you can see that the error was caused by the method `acme::AppModule.contributeRegustryStartup()` when configuring `RegistryStartupImpl`.
-
-If more information if required, you can turn on `afIoc` debug logging which outputs trace level contextual information.
-
-    Pod.find("afIoc").log.level = LogLevel.debug
-
-Be warned though - it outputs a lot!
-
-```
-[  1]  --> Locating service by ID 'afReflux::Reflux'
-[  2]   --> Creating PROXY for Service 'afReflux::Reflux'
-[  3]    --> Creating REAL Service 'afIoc::ServiceProxyBuilder'
-[  4]     --> Creating 'afIoc::ServiceProxyBuilder' via ctor autobuild
-[  5]      --> Determining injection parameters for afIoc::ServiceProxyBuilderImpl Void make(afIoc::ActorPools actorPools, |This->Void| in)
-[  5]        > Parameter 1 = afIoc::ActorPools
-[  6]       --> Looking for dependency of type afIoc::ActorPools
-[  6]       <-- Looking for dependency of type afIoc::ActorPools [000ms]
-[  6]       --> Looking for dependency of type afIoc::ActorPools
-[  6]         > Found Service 'afIoc::ActorPools'
-[  7]        --> Creating REAL Service 'afIoc::ActorPools'
-[  8]         --> Creating 'afIoc::ActorPools' via ctor autobuild
-[  9]          --> Determining injection parameters for afIoc::ActorPoolsImpl Void make([Str:concurrent::ActorPool] actorPools)
-[  9]            > Parameter 1 = [Str:concurrent::ActorPool]
-[ 10]           --> Looking for dependency of type [Str:concurrent::ActorPool]
-[ 10]           <-- Looking for dependency of type [Str:concurrent::ActorPool] [000ms]
-[ 10]           --> Looking for dependency of type [Str:concurrent::ActorPool]
-[ 10]             > Found Configuration '[Str:concurrent::ActorPool]'
-[ 11]            --> Gathering configuration of type [Str:concurrent::ActorPool]
-[ 12]             --> Determining injection parameters for afIoc::IocModule Void contributeActorPools(afIoc::Configuration config)
-[ 12]               > Parameter 1 = afIoc::Configuration
-[ 12]               > Parameter provided by user
-[ 12]             <-- Determining injection parameters for afIoc::IocModule Void Void contributeActorPools(afIoc::Configuration config) [000ms]
-[ 12]             --> Invoking Void contributeActorPools(afIoc::Configuration config) on afIoc::IocModule...
-[ 12]             <-- Invoking Void contributeActorPools(afIoc::Configuration config) on afIoc::IocModule... [005ms]
-[ 11]              > Added 1 contributions
-[ 11]            <-- Gathering configuration of type [Str:concurrent::ActorPool] [005ms]
- ...
- ...
 ```
 
