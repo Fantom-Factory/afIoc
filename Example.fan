@@ -44,7 +44,7 @@
     
     
     
-    // ---- Use the IoC Registry to access the services ---------------------------
+    // ---- Use Sopes to access the services --------------------------------------
     
     class Main {
         Void main() {

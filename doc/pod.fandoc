@@ -22,7 +22,7 @@ Quick Start
 
     syntax: fantom
 
-using afIoc
+    using afIoc
 
     // ---- Services are plain Fantom classes -------------------------------------
 
@@ -68,7 +68,7 @@ using afIoc
 
 
 
-    // ---- Use the IoC Registry to access the services ---------------------------
+    // ---- Use Sopes to access the services --------------------------------------
 
     class Main {
         Void main() {
@@ -609,11 +609,9 @@ const class MyService {
 
 AutoBuilding
 ************
-It is common to *autobuild* class instances. So much so, there is a 'build()' method on 'Scope', a 'build()' method on service configuration objects and there is even an '@Autobuild' facet. But what is *auto-building*?
+It is common to *autobuild* class instances. So much so, there is a 'build()' method on 'Scope', a 'build()' method on service 'Configuration' objects, and there's even an '@Autobuild' facet. But what is *auto-building*?
 
 Autobuilding is the act of creating an instance of a class with IoC. That is, IoC will new up the instance and perform any necessary injection as previously outlined.
-
-For example, all services defined via 'defineServices()' methods are autobuilt.
 
 Let's look at this code:
 
@@ -662,37 +660,37 @@ Service Scopes
 **************
 Services are created just once per 'Scope', but may be created in multiple scopes. Scopes are nested and, if a service can not be found in one scope, the search is delegated to the parent scope.
 
-IoC defines just one scope - the *root scope*. All other scopes are derived from the root scope. The root scope is a non-threaded scope, meaning it can only hold instances of 'const' classes and services. Threaded scopes are created and destoyed in the same thrtad, hence they may only contain non-const classes and services.
+IoC defines just one scope - the **root scope**. All other scopes are derived from the root scope. The root scope is a non-threaded scope, meaning it can only hold instances of 'const' classes and services. Threaded scopes are created and destroyed in the same thread, hence they may only contain non-const classes and services.
 
 Non-threaded scopes (like the root scope) may create and contain any type of scope, but threaded scopes may only contain other threaded scopes.
 
-The scope of a service may be explicitly set when you define it - either in the '@Build' / '@Override' facet or in the 'RegistryBuilder.addService()' method. If no scope is explicitly set then, by default, const classes are matched to all non-threaded scopes. And non-const classes are matched to all threaded scopes.
+The scope of a *service* may be explicitly set when you define the service - either in the '@Build' / '@Override' facet or in the 'RegistryBuilder.addService()' method. If no scope is explicitly set then, by default, const classes are matched to *all* non-threaded scopes. And non-const classes are matched to *all* threaded scopes.
 
-You can define your own scopes via the 'RegistryBuilder.addScope()' method and use it with 'Scope.createChildScope()'. But largely, it is just the IoC container that defines and creates scopes. Both [Reflux]`pod:afReflux` and [BedSheet]`pod:afBedSheet` are examples of IoC containters.
+You can define custom scopes via 'RegistryBuilder.addScope()' method and create it with 'Scope.createChildScope()'. But largely, it is just IoC containers that define and creates scopes. Both [Reflux]`pod:afReflux` and [BedSheet]`pod:afBedSheet` are examples of IoC containers.
 
 
 
 Reflux Applications
 ===================
-If building a [Reflux]`pod:afReflux` application then all the processing happens in the UI thread. As such, Reflux defines a single threaded scope called 'uiThread' and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.  Happy days!
+In a [Reflux]`pod:afReflux` application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called 'uiThread' and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
+
+*Happy days!*
 
 
 
-Web / REST Applications
-=======================
-Web / REST applications are multi-threaded; each web request is served on a different thread. For that reason the [BedSheet's]`pod:afBedSheet` web server defines a threaded 'request' scope.
+BedSheet Applications
+=====================
+[BedSheet]`pod:afBedSheet` Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called 'request'.
 
 **Request Scope:**
-Here a new instance of the service will be created for each thread / web request. [BedSheet's]`pod:afBedSheet` 'WebReq' and 'WebRes' are good examples of 'request' services. In some situations this *per thread* object creation could be considered wasteful. In other situtations, such as sharing database connections, it is not even viable. So let's look at:
+Here a new instance of the service will be created for each thread / web request. BedSheet's 'WebReq' and 'WebRes' are good examples of 'request' services. Note in some situations this *per thread* object creation could be considered wasteful. In other situations, such as sharing database connections, it is not even viable.
 
 **Root Scope:**
 In IoC's default scope, only one instance of the service is created for the entire application. *Root scoped* services need to be 'const' classes.
 
-Writing 'const' services may be off-putting to some - because they're constant, right!? ** *Wrong!* **
+Writing 'const' services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...]`article:from-one-thread-to-another` shows you how.
 
-Const classes **can** hold *mutable* data. The article [From One Thread to Another...]`article:from-one-thread-to-another` shows you how.
-
-The smart ones may be thinking that 'root' scoped services can only hold other 'root' scoped services. Well, they would be wrong! Using the magic of *Lazy Funcs*, 'request' scoped services may also be injected into 'root' scoped services. See [Lazy Functions]`#lazyFunctions` for more info.
+The smart ones may be thinking that 'root' scoped services can only hold other 'root' scoped services. Well, they would be wrong too! Using the magic of *Lazy Funcs*, 'request' scoped services may be injected into 'root' scoped services. See [Lazy Functions]`#lazyFunctions` for more info.
 
 
 
@@ -702,8 +700,8 @@ Here is a quick example of how to create and use your own threaded scope, runnin
 
 pre>
 registry := RegistryBuilder() {
-	addScope("thread")
-	addService(MyService#).withScope("thread")
+    addScope("thread")
+    addService(MyService#).withScope("thread")
 }.build
 
 rootScope := registry.rootScope
@@ -722,7 +720,7 @@ registry.shutdown
 
 Jail Breaking
 =============
-As you can see above, the 'thread' scope is constrained to the closure passed into 'Scope.createChildScope()'. Sometimes this is not desirable. If so, it is possoble to *jail break* the child scope from the closure:
+As you can see above, the 'thread' scope is constrained to the closure passed into 'Scope.createChildScope()'. Sometimes this is not desirable. If so, it is possible to *jail break* the child scope from the closure:
 
 pre>
 registry := RegistryBuilder() {
@@ -737,6 +735,7 @@ rootScope.createChildScope("thread") |tScope| {
     threadScope = tScope.jailBreak
 }
 
+// use thread scope from outside the defining closure
 myService := threadScope.serviceById("serviceId")
 
 ...
@@ -745,7 +744,7 @@ threadScope.destroy
 registry.shutdown
 <pre
 
-Note that if you jail break a scope then it is your responsiblity to 'destroy()' it!
+Note that if you jail break a scope then it is your responsibility to 'destroy()' it!
 Also note that once jail broken, the scopes is no longer returned as the registry's *active* scope.
 
 
@@ -756,19 +755,13 @@ To defer building services until they are used, you can inject *Lazy Functions*.
 
 pre>
 syntax: fantom
-@Inject |->MyService| myServiceFunc
+@Inject
+|->MyService| myServiceFunc
 <pre
 
-or
+Lazy funcs always query the current *active* scope to find the service instance. The active scope may be different to the scope that the containing class was created in. This important distinction allows threaded services to be injected into non-threaded services.
 
-pre>
-syntax: fantom
-myServiceFunc := (|->MyService|) registry.dependencyByType(|->MyService|#)
-<pre
-
-Lazy funcs always query the current *active* scope to find the service instance. The active scope may be different to the scope that the containing class was created in. This important distinction allows threaded services to be injectd into non-threaded services.
-
-(Note that in order to do this, Lazy Funcs are also immutable.)
+(Note that Lazy Funcs are immutable.)
 
 So instead of writing this:
 
@@ -782,13 +775,18 @@ const class ConstService {
 
     new make(|This| in) { in(this) }
 
-    NonConstService nonConstService() {
+    Void doStuff() {
+        oldSkoolLazyFunc().doStuff()
+    }
+
+    NonConstService oldSkoolLazyFunc() {
+        // returns a non-const service from the active scope
         registry.activeScope.serviceById(NonConstService#.qname)
     }
 }
 <pre
 
-You can write this:
+You can just write this:
 
 pre>
 syntax: fantom
@@ -796,9 +794,13 @@ using afIoc
 
 const class ConstService {
 
-    @Inject const |->NonConstService| nonConstService
+    @Inject const |->NonConstService| lazyFunc
 
     new make(|This| in) { in(this) }
+
+    Void doStuff() {
+        lazyFunc().doStuff()
+    }
 }
 <pre
 
@@ -810,13 +812,13 @@ Sometimes it can't be helped. Sometimes you have a circular dependency in your s
 
   ServiceA -> ServiceB -> ServiceC -> ServiceA
 
-This makes creating an instance of 'ServiceA' impossible, because to create 'ServiceA' you first have to create 'ServiceA' to inject into 'ServiceC'!
+This makes creating an instance of 'ServiceA' impossible, because to create 'ServiceA' you first create 'ServiceA' to inject into 'ServiceC'!
 
-But by giving just one of the service injections into a Lazy Func, the chain is broken!
+But by turning just one of the service injections into a Lazy Func, the chain is broken!
 
   ServiceA -> ServiceBLazyFunc ...... ServiceB -> ServiceC -> ServiceA
 
-The chain is broken because when IoC creates 'ServiceA' it injects a func for 'ServiceB'. 'ServiceB' is only created when that func is called. By which time, 'ServiceA' has already been created! So when the func is called, IoC happily creates 'ServiceC', injecting in 'ServiceA'.
+The chain is broken because when IoC creates 'ServiceA' it injects a func for 'ServiceB'. 'ServiceB' is only created when that func is called. By which time, 'ServiceA' has already been created! So when the Lazy Func is called, IoC happily creates 'ServiceC', injecting in 'ServiceA'.
 
 This means circular service dependencies are virtually eliminated!
 
@@ -824,25 +826,26 @@ This means circular service dependencies are virtually eliminated!
 
 Factory Functions
 *****************
-To perform an autobuild you usually need an instance of the IoC 'Registry'. As it is not always convenient to inject / pass around the Registry you may also autobuild using *Factory Functions*.
+To perform an autobuild you need a 'Scope' instance. As it is not always convenient to inject / pass around the Scope you may also autobuild using *Factory Functions*.
 
-Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define paramters, the values of which get passed to the autobuild ctor:
+Factory functions are similar to Lazy Functions, except they return non-service types. Factory funcs may also define parameters, the values of which get passed to the autobuild ctor:
 
 pre>
 syntax: fantom
 using afIoc
 
-class BuildMe {
-    new make(Str name, SomeService someService) { ... }
-}
-
 class Builder {
-    @Inject |Str->BuildMe| buildMeFunc
+    @Inject |Str->BuildMe| factoryFunc
 
     Void stuff() {
-        bob1 := buildMeFunc("Judge")    // "Judge" gets passed to the BuildMe ctor
-        bob2 := buildMeFunc("Dredd")    // "Dredd" gets passed to the BuildMe ctor
+        bob1 := factoryFunc("Judge")  // "Judge" gets passed to the BuildMe ctor
+        bob2 := factoryFunc("Dredd")  // "Dredd" gets passed to the BuildMe ctor
     }
+}
+
+class BuildMe {
+    // name is passed in from the factory func, someService is injected
+    new make(Str name, SomeService someService) { ... }
 }
 <pre
 
