@@ -6,7 +6,8 @@ internal const class NonInvasiveInspector : ModuleInspector {
 		methods := module.typeof.methods.rw.sort |Method a, Method b -> Int| { a.name <=> b.name }
 
 		methods.each |method| {
-			if (method.name.equalsIgnoreCase("defineModule") && method.params.isEmpty && method.returns.fits([Str:Obj]#))
+			// I wanted 'defineModule()' but IoC 2 picks up defineXXXX() breaking backwards compatibility for libs like afConcurrent
+			if (method.name.equalsIgnoreCase("nonInvasiveIocModule") && method.params.isEmpty && method.returns.fits([Str:Obj]#))
 				addModule(bob, module, method)
 		}		
 	}
