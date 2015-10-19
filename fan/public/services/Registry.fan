@@ -273,9 +273,8 @@ internal const class RegistryImpl : Registry {
 	override Str printServices() {
 		print := "\n"
 		
-		buckets := groupBy(serviceDefs.vals) |ServiceDef def->Obj| { def.type.pod.name }
-		buckets = buckets.keys.sort.reduce(Str:Obj[:] { it.ordered = true }) |Str:Obj map, key| { map[key] = buckets[key] }
-		
+		groups  := groupBy(serviceDefs.vals) |ServiceDef def->Obj| { def.type.pod.name }
+		buckets := (Str:ServiceDef[]) groups.keys.sort.reduce(Str:ServiceDef[][:] { it.ordered = true }) |Str:ServiceDef[] map, key| { map[key] = groups[key] }
 		
 		maxSize := 0
 		buckets.each |ServiceDef[] serviceDefs, Str podName| {

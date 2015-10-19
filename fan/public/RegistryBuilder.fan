@@ -96,6 +96,9 @@ class RegistryBuilder {
 		if (moduleType.fits(IocModule#))
 			throw ArgErr(ErrMsgs.regBuilder_cannotRemoveModule(IocModule#))
 
+		if (!suppressLogging)
+			_logger.info("Removing module ${moduleType.qname}")
+
 		// remove all now
 		_modulesAdd = _modulesAdd.exclude { it.typeof == moduleType }
 
