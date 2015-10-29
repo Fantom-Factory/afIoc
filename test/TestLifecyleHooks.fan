@@ -33,12 +33,12 @@ internal class TestLifecyleHooks : IocTest {
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
-			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - root")
+			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread")
 		}
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
-			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - root")
+			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread")
 		}
 		
 		reg.shutdown
@@ -53,13 +53,13 @@ internal class TestLifecyleHooks : IocTest {
 		reg.rootScope.createChildScope("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
-		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - root")
+		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread")
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
-		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - root")
+		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread")
 		
 		reg.shutdown
 	}
