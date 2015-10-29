@@ -134,7 +134,7 @@ internal const class ScopeImpl : Scope {
 		this.serviceStore	= ServiceStore(registry, scopeDef.id)
 		this.destroyedLock	= OneShotLock(ErrMsgs.scopeDestroyed(id), ScopeDestroyedErr#)
 		
-		scopeDef.callCreateHooks(parent)
+		scopeDef.callCreateHooks(this)
 	}
 
 	override Str id() {
@@ -268,7 +268,7 @@ internal const class ScopeImpl : Scope {
 		// An IoC module could easily be created to compensate for this if absolutely needed. 
 		if (destroyedLock.lock) return
 		
-		scopeDef.callDestroyHooks(parent)
+		scopeDef.callDestroyHooks(this)
 
 		serviceStore.destroy
 	}
