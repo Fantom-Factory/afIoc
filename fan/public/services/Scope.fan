@@ -266,9 +266,11 @@ internal const class ScopeImpl : Scope {
 		// only of concern if someone has destroy hooks on both scopes.
 		//
 		// An IoC module could easily be created to compensate for this if absolutely needed. 
-		if (destroyedLock.lock) return
+		if (destroyedLock.locked) return
 		
 		scopeDef.callDestroyHooks(this)
+
+		destroyedLock.lock
 
 		serviceStore.destroy
 	}

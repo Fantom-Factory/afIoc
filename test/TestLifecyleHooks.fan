@@ -115,6 +115,7 @@ internal const class T_ConstClass {
 	}
 
 	static Void scopeDestroyHook(Scope scope) {
+		scope.serviceById(Registry#.qname)	// just check we can still use the scope 
 		eventRef.val = "scopeDestroyHook - ${scope.id}"
 	}
 
