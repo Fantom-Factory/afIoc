@@ -35,7 +35,7 @@ internal const class NonInvasiveInspector : ModuleInspector {
 		contributions := ([Str:Obj][]?) map["contributions"]
 		contributions?.each {
 			serviceId	:= (Str)		it["serviceId"]
-			key			:= (Str?)		it["key"]
+			key			:= (Obj?)		it["key"]
 			value		:= (Obj?)		it["value"]
 			valueFunc	:= (Func?)		it["valueFunc"]
 			build		:= (Type?)		it["build"]
