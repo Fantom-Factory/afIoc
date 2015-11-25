@@ -41,7 +41,8 @@ internal const class NonInvasiveInspector : ModuleInspector {
 			build		:= (Type?)		it["build"]
 			before		:= (Obj?)		it["before"]
 			after		:= (Obj?)		it["after"]
-			regBob.contributeToService(serviceId, |Configuration config| {
+			
+			configFunc	:= |Configuration config| {
 				if (build != null)
 					value = config.build(build)
 
@@ -64,8 +65,18 @@ internal const class NonInvasiveInspector : ModuleInspector {
 					constraints.before(before, true)
 				if (after != null)
 					constraints.after(after, true)
-				
-			}, true)
+			}
+
+			switch (serviceId) {
+				case "registryStartup":
+					regBob.onRegistryStartup(configFunc)
+			
+				case "registryShutdown":
+					regBob.onRegistryShutdown(configFunc)
+			
+				default:
+					regBob.contributeToService(serviceId, configFunc, true)
+			}
 		}
 	}	
 }
