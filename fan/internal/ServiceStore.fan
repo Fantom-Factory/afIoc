@@ -50,6 +50,10 @@ internal const class ServiceStore {
 			it.destroy
 		}
 	}
+	
+	override Str toStr() {
+		serviceIds.rw.sort.join("\n")
+	}
 }
 
 @Js

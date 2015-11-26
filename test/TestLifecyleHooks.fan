@@ -23,7 +23,7 @@ internal class TestLifecyleHooks : IocTest {
 		verifyEq(T_ConstClass.eventRef.val, null)
 		
 		reg.shutdown
-		verifyEq(T_ConstClass.eventRef.val, "registryShutdownHook - root")
+		verifyEq(T_ConstClass.eventRef.val, "registryShutdownHook - root - root")
 	}
 
 	Void testScopeCreate() {
@@ -33,12 +33,12 @@ internal class TestLifecyleHooks : IocTest {
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
-			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread")
+			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread - thread")
 		}
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
-			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread")
+			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread - thread")
 		}
 		
 		reg.shutdown
@@ -53,13 +53,13 @@ internal class TestLifecyleHooks : IocTest {
 		reg.rootScope.createChildScope("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
-		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread")
+		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread - thread")
 		
 		T_ConstClass.eventRef.val = null
 		reg.rootScope.createChildScope("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
-		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread")
+		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread - thread")
 		
 		reg.shutdown
 	}
@@ -91,10 +91,10 @@ internal class TestLifecyleHooks : IocTest {
 			addModule(T_MyModule09())
 		}.build
 	
-		verifyEq(T_ConstClass.eventRef.val, "registryStartupHook - root")
+		verifyEq(T_ConstClass.eventRef.val, "registryStartupHook - root - root")
 		
 		reg.shutdown
-		verifyEq(T_ConstClass.eventRef.val, "registryShutdownHook - root")
+		verifyEq(T_ConstClass.eventRef.val, "registryShutdownHook - root - root")
 	}
 }
 
@@ -103,20 +103,20 @@ internal const class T_ConstClass {
 	const static AtomicRef eventRef	:= AtomicRef(null)
 	
 	static Void registryStartupHook(Scope scope) {
-		eventRef.val = "registryStartupHook - ${scope.id}"
+		eventRef.val = "registryStartupHook - ${scope.id} - ${scope.registry.activeScope.id}"
 	}
 
 	static Void registryShutdownHook(Scope scope) {
-		eventRef.val = "registryShutdownHook - ${scope.id}"
+		eventRef.val = "registryShutdownHook - ${scope.id} - ${scope.registry.activeScope.id}"
 	}
 
 	static Void scopeCreateHook(Scope scope) {
-		eventRef.val = "scopeCreateHook - ${scope.id}"
+		eventRef.val = "scopeCreateHook - ${scope.id} - ${scope.registry.activeScope.id}"
 	}
 
 	static Void scopeDestroyHook(Scope scope) {
 		scope.serviceById(Registry#.qname)	// just check we can still use the scope 
-		eventRef.val = "scopeDestroyHook - ${scope.id}"
+		eventRef.val = "scopeDestroyHook - ${scope.id} - ${scope.registry.activeScope.id}"
 	}
 
 	static Void serviceBuildHook(Scope scope, ServiceDef serviceDef, Obj serviceInstance) {
