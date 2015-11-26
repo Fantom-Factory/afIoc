@@ -132,9 +132,7 @@ internal const class ScopeImpl : Scope {
 		this.scopeDef		= scopeDef
 		this.parent			= parent
 		this.serviceStore	= ServiceStore(registry, scopeDef.id)
-		this.destroyedLock	= OneShotLock(ErrMsgs.scopeDestroyed(id), ScopeDestroyedErr#)
-		
-		scopeDef.callCreateHooks(this)
+		this.destroyedLock	= OneShotLock(ErrMsgs.scopeDestroyed(id), ScopeDestroyedErr#)		
 	}
 
 	override Str id() {
@@ -239,6 +237,8 @@ internal const class ScopeImpl : Scope {
 		childScopeDef	:= registry.findScopeDef(scopeId, this)
 		childScope 		:= ScopeImpl(registry, this, childScopeDef)
 		registry.activeScopeStack.push(childScope)
+		childScopeDef.callCreateHooks(childScope)
+
 		try {
 			f.call(childScope)
 		} finally {

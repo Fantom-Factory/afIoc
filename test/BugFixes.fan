@@ -20,32 +20,32 @@ internal class BugFixes : IocTest {
 		reg.registry.shutdown
 	}
 	
-//	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
-//		reg := threadScope { addModule(T_MyModule85#) }
-//		t70	:= (T_MyService70) reg.serviceById("t70")
-//		verifyNotNull(t70)
-//	}
-//
-//	Void testDupServiceCanBeGottenByType() {
-//		reg := threadScope { addModule(T_MyModule98#) }
-//		
-//		s1 := reg.serviceById(T_MyService89#.qname)
-//		s2 := reg.serviceById("PillowRoutes")
-//		verifyNotEq(s1, s2)
-//		
-//		t1 := reg.serviceById(T_MyService89#.qname)
-//		verifyEq(t1, s1)
-//	}
-//	
-//	Void testThreadedServicesCanBeAutobuiltInCtor() {
-//		reg := threadScope { addModule(T_MyModule100#) }
-//		t2 := reg.serviceById("s92")
-//	}
-//
-//	Void testThreadedServicesCanBeInjectedIntoCtor() {
-//		reg := threadScope { addModule(T_MyModule100#) }
-//		t2 := reg.serviceById("s93")
-//	}
+	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
+		reg := threadScope { addModule(T_MyModule85#) }
+		t70	:= (T_MyService70) reg.serviceById("t70")
+		verifyNotNull(t70)
+	}
+
+	Void testDupServicesWithDiffIds() {
+		reg := threadScope { addModule(T_MyModule98#) }
+		
+		s1 := reg.serviceById(T_MyService89#.qname)
+		s2 := reg.serviceById("PillowRoutes")
+		verifyNotEq(s1, s2)
+		
+		t1 := reg.serviceById(T_MyService89#.qname)
+		verifyEq(t1, s1)
+	}
+	
+	Void testThreadedServicesCanBeAutobuiltInCtor() {
+		reg := threadScope { addModule(T_MyModule100#) }
+		t2 := reg.serviceById("s92")
+	}
+
+	Void testThreadedServicesCanBeInjectedIntoCtor() {
+		reg := threadScope { addModule(T_MyModule100#) }
+		t2 := reg.serviceById("s93")
+	}
 }
 
 @Js
