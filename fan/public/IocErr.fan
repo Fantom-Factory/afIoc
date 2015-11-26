@@ -36,6 +36,7 @@ const class IocErr : Err {
 
 	@NoDoc
 	protected Str opTraceStr() {
+		if (operationTrace?.trimToNull == null) return ""
 		opTrace := "\nIoC Operation Trace:\n"
 		lines	:= operationTrace?.splitLines ?: Str#.emptyList
 		lines.each |op, i| { 
