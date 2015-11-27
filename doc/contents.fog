@@ -1,0 +1,5 @@
+[Uri:Str][
+	`/doc/pod.fandoc`			: "User Guide",
+	`/doc/upgradeToV3.fandoc`	: "IoC V3 Upgrade Notes",
+	`/doc/releaseNotes.fandoc`	: "Release Notes"
+]

@@ -1,0 +1,163 @@
+Upgrade to IoC v3
+*****************
+
+This document explains some of the differences between IoC 2 and IoC 3.
+
+IoC 3 is a complete rewrite of the IoC library, but the main interface to the library (service facets) has remained the same. This allowed the extensive test coverage of IoC 2 to be reused for IoC 3, and ensures your code requires little, if any, change to update.
+
+A major feature of IoC 3 is that it is available in Javascript. To allow this, the Proxy and Aspect features of IoC 2 have been dropped. A side effect being that IoC is now faster and more lightweight than ever before. Proxies, if required, can generally be replaced by Lazy Funcs, and it was felt Aspects were a generally under utilised advanced feature.
+
+
+
+RegistryBuilder
+===============
+'RegistryBuilder' now accepts module *instances* as well as module types. Note the 'startup()' method has been dropped.
+
+Old code:
+pre>
+syntax: fantom
+registry := RegistryBuilder().addModule(MyModule#).build().startup()
+<pre
+
+New code:
+pre>
+syntax: fantom
+registry := RegistryBuilder().addModule(MyModule()).build()
+<pre
+
+'RegistryBuilder' is a lot more versatile and is able to do everything an 'AppModule' can, and more! An example using 'with()' it-block syntax:
+pre>
+syntax: fantom
+registry := RegistryBuilder() {
+    addModule(MyModule())
+
+    // add services and contribute to them
+    addService(Penguins#).withCtorArgs(["fishLegs"])
+    contributeToServiceType(Penguins#) |Configuration config| {
+        config["food"] = Fish()
+    }
+
+    // add hooks to lifecycle events
+    onRegistryStartup          |Configuration config| { ... }
+    onRegistryShutdown         |Configuration config| { ... }
+    onScopeDestroy("root")     |Configuration config| { ... }
+    onScopeDestroy("root")     |Configuration config| { ... }
+    onServiceBuild("penguins") |Configuration config| { ... }
+
+}.build()
+<pre
+
+
+
+AppModules
+==========
+'AppModules' must now be 'const' because instances may be contributed to 'RegistryBuilder'. This means methods no longer need to be static, which feels more natural.
+
+'defineServices()' may be called anything as long as the method name starts with 'defineXXXX()' and declares 'RegistryBuilder' as its only parameter.
+
+Methods annotated with '@Build', '@Contribute' and '@Override' remain the same.
+
+The 'RegistryStartup' and 'RegistryShutdown' services have been replaced with lifecycle hooks, which may be contributed to via special named methods.
+
+Other syntax differences are shown below:
+
+Old code:
+pre>
+syntax: fantom
+class AppModule {
+
+    static Void defineServices(ServiceDefinitions defs) {
+        defs.add(MyService#).withCtorArgs(["fishLegs"])
+        ...
+    }
+
+    @Build
+    static Penguins buildPenguins() { ... }
+
+    @Contribute { serviceType=Penguins# }
+    static Void contributePenguinUrls(Configuration config) { ... }
+
+    @Contribute { serviceType=RegistryStartup# }
+    static Void contributeRegistryStartup(Configuration config) { ... }
+
+    @Contribute { serviceType=RegistryShutdown# }
+    static Void contributeRegistryShutdown(Configuration config) { ... }
+}
+<pre
+
+New code:
+pre>
+syntax: fantom
+const class AppModule {
+
+    Void defineModule(RegistryBuilder bob) {
+        bob.addService(MyService()).withCtorArgs(["fishLegs"])
+        ...
+    }
+
+    @Build
+    Penguins buildPenguins() { ... }
+
+    @Contribute { serviceType=Penguins# }
+    Void contributePenguinUrls(Configuration config) { ... }
+
+    Void onRegistryStartup(Configuration config) { ... }
+
+    Void onRegistryShutdown(Configuration config) { ... }
+}
+<pre
+
+No changes have been made to the 'Configuration' class other than contributions may now be optional.
+
+
+
+Registry / Scope
+================
+The biggest change in IoC 3 is the introduction of Scopes. As such, most of the useful dependency injection methods have moved from 'Registry' to the new 'Scope' class. The method names have been tidied up too.
+
+Old code:
+pre>
+syntax: fantom
+registry.serviceById("myService")
+registry.dependencyByType(MyService#)
+registry.autobuild(MyService#)
+registry.injectIntoFields(MyService())
+<pre
+
+
+New code:
+pre>
+syntax: fantom
+registry.serviceById("myService")
+registry.serviceByType(MyService#)
+registry.build(MyService#)
+registry.inject(MyService())
+<pre
+
+Note that only services may now be retrieved from Scope, should you wish for a general dependency, use the 'DependencyProviders' service - see source for details.
+
+
+
+Scopes
+======
+As previously mentioned, the biggest change in IoC 3 is the introduction of Scopes. IoC itself defines an application level *root scope* where all singletons may live. For non-const classes [BedSheet]`pod:afBedSheet` defines a threaded 'request' scope and [Reflux]`pod:afReflux` defines a 'uiThread' scope.
+
+Const services are automatically matched to the root scope (and other non-threaded scopes), and non-const services are matched to threaded scopes. In containers such as BedSheet and Reflux where there are just 2 scopes, this default behaviour matches IoC 2.
+
+However, if creating custom scopes then you should take care that services are only created in prescribed scopes.
+
+pre>
+syntax: fantom
+registry := RegistryBuilder() {
+	addScope("southPole")
+	addService(Penguins#).withScope("southPole")
+}
+
+registry.rootScope.createChildScope("southPole") |Scope southPole| {
+	southPole.serviceByType(Penguins#)
+	...
+}
+<pre
+
+Have fun!
+

@@ -1,0 +1,303 @@
+Versions
+********
+
+v3.0.0
+======
+ - New: IoC now availble in Javascript!
+ - New: IoC v3 is a re-write - it's lightweight, fast, and more cusomisable than ever before!
+
+v2.0.10
+=======
+ - Bug: Could not autobuild types that had a 'List' or a 'Map' as the first ctor param - it was clashing with service config.
+
+v2.0.8
+======
+ - New: Factory Functions! Autobuild instances without passing around the 'Registry'.
+ - New: Lazy Functions! An easy way to defer service creation.
+ - Chg: Autobuild and service ctors are now selected on a *best fit* basis, not just the number of parameters.
+ - Chg: Nullable ctor and method parameters are now deemed *optional* and don't throw an Err if not found.
+ - Chg: Hardcoded 'ServiceProvider' to be the last dependency provider to simplify config contributions.
+ - Bug: Some combinations of autobuilding and service creation caused IoC to hang indefinitely instead of throwing a service recursion error.
+
+v2.0.6
+======
+ - New: Added 'RegistryBuilder.dup()'.
+ - New: Added 'IocService.options()'.
+ - Chg: 'RegistryBuilder' is now serializable.
+
+v2.0.4
+======
+ - New: Documentation - lots of it!
+ - Chg: Renamed 'InjectionCtx.injectingInto' --> 'InjectionCtx.target' and 'InjectionCtx.injectingIntoType' --> 'InjectionCtx.targetType'.
+ - Bug: '@Autobuild' fields could be created twice if an it-block ctor was used.
+
+v2.0.2
+======
+ - Chg: 'perApplication' scoped services can only be created once, even during threaded race conditions.
+ - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
+ - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
+ - Chg: 'RegistryBuilder.addModulesFromPod()' now takes a Str (pod name), not a pod instance.
+ - Chg: 'DependencyProviders' is more accessible for [efanXtra]`pod:afEfanXtra`.
+ - Bug: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
+
+v2.0.0
+======
+ - New: All attributes of a service (scope, proxy, etc...) may be overridden.
+ - New: '@Override' facet for defining service override methods in 'AppModule'.
+ - New: '@Autobuild' facet for injecting non-service instances.
+ - New: 'ServiceDefinitions', 'ServiceDefinitionOptions' and 'ServiceOverrideOptions' replaces 'ServiceBinder' et al.
+ - New: Added 'RegistryBuilder.removeModule()'.
+ - Chg: Optomised and reduced internal code - **now 20% faster!**
+ - Chg: Services are not proxied unless they need to be; e.g. it has method advice, or is thread scope being injected into an app scoped service. (Potential breaking change.)
+ - Chg: 'DependencyProviders' are applied to *all* fields, '@Inject' facet is no longer required.
+ - Chg: Deleted 'autobuild' from '@Inject' facet in favour of a new-ish '@Autobuild' facet. (Breaking change.)
+ - Chg: Default serviceId for '@Build' methods is now the qualified name of the return Type. (Potential breaking change.)
+ - Chg: Deleted 'ServiceOverrides' service in favour of service '@Override' methods. (Breaking change.)
+ - Chg: Deleted 'ServiceStats' service in favour of method 'Registry.serviceDefinitions()'. (Breaking change.)
+ - Chg: Deleted all existing @Deprecated classes. (Breaking change.)
+ - Chg: 'LogProvider' service may be overridden to ensure it provides *all* injected 'Log' instances. (Breaking change.)
+ - Chg: Renamed 'ServiceStat' -> 'ServiceDefinition'. (Breaking change.)
+ - Chg: Lower cased the names of the 'ServiceLifecycle' enum. (Breaking change.)
+ - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
+ - Bug: 'IocService' methods now more closely follow those of 'Registry'.
+
+v1.7.6
+======
+ - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.
+ - Chg: Added 'checked' parameter to 'Registry.serviceById()'.
+ - Chg: Removed the little used 'Unwrappable' Err mixin.
+ - Bug: 'RegistryBuilder' could potentially throw an Err when adding both modules and pods.
+
+v1.7.4
+======
+ - Bug: Configuration contributions added via 'set()' did not have any implied ordering constraints.
+
+v1.7.2
+======
+ - Chg: Configuration ordering constraints are no longer specified with strings. Use the new 'Constraints' class to pass your Obj keys in.
+   This avoids problems with 'toStr()' and string keys with commas.
+
+v1.7.0
+======
+ - New: All service configuration is done through the *uber* 'Configuration' object.
+ - New: Configuration IDs can now be injected by specifying a Map rather than a List.
+ - New: Added '@Advise.serviceType' for advising a single service.
+ - Chg: Deprecated 'OrderedConfig' and 'MappedConfig' in favour of 'Configuration'.
+ - Chg: Aspect invoker references 'null' instead of an empty list when holding method advice.
+ - Chg: 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' now use the Type's qualified name as the key
+ - Chg: Deleted all existing @Deprecated classes.
+ - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
+
+v1.6.4
+======
+ - New: Methods on proxied services may now have *plain* default values - 'Plastic' will attempt to *guess* what they are!
+ - Chg: Removed deprecated classes 'TypeCoercer, StrategyRegistry' and 'NotFoundErr'.
+ - Chg: Changed the default values for some 'Registry' methods to 'null' (from 'Obj#.emptyList').
+ - Chg: Moved the startup logging to 'RegistryStartup' contributions so they could easily be removed / overridden.
+ - Chg: Removed the 'RegistryBuilder' options 'logServiceCreation, disableProxies, suppressStartupBanner' and 'suppressStartupServiceList'.
+ - Chg: Gave the IoC 'ActorPool' a name.
+ - Bug: Could not autobuild nullable types.
+
+v1.6.2
+======
+ - New: Threaded services can be overriden.
+ - New: Using [Bean Utils 0.0.2]`pod:afBeanUtils`
+ - Chg: Deleted all previous '@Deprecated' classes and methods.
+ - Chg: Deprecated 'TypeCoercer, StrategyRegistry' and 'NotFoundErr' in favour of new [Bean Utils]`pod:afBeanUtils` library.
+ - Chg: Type checks involving Lists and Maps when calling methods and ctors are more lenient.
+ - Chg: Renamed 'RegistryShutdownHub' -> 'RegistryShutdown'. Shutdown listeners are deprecated, use standard AppModule contributions instead.
+ - Chg: Renamed 'DependencyProviderSource' -> 'DependencyProviders'.
+ - Chg: Renamed 'ServiceOverride' -> 'ServiceOverrides'.
+ - Chg: Renamed 'InjectionType' -> 'InjectionKind'.
+ - Chg: Discovered 'List.eachRange()'!
+ - Chg: IoC system ActorPool is stopped on shutdown.
+ - Bug: Trying to proxy a mixin with a static field gave an Err.
+
+v1.6.0
+======
+ - New: 'Registry.dependencyByType()' now returns services via a type inheritance search.
+ - New: 'LocalRefs, LocalMaps, LocalLists' instances may now be '@Inject'ed thanks to new 'DependencyProviders'
+ - New: Added 'fieldVals' parameter to 'Regsitry.autobuild(...)' and 'Regsitry.createProxy(...)' so non-DI fields may also be set by an it-block.
+ - New: Added 'ActorPools' class to keep tabs on ActorPools.
+ - New: Added 'moduleTypes()' and 'modulePods()' to 'RegistryMeta'.
+ - New: Added 'createProxy()' to 'OrderedConfig' and 'MappedConfig'.
+ - Chg: Optomised internal concurrent processes - **now 20% faster!**
+ - Chg: [Concurrent]`pod:afConcurrent` has been broken out into an external dependency.
+ - Chg: Deprecated 'ConcurrentState, ConcurrentCache, ThreadStash' in favour of [Concurrent]`pod:afConcurrent` classes.
+ - Chg: Attempting to '@Inject' into a static field will now throw an Err.
+ - Chg: Renamed 'ThreadStashManager' -> 'ThreadLocalManager'
+ - Chg: Renamed RegistryOptions -> 'RegistryMeta'
+ - Chg: Re-jigged 'RegistryBuilder' logic and API.
+ - Chg: Re-jigged 'StrategyRegistry' to add 'findAllChildren()'.
+ - Chg: 'TypeCoercer' is now 'const'.
+
+v1.5.4
+======
+ - Chg: Available values in 'NotFoundErr' are now sorted alphabetically.
+ - Bug: Attempting to inject or autobuild a threaded service in an app-scoped (const) service gave an error.
+
+v1.5.2
+======
+ - New: 'TypeCoercer' converts Lists from one parameterised type to another.
+ - New: 'ConcurrentCache' gets new methods: 'clear(), isEmpty(), remove(), replace(), size()'.
+ - New: Added 'clearCache()' to 'TypeCoercer'.
+ - New: Added 'clearCache()' to 'StrategyRegistry'.
+ - Chg: Added a 'checked' parameter to 'Registry.dependencyByType()'
+ - Chg: Deprecated 'ServiceBinder.bindImpl()' in favour of a nullable parameter in 'ServiceBinder.bind()'
+ - Chg: Errs thrown in 'Registry.callMethod()' are no longed wrapped in an 'IocErr'.
+ - Chg: Renamed '@ServiceId.serviceId' -> '@ServiceId.id'
+ - Bug: 'Registry.callMethod()' could not handle methods with default arguments.
+ - Bug: 'Log' could not be injected via ctor.
+
+v1.5.0
+======
+ - New: 'Registry.createProxy()' lets you create a lazy proxy from an arbituary mixin / impl pair.
+ - New: 'Registry.callMethod()' lets you invoke methods with dependencies injected into the parameters.
+ - New: 'LogProvider' lets you inject 'Log' instances.
+ - New: 'InjectionCtx' contains details as to what type of injection is taking place. (Renamed from 'ProviderCtx')
+ - New: Service overrides can use Types as the config key.
+ - Chg: When a service type is defined multiple times, a default one is returned by 'dependencyByType'.
+ - Chg: Default ServiceIds are now the **fully qualified** names of the service (mixin) type. (Breaking change.)
+ - Chg: Removed dependency type from 'DependencyProvider' method signatures. It moved to 'InjectionCtx'. (Breaking change.)
+ - Chg: Liberated the 'PipelineBuilder' util service. It moved to BedSheet. (Breaking change.)
+ - Chg: Overhauled 'InjectionCtx' to make use of ThreadStacks so it doesn't need to be passed around.
+
+v1.4.10
+=======
+ - Chg: InjectionCtx is now threaded and used in Lazy Service creation. (Um, that means more complete Operation Stacks in IocErrs!)
+ - Bug: Once a proxied service, always a proxied service! In some cases the *real* service could have been returned.
+
+v1.4.8
+======
+ - New: RegistryBuilder options are now available via `RegistryOptions`.
+ - Chg: Injectable services are now documented with '(Service)'.
+ - Chg: Enabled multi-line banner text.
+
+v1.4.6
+======
+ - New: Added 'makeWithMap()' ctor and 'getOrAdd()' to 'ConcurrentCache'.
+ - New: 'NotFoundErr' now pretty prints available values.
+ - Chg: [Plastic]`pod:afPlastic` has been broken out into an external dependency.
+ - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
+ - Bug: `DependencyProvider`s could Err when they depended on lazy services (recursion error).
+ - Bug: 'ThreadStash' name prefix tidy.
+
+v1.4.4
+======
+ - New: 'PlasticCompilationErr' gives detailed info and code snippets.
+ - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
+ - Chg: afPlastic now generates 'using' statements.
+ - Chg: Toned down `RegistryBuilder` logging.
+ - Bug: 'Before' and 'After' ordering constraint prefixes were not case insensitive.
+
+v1.4.2
+======
+ - New: Added 'ConcurrentCache' class, an application of 'ConcurrentState' designed for fast reads.
+ - New: Added 'PlasticClassModel.extendClass()' for the model may now extend multiple Mixins.
+ - New: Added 'PlasticClassModel.addMethod()' for adding new methods.
+ - Chg: 'ConcurrentState' state may now be 'null' (and added an instance count).
+
+v1.4.0
+======
+ - New: Added 'OrderedConfig.remove()' and 'MappedConfig.remove()'.
+ - New: Added 'RegistryBuilder.moduleTypes' to return a list of modules types held by the builder.
+ - New: Added 'suppressStartupMsg' build option.
+ - Chg: Rejigged the config override argument order. (Breaking Change.)
+ - Chg: Deleted '@Deprecated' config methods.
+ - Chg: Transferred VCS ownership to [AlienFactory]`https://bitbucket.org/AlienFactory`
+ - Chg: Test code is no longer distributed with the afIoc.pod - pod size was nearing 500 Kb!
+ - Chg: ThreadStashs have less verbose names.
+ - Bug: Could not override ordered config if it was referenced by constraints.
+
+v1.3.10
+=======
+ - New: Added 'PipelineBuilder' util service.
+ - Chg: 'Registry.autobuild()' now looks for a default implementation if passed a mixin.
+ - Chg: Made it clear when service creation fails due to Registry Shutdown.
+ - Bug: Proxy Types for lazy services are now cached. Would have caused a memory leak when using creating lots of threaded const services.
+ - Bug: Ordered contributions with multiple 'before:' constraints could be added to the config list multiple times.
+ - Bug: afPlastic would only allow methods to be overridden if they were defined in the immediate parent type.
+ - Bug: Stack frames were lost from Errs originating from module builder methods.
+
+v1.3.8
+======
+ - New: Added 'TypeCoercer' util class that converts an Obj to a given type using 'toXXX()' and 'fromXXX()' methods.
+ - Chg: 'OrderedConfig' contributions are coerced to the contrib type.
+ - Chg: 'MappedConfig' key and value contributions are coerced to their required types.
+ - Chg: Added shortcut '@Operator This add(obj)' to 'OrderedConfig' and '@Deprecated Void addUnordered(obj)'.
+ - Chg: Added shortcut '@Operator This set(key, val)' to 'MappedConfig' and '@Deprecated Void addMapped(key, val)'.
+ - Chg: Public method on 'OrderedConfig' and 'MappedConfig' now return 'this' and other tweaks.
+ - Chg: Exposed '@NoDoc PlasticPodCompiler' so it may be used outside of afIoc.
+
+v1.3.6
+======
+ - Bug: Real impls of proxied const services were not being cached.
+ - Bug: The implied order of unordered config in 'OrderedConfig' was not assured.
+ - Bug: Could not inject null into const fields via a custom 'DependencyProvider'.
+
+v1.3.4
+======
+ - Chg: `DependencyProvider`s may now provide 'null' values.
+ - Chg: 'OrderedConfig' values may be 'null'.
+ - Chg: 'MappedConfig' values may be 'null'.
+ - Chg: Tweaked 'OrderedConfig' placeholder default ordering logic.
+ - Bug: Placeholders in 'OrderedConfig' Err'ed when config was not a Str.
+
+v1.3.2
+======
+ - New: IocErr is thrown on startup if module advisor methods don't match any proxyable serivces.
+ - New: Module advisor methods may be marked as optional.
+ - New: Add thread clean up handlers to 'ThreadStashManager'.
+ - New: Added 'ThreadStash.contains'
+ - Chg: Operations Err trace is now part of the Err msg (and no longer logged to 'sys.err')
+ - Chg: 'ConcurrentState.withState()' now returns a 'Future'.
+ - Bug: Lifecyle data for threaded Services was not threaded. (Caused problems for threaded proxy services.)
+
+v1.3.0
+======
+ - New: Simple Aspect API for advising proxied servies.
+ - New: Service proxies for mixins are generated and compiled on the fly to give true lazy loading.
+ - New: 'ThreadStashManager' now keeps tabs on your 'ThreadStashes' so they may be cleanup at the end of, um... say a web request!
+ - Chg: Revamped 'LocalStash' into 'ThreadStash'
+ - Chg: Mapped override keys can always be a Str
+ - Chg: Removed Ioc frames from stack traces (no more 150+ line stacktraces!)
+ - Chg: Reducded INFO logging.
+ - Bug: '@Build.serivceId' was not overriding the build method name.
+ - Bug: Distributed mapped overide could throw an invalid override not found err.
+ - Bug: Autobuild now checks if the type is instantiable.
+
+v1.2.2
+======
+ - Chg: `Registry.autobuild` now accepts optional parameters to pass / mix into the ctor.
+ - Chg: 'ConcurrentState' now accepts a factory method for creating / initialising state.
+
+v1.2.0
+======
+ - New: Browse defined services via 'ServiceStats'.
+ - New: Override defined services with your own implementations via the new powerful 'ServiceOverrides' feature.
+ - New: Override any existing 'OrderedConfig' contribution with you own, via 'OrderedConfig.addOverride'.
+ - New: Override any existing 'MappedConfig' contribution with you own, via 'MappedConfig.addOverride'.
+ - New: Ordered configurations may define 'Placeholders'.
+ - Chg: 'Registry shutdown listeners' may now be ordered.
+ - Chg: Improved Registry startup times by only inspecting Pods (for modules) the once.
+ - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
+
+v1.1.0
+======
+ - New: Extend IoC by defining your own `DependencyProvider`s.
+ - New: '@ServiceId' lets you disambiguate between different implmentations of the same service mixin.
+ - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
+ - New: Ordered configuration contributions are ordered across modules.
+ - Bug: Services can be created even if they don't define any ctors.
+
+v1.0.0
+======
+ - New: Added 'addUnorderedAll' and 'addMappedAll' to 'OrderedConfig' and 'MappedConfig'.
+ - Chg: Multiple instances of 'ConcurrentState' can be created with the same state class.
+ - Bug: Made public the 'withState()' and 'getState()' methods on 'ConcurrentState'.
+ - Bug: NPE could be thrown if ctor depdendency not found.
+
+v0.0.2
+======
+ - New: A fully loaded preview release.
+
