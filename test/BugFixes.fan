@@ -36,15 +36,23 @@ internal class BugFixes : IocTest {
 		t1 := reg.serviceById(T_MyService89#.qname)
 		verifyEq(t1, s1)
 	}
-	
-	Void testThreadedServicesCanBeAutobuiltInCtor() {
-		reg := threadScope { addModule(T_MyModule100#) }
-		t2 := reg.serviceById("s92")
-	}
 
-	Void testThreadedServicesCanBeInjectedIntoCtor() {
+	Void testThreadedServicesCanNotBeInjectedIntoCtor() {
 		reg := threadScope { addModule(T_MyModule100#) }
-		t2 := reg.serviceById("s93")
+		// by default, lets not mix up the scopes 'cos it's confusing
+		// if they really want to, they can use registry.activeScope for resolution
+		verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService93#, [,])) {
+			reg.serviceById("s93")			
+		}
+	}
+	
+	Void testThreadedServicesCanNotBeAutobuiltInCtor() {
+		reg := threadScope { addModule(T_MyModule100#) }
+		// by default, lets not mix up the scopes 'cos it's confusing
+		// if they really want to, they can use registry.activeScope for resolution
+		verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService93#, [,])) {
+			reg.serviceById("s92")
+		}
 	}
 }
 
@@ -98,9 +106,10 @@ internal const class T_MyModule100 {
 internal class T_MyService91 { }	// threaded
 @Js
 internal const class T_MyService92 {
-	new make(Scope reg, |This|in) { 
-		in(this) 
-		reg.serviceByType(T_MyService91#)
+	new make(Scope scope, |This|in) { 
+		in(this)
+		// T_MyService93 requires a threaded service
+		scope.build(T_MyService93#)
 	}
 }
 @Js
