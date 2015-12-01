@@ -302,7 +302,7 @@ internal const class RegistryImpl : Registry {
 				? "\nPod '${podName}' has 1 public service"
 				: "\nPod '${podName}' has ${noOfPub} public services"
 			if (noOfPri > 0)
-				print += " (and ${noOfPri} private)"
+				print += " (and ${noOfPri} internal)"
 			print += ":\n\n"
 			print += srvcs
 		}
