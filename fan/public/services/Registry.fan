@@ -244,7 +244,7 @@ internal const class RegistryImpl : Registry {
 			scope = scope.parent
 		}
 
-		// ensure the core scopes are destoyed - for wotever reason they may not have been part of the scope hierarchy
+		// ensure the core scopes are destroyed - for wotever reason they may not have been part of the scope hierarchy
 		rootScope_.destroy
 		builtInScope.destroy
 		
@@ -267,7 +267,7 @@ internal const class RegistryImpl : Registry {
 
 	override Scope activeScope() {
 		shutdownLock.check
-		return (activeScopeStack.peek ?: defScopeRef.val) ?: rootScope_
+		return activeScopeStack.peek ?: defScopeRef.val
 	}
 	
 	override Str printServices() {
