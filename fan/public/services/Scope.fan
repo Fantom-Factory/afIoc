@@ -281,6 +281,7 @@ internal const class ScopeImpl : Scope {
 	}
 
 	internal Void destroyedCheck() {
+		registry.shutdownLock.check
 		destroyedLock.check
 
 		// just in case someone forgets to destroy a jail broken scope
