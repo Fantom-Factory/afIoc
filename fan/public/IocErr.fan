@@ -97,7 +97,6 @@ internal const class ArgNotFoundErr : IocErr, NotFoundErr {
 	
 	Str valuesStr() {
 		buf := StrBuf()
-		buf.add("\n${typeof.qname}: ${msg}\n")
 		buf.add("\n${valueMsg}\n")
 		availableValues.each { buf.add("  $it\n")}
 		return buf.toStr

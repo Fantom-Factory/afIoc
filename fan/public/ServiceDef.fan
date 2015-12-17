@@ -97,7 +97,7 @@ internal const class ServiceDefImpl : ServiceDef {
 	This validate(RegistryImpl registry) {
 		declaredScopes.exclude |s1| { registry.scopeDefs_.keys.any |s2| { s1.equalsIgnoreCase(s2) } } {
 			if (it.isEmpty.not) 
-				throw IocErr(ErrMsgs.serviceBuilder_scopesNotFound(id, it))
+				throw ArgNotFoundErr(ErrMsgs.serviceBuilder_scopesNotFound(id, it), registry.scopeDefs_.keys)
 		}
 
 		if (matchedScopes.isEmpty) {
