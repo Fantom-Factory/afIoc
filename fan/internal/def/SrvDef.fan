@@ -121,7 +121,7 @@ internal class SrvDef {
 		if (builder == null)	throw IocErr(ErrMsgs.serviceBuilder_noBuilder(id))
 
 		aliasTypes?.each { 
-			if (it.fits(type).not)
+			if (it.fits(type).not && type.fits(it).not)
 				throw IocErr(ErrMsgs.serviceBuilder_aliasTypeDoesNotFitType(it, type))
 		}
 		

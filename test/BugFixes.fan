@@ -19,6 +19,21 @@ internal class BugFixes : IocTest {
 		
 		reg.registry.shutdown
 	}
+
+	Void testServiceMixinsCanBeInjected() {
+		reg := threadScope { addService(T_MyService79Impl#).withId(T_MyService79#.qname).withAliasType(T_MyService79#) }
+		
+		// should have always worked
+		s79 := reg.serviceById(T_MyService79#.qname)
+		verifyEq(s79.typeof, T_MyService79Impl#)
+
+		// There's no reason *why* mixins can't be injected - as long as the actual service implements it
+		// the bug / enhancement
+		s79 = reg.serviceByType(T_MyService79#)
+		verifyEq(s79.typeof, T_MyService79Impl#)
+		
+		reg.registry.shutdown
+	}
 	
 	Void testOrderedPlaceholdersAllowedOnNonStrConfig() {
 		reg := threadScope { addModule(T_MyModule85#) }

@@ -47,7 +47,7 @@ internal const class NonInvasiveInspector : ModuleInspector {
 				if (build != null)
 					value2 = config.build(build)
 
-				// used by afSlim
+				// used by afSlim and afWebSockets
 				if (valueFunc != null)
 					value2 = config.scope.callFunc(valueFunc)
 
