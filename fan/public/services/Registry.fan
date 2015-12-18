@@ -291,7 +291,11 @@ internal const class RegistryImpl : Registry {
 				pub := def.serviceTypes.any { isPublic }
 				if (pub) {
 					sep	  := def.noOfInstancesBuilt > 0 ? "|" : ":"
-					srvcs += def.id.replace("${podName}::", "").padl(maxSize + 2) + "${sep} " + def.matchedScopes.join(", ") + "\n"
+					srvcs += def.id.replace("${podName}::", "").padl(maxSize + 2) + "${sep} " + def.matchedScopes.join(", ")
+					alias := def.aliases.dup.addAll(def.aliasTypes.map { it.qname })
+					if (alias.size > 0)
+						srvcs += " (aliases: " + alias.join(", ") + ")"
+					srvcs += "\n"
 					noOfPub++
 				} else
 					noOfPri++
