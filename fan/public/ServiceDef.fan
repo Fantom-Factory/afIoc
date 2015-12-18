@@ -128,5 +128,12 @@ internal const class ServiceDefImpl : ServiceDef {
 	}	
 
 	@NoDoc
-	override Str toStr() { serviceIds.first }
+	override Str toStr() {
+		str := serviceIds.first
+		if (aliases.size > 0 || aliasTypes.size > 0) {
+			alias := aliases.dup.addAll(aliasTypes.map { it.qname })
+			str   += " (aliases: " + alias.join(", ") + ")"			
+		}
+		return str
+	}
 }
