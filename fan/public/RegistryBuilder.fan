@@ -401,7 +401,9 @@ class RegistryBuilder {
 				throw IocErr(ErrMsgs.regBuilder_invalidRegistryValue(key, optType, val.typeof))
 		}
 
-		registry := _buildHard(defaults.setAll(options))
+		// set defaults but allow modules to alter / add to options
+		options = defaults.setAll(options)
+		registry := _buildHard
 		
 		_lock.lock
 		return registry
@@ -440,7 +442,7 @@ class RegistryBuilder {
 		}		
 	}
 	
-	private Registry _buildHard([Str:Obj?] options) {
+	private Registry _buildHard() {
 
 		// inspect modules, and keep inspecting until no more are added
 		moduleTypes := Type[,]
