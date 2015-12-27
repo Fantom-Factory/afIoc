@@ -57,8 +57,8 @@ mixin InjectionCtx {
 	virtual Bool funcTakesServiceConfig() {
 		serviceId != null &&
 		func != null && method != null &&
-		(method.isCtor || method.hasFacet(Build#)) &&
-		(func.params.first?.type?.name == "List" || func.params.first?.type?.name == "Map")
+		(method.isCtor || method.hasFacet(Build#) || method.hasFacet(Override#)) &&
+		(method.params.first?.type?.name == "List" || method.params.first?.type?.name == "Map")
 	}
 
 	** Returns the index into 'funcArgs' should it be applicable, 'null' otherwise. 
@@ -130,7 +130,7 @@ internal class InjectionCtxImpl : InjectionCtx {
 		funcTakesServiceConfig = 
 			serviceId != null &&
 			func != null && method != null &&
-			(method.isCtor || method.hasFacet(Build#)) &&
-			(func.params.first?.type?.name == "List" || func.params.first?.type?.name == "Map")
+			(method.isCtor || method.hasFacet(Build#) || method.hasFacet(Override#)) &&
+			(method.params.first?.type?.name == "List" || method.params.first?.type?.name == "Map")
 	}
 }

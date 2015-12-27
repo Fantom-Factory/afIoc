@@ -59,6 +59,17 @@ internal class TestServiceOverride : IocTest {
 		s45 := (T_MyService45) reg.serviceById("s45-type")
 		verifyEq(s45.dude, "auto")
 	}
+	
+	Void testOverrideBuildFuncsTakeConfig() {
+		reg := RegistryBuilder() {
+			addService(T_MyService81#).withId("s81")
+			contributeToService("s81") |Configuration config| { config.add("dude")  }
+			addModule(T_MyModule10#)
+		}.build.rootScope
+		
+		s81 := (T_MyService81) reg.serviceById("s81")
+		verifyEq(s81.config, ["override-dude"])		
+	}
 }
 
 @Js
@@ -131,42 +142,30 @@ internal const class T_MyModule58 {
 	}
 }
 
-@Js
-internal const mixin T_MyService44 { virtual Str judge() { "anderson" } }
-@Js
-internal const class T_MyService44Impl  : T_MyService44 { }
-@Js
-internal const class T_MyService44Impl2 : T_MyService44 { override Str judge() { "dredd" } }
+@Js internal const mixin T_MyService44 { virtual Str judge() { "anderson" } }
+@Js internal const class T_MyService44Impl  : T_MyService44 { }
+@Js internal const class T_MyService44Impl2 : T_MyService44 { override Str judge() { "dredd" } }
 
-@Js
-internal const mixin T_MyService56 { virtual Str judge() { "anderson" } }
-@Js
-internal const class T_MyService56Impl2 : T_MyService56 { override Str judge() { "dredd" } }
+@Js internal const mixin T_MyService56 { virtual Str judge() { "anderson" } }
+@Js internal const class T_MyService56Impl2 : T_MyService56 { override Str judge() { "dredd" } }
 
-@Js
-internal const mixin T_MyService90 { virtual Str judge() { "anderson" } }
-@Js
-internal const class T_MyService90Impl  : T_MyService90 { }
-@Js
-internal const class T_MyService90Impl2 : T_MyService90 { override Str judge() { "dredd" } }
+@Js internal const mixin T_MyService90 { virtual Str judge() { "anderson" } }
+@Js internal const class T_MyService90Impl  : T_MyService90 { }
+@Js internal const class T_MyService90Impl2 : T_MyService90 { override Str judge() { "dredd" } }
 
-@Js
-internal mixin T_MyService45 {
+@Js internal mixin T_MyService45 {
 	abstract Str? dude 
 	virtual Str judge() { "anderson" } 
 }
-@Js
-internal class T_MyService45Impl : T_MyService45 { 
+@Js internal class T_MyService45Impl : T_MyService45 { 
 	override Str? dude 
 }
-@Js
-internal class T_MyService45Impl2 : T_MyService45 { 
+@Js internal class T_MyService45Impl2 : T_MyService45 { 
 	override Str? dude := "auto"
 	override Str judge() { "dredd" } 
 }
 
-@Js
-internal const class T_MyModule60 {
+@Js internal const class T_MyModule60 {
 	static Void defineServices(RegistryBuilder defs) {
 		defs.addService(T_MyService44#).withId("s44")
 		defs.addService(T_MyService02#).withId("s12")
@@ -178,10 +177,27 @@ internal const class T_MyModule60 {
 	}	
 }
 
-@Js
-internal const class T_MyModule61 {
+@Js internal const class T_MyModule61 {
 	@Override { serviceId="s12" }
 	static T_MyService02 overrideWotever() {
 		T_MyService02()
+	}
+}
+
+@Js internal const class T_MyService81 {
+	const Str[] config
+	new make(Str[] config) {
+		this.config = config
+	}
+}
+
+@Js internal const class T_MyService81Ovr : T_MyService81 {
+	new make(Str[] config) : super(config) { }
+}
+
+@Js internal const class T_MyModule10 {
+	@Override { serviceId="s81" }
+	T_MyService81 overrideS81(Str[] config) {
+		T_MyService81(["override-${config[0]}"])
 	}
 }
