@@ -365,7 +365,7 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** regBuilder.onServiceBuild("*penguin*") |Configuration config| {
-	**     config["log.hello"] = |Scope scope, ServiceDef def, Obj instance| {
+	**     config["log.hello"] = |Scope scope, ServiceDef def, Obj? instance| {
 	**         Log.get("afIoc").info("HELLO WORLD from ${def.id}")
 	**     }
 	** }

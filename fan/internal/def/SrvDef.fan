@@ -4,7 +4,7 @@ internal class SrvDef {
 	Type 			moduleId	// see ErrMsgs.registry_serviceAlreadyDefined()
 	Str? 			id
 	Type?			type  
-	|Scope->Obj|?	builder
+	|Scope->Obj?|?	builder
 	Str[]?			aliases
 	Type[]?			aliasTypes
 	ContribDef[]?	contribDefs
@@ -107,7 +107,7 @@ internal class SrvDef {
 		serviceImpl	:= implType
 		ctorArgs	:= ctorArgs?.ro?.toImmutable	// builders should have already ensured immutability
 		fieldVals	:= fieldVals?.ro?.toImmutable	// builders should have already ensured immutability
-		builder 	= |Scope currentScope->Obj| {
+		builder 	= |Scope currentScope->Obj?| {
 			scope 		:= (ScopeImpl) currentScope
 			buildType	:= scope.registry.autoBuilder.findImplType(serviceType, serviceImpl)
 			return scope.registry.autoBuilder.autobuild(currentScope, buildType, ctorArgs, fieldVals, serviceId)

@@ -41,7 +41,7 @@ internal const class FacetInspector : ModuleInspector {
 		srvDef.declaredScopes= buildFacet.scopes 
 		srvDef.aliases		= buildFacet.aliases
 		srvDef.aliasTypes	= buildFacet.aliasTypes
-		srvDef.builder 		= |Scope currentScope->Obj| {
+		srvDef.builder 		= |Scope currentScope->Obj?| {
 			scope 		:= (ScopeImpl) currentScope
 			methodArgs	:= scope.registry.autoBuilder.findFuncArgs(currentScope, method.func, null, instance, serviceId)
 			return method.callOn(instance, methodArgs)
@@ -67,7 +67,7 @@ internal const class FacetInspector : ModuleInspector {
 		ovrDef.gotService = |Str serviceId, Type serviceType| {
 			if (!method.returns.fits(serviceType))
 				throw IocErr(ErrMsgs.autobuilder_bindImplDoesNotFit(serviceType, method.returns))
-			ovrDef.builder 	= |Scope currentScope->Obj| {
+			ovrDef.builder 	= |Scope currentScope->Obj?| {
 				scope 		:= (ScopeImpl) currentScope
 				methodArgs	:= scope.registry.autoBuilder.findFuncArgs(currentScope, method.func, null, instance, serviceId)
 				return method.callOn(instance, methodArgs)
