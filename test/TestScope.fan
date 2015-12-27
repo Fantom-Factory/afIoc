@@ -1,4 +1,5 @@
 
+@Js
 internal class TestScope : IocTest {
 	
 	Void testScopeAlreadyDefined() {
@@ -31,19 +32,19 @@ internal class TestScope : IocTest {
 	}
 
 	Void testScopeNotFound() {
-		verifyIocErrMsg(ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere"])) {
+		verifyErrMsg(ArgNotFoundErr#, ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere"])) {
 			RegistryBuilder() {
 				addService(T_MyService02#).withScopes(["notHere"])
 			}.build
 		}
 
-		verifyIocErrMsg(ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere"])) {
+		verifyErrMsg(ArgNotFoundErr#, ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere"])) {
 			RegistryBuilder() {
 				addService(T_MyService02#).withScopes(["root", "notHere"])
 			}.build
 		}
 
-		verifyIocErrMsg(ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere", "again"])) {
+		verifyErrMsg(ArgNotFoundErr#, ErrMsgs.serviceBuilder_scopesNotFound(T_MyService02#.qname, ["notHere", "again"])) {
 			RegistryBuilder() {
 				addService(T_MyService02#).withScopes(["root", "notHere", "again"])
 			}.build
@@ -89,4 +90,5 @@ internal class TestScope : IocTest {
 	}
 }
 
+@Js
 internal const class T_MyService75 {}

@@ -57,7 +57,7 @@ internal const class ServiceDefImpl : ServiceDef {
 		this.aliasTypes		= this.serviceTypes[1..-1]
 	}
 	
-	|Scope->Obj| builderFunc() { builderFuncRef.val }
+	|Scope->Obj?| builderFunc() { builderFuncRef.val }
 
 	|Configuration|[]? contribFuncs() {
 		contribFuncsRef?.val
@@ -75,16 +75,16 @@ internal const class ServiceDefImpl : ServiceDef {
 		serviceTypes.any { it == serviceType }
 	}
 
-	Obj build(Scope currentScope) {
+	Obj? build(Scope currentScope) {
 		instance	:=  builderFunc.call(currentScope)
 		noOfInstancesRef.incrementAndGet
 		return instance
 	}
 
-	Void callBuildHooks(Scope currentScope, Obj instance) {
+	Void callBuildHooks(Scope currentScope, Obj? instance) {
 		configs	:= (Func[]?) buildHooksRef?.val
 		if (configs != null && configs.isEmpty.not) {
-			config	:= ConfigurationImpl(currentScope, Str:|Scope, ServiceDef, Obj|#, "afIoc::Scope.onCreate")
+			config	:= ConfigurationImpl(currentScope, Str:|Scope, ServiceDef, Obj?|#, "afIoc::Scope.onCreate")
 			configs.each {
 				it.call(config)
 				config.cleanupAfterMethod

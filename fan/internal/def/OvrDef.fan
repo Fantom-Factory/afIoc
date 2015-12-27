@@ -5,7 +5,7 @@ internal class OvrDef {
 	Str?			serviceId
 	Type?			serviceType
 
-	|Scope->Obj|?	builder
+	|Scope->Obj?|?	builder
 	Str[]?			aliases
 	Type[]?			aliasTypes
 	Str[]?			scopes

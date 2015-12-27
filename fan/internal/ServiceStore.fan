@@ -70,7 +70,7 @@ internal const class ServiceInstance {
 		this.buildErr	= AtomicRef(null)
 	}
 	
-	Obj getOrBuild(Scope currentScope) {
+	Obj? getOrBuild(Scope currentScope) {
 		unsafe := (Unsafe?) instance.val
 		if (unsafe != null)
 			return unsafe.val
@@ -112,7 +112,7 @@ internal const class ServiceInstance {
 		this.def.noOfInstancesRef.incrementAndGet
 	}
 	
-	private Obj build(Scope currentScope) {
+	private Obj? build(Scope currentScope) {
 		instance := def.build(currentScope)
 		def.callBuildHooks(currentScope, instance)
 		return instance

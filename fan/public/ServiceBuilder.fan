@@ -93,8 +93,6 @@ mixin ServiceBuilder {
 	** Sets many Types that this service is also known as.
 	abstract This withAliasTypes(Type[]? aliasTypes)
 
-//	abstract This addScope(Str scope)
-
 	** Sets the scope that the service can be created in.
 	** 
 	** pre>
@@ -129,7 +127,7 @@ mixin ServiceBuilder {
 	** <pre
 	** 
 	** 'Scope' is the current scope the service is being built in.
-	abstract This withBuilder(|Scope -> Obj|? serviceBuilder)
+	abstract This withBuilder(|Scope -> Obj?|? serviceBuilder)
 	
 	** Set constructor arguments to be used when the service is autobuilt. 
 	** Note the args must be immutable.
@@ -233,11 +231,11 @@ internal class ServiceBuilderImpl : ServiceBuilder {
 //		return this
 //	}
 	
-	override This withBuilder(|Scope -> Obj|? serviceBuilder) {
+	override This withBuilder(|Scope -> Obj?|? serviceBuilder) {
 		srvDef.builder = toImmutableObj(serviceBuilder)
 		if (serviceBuilder != null) {
 			srvDef.autobuild	= false
-			srvDef.implType	= null
+			srvDef.implType		= null
 		} else
 			srvDef.autobuild	= true
 		return this
