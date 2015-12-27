@@ -34,7 +34,7 @@ mixin ServiceOverrideBuilder {
 	abstract This withScopes(Str[]? scopes)
 	
 	** Overrides the service builder func. 
-	abstract This withBuilder(|Scope -> Obj|? serviceBuilder)
+	abstract This withBuilder(|Scope -> Obj?|? serviceBuilder)
 	
 	** Overrides the service ctor args. 
 	abstract This withCtorArgs(Obj?[]? args)
@@ -121,7 +121,7 @@ internal class ServiceOverrideBuilderImpl : ServiceOverrideBuilder {
 		return this
 	}
 	
-	override This withBuilder(|Scope -> Obj|? serviceBuilder) {
+	override This withBuilder(|Scope -> Obj?|? serviceBuilder) {
 		ovrDef.builder = toImmutableObj(serviceBuilder)
 		if (serviceBuilder != null) {
 			ovrDef.autobuild	= false
