@@ -48,11 +48,19 @@ internal class TestFacetBuild : IocTest {
 			verify(e.traceToStr.contains("afIoc::T_MyModule91.buildT1"))
 		}
 	}
-
+	
+	Void testBuildFuncTakesConfig() {
+		reg := RegistryBuilder() {
+			addModule(T_MyModule11#)
+			contributeToService("s81") |Configuration config| { config.add("dude")  }
+		}.build.rootScope
+		
+		s81 := (T_MyService81) reg.serviceById("s81")
+		verifyEq(s81.config, ["build-dude"])				
+	}
 }
 
-@Js
-internal const class T_MyModule04 {
+@Js internal const class T_MyModule04 {
 	static Void defineServices(RegistryBuilder defs) {
 		defs.addService(T_MyService02#)
 	}
@@ -67,8 +75,7 @@ internal const class T_MyModule04 {
 	}
 }
 
-@Js
-internal const class T_MyModule05 {
+@Js internal const class T_MyModule05 {
 	static Void defineServices(RegistryBuilder defs) {
 		defs.addService(T_MyService02#)
 	}
@@ -90,25 +97,29 @@ internal const class T_MyModule05 {
 	}
 }
 
-@Js
-internal const class T_MyModule21 {
+@Js internal const class T_MyModule21 {
 	static Void defineServices(RegistryBuilder defs) {
 		defs.addService(T_MyService01#).withScopes(["root"])
 	}
 }
 
-@Js
-internal const class T_MyModule22 {
+@Js internal const class T_MyModule22 {
 	@Build { scopes=["root"] }
 	static T_MyService01 buildT1() {
 		return T_MyService01()
 	}
 }
 
-@Js
-internal const class T_MyModule91 {
+@Js internal const class T_MyModule91 {
 	@Build { serviceId = "t1" }
 	static T_MyService01 buildT1() {
 		throw Err("Bugger!")
+	}
+}
+
+@Js internal const class T_MyModule11 {
+	@Build { serviceId="s81" }
+	T_MyService81 overrideS81(Str[] config) {
+		T_MyService81(["build-${config[0]}"])
 	}
 }
