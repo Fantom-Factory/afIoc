@@ -121,7 +121,7 @@ mixin ServiceBuilder {
 	** 
 	** pre>
 	** syntax: fantom
-	** regBuilder.addService(Wolf#).withBuilder |Scope scope -> Obj| {
+	** regBuilder.addService(Wolf#).withBuilder |Scope scope -> Obj?| {
 	**     return Penguin()
 	** }
 	** <pre
