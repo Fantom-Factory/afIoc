@@ -34,16 +34,18 @@ internal class ThreadStack {
 
 
 @Js
-internal const class ServiceInjectStack {
+internal const class OperationsStack {
 	private const Str thisStackId
 	
 	new make(Int regInstCount) {
-		thisStackId = regInstCount.toStr.padl(2, '0') + "." + ServiceInjectStack#.qname
+		thisStackId = regInstCount.toStr.padl(2, '0') + "." + OperationsStack#.qname
 	}
 
+	** Caller MUST also call pop() in a finally
 	This push(Str operation, Str thing) {
 		threadStack := getOrAdd
-		op := "${operation}:".justl(15) + " " + thing
+		// 17 is for "Gathering config"
+		op := "${operation}:".justl(17) + " " + thing
 		threadStack.push([op, null])
 		return this
 	}
