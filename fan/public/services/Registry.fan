@@ -97,7 +97,7 @@ internal const class RegistryImpl : Registry {
 	const Unsafe				shutdownHooksRef
 	const RegistryMeta			regMeta
 	const ActiveScopeStack		activeScopeStack
-	const ServiceInjectStack	serviceInjectStack
+	const OperationsStack		opStack
 	const AtomicRef				defScopeRef		:= AtomicRef()
 
 	override const Str:ScopeDef		scopeDefs
@@ -106,7 +106,7 @@ internal const class RegistryImpl : Registry {
 	new make(Duration buildStart, Str:ScpDef scopeDefs_, Str:SrvDef srvDefs, Type[] moduleTypes, [Str:Obj?] options, Func[] startupHooks, Func[] shutdownHooks) {
 		instanceCount.incrementAndGet
 		activeScopeStack	= ActiveScopeStack(instanceCount.val)
-		serviceInjectStack	= ServiceInjectStack(instanceCount.val)
+		opStack				= OperationsStack(instanceCount.val)
 
 		this.shutdownHooksRef	= Unsafe(shutdownHooks)
 		this.scopeDefs_	 		= scopeDefs_.map |def -> ScopeDefImpl| { def.toScopeDef }

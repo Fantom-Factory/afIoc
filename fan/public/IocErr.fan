@@ -13,7 +13,7 @@ const class IocErr : Err {
 		// TODO: find a reference to the containing Registry
 		// until we do, all opTraces will refer to the same Reg instance
 		// but, to be fair, it's unlikely there'll ever be more than one!
-		this.operationTrace = ServiceInjectStack(1).operations.join("\n")
+		this.operationTrace = OperationsStack(1).operations.join("\n")
 	}
 	
 	@NoDoc

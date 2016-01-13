@@ -142,17 +142,17 @@ internal const class ScopeImpl : Scope {
 	override Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		destroyedCheck
 
-		registry.serviceInjectStack.push("Building", type.qname)
+		registry.opStack.push("Building", type.qname)
 		try return registry.autoBuilder.autobuild(this, type, ctorArgs, fieldVals, null)
 		catch (IocErr ie)	throw ie
 		catch (Err err)		throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 
 	override Obj inject(Obj instance) {
 		destroyedCheck
 
-		registry.serviceInjectStack.push("Injecting", instance.typeof.qname)
+		registry.opStack.push("Injecting", instance.typeof.qname)
 		try {
 			plan := registry.autoBuilder.findFieldVals(this, instance.typeof, instance, null, null)			
 			plan.each |val, field| {
@@ -162,20 +162,20 @@ internal const class ScopeImpl : Scope {
 		}
 		catch (IocErr ie)	throw ie
 		catch (Err err)		throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 
 	override Obj? callMethod(Method method, Obj? instance, Obj?[]? args := null) {
 		destroyedCheck
 
-		registry.serviceInjectStack.push("Calling method", method.qname)
+		registry.opStack.push("Calling method", method.qname)
 		try {
 			methodArgs := registry.autoBuilder.findFuncArgs(this, method.func, args, instance, null)
 			return method.callOn(instance, methodArgs)
 		}
 		catch (IocErr ie)	throw ie
 		catch (Err err)		throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 
 	override Obj? callFunc(Func func, Obj?[]? args := null) {
@@ -183,25 +183,25 @@ internal const class ScopeImpl : Scope {
 		if (func.typeof.isGeneric)
 			throw ArgErr("Can not call generic functions: ${func.typeof.signature}")
 
-		registry.serviceInjectStack.push("Calling func", func.typeof.signature)
+		registry.opStack.push("Calling func", func.typeof.signature)
 		try {
 			funcArgs := registry.autoBuilder.findFuncArgs(this, func, args, null, null)
 			return func.callList(funcArgs)
 		}
 		catch (IocErr ie)	throw ie
 		catch (Err err)		throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 	
 	override Obj? serviceById(Str serviceId, Bool checked := true) {
 		destroyedCheck		
 		
-		registry.serviceInjectStack.push("Resolving ID", serviceId)
-		registry.serviceInjectStack.setServiceId(serviceId)
+		registry.opStack.push("Resolving ID", serviceId)
+		registry.opStack.setServiceId(serviceId)
 		try 	return serviceById_(serviceId, Str[,], checked)
 		catch	(IocErr ie)	throw ie
 		catch	(Err err)	throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 
 	internal Obj? serviceById_(Str serviceId, Str[] scopes, Bool checked := true) {
@@ -215,11 +215,11 @@ internal const class ScopeImpl : Scope {
 	override Obj? serviceByType(Type serviceType, Bool checked := true) {
 		destroyedCheck
 
-		registry.serviceInjectStack.push("Resolving Type", serviceType.qname)
+		registry.opStack.push("Resolving Type", serviceType.qname)
 		try		return serviceByType_(serviceType, Str[,], checked)
 		catch	(IocErr ie)	throw ie
 		catch	(Err err)	throw IocErr(err.msg, err)
-		finally registry.serviceInjectStack.pop
+		finally registry.opStack.pop
 	}
 
 	internal Obj? serviceByType_(Type serviceType, Str[] scopes, Bool checked := true) {
@@ -227,7 +227,7 @@ internal const class ScopeImpl : Scope {
 		if (serviceInstance == null)
 			return parent?.serviceByType_(serviceType, scopes.add(id), checked)
 				?: (checked ? throw ServiceNotFoundErr(ErrMsgs.scope_couldNotFindServiceByType(serviceType, scopes.dup.add(id).reverse), services(scopes.dup.add(id).reverse)) : null)
-		registry.serviceInjectStack.setServiceId(serviceInstance.def.id)
+		registry.opStack.setServiceId(serviceInstance.def.id)
 		return serviceInstance.getOrBuild(this)			
 	}
 	

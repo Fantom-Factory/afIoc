@@ -194,7 +194,7 @@ internal mixin ErrMsgs {
 	}
 	
 	static Str orderer_configIsPlaceholder(Str placeholder) {
-		"Configuration Id does not exist - $placeholder"
+		"Configuration Id does not exist: $placeholder"
 	}
 
 	

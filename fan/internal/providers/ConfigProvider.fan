@@ -10,6 +10,9 @@ internal const class ConfigProvider : DependencyProvider {
 		// I'm happy calling internal methods here, 'cos this is an internal operation!
 		scope		:= (ScopeImpl) currentScope
 		serviceDef	:= scope.serviceDefById(ctx.serviceId, true)
-		return serviceDef.gatherConfiguration(currentScope, ctx.funcParam.type)
+		opStack		:= ((RegistryImpl) scope.registry).opStack 
+		opStack.push("Gathering config", serviceDef.id)
+		try 	return serviceDef.gatherConfiguration(currentScope, ctx.funcParam.type)
+		finally	opStack.pop
 	}
 }
