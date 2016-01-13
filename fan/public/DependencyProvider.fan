@@ -13,6 +13,18 @@
 ** 
 ** Note that 'canProvide()' is called for *all* fields, not just those annotated with '@Inject'.
 ** 
+** If your dependency provider re-uses the '@Inject' facet, then it should be ordered *before* the
+** standard IoC service provider so it is queried first. The IoC service provider has an ID of 
+** 'afIoc.service':
+** 
+** pre>
+** syntax: fantom
+** @Contribute { serviceType=DependencyProviders# }
+** Void contributeDependencyProviders(Configuration config) {
+**     config.set("myProvider", MyProvider()).before("afIoc.service")
+** }
+** <pre
+** 
 ** (*) The 'DependencyProviders' service is annotated with '@NoDoc' and is not listed in the API. 
 ** This is because it's only used as a configuration point, so it's not very interesting!
 @Js

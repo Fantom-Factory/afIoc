@@ -165,17 +165,18 @@ internal const class RegistryImpl : Registry {
 		
 		// ---- Create Dependency Providers ----
 
-		dependencyProviders := DependencyProviders(Str:DependencyProvider[
-			"afIoc.autobuild"	: AutobuildProvider(),
-			"afIoc.func"		: FuncProvider(),
-			"afIoc.log"			: LogProvider(),
-			"afIoc.scope"		: ScopeProvider(),
+		// these are also redefined in IocModule
+		dependencyProviders := DependencyProviders(Str:DependencyProvider[:] { ordered = true }
+			.add("afIoc.autobuild",		AutobuildProvider())
+			.add("afIoc.func",			FuncProvider())
+			.add("afIoc.log",			LogProvider())
+			.add("afIoc.scope", 		ScopeProvider())
 
-			"afIoc.config"		: ConfigProvider(),
-			"afIoc.funcArg"		: FuncArgProvider(),
-			"afIoc.service"		: ServiceProvider(),
-			"afIoc.ctorItBlock"	: CtorItBlockProvider()
-		]) 
+			.add("afIoc.config", 		ConfigProvider())
+			.add("afIoc.funcArg", 		FuncArgProvider())
+			.add("afIoc.service", 		ServiceProvider())
+			.add("afIoc.ctorItBlock",	CtorItBlockProvider())
+		) 
 		autoBuilder			= AutoBuilder([:], dependencyProviders)
 		regMeta				= RegistryMetaImpl(options, moduleTypes)
 
@@ -184,6 +185,7 @@ internal const class RegistryImpl : Registry {
 		builtInScope.instanceById(DependencyProviders#	.qname, [,], true).setInstance(dependencyProviders)
 		builtInScope.instanceById(AutoBuilder#			.qname, [,], true).setInstance(autoBuilder)
 		
+		// it's chicken and egg - we need dependency providers to create dependency providers!
 		sysDepProInst	:= builtInScope.instanceById(DependencyProviders#.qname, [,], true)
 		userDepPro		:= (DependencyProviders) autoBuilder.autobuild(rootScope_, DependencyProviders#, null, null, DependencyProviders#.qname)
 		sysDepProInst.setInstance(userDepPro)
