@@ -206,7 +206,7 @@ internal const class RegistryImpl : Registry {
 		hooks := (Str:Func) config.toMap
 		
 		// ensure system messages are printed at the end 
-		order	:= "afIoc.logBanner".split
+		order	:= "afIoc.logBanner".split	// this makes moar sense when there are more keys in the list! See DependencyProviders
 		hooks.keys.sort |k1, k2| {
 			(order.index(k1) ?: -1) <=> (order.index(k2) ?: -1)
 		}.each {
@@ -217,7 +217,7 @@ internal const class RegistryImpl : Registry {
 			startDuration	:= Duration.now - startStart
 			buildTime 		:= buildDuration.toMillis.toLocale("#,###")
 			startupTime 	:= startDuration.toMillis.toLocale("#,###")
-			msg 			:= "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms\n"
+			msg 			:= "IoC Registry built in ${buildTime}ms and started up in ${startupTime}ms"
 			Registry#.pod.log.info(msg)
 		}
 	}
@@ -345,7 +345,6 @@ internal const class RegistryImpl : Registry {
 			title += banner
 			first = false
 		}
-		title 	+= "\n"
 
 		return title
 	}

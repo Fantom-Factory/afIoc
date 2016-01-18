@@ -71,7 +71,7 @@ class RegistryBuilder {
 			return this
 		}
 		
-		if (!suppressLogging)
+		if (!suppressLogging && moduleType != IocModule#)
 			_logger.info("Adding module ${moduleType.qname}")
 
 		if (module is Type) 
