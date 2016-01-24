@@ -48,8 +48,17 @@ class RegistryBuilder {
 		addModule(IocModule())
 	}
 
-	** Adds a module to the registry. 'module' may be a class instance or a 'Type'.
+	** Adds a module to the registry. The given 'module' may be:
+	**  - a module instance, 
+	**  - a module 'Type'
+	**  - a qualified module name ( 'Str' )
+	**  - a pod name ( 'Str' )
+	** 
+	** If a pod name then dependencies are also added.
+	** 
 	** Any modules defined with the '@SubModule' facet are also added.
+	** 
+	** Don't forget you can always call 'removeModule(...)' too!
 	This addModule(Obj module) {
 		_lock.check
 		
@@ -74,13 +83,21 @@ class RegistryBuilder {
 		if (!suppressLogging && moduleType != IocModule#)
 			_logger.info("Adding module ${moduleType.qname}")
 
+		// be nice and check for Strs
+		if (module is Str) {
+			if (Pod.find(module, false) != null)
+				return addModulesFromPod(module, true)
+			module = Type.find(module, true)
+		}
+		
 		if (module is Type) 
 			module = ((Type) module).make
-		
+
 		_modulesAdd.add(module)
 		
 		// need to double add 'cos we clear _modulesAdd during inspection 
 		_modulesAddAdd.add(module)
+		
 		return this
 	}
 
@@ -427,7 +444,7 @@ class RegistryBuilder {
 		if (addDependencies) {
 			pod.depends.each |depend| {
 				dependency := Pod.find(depend.name)
-				_addModulesFromPod(dependency)
+				_addModulesFromPod(dependency, addDependencies)
 			}
 		}
 	}
