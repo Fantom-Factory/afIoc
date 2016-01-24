@@ -35,7 +35,7 @@ internal const class NonInvasiveInspector : ModuleInspector {
 		contributions := ([Str:Obj][]?) map["contributions"]
 		contributions?.each {
 			serviceId	:= (Str)		it["serviceId"]
-			key			:= (Obj?)		toImmutableObj(moduleId, it["key"])
+			key			:= (Obj?)		toImmutableObj(   moduleId,			 it["key"])
 			value		:= (Obj?)		toImmutableObj("${moduleId}.${key}", it["value"])
 			valueFunc	:= (Func?)		toImmutableObj("${moduleId}.${key}", it["valueFunc"])
 			build		:= (Type?)		it["build"]
