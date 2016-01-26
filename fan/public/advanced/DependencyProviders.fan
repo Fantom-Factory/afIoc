@@ -50,12 +50,17 @@ const class DependencyProviders {
 		if (depPro == null)
 			return plan
 		
-		dependency := depPro.provide(currentScope, ctx)
-		
+		dependency := depPro.provide(currentScope, ctx)		
+
+		// If dependency is null, then don't set the field.
+		// This lets optional fields define default values - handy for IocConfig values.
+		// True, this then means default values cannot be overridden with null, but that's
+		// a lesser use case.
+		if (dependency == null)
+			return plan
+
 		type := ctx.field?.type ?: ctx.funcParam?.type
-		if (dependency == null && type.isNullable.not)
-			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(null, type))
-		else if (dependency != null && ReflectUtils.fits(dependency.typeof, type).not)
+		if (dependency != null && ReflectUtils.fits(dependency.typeof, type).not)
 			throw IocErr(ErrMsgs.dependencyProviders_dependencyDoesNotFit(dependency.typeof, type))
 		
 		plan[ctx.field] = ctx.field.isConst ? toImmutableObj(ctx.field, dependency) : dependency

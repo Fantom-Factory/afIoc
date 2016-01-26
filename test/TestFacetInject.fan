@@ -5,15 +5,17 @@ internal class TestFacetInject : IocTest {
 	Void testFieldInjection() {
 		reg := threadScope { addModule(T_MyModule34#) }
 
-		// test field injection
+		// test optional field injection
 		s65 := (T_MyService65) reg.serviceById("s65") 
 		verifyNull(s65.opt2_1)
 		verifyNull(s65.opt2_2)
+		verifyEq(s65.opt2_3, "default")
 
-		// test ctor injection
+		// test optional ctor injection
 		s66 := (T_MyService66) reg.serviceById("s66") 
 		verifyNull(s66.opt2_1)
 		verifyNull(s66.opt2_2)
+		verifyEq(s66.opt2_3, "default")
 	}
 
 	Void testFieldInjection2() {
@@ -74,6 +76,9 @@ internal class T_MyService65 {
 
 	@Inject { optional=true; id="wotever" }
 	T_MyService02? opt2_2
+
+	@Inject { optional=true; id="wotever" }
+	Str opt2_3	:= "default"
 }
 
 @Js
@@ -83,6 +88,9 @@ internal const class T_MyService66 {
 
 	@Inject { optional=true; id="wotever" }
 	const T_MyService24? opt2_2
+
+	@Inject { optional=true; id="wotever" }
+	const Str opt2_3	:= "default"
 	
 	new make(|This|in) { in(this) }
 }
