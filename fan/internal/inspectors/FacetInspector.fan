@@ -42,9 +42,7 @@ internal const class FacetInspector : ModuleInspector {
 		srvDef.aliases		= buildFacet.aliases
 		srvDef.aliasTypes	= buildFacet.aliasTypes
 		srvDef.builder 		= |Scope currentScope->Obj?| {
-			scope 		:= (ScopeImpl) currentScope
-			methodArgs	:= scope.registry.autoBuilder.findFuncArgs(currentScope, method.func, null, instance, serviceId)
-			return method.callOn(instance, methodArgs)
+			return callMethod(currentScope, method, instance, serviceId)
 		}
 	}
 	
@@ -68,9 +66,7 @@ internal const class FacetInspector : ModuleInspector {
 			if (!method.returns.fits(serviceType))
 				throw IocErr(ErrMsgs.autobuilder_bindImplDoesNotFit(serviceType, method.returns))
 			ovrDef.builder 	= |Scope currentScope->Obj?| {
-				scope 		:= (ScopeImpl) currentScope
-				methodArgs	:= scope.registry.autoBuilder.findFuncArgs(currentScope, method.func, null, instance, serviceId)
-				return method.callOn(instance, methodArgs)
+				return callMethod(currentScope, method, instance, serviceId)
 			}
 		}
 	}
@@ -103,15 +99,20 @@ internal const class FacetInspector : ModuleInspector {
 			it.serviceType	= contribute.serviceType
 			it.optional		= contribute.optional
 			
-//		opStack		:= ((RegistryImpl) scope.registry).opStack 
-//		opStack.push("Gathering config", serviceDef.id)
-//		try 	return serviceDef.gatherConfiguration(currentScope, ctx.funcParam.type)
-//		finally	opStack.pop
 			
 			it.configFuncRef= Unsafe(|Configuration config| { config.scope.callMethod(method, instance, [config]) })
 			it.method2		= method
 		}
 		
 		reg._contribDefs.add(contribDef)
+	}
+	
+	// call the method ourselves so we can set the serviceId
+	private static Obj? callMethod(ScopeImpl scope, Method method, Obj? instance, Str serviceId) {
+		methodArgs	:= scope.registry.autoBuilder.findFuncArgs(scope, method.func, null, instance, serviceId)
+		opStack		:= ((RegistryImpl) scope.registry).opStack 
+		scope.registry.opStack.push("Calling method", method.qname)
+		try 	return method.callOn(instance, methodArgs)
+		finally	opStack.pop		
 	}
 }

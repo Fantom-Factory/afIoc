@@ -43,29 +43,38 @@ internal const class NonInvasiveInspector : ModuleInspector {
 			after		:= (Obj?)		toImmutableObj("${moduleId}.${key}", it["after"])
 			
 			configFunc	:= |Configuration config| {
-				value2	:= value
-				if (build != null)
-					value2 = config.build(build)
+				scope		:= config.scope
+				registry	:= (RegistryImpl) scope.registry
+				opStack		:= registry.opStack 
+				registry.opStack.push("Inspecting", "${moduleId}.${key}")
 
-				// used by afSlim and afWebSockets
-				if (valueFunc != null)
-					value2 = config.scope.callFunc(valueFunc)
+				try {
+					value2	:= value
+					if (build != null)
+						value2 = config.build(build)
+	
+					// used by afSlim and afWebSockets
+					if (valueFunc != null)
+						value2 = scope.callFunc(valueFunc)
+	
+					// a cheap hack for IoCs only implementation mixin
+					// used by afConcurrent for its LocalRefProvider
+					if (serviceId == DependencyProviders#.qname)
+						value2 = DependencyProviderProxy(value2)
+					
+					constraints := (Constraints?) null
+					if (key == null)
+						constraints = config.add(value2)
+					else
+						constraints = config.set(key, value2)
+					
+					if (before != null)
+						constraints.before(before, true)
+					if (after != null)
+						constraints.after(after, true)
 
-				// a cheap hack for IoCs only implementation mixin
-				// used by afConcurrent for its LocalRefProvider
-				if (serviceId == DependencyProviders#.qname)
-					value2 = DependencyProviderProxy(value2)
-				
-				constraints := (Constraints?) null
-				if (key == null)
-					constraints = config.add(value2)
-				else
-					constraints = config.set(key, value2)
-				
-				if (before != null)
-					constraints.before(before, true)
-				if (after != null)
-					constraints.after(after, true)
+				} finally
+					opStack.pop
 			}
 
 			switch (serviceId) {
