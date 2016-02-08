@@ -6,7 +6,7 @@ internal const class FacetInspector : ModuleInspector {
 		moduleType := module.typeof
 
 		if (moduleType.hasFacet(SubModule#)) {
-			subModule := (SubModule) Type#.method("facet").callOn(moduleType, [SubModule#])	// Stoopid F4
+			subModule := (SubModule) moduleType.facet(SubModule#)
 			subModule.modules.each { 
 				bob.addModule(it)
 			}
@@ -29,7 +29,7 @@ internal const class FacetInspector : ModuleInspector {
 	}
 	
 	private Void addServiceDef(RegistryBuilder reg, Obj module, Method method) {
-		buildFacet	:= (Build) Slot#.method("facet").callOn(method, [Build#])	// Stoopid F4 
+		buildFacet	:= (Build) method.facet(Build#) 
 		instance 	:= method.isStatic ? null : module
 		serviceId	:= buildFacet.serviceId ?: method.returns.qname
 				
@@ -49,7 +49,7 @@ internal const class FacetInspector : ModuleInspector {
 	}
 	
 	private Void addServiceOverride(RegistryBuilder reg, Obj module, Method method) {
-		overFacet	:= (Override) Slot#.method("facet").callOn(method, [Override#])	// Stoopid F4 
+		overFacet	:= (Override) method.facet(Override#) 
 		instance 	:= method.isStatic ? null : module		
 		overId		:= overFacet.serviceId
 		overType	:= overFacet.serviceType ?: method.returns
@@ -79,7 +79,7 @@ internal const class FacetInspector : ModuleInspector {
 		if (method.params.isEmpty || method.params[0].type != Configuration#)
 			throw IocErr(ErrMsgs.contributions_contributionMethodMustTakeConfig(method))
 
-		contribute := (Contribute) Slot#.method("facet").callOn(method, [Contribute#])	// Stoopid F4
+		contribute := (Contribute) method.facet(Contribute#)
 
 		instance 	:= method.isStatic ? null : module
 		serviceId	:= (Str?)  null
@@ -102,6 +102,12 @@ internal const class FacetInspector : ModuleInspector {
 			it.serviceId	= contribute.serviceId
 			it.serviceType	= contribute.serviceType
 			it.optional		= contribute.optional
+			
+//		opStack		:= ((RegistryImpl) scope.registry).opStack 
+//		opStack.push("Gathering config", serviceDef.id)
+//		try 	return serviceDef.gatherConfiguration(currentScope, ctx.funcParam.type)
+//		finally	opStack.pop
+			
 			it.configFuncRef= Unsafe(|Configuration config| { config.scope.callMethod(method, instance, [config]) })
 			it.method2		= method
 		}

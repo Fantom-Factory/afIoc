@@ -23,7 +23,7 @@ internal const class FuncProvider : DependencyProvider {
 		funcType	:= ctx.field?.type ?: ctx.funcParam.type
 
 		if (ctx.isFieldInjection) {
-			inject	:= (Inject) Slot#.method("facet").callOn(ctx.field, [Inject#])	// Stoopid F4
+			inject	:= (Inject) ctx.field.facet(Inject#)
 			if (inject.id != null)
 				serId = inject.id
 			else

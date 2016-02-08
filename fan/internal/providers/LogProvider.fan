@@ -19,7 +19,7 @@ const class LogProvider : DependencyProvider {
 	override Obj? provide(Scope currentScope, InjectionCtx ctx) {
 		logId := ctx.targetType.pod.name
 		if (ctx.isFieldInjection) {
-			inject := (Inject) Slot#.method("facet").callOn(ctx.field, [Inject#])	// Stoopid F4
+			inject := (Inject) ctx.field.facet(Inject#)
 			if (inject.id != null)
 				logId = inject.id
 		}
