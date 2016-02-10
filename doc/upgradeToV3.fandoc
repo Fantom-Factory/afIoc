@@ -5,7 +5,9 @@ This document explains some of the differences between IoC 2 and IoC 3.
 
 IoC 3 is a complete rewrite of the IoC library, but the main interface to the library (service facets) has remained the same. This allowed the extensive test coverage of IoC 2 to be reused for IoC 3, and ensures your code requires little, if any, change to update.
 
-A major feature of IoC 3 is that it is available in Javascript. To allow this, the Proxy and Aspect features of IoC 2 have been dropped. A side effect being that IoC is now faster and more lightweight than ever before. Proxies, if required, can generally be replaced by Lazy Funcs, and it was felt Aspects were a generally under utilised advanced feature.
+A major feature of IoC 3 is that it is available in Javascript. To allow this, the Proxy and Aspect features of IoC 2 have been dropped. A side effect being that IoC is now faster and more lightweight than ever before. Proxies, if required, can generally be replaced by Lazy Funcs, and it was felt Aspects were an advanced, and generally under utilised feature.
+
+On to the changes:
 
 
 
@@ -128,10 +130,11 @@ registry.injectIntoFields(MyService())
 New code:
 pre>
 syntax: fantom
-registry.serviceById("myService")
-registry.serviceByType(MyService#)
-registry.build(MyService#)
-registry.inject(MyService())
+scope := registry.activeScope()
+scope.serviceById("myService")
+scope.serviceByType(MyService#)
+scope.build(MyService#)
+scope.inject(MyService())
 <pre
 
 Note that only services may now be retrieved from Scope, should you wish for a general dependency, use the 'DependencyProviders' service - see source for details.
