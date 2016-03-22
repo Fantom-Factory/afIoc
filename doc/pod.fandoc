@@ -1325,6 +1325,64 @@ Note that the 'setup()' and 'teardown()' could be moved into a common base class
 
 
 
+Threaded Services
+=================
+If your application contains threaded services, then to inject them, you need to create an instance of a threaded scope:
+
+pre>
+syntax: fantom
+using afIoc::Inject
+using afIoc::Registry
+using afIoc::RegistryBuilder
+
+class TestExample : Test {
+    Registry? reg
+
+    // the threaded scope instance
+    Scope?    scope
+
+    @Inject
+    MyService? myService
+
+    override Void setup() {
+        reg = RegistryBuilder()
+
+        // define a threaded scope
+        reg.addScope("thread", true)
+
+        reg.addModule(AppModule#)
+           .addModule(TestModule#)
+           .build
+
+        // create an instance of the threaded scope
+        reg.rootScope.createChildScope("thread") { this.scope = it.jailBreak }
+
+        // use the threaded scope to set MyService and other @Inject'ed fields
+        scope.inject(this)
+    }
+
+    override Void teardown() {
+        // ensure any scopes we broke out of jail are destroyed
+        scope?.destroy
+        reg?.shutdown
+    }
+
+    Void testStuff() {
+        ...
+        myService.doStuff()
+        ...
+    }
+}
+
+const class TestModule {
+    // define any service / test overrides here
+}
+<pre
+
+Note the scope may be called what you like, but 'thread' shows intent here.
+
+
+
 Debugging
 *********
 Recursively creating and injecting services into services can become surprisingly complex. So much so, when a error occurs it can be difficult to track down. For this reason IoC wraps Errs thrown and provides an Operations Stack that gives insight into what IoC was attempting to do (and to what) when the error occured.
