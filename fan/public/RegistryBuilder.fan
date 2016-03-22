@@ -284,7 +284,7 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** regBuilder.onRegistryStartup |Configuration config| {
-	**     config["log.hello"] = |Scope rootScope| {
+	**     config["log.hello1"] = |Scope rootScope| {
 	**         penguin := rootScope.serviceById("acme::Penguin")
 	**         Log.get("afIoc").info("Hello ${penguin.name}!")
 	**     }
@@ -299,12 +299,20 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** Void onRegistryStartup(Configuration config, Penguin penguin) {
-	**     config["log.hello"] = |Scope rootScope| {
+	**     config.set("log.hello2", |Scope rootScope| {
 	**         Log.get("afIoc").info("Hello ${penguin.name}!")
-	**     }
+	**     }).after("log.hello1")
 	** }
 	** <pre
 	** 
+	** Or, if you don't care about ordering, you may omit the call to 'Configuration':
+	** 
+	** pre>
+	** syntax: fantom
+	** Void onRegistryStartup(Penguin penguin) {
+	**     Log.get("afIoc").info("Hello ${penguin.name}!")
+	** }
+	** <pre
 	This onRegistryStartup(|Configuration| startupHook) {
 		_registryStartupHooks.add([_currentModule, startupHook])
 		return this
@@ -315,7 +323,7 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** regBuilder.onRegistryShutdown |Configuration config| {
-	**     config["log.bye"] = |Scope rootScope| {
+	**     config["log.bye1"] = |Scope rootScope| {
 	**         penguin := rootScope.serviceById("acme::Penguin")
 	**         Log.get("afIoc").info("Goodbye ${penguin.name}!")
 	**     }
@@ -330,12 +338,20 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** Void onRegistryShutdown(Configuration config, Penguin penguin) {
-	**     config["log.bye"] = |Scope rootScope| {
+	**     config.set("log.bye2", |Scope rootScope| {
 	**         Log.get("afIoc").info("Goodbye ${penguin.name}!")
-	**     }
+	**     }).after("log.bye1")
 	** }
 	** <pre
 	** 
+	** Or, if you don't care about ordering, you may omit the call to 'Configuration':
+	** 
+	** pre>
+	** syntax: fantom
+	** Void onRegistryShutdown(Penguin penguin) {
+	**     Log.get("afIoc").info("Goodbye ${penguin.name}!")
+	** }
+	** <pre
 	This onRegistryShutdown(|Configuration| shutdownHook) {
 		_registryShutdownHooks.add([_currentModule, _toImmutableObj(shutdownHook)])
 		return this
