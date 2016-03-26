@@ -70,7 +70,7 @@ internal class TestScopeBuild : IocTest {
 		reg := threadScope { it.addService(T_MyService02#) { it.withId("s02") } } 
 		reg.build(T_MyService02#)
 		log := (LogRec?) logs.list.last
-		verifyEq(log?.msg, ErrMsgs.autobuilder_warnAutobuildingService(T_MyService02#, "s02"))
+		verifyEq(log?.msg, ErrMsgs.autobuilder_warnAutobuildingService(T_MyService02#))
 	}
 	
 	Void testAutobuildCtorSelection() {

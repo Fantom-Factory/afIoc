@@ -37,12 +37,17 @@ internal const class ServiceStore {
 	
 	ServiceInstance? instanceByType(Type type) {
 		serviceType := type.toNonNullable
-		serviceIds	:= typeLookup[serviceType] ?: Str#.emptyList
-		if (serviceIds.isEmpty)
+		serviceIds	:= typeLookup[serviceType]
+		if (serviceIds == null || serviceIds.isEmpty)
 			return null
 		if (serviceIds.size == 1)
 			return idInstances[serviceIds.first]
 		throw IocErr(ErrMsgs.serviceStore_multipleServicesMatchType(serviceType, serviceIds))
+	}
+
+	// just for the autobuild / service warning
+	Bool containsServiceType(Type type) {
+		typeLookup[type.toNonNullable] != null
 	}
 	
 	Void destroy() {

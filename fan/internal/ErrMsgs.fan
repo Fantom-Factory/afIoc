@@ -205,8 +205,8 @@ internal mixin ErrMsgs {
 		"Contribution Func '${key}' for service '${serviceId}' is NOT immutable"
 	}
 
-	static Str autobuilder_warnAutobuildingService(Type serviceType, Str serviceId) {
-		"Building ${serviceType.qname} which is *also* defined as service '${serviceId} - unusual!"
+	static Str autobuilder_warnAutobuildingService(Type serviceType) {
+		"Building ${serviceType.qname} which is *also* defined as service - unusual!"
 	}
 	
 	static Str autobuilder_ctorsWithSameNoOfParams(Type serviceType, Int noOfParams) {
