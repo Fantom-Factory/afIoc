@@ -29,9 +29,10 @@ const class AutoBuilder {
 	virtual Obj autobuild(Scope currentScope, Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals, Str? serviceId) {
 		
 		if (serviceId == null) {
-			serviceDef := ((ScopeImpl) currentScope).serviceDefByType(type, false)
-			if (serviceDef != null)
-				log.warn(ErrMsgs.autobuilder_warnAutobuildingService(type, serviceDef.id))
+			// we can't easily bring back the serviceDef, 'cos there may be multiple services
+			serviceExistsForType := ((ScopeImpl) currentScope).containsServiceType(type)
+			if (serviceExistsForType)
+				log.warn(ErrMsgs.autobuilder_warnAutobuildingService(type))
 		}
 		
 		impl := findImplType(type, null)

@@ -314,6 +314,11 @@ internal const class ScopeImpl : Scope {
 				?: (checked ? throw ServiceNotFoundErr(ErrMsgs.scope_couldNotFindServiceByType(serviceType, scopes.dup.add(id).reverse), services(scopes.dup.add(id).reverse)) : null)
 			)
 	}
+
+	// just for the autobuild / service warning
+	internal Bool containsServiceType(Type serviceType) {
+		serviceStore.containsServiceType(serviceType) ? true : (parent?.containsServiceType(serviceType) ?: false)
+	}
 	
 	private Str[] services(Str[] scopes) {
 		scopes.map |scope| { registry.scopeIdLookup[scope].map { "$scope - $it" } }.flatten
