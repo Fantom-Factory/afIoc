@@ -1,6 +1,3 @@
-Upgrade to IoC v3
-*****************
-
 This document explains some of the differences between IoC 2 and IoC 3.
 
 IoC 3 is a complete rewrite of the IoC library, but the main interface to the library (service facets) has remained the same. This allowed the extensive test coverage of IoC 2 to be reused for IoC 3, and ensures your code requires little, if any, change to update.
@@ -12,7 +9,7 @@ On to the changes:
 
 
 RegistryBuilder
-===============
+***************
 'RegistryBuilder' now accepts module *instances* as well as module types. Note the 'startup()' method has been dropped.
 
 Old code:
@@ -52,7 +49,7 @@ registry := RegistryBuilder() {
 
 
 AppModules
-==========
+**********
 'AppModules' must now be 'const' because instances may be contributed to 'RegistryBuilder'. This means methods no longer need to be static, which feels more natural.
 
 'defineServices()' may be called anything as long as the method name starts with 'defineXXXX()' and declares 'RegistryBuilder' as its only parameter.
@@ -114,7 +111,7 @@ No changes have been made to the 'Configuration' class other than contributions 
 
 
 Registry / Scope
-================
+****************
 The biggest change in IoC 3 is the introduction of Scopes. As such, most of the useful dependency injection methods have moved from 'Registry' to the new 'Scope' class. The method names have been tidied up too.
 
 Old code:
@@ -142,7 +139,7 @@ Note that only services may now be retrieved from Scope, should you wish for a g
 
 
 Scopes
-======
+******
 As previously mentioned, the biggest change in IoC 3 is the introduction of Scopes. IoC itself defines an application level *root scope* where all singletons may live. For non-const classes [BedSheet]`pod:afBedSheet` defines a threaded 'request' scope and [Reflux]`pod:afReflux` defines a 'uiThread' scope.
 
 Const services are automatically matched to the root scope (and other non-threaded scopes), and non-const services are matched to threaded scopes. In containers such as BedSheet and Reflux where there are just 2 scopes, this default behaviour matches IoC 2.

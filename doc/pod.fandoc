@@ -12,12 +12,23 @@ Like [Guice]`http://code.google.com/p/google-guice/`? Know [Spring]`http://www.s
  - Simple API
  - **Runs in Javascript!**
 
+See frameworks such as [BedSheet]`pod:afBedSheet` and [Reflux]`pod:afReflux` for ready to go IoC containers.
+
 IoC was inspired by the most excellent [Tapestry 5 IoC]`http://tapestry.apache.org/ioc.html` for Java.
 
 
 
 Quick Start
 ***********
+This quick start demonstrates:
+ 1. Service definition
+ 2. List configuration
+ 3. Registry building
+ 4. It-block ctor injection
+ 5. Autobuilding
+
+The 'Main::main()' method creates a registry instance, obtains instances of the 'DinnerMenu' service, which prints contributed instances of the 'ChefsSpecials' class.
+
 1. Create a text file called 'Example.fan'
 
     syntax: fantom
@@ -33,6 +44,7 @@ Quick Start
 
         const Str[] dishes
 
+        // 4. It-block ctor injection
         new make(Str[] dishes, |This| in) {
             in(this)  // this it-block performs the actual injection
             this.dishes = dishes
@@ -54,11 +66,14 @@ Quick Start
 
     ** This is the central place where services are defined and configured
     const class AppModule {
+
+        // 1. Service definition
         Void defineServices(RegistryBuilder bob) {
             bob.addService(DinnerMenu#).withRootScope
             bob.addService(ChefsSpecials#).withRootScope
         }
 
+        // 2. Service configuration
         @Contribute { serviceType=DinnerMenu# }
         Void contributeDinnerMenu(Configuration config) {
             config.add("Fish'n'Chips")
@@ -72,6 +87,7 @@ Quick Start
 
     class Main {
         Void main() {
+            // 3. Registry building
             // create the registry, passing in our module
             registry := RegistryBuilder().addModule(AppModule#).build()
             scope    := registry.rootScope
@@ -79,6 +95,8 @@ Quick Start
             // different ways to access services
             menu1 := (DinnerMenu) scope.serviceById("Example_0::DinnerMenu")  // returns a service instance
             menu2 := (DinnerMenu) scope.serviceByType(DinnerMenu#)            // returns the same instance
+
+            // 5. Autobuilding
             menu3 := (DinnerMenu) scope.build(DinnerMenu#, [["Beef Stew"]])   // build a new instance
 
             // print menus

@@ -1,4 +1,4 @@
-#IoC 3 v3.0.0
+#IoC v3.0.0
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
 [![pod: v3.0.0](http://img.shields.io/badge/pod-v3.0.0-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
@@ -22,7 +22,7 @@ IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.o
 
 ## Install
 
-Install `IoC 3` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
+Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
 
     C:\> fanr install -r http://pods.fantomfactory.org/fanr/ afIoc
 
@@ -36,7 +36,14 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
 
 ## Quick Start
 
-1. Create a text file called `Example.fan`
+This quick start demonstrates:
+
+1. Service definition
+2. Service configuration
+3. Registry building
+4. It-block ctor injection
+5. Autobuilding
+6. Create a text file called `Example.fan`
 
         using afIoc
         
@@ -49,6 +56,7 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
         
             const Str[] dishes
         
+            // 4. It-block ctor injection
             new make(Str[] dishes, |This| in) {
                 in(this)  // this it-block performs the actual injection
                 this.dishes = dishes
@@ -70,11 +78,14 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
         
         ** This is the central place where services are defined and configured
         const class AppModule {
+        
+            // 1. Service definition
             Void defineServices(RegistryBuilder bob) {
                 bob.addService(DinnerMenu#).withRootScope
                 bob.addService(ChefsSpecials#).withRootScope
             }
         
+            // 2. Service configuration
             @Contribute { serviceType=DinnerMenu# }
             Void contributeDinnerMenu(Configuration config) {
                 config.add("Fish'n'Chips")
@@ -88,6 +99,7 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
         
         class Main {
             Void main() {
+                // 3. Registry building
                 // create the registry, passing in our module
                 registry := RegistryBuilder().addModule(AppModule#).build()
                 scope    := registry.rootScope
@@ -95,6 +107,8 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
                 // different ways to access services
                 menu1 := (DinnerMenu) scope.serviceById("Example_0::DinnerMenu")  // returns a service instance
                 menu2 := (DinnerMenu) scope.serviceByType(DinnerMenu#)            // returns the same instance
+        
+                // 5. Autobuilding
                 menu3 := (DinnerMenu) scope.build(DinnerMenu#, [["Beef Stew"]])   // build a new instance
         
                 // print menus
@@ -108,7 +122,7 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
         }
 
 
-2. Run `Example.fan` as a Fantom script from the command line:
+7. Run `Example.fan` as a Fantom script from the command line:
 
         C:\> fan Example.fan
         
@@ -1225,6 +1239,61 @@ Should you fail to add a required module / library, the test will fail when IoC 
 Where `XXXX` is a service in the library you forgot to add.
 
 Note that the `setup()` and `teardown()` could be moved into a common base class.
+
+### Threaded Services
+
+If your application contains threaded services, then to inject them, you need to create an instance of a threaded scope:
+
+```
+using afIoc::Inject
+using afIoc::Registry
+using afIoc::RegistryBuilder
+
+class TestExample : Test {
+    Registry? reg
+
+    // the threaded scope instance
+    Scope?    scope
+
+    @Inject
+    MyService? myService
+
+    override Void setup() {
+        reg = RegistryBuilder()
+
+        // define a threaded scope
+        reg.addScope("thread", true)
+
+        reg.addModule(AppModule#)
+           .addModule(TestModule#)
+           .build
+
+        // create an instance of the threaded scope
+        reg.rootScope.createChildScope("thread") { this.scope = it.jailBreak }
+
+        // use the threaded scope to set MyService and other @Inject'ed fields
+        scope.inject(this)
+    }
+
+    override Void teardown() {
+        // ensure any scopes we broke out of jail are destroyed
+        scope?.destroy
+        reg?.shutdown
+    }
+
+    Void testStuff() {
+        ...
+        myService.doStuff()
+        ...
+    }
+}
+
+const class TestModule {
+    // define any service / test overrides here
+}
+```
+
+Note the scope may be called what you like, but `thread` shows intent here.
 
 ## Debugging
 
