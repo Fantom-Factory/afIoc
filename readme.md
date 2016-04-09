@@ -18,6 +18,8 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - Simple API
 - **Runs in Javascript!**
 
+See frameworks such as [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) and [Reflux](http://pods.fantomfactory.org/pods/afReflux) for ready to go IoC containers.
+
 IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html) for Java.
 
 ## Install
@@ -39,11 +41,14 @@ Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fant
 This quick start demonstrates:
 
 1. Service definition
-2. Service configuration
+2. List configuration
 3. Registry building
 4. It-block ctor injection
 5. Autobuilding
-6. Create a text file called `Example.fan`
+
+The `Main::main()` method creates a registry instance, obtains instances of the `DinnerMenu` service, which prints contributed instances of the `ChefsSpecials` class.
+
+1. Create a text file called `Example.fan`
 
         using afIoc
         
@@ -122,7 +127,7 @@ This quick start demonstrates:
         }
 
 
-7. Run `Example.fan` as a Fantom script from the command line:
+2. Run `Example.fan` as a Fantom script from the command line:
 
         C:\> fan Example.fan
         
