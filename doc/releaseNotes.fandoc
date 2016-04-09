@@ -35,7 +35,7 @@ v2.0.2
 ======
  - Chg: 'perApplication' scoped services can only be created once, even during threaded race conditions.
  - Chg: Added 'withCtorArgs()' and 'withFieldVals()' to 'ServiceDefinitions'; building custom services is now even easier!
- - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See `ThreadLocalManager`.
+ - Chg: 'LocalProvider' takes into account '@Inject.type' when injecting 'LocalLists' and 'LocalMaps'. See 'ThreadLocalManager'.
  - Chg: 'RegistryBuilder.addModulesFromPod()' now takes a Str (pod name), not a pod instance.
  - Chg: 'DependencyProviders' is more accessible for [efanXtra]`pod:afEfanXtra`.
  - Bug: 'ServiceDefinitions.withImplId()' should not have taken an Id parameter.
@@ -169,7 +169,7 @@ v1.4.10
 
 v1.4.8
 ======
- - New: RegistryBuilder options are now available via `RegistryOptions`.
+ - New: RegistryBuilder options are now available via 'RegistryOptions'.
  - Chg: Injectable services are now documented with '(Service)'.
  - Chg: Enabled multi-line banner text.
 

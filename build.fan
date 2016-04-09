@@ -8,9 +8,9 @@ class Build : BuildPod {
 		version = Version("3.0.0")
 
 		meta = [	
-			"proj.name"		: "IoC 3",
+			"proj.name"		: "IoC",
 			"repo.tags"		: "system",
-			"repo.public"	: "false"
+			"repo.public"	: "true"
 		]
 
 		depends = [
@@ -24,13 +24,7 @@ class Build : BuildPod {
 
 		srcDirs = [`fan/`, `fan/internal/`, `fan/internal/def/`, `fan/internal/inspectors/`, `fan/internal/providers/`, `fan/public/`, `fan/public/advanced/`, `fan/public/facets/`, `fan/public/services/`, `test/`]
 		resDirs = [`doc/`]
-	}
-
-	@Target
-	override Void compile() {
-		// remove test pods from final build
-		testPods := "afConcurrent".split
-		depends = depends.exclude { testPods.contains(it.split.first) }
-		super.compile
+		
+		meta["afBuild.testPods"]	= "afConcurrent"
 	}
 }
