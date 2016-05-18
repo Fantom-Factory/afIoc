@@ -1,10 +1,13 @@
 Versions
 ********
+v3.0.2
+======
+ - Bug: Methods marked with '@PostInjection' weren't being called after 'scope.inject()'.
 
 v3.0.0
 ======
  - New: IoC now availble in Javascript!
- - New: IoC v3 is a re-write - it's lightweight, fast, and more cusomisable than ever before!
+ - New: IoC v3 is a re-write - it's lighter, faster, and more cusomisable than ever before!
 
 v2.0.10
 =======

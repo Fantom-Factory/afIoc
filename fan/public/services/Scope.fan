@@ -33,7 +33,7 @@ const mixin Scope {
 	** 
 	**  - creates an instance via the ctor marked with '@Inject' or the *best* fitting ctor with the most parameters
 	**  - inject dependencies into fields (of all visibilities)
-	**  - call any methods annotated with '@PostInjection'
+	**  - calls any method on the class annotated with '@PostInjection'
 	** 
 	** 'ctorArgs' (if provided) will be passed as arguments to the constructor.
 	** Constructor parameters should be defined in the following order:
@@ -43,7 +43,8 @@ const mixin Scope {
 	** Note that 'fieldVals' are set by an it-block function, should the ctor define one.
 	abstract Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 	
-	** Injects services and dependencies into fields of all visibilities.
+	** Injects services and dependencies into fields of all visibilities and
+	** calls any method on the class annotated with '@PostInjection'.
 	** 
 	** Returns the object passed in for method chaining.
 	abstract Obj inject(Obj obj)
@@ -158,6 +159,7 @@ internal const class ScopeImpl : Scope {
 			plan.each |val, field| {
 				field.set(instance, field.isConst ? val.toImmutable : val)
 			}
+			registry.autoBuilder.callPostInjectionMethods(this, null, instance, instance.typeof)
 			return instance
 		}
 		catch (IocErr ie)	throw ie
