@@ -74,16 +74,21 @@ const class AutoBuilder {
 				field.set(inst, val)
 			}
 
-		impl.methods.findAll { it.hasFacet(PostInjection#) }.each |method| {
-			methodArgs := findFuncArgs(currentScope, method.func, null, inst, serviceId)
-			method.callOn(inst, methodArgs)
-		}
+		callPostInjectionMethods(currentScope, serviceId, inst, impl)
 		
 		buildHooks := (Str:|Scope, Obj|) buildHooksRef.val
 		// call with scope first so it matches onServiceBuild and other methods
 		buildHooks.each { it.call(currentScope, inst) }
 		
 		return inst
+	}
+	
+	@NoDoc
+	virtual Void callPostInjectionMethods(Scope currentScope, Str? serviceId, Obj inst, Type impl) {
+		impl.methods.findAll { it.hasFacet(PostInjection#) }.each |method| {
+			methodArgs := findFuncArgs(currentScope, method.func, null, inst, serviceId)
+			method.callOn(inst, methodArgs)
+		}		
 	}
 	
 	** A return value of 'null' signifies the type has no ctors and must be instantiated via `Type.make`
