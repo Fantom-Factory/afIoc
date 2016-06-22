@@ -69,7 +69,7 @@ internal class Contrib : Constraints {
 	}
 	
 	override Str toStr() {
-		"[$key:$val]"
+		"[$key:$val].before($befores).after($afters)"
 	}	
 }
 
@@ -101,4 +101,6 @@ internal class ContribCont {
 		this.key = key
 		this.optional = optional
 	}
+
+	override Str toStr() { key.toStr }
 }
