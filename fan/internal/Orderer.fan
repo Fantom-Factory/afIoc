@@ -10,9 +10,10 @@
 //        for each node m with an edge from n to m do
 //            visit(m)
 //        mark n permanently
-//        add n to L
+//        unmark n temporarily
+//        add n to head of L
 ** 
-** @see `http://en.wikipedia.org/wiki/Topological_sorting`	
+** @see `http://en.wikipedia.org/wiki/Topological_sorting`
 @Js
 internal class Orderer {
 
@@ -55,10 +56,10 @@ internal class Orderer {
 		}
 	}
 
-	Obj?[] toOrderedList() {
+	Obj[] toOrderedList() {
 		order()
-			.exclude { it.payload === PLACEHOLDER || it.payload === DELETE }
-			.map 	 { it.payload === NULL ? null : it.payload }
+			.exclude { it.payload === PLACEHOLDER || it.payload === DELETE || it.payload == NULL || it.payload == null }
+			.map 	 { it.payload }
 	}
 
 	Void clear() {
@@ -66,40 +67,41 @@ internal class Orderer {
 		nodes.clear
 	}
 
+
 	internal OrderedNode[] order() {
-		nodesIn	 := nodes.dup
+		nodesIn	 := nodes.vals
 		nodesOut := OrderedNode[,]
-
-		while (!nodesIn.isEmpty) {
+		node	 := nodesIn.first as OrderedNode
+		while (node != null) {
 			ctx := OrderingCtx()
-			ctx.withNode(nodesIn.vals[0]) |node| {
-				visit(ctx, nodesIn, nodesOut, node)
+			ctx.withNode(node) |n| {
+				visit(ctx, n, nodesIn, nodesOut)
 			}
+			node = nodesIn.find { !it.marked }
 		}
-
 		return nodesOut
 	}
-
-	private Void visit(OrderingCtx ctx, Obj:OrderedNode nodesIn, OrderedNode[] nodesOut, OrderedNode n) {
-		// follow the dependencies until we find a node that depends on no-one
-		nodesIn
-			.findAll { 
-				it.isBefore.any |depName| { depName == n.name }
-			}
-			.each { 
-				ctx.withNode(it) |node| {
-					// BugFix 1.3.10: ensure we don't visit nodes that have already been moved to nodeOut 
-					if (nodesIn.containsKey(node.name))
-						visit(ctx, nodesIn, nodesOut, node)
-				}
-			}
-
-		// move node from nodesIn to nodesOut
-		nodesIn.remove(n.name)
+	
+	private Void visit(OrderingCtx ctx, OrderedNode node, OrderedNode[] nodesIn, OrderedNode[] nodesOut) {
+		if (node.markedT)
+			throw ctx.dagErr(nodesIn)
 		
-		// don't move optional nodes that weren't found
-		if (n.isPlaceholder.not)
-			nodesOut.add(n)
+		node.markedT = true
+				
+		befores := nodesIn.findAll |m| { m.isBefore.any { it == node.name } }
+		befores.each |m| { 
+			ctx.withNode(m) |q| {
+				visit(ctx, q, nodesIn, nodesOut)
+			}
+		}
+		
+		node.markedT = false
+		
+		if (node.markedP == true)
+			return
+
+		nodesOut.add(node)
+		node.markedP = true
 	}	
 
 	private OrderedNode getOrAdd(Obj name, Obj? payload, Bool isOptional) {
@@ -121,7 +123,11 @@ internal class OrderedNode {
 	Obj 	name
 	Obj[] 	isBefore	:= [,]
 	Obj? 	payload	
-	Bool	isOptional	
+	Bool	isOptional
+
+	Bool	markedT
+	Bool	markedP
+	Bool	marked() { markedT || markedP }
 
 	new make(Obj name, Obj? payload, Bool isOptional) {
 		this.name 	 	= name
@@ -134,13 +140,15 @@ internal class OrderedNode {
 	}
 
 	override Str toStr() {
-		"${name}->(" + isBefore.join(",") + ")"
+		isBefore.isEmpty
+			? name.toStr
+			: "${name}->(" + isBefore.join(",") + ")"
 	}
 }
 
 @Js
 internal class OrderingCtx {
-	private OrderedNode[]	nodeStack	:= [,]
+	OrderedNode[]	nodeStack	:= [,]
 
 	Void withNode(OrderedNode node, |OrderedNode node| operation) {
 		nodeStack.push(node)
@@ -149,7 +157,7 @@ internal class OrderingCtx {
 			// check for recursion
 			nodeStack.eachRange(0..<-1) { 
 				if (it == node)
-					throw IocErr(ErrMsgs.orderer_configRecursion(stackNames))
+					throw recursionErr
 			}
 	
 			if (node.isPlaceholder && node.isOptional.not)
@@ -161,6 +169,14 @@ internal class OrderingCtx {
 		}
 	}
 
+	Err recursionErr() {
+		IocErr(ErrMsgs.orderer_configRecursion(stackNames))
+	}
+	
+	Err dagErr(OrderedNode[] ns) {
+		IocErr(ErrMsgs.orderer_configNoDag(ns.join(", ")))
+	}
+	
 	Str[] stackNames() {
 		nodeStack.map { it.name }
 	}

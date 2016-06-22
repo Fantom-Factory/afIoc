@@ -2,6 +2,7 @@ Versions
 ********
 v3.0.2
 ======
+ - Chg: Rejigged the configuration constraint ordering algorithm.
  - Bug: Methods marked with '@PostInjection' weren't being called after 'scope.inject()'.
 
 v3.0.0

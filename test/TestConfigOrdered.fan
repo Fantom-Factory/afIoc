@@ -136,6 +136,21 @@ internal class TestConfigOrdered : IocTest {
 	
 	// ---- Bug Tests -----------------------------------------------------------------------------
 	
+	Void testDagBug() {
+		reg := threadScope { 
+			it.addService(T_MyService82#).withId("s82")
+			it.contributeToServiceType(T_MyService82#) |Configuration config| {
+				config.set("ajax",  "Ajax#").after("BedSheet")
+				config.set("Clean", "Clean#").before("BedSheet").before("Err")
+				config.set("Err", 	"Err#"	).before("BedSheet")		
+				config.addPlaceholder("BedSheet")				
+			}
+		}
+		s82 := (T_MyService82) reg.serviceById("s82")
+		
+		verifyEq(s82.filters, ["Clean#", "Err#", "Ajax#"])
+	}
+
 	Void testFilterBug() {
 		reg := threadScope { addModule(T_MyModule92#) }
 		s82 := (T_MyService82) reg.serviceById("s82")

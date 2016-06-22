@@ -38,9 +38,9 @@ internal class TestConstraints : IocTest {
 				}.before("a-2")
 			}
 			contributeToServiceType(T_MyService12#) |Configuration config| {
-					config.set("d-1", 1).before("a-1")
-					config.set("d-2", 1).before("b-1")
-					config.set("d-3", 1).before("afIoc.unordered- 1").before("a-1")
+				config.set("d-1", 1).before("a-1")
+				config.set("d-2", 1).before("b-1")
+				config.set("d-3", 1).before("afIoc.unordered- 1").before("a-1")
 			}
 		}.serviceByType(T_MyService12#)
 		

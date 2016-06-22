@@ -189,6 +189,10 @@ internal mixin ErrMsgs {
 		"Configuration ordering recursion! A configuration contribution depends on its self in some way : " + nodeNames.join(" -> ")
 	}
 
+	static Str orderer_configNoDag(Str nodes) {
+		"Configuration ordering constraints could not be satisfied! (DAG error!) : " + nodes		
+	}
+
 	static Str orderer_configKeyAlreadyAdded(Str id) {
 		"Configuration ordering already has a contribution with ID '$id'"
 	}

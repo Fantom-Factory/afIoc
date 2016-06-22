@@ -192,7 +192,7 @@ internal class ConfigurationImpl : Configuration {
 		if (orderedContribs != null) {
 			last := orderedContribs.last
 			if (last != null) {
-				last.before(key)
+				last.before(contrib.key)
 				contrib.after(last.key)
 			}
 			orderedContribs.add(contrib)
@@ -349,7 +349,7 @@ internal class ConfigurationImpl : Configuration {
 	private Obj? validateVal(Obj? val) {
 		if (val === Orderer.DELETE || val === Orderer.PLACEHOLDER)
 			return val
-		
+
 		if (val == null) {
 			if (!valueType.isNullable)
 				throw IocErr(ErrMsgs.contributions_configTypeMismatch("value", null, valueType))
