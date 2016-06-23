@@ -8,7 +8,8 @@ internal class SrvDef {
 	Str[]?			aliases
 	Type[]?			aliasTypes
 	ContribDef[]?	contribDefs
-	Func[]?			buildContribs
+	Func[]?			buildHookContribs
+	Func[]?			decorateHookContribs
 	Str[]?			declaredScopes
 	Str[]			matchedScopes	:= Str[,]
 
@@ -134,7 +135,8 @@ internal class SrvDef {
 			it.matchedScopes	= this.matchedScopes
 			it.builderFuncRef	= Unsafe(this.builder)
 			it.contribFuncsRef	= Unsafe(contribDefs?.map |def -> |Configuration| | { def.configFunc })
-			it.buildHooksRef	= Unsafe(buildContribs)
+			it.buildHooksRef	= Unsafe(buildHookContribs)
+			it.decorateHooksRef	= Unsafe(decorateHookContribs)
 		}		
 	}
 

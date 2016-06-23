@@ -119,6 +119,7 @@ internal const class ServiceInstance {
 	
 	private Obj? build(Scope currentScope) {
 		instance := def.build(currentScope)
+		instance =  def.decorate(currentScope, instance)
 		def.callBuildHooks(currentScope, instance)
 		return instance
 	}

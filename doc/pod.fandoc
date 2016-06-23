@@ -1233,6 +1233,47 @@ The service 'Configuration' class also provides a means to set an override ID. O
 
 
 
+Decorating Services
+===================
+Services may be decorated. That is, they may be replaced with another instance that *wraps* the original instance. You may do this to log method calls. For example, a 'MrMen' service and a wrapper:
+
+pre>
+syntax: fantom
+const mixin MrMen {
+    virtual Str mrHappy() { "Mr Happy" }
+}
+
+const class MeMenWrapper : MrMen {
+    const MrMen orig
+
+    new make(MrMen orig) {
+        this.orig = orig
+    }
+
+    override Str mrHappy() {
+        echo("Calling Mr Happy...")
+        return orig.mrHappy
+    }
+}
+<pre
+
+Decorate the original 'MrMen' service using the 'RegistryBuilder':
+
+pre>
+syntax: fantom
+regBuilder.decorateService("acme::MrMen") |Configuration config| {
+    config["mrMen.wrapper"] = |Obj? serviceInstance, Scope scope, ServiceDef serviceDef->Obj?| {
+        return MrMenWrapper(serviceInstance)
+    }
+}
+<pre
+
+Note the id 'mrMen.wrapper' isn't required, but may be useful for ordering if someone wishes to wrap your wrapper!
+
+Note that wrapping / decorating services isn't possible with normal overrides because overrides don't have a handle on the original service.
+
+
+
 Dependency Providers [#dependecnyProviders]
 *******************************************
 IoC injects services, but it can also inject other custom classes and objects. By contributing instances of `DependencyProvider` to the 'DependencyProviders' service you can inject your own objects:

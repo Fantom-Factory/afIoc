@@ -22,6 +22,7 @@ class RegistryBuilder {
 	private Obj[][]			_scopeCreateHooks		:= Obj[][,]
 	private Obj[][]			_scopeDestroyHooks		:= Obj[][,]
 	private Obj[][]			_serviceBuildHooks		:= Obj[][,]
+	private Obj[][]			_decoratorHooks			:= Obj[][,]
 	private Duration		_buildStart
 	
 	@NoDoc
@@ -398,7 +399,7 @@ class RegistryBuilder {
 	** pre>
 	** syntax: fantom
 	** regBuilder.onServiceBuild("*penguin*") |Configuration config| {
-	**     config["log.hello"] = |Scope scope, ServiceDef def, Obj? instance| {
+	**     config["log.hello"] = |Obj? instance, Scope scope, ServiceDef def| {
 	**         Log.get("afIoc").info("HELLO WORLD from ${def.id}")
 	**     }
 	** }
@@ -413,7 +414,26 @@ class RegistryBuilder {
 		_serviceBuildHooks.add([_currentModule, Regex.glob(serviceGlob), _toImmutableObj(buildHook)])
 		return this
 	}
-	
+
+	** Allows you to decorate / replace services with your own implementations.
+	** 
+	** pre>
+	** syntax: fantom
+	** regBuilder.decorateService("acme::MyService") |Configuration config| {
+	**     config["alt-1"] = |Obj? serviceInstance, Scope scope, ServiceDef serviceDef->Obj?| {
+	**         return MyServiceAlt(serviceInstance)
+	**     }
+	** }
+	** <pre
+	** 
+	** The difference between decorating and overriding, is that when decorating you are passed the 
+	** original instance. This makes it perfect for wrapping implementations with logging methods, 
+	** or other cross cutting / AOP style operations. 
+	This decorateService(Str serviceId, |Configuration| decoratorHook) {
+		_decoratorHooks.add([_currentModule, serviceId, _toImmutableObj(decoratorHook)])
+		return this
+	}
+
 	** Sets a value in the 'options' map. 
 	** Returns 'this' so it may be used as a builder method. 		
 	This setOption(Str name, Obj? value) {
@@ -423,7 +443,6 @@ class RegistryBuilder {
 
 	** Builds and returns the registry; this may only be done once.  
     Registry build() {
-
 		defaults := Str:Obj?[:] { it.caseInsensitive = true }.addAll([
 			"afIoc.bannerText" : "Alien-Factory IoC v$typeof.pod.version",
 		])
@@ -503,6 +522,7 @@ class RegistryBuilder {
 		_scopeCreateHooks		= _scopeCreateHooks		.exclude { _modulesRemove.contains(it[0]) }
 		_scopeDestroyHooks		= _scopeDestroyHooks	.exclude { _modulesRemove.contains(it[0]) }
 		_serviceBuildHooks		= _serviceBuildHooks	.exclude { _modulesRemove.contains(it[0]) }
+		_decoratorHooks			= _decoratorHooks		.exclude { _modulesRemove.contains(it[0]) }
 
 		// we could use Map.addList(), but do it the long way round so we get a nice error on dups
 		services := Str:SrvDef[:] { caseInsensitive = true }
@@ -580,10 +600,19 @@ class RegistryBuilder {
 		scopeDefs.each |ScpDef scpDef| {
 			scpDef.createContribs  = _scopeCreateHooks .findAll { scpDef.matchesGlob(it[1]) }.map { it[2] }
 			scpDef.destroyContribs = _scopeDestroyHooks.findAll { scpDef.matchesGlob(it[1]) }.map { it[2] }
+			if (scpDef.createContribs.isEmpty)
+				scpDef.createContribs = null
+			if (scpDef.destroyContribs.isEmpty)
+				scpDef.destroyContribs = null
 		}
 
 		services.each |srvDef| {
-			srvDef.buildContribs  = _serviceBuildHooks .findAll { srvDef.matchesGlob(it[1]) }.map { it[2] }
+			srvDef.buildHookContribs	= _serviceBuildHooks .findAll { srvDef.matchesGlob(it[1]) }.map { it[2] }
+			srvDef.decorateHookContribs	= _decoratorHooks	 .findAll { srvDef.matchesId(it[1])   }.map { it[2] }
+			if (srvDef.buildHookContribs.isEmpty)
+				srvDef.buildHookContribs = null
+			if (srvDef.decorateHookContribs.isEmpty)
+				srvDef.decorateHookContribs = null
 		}
 		
 		return RegistryImpl(_buildStart, scopeDefs, services, moduleTypes, options, _registryStartupHooks.map { it[1] }, _registryShutdownHooks.map { it[1] })
