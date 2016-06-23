@@ -119,7 +119,7 @@ internal const class T_ConstClass {
 		eventRef.val = "scopeDestroyHook - ${scope.id} - ${scope.registry.activeScope.id}"
 	}
 
-	static Void serviceBuildHook(Scope scope, ServiceDef serviceDef, Obj serviceInstance) {
+	static Void serviceBuildHook(Obj? serviceInstance, Scope scope, ServiceDef serviceDef) {
 		eventRef.val = "serviceBuildHook - ${serviceDef.id}"
 	}
 }

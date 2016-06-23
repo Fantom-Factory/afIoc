@@ -47,6 +47,7 @@ internal const class ServiceDefImpl : ServiceDef {
 			const Unsafe?	contribFuncsRef		// Unsafe because Javascript can't hold immutable funcs
 			const Unsafe	builderFuncRef		// Unsafe because Javascript can't hold immutable funcs
 			const Unsafe?	buildHooksRef		// Unsafe because Javascript can't hold immutable funcs
+			const Unsafe?	decorateHooksRef	// Unsafe because Javascript can't hold immutable funcs
 			const AtomicInt	noOfInstancesRef	:= AtomicInt(0)
 
 	new make(|This|in) {
@@ -80,17 +81,31 @@ internal const class ServiceDefImpl : ServiceDef {
 		noOfInstancesRef.incrementAndGet
 		return instance
 	}
-
-	Void callBuildHooks(Scope currentScope, Obj? instance) {
-		configs	:= (Func[]?) buildHooksRef?.val
+	
+	Obj? decorate(Scope currentScope, Obj? instance) {
+		configs	:= (Func[]?) decorateHooksRef?.val
 		if (configs != null && configs.isEmpty.not) {
-			config	:= ConfigurationImpl(currentScope, Str:|Scope, ServiceDef, Obj?|#, "afIoc::Scope.onCreate")
+			config	:= ConfigurationImpl(currentScope, Str:|Obj?, Scope, ServiceDef|#, "afIoc::Scope.onCreate")
 			configs.each {
 				it.call(config)
 				config.cleanupAfterMethod
 			}
 			hooks := (Str:Func) config.toMap
-			hooks.each { it.call(currentScope, this, instance) }
+			hooks.each { instance = it.call(instance, currentScope, this) }
+		}
+		return instance
+	}
+
+	Void callBuildHooks(Scope currentScope, Obj? instance) {
+		configs	:= (Func[]?) buildHooksRef?.val
+		if (configs != null && configs.isEmpty.not) {
+			config	:= ConfigurationImpl(currentScope, Str:|Obj?, Scope, ServiceDef|#, "afIoc::Scope.onCreate")
+			configs.each {
+				it.call(config)
+				config.cleanupAfterMethod
+			}
+			hooks := (Str:Func) config.toMap
+			hooks.each { it.call(instance, currentScope, this) }
 		}
 	}
 

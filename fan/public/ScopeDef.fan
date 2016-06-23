@@ -32,8 +32,8 @@ internal const class ScopeDefImpl : ScopeDef {
 	}
 
 	Void callCreateHooks(Scope? parent) {
-		configs	:= (Func[]) createRefs.val
-		if (configs.isEmpty.not) {
+		configs	:= (Func[]?) createRefs.val
+		if (configs != null && configs.isEmpty.not) {
 			config	:= ConfigurationImpl(parent, Str:|Scope|#, "afIoc::Scope.onCreate")
 			configs.each {
 				it.call(config)
@@ -45,8 +45,8 @@ internal const class ScopeDefImpl : ScopeDef {
 	}
 
 	Void callDestroyHooks(Scope? parent) {
-		configs	:= (Func[]) destroyRefs.val
-		if (configs.isEmpty.not) {
+		configs	:= (Func[]?) destroyRefs.val
+		if (configs != null && configs.isEmpty.not) {
 			config	:= ConfigurationImpl(parent, Str:|Scope|#, "afIoc::Scope.onDestroy")
 			configs.each {
 				it.call(config)
