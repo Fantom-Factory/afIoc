@@ -4,6 +4,7 @@ v3.0.2
 ======
  - Chg: Rejigged the configuration constraint ordering algorithm.
  - Bug: Methods marked with '@PostInjection' weren't being called after 'scope.inject()'.
+ - Bug: 'config.inOrder |->| { ... }' wasn't being applied to overriden config.
 
 v3.0.0
 ======
