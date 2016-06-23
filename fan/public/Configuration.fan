@@ -106,6 +106,8 @@ mixin Configuration {
 	** Overrides and replaces a contributed value. 
 	** The existing key must exist.
 	** 
+	** Note that when overriding, all existing ordering constraints are cleared and must be re-set.
+	** 
 	** 'existingKey' is the id / key of the value to be replaced. 
 	** It may have been initially provided by 'set()' or have be the 'newKey' of a previous override.
 	** 
@@ -192,8 +194,8 @@ internal class ConfigurationImpl : Configuration {
 		if (orderedContribs != null) {
 			last := orderedContribs.last
 			if (last != null) {
-				last.before(contrib.key)
-				contrib.after(last.key)
+				last.before(contrib.keyFudge)
+				contrib.after(last.keyFudge)
 			}
 			orderedContribs.add(contrib)
 		}
@@ -233,8 +235,18 @@ internal class ConfigurationImpl : Configuration {
 		if (overrides.vals.map { it.key }.contains(newKey))
 		 	throw IocErr(ErrMsgs.contributions_configOverrideKeyAlreadyExists(newKey.toStr))
 
-		contrib := Contrib(newKey, newValue)
+		contrib := Contrib(newKey, newValue, existingKey)
 		overrides[existingKey] = contrib
+
+		if (orderedContribs != null) {
+			last := orderedContribs.last
+			if (last != null) {
+				last.before(contrib.keyFudge)
+				contrib.after(last.keyFudge)
+			}
+			orderedContribs.add(contrib)
+		}
+
 		return contrib
 	}
 	

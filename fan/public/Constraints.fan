@@ -28,14 +28,19 @@ mixin Constraints {
 
 @Js
 internal class Contrib : Constraints {
-	Obj key; Obj? val
+	Obj key; Obj? val; Obj? existingKey
 	Bool unordered
 
 	ContribCont[]? befores;	ContribCont[]? afters
 
-	new make(Obj key, Obj? val) {
+	new make(Obj key, Obj? val, Obj? existingKey := null) {
 		this.key = key
 		this.val = val
+		this.existingKey = existingKey
+	}
+	
+	Obj keyFudge() {
+		existingKey ?: key
 	}
 	
 	override This before(Obj key, Bool optional := false) {
