@@ -1,7 +1,7 @@
-#IoC v3.0.0
+#IoC v3.0.2
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v3.0.0](http://img.shields.io/badge/pod-v3.0.0-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v3.0.2](http://img.shields.io/badge/pod-v3.0.2-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
@@ -1142,6 +1142,43 @@ The `@Override` facet has an `overrideId` attribute which is the same as above. 
 The service `Configuration` class also provides a means to set an override ID. Overriding service contribution overrides work in exactly the same way.
 
 > TIP: It is good practice to provide an override ID so others may override your override.
+
+### Decorating Services
+
+Services may be decorated. That is, they may be replaced with another instance that *wraps* the original instance. You may do this to log method calls. For example, a `MrMen` service and a wrapper:
+
+```
+const mixin MrMen {
+    virtual Str mrHappy() { "Mr Happy" }
+}
+
+const class MeMenWrapper : MrMen {
+    const MrMen orig
+
+    new make(MrMen orig) {
+        this.orig = orig
+    }
+
+    override Str mrHappy() {
+        echo("Calling Mr Happy...")
+        return orig.mrHappy
+    }
+}
+```
+
+Decorate the original `MrMen` service using the `RegistryBuilder`:
+
+```
+regBuilder.decorateService("acme::MrMen") |Configuration config| {
+    config["mrMen.wrapper"] = |Obj? serviceInstance, Scope scope, ServiceDef serviceDef->Obj?| {
+        return MrMenWrapper(serviceInstance)
+    }
+}
+```
+
+Note the id `mrMen.wrapper` isn't required, but may be useful for ordering if someone wishes to wrap your wrapper!
+
+Note that wrapping / decorating services isn't possible with normal overrides because overrides don't have a handle on the original service.
 
 ## Dependency Providers
 
