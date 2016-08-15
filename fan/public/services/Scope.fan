@@ -277,7 +277,8 @@ internal const class ScopeImpl : Scope {
 			// if createHooks errors, we should still call destroyHooks, because *some* create hooks may have succeeded
 			errors = childScopeDef.callCreateHooks(childScope)
 
-			f?.call(childScope)
+			if (f != null && (errors == null || errors.isEmpty))
+				f.call(childScope)
 		} finally {
 			if (f != null) {
 				errs := childScope.destroyInternal

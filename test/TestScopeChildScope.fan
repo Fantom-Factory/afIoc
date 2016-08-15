@@ -65,7 +65,6 @@ internal class TestScopeChildScope : IocTest {
 	}
 	
 	Void testCreatingNonActiveScopes() {
-
 		registry := RegistryBuilder() {
 		    addScope("myScope")
 		}.build

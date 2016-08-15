@@ -25,6 +25,7 @@ internal class TestScopeDestroy : IocTest {
 	}
 	
 	Void testScopeHookErrors() {
+		called := AtomicRef(false)
 
 		// verify onScopeCreate method errs
 		reg := RegistryBuilder() {
@@ -35,8 +36,11 @@ internal class TestScopeDestroy : IocTest {
 		}.build
 		
 		verifyErrMsg(Err#, "Ha ha ha!") {
-			reg.rootScope.createChild("myScope") { }
+			reg.rootScope.createChild("myScope") {
+				called.val = true
+			}
 		}
+		verifyFalse(called.val)
 		
 		
 		
@@ -55,6 +59,7 @@ internal class TestScopeDestroy : IocTest {
 		
 		
 		// verify onScopeCreate hook errs
+		called.val = false
 		reg = RegistryBuilder() {
 			it.addScope("myScope")
 			it.onScopeCreate("myScope") |config| {
@@ -65,8 +70,11 @@ internal class TestScopeDestroy : IocTest {
 		}.build
 		
 		verifyErrMsg(Err#, "Ha ha ha!") {
-			reg.rootScope.createChild("myScope") { }
+			reg.rootScope.createChild("myScope") {
+				called.val = true
+			}
 		}
+		verifyFalse(called.val)
 		
 		
 		
@@ -87,7 +95,7 @@ internal class TestScopeDestroy : IocTest {
 
 
 		// verify onScopeDestroy is still called if there's an error in onScopeCreate
-		called := AtomicRef(false)
+		called.val = false
 		reg = RegistryBuilder() {
 			it.addScope("myScope")
 			it.onScopeDestroy("myScope") |config| {
