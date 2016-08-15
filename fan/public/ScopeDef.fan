@@ -31,29 +31,59 @@ internal const class ScopeDefImpl : ScopeDef {
 		id.equalsIgnoreCase(scopeId) || aliases.any { it.equalsIgnoreCase(scopeId) }
 	}
 
-	Void callCreateHooks(Scope? parent) {
+	Err[]? callCreateHooks(Scope? parent) {
+		errors  := null as Err[]
 		configs	:= (Func[]?) createRefs.val
 		if (configs != null && configs.isEmpty.not) {
 			config	:= ConfigurationImpl(parent, Str:|Scope|#, "afIoc::Scope.onCreate")
 			configs.each {
-				it.call(config)
-				config.cleanupAfterMethod
+				try {
+					it.call(config)
+					config.cleanupAfterMethod
+				} catch (Err err) {
+					if (errors == null)
+						errors = Err[,]
+					errors.add(err)
+				}
 			}
 			hooks := (Str:Func) config.toMap
-			hooks.each { it.call(parent) }
-		}		
+			hooks.each {
+				try	it.call(parent)
+				catch (Err err) {
+					if (errors == null)
+						errors = Err[,]
+					errors.add(err)
+				}
+			}
+		}
+		return errors
 	}
 
-	Void callDestroyHooks(Scope? parent) {
+	Err[]? callDestroyHooks(Scope? parent) {
+		errors  := null as Err[]
 		configs	:= (Func[]?) destroyRefs.val
 		if (configs != null && configs.isEmpty.not) {
 			config	:= ConfigurationImpl(parent, Str:|Scope|#, "afIoc::Scope.onDestroy")
 			configs.each {
-				it.call(config)
-				config.cleanupAfterMethod
+				try {
+					it.call(config)
+					config.cleanupAfterMethod
+				} catch (Err err) {
+					if (errors == null)
+						errors = Err[,]
+					errors.add(err)
+				}
 			}
 			hooks := (Str:Func) config.toMap
-			hooks.each { it.call(parent) }
-		}		
+			hooks.each {
+				try it.call(parent)
+				catch (Err err) {
+					if (errors == null)
+						errors = Err[,]
+					errors.add(err)
+				}
+			}
+		}
+		return errors
 	}
 }

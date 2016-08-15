@@ -12,11 +12,19 @@ const mixin Registry {
 	abstract This shutdown()
 
 	** Returns the *root* scope.
+	** 
+	** For normal IoC usage, consider using 'activeScope()' instead. 
 	abstract Scope rootScope()
-	
+
+	** Returns the global *default* scope. 
+	** This is the default scope used in any new thread and defaults to the *root* scope. 
+	** 
+	** For normal IoC usage, consider using 'activeScope()' instead. 
+	abstract Scope defaultScope()
+
 	** Returns the current *active* scope.
 	abstract Scope activeScope()
-	
+
 	** Returns a map of all defined scopes, keyed by scope ID.
 	abstract Str:ScopeDef scopeDefs()
 	
@@ -47,10 +55,11 @@ const mixin Registry {
 	** <pre
 	abstract Str printBanner()
 	
-	// used by Reflux to set the default active scope (to uiThread)
-	** Sets the default active scope. Defaults to *root scope*.
-	@NoDoc
-	abstract Scope? setDefaultScope(Scope? defaultScope)
+	** *For advanced use only.*
+	** 
+	** Sets a new global default scope and returns the old one.
+	** Only non-threaded scopes may be set as the global default.
+	abstract Scope setDefaultScope(Scope defaultScope)
 	
 	@NoDoc @Deprecated { msg="Use 'rootScope.build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
@@ -98,7 +107,7 @@ internal const class RegistryImpl : Registry {
 	const RegistryMeta			regMeta
 	const ActiveScopeStack		activeScopeStack
 	const OperationsStack		opStack
-	const AtomicRef				defScopeRef		:= AtomicRef()
+	const AtomicRef				defaultScopeRef		:= AtomicRef()
 
 	override const Str:ScopeDef		scopeDefs
 	override const Str:ServiceDef	serviceDefs
@@ -159,7 +168,7 @@ internal const class RegistryImpl : Registry {
 		
 		rootScopeDef	:= findScopeDef("root", builtInScope)
 		rootScope_	 	= ScopeImpl(this, builtInScope, rootScopeDef)
-		defScopeRef.val	= rootScope_
+		defaultScopeRef.val	= rootScope_
 
 	
 		
@@ -240,16 +249,26 @@ internal const class RegistryImpl : Registry {
 		hooks.each { it.call(rootScope_) }
 		
 		// destroy all active scopes and their children...!
-		scope := (Scope?) activeScope
+		scope := (ScopeImpl?) activeScope
+		sdErrs := Err[,]
 		while (scope != null) {
-			scope.destroy
+			sdErrs.addAll(scope._destroy ?: Err#.emptyList)
 			scope = scope.parent
 		}
 
-		// ensure the core scopes are destroyed - for wotever reason they may not have been part of the scope hierarchy
-		rootScope_.destroy
-		builtInScope.destroy
-		
+		// ensure the root and default scopes are destroyed
+		// for wotever reason they may not have been part of the active scope hierarchy
+		scope = defaultScopeRef.val
+		while (scope != null) {
+			sdErrs.addAll(scope._destroy ?: Err#.emptyList)
+			scope = scope.parent
+		}
+		scope = rootScope_
+		while (scope != null) {
+			sdErrs.addAll(scope._destroy ?: Err#.emptyList)
+			scope = scope.parent
+		}
+
 		if (sayGoodbye) {
 			log			 := Registry#.pod.log
 			shutdownTime := (Duration.now - then).toMillis.toLocale("#,###")
@@ -259,6 +278,10 @@ internal const class RegistryImpl : Registry {
 
 		// allow services (and shutdown contributions!) access the registry until it *has* been shutdown
 		shutdownLock.lock
+		
+		if (sdErrs.size > 0)
+			throw sdErrs.first
+		
 		return this
 	}
 	
@@ -267,9 +290,14 @@ internal const class RegistryImpl : Registry {
 		return rootScope_
 	}
 
+	override Scope defaultScope() {
+		shutdownLock.check
+		return defaultScopeRef.val
+	}
+
 	override Scope activeScope() {
 		shutdownLock.check
-		return activeScopeStack.peek ?: defScopeRef.val
+		return activeScopeStack.peek ?: defaultScopeRef.val
 	}
 	
 	override Str printServices() {
@@ -349,9 +377,12 @@ internal const class RegistryImpl : Registry {
 		return title
 	}
 	
-	override Scope? setDefaultScope(Scope? scope) {
-		this.defScopeRef.val = scope
-		return scope
+	override Scope setDefaultScope(Scope scope) {
+		if (scope.isThreaded)
+			throw ArgErr("Scope '${scope.id}' is threaded. Only non-threaded scopes may be set as the global default.")
+		oldScope := this.defaultScopeRef.val
+		this.defaultScopeRef.val = scope
+		return oldScope
 	}
 	
 	ScopeDefImpl findScopeDef(Str scopeId, ScopeImpl? currentScope) {

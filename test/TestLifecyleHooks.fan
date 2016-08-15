@@ -32,12 +32,12 @@ internal class TestLifecyleHooks : IocTest {
 		}.build
 		
 		T_ConstClass.eventRef.val = null
-		reg.rootScope.createChildScope("thread") {
+		reg.rootScope.createChild("thread") {
 			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread - thread")
 		}
 		
 		T_ConstClass.eventRef.val = null
-		reg.rootScope.createChildScope("thread") {
+		reg.rootScope.createChild("thread") {
 			verifyEq(T_ConstClass.eventRef.val, "scopeCreateHook - thread - thread")
 		}
 		
@@ -50,13 +50,13 @@ internal class TestLifecyleHooks : IocTest {
 		}.build
 		
 		T_ConstClass.eventRef.val = null
-		reg.rootScope.createChildScope("thread") {
+		reg.rootScope.createChild("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
 		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread - thread")
 		
 		T_ConstClass.eventRef.val = null
-		reg.rootScope.createChildScope("thread") {
+		reg.rootScope.createChild("thread") {
 			verifyEq(T_ConstClass.eventRef.val, null)
 		}
 		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread - thread")
@@ -73,13 +73,13 @@ internal class TestLifecyleHooks : IocTest {
 			addService(T_MyService02#).withId("s02").withScopes(["thread"])
 		}.build
 		
-		reg.rootScope.createChildScope("thread") |thread| {
+		reg.rootScope.createChild("thread") |thread| {
 			T_ConstClass.eventRef.val = null
 			thread.serviceById("s02")
 			verifyEq(T_ConstClass.eventRef.val, "serviceBuildHook - s02")
 		}
 		
-		reg.rootScope.createChildScope("thread") |thread| {
+		reg.rootScope.createChild("thread") |thread| {
 			T_ConstClass.eventRef.val = null
 			thread.build(T_MyService02#)
 			verifyEq(T_ConstClass.eventRef.val, null)

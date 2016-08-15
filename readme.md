@@ -654,7 +654,7 @@ Non-threaded scopes (like the root scope) may create and contain any type of sco
 
 The scope of a *service* may be explicitly set when you define the service - either in the `@Build` / `@Override` facet or in the `RegistryBuilder.addService()` method. If no scope is explicitly set then, by default, const classes are matched to *all* non-threaded scopes. And non-const classes are matched to *all* threaded scopes.
 
-You can define custom scopes via `RegistryBuilder.addScope()` method and create it with `Scope.createChildScope()`. But largely, it is just IoC containers that define and creates scopes. Both [Reflux](http://pods.fantomfactory.org/pods/afReflux) and [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) are examples of IoC containers.
+You can define custom scopes via `RegistryBuilder.addScope()` method and create it with `Scope.createChild()`. But largely, it is just IoC containers that define and creates scopes. Both [Reflux](http://pods.fantomfactory.org/pods/afReflux) and [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) are examples of IoC containers.
 
 ### Reflux Applications
 
@@ -687,7 +687,7 @@ registry := RegistryBuilder() {
 rootScope := registry.rootScope
 
 Actor(ActorPool()) |->| {
-    rootScope.createChildScope("thread") |threadScope| {
+    rootScope.createChild("thread") |threadScope| {
         myService := threadScope.serviceById("serviceId")
         ...
     }
@@ -698,7 +698,7 @@ registry.shutdown
 
 ### Jail Breaking
 
-As you can see above, the `thread` scope is constrained to the closure passed into `Scope.createChildScope()`. Sometimes this is not desirable. If so, it is possible to *jail break* the child scope from the closure:
+As you can see above, the `thread` scope is constrained to the closure passed into `Scope.createChild()`. Sometimes this is not desirable. If so, it is possible to *jail break* the child scope from the closure:
 
 ```
 registry := RegistryBuilder() {
@@ -709,7 +709,7 @@ registry := RegistryBuilder() {
 rootScope   := registry.rootScope
 threadScope := (Scope?) null
 
-rootScope.createChildScope("thread") |tScope| {
+rootScope.createChild("thread") |tScope| {
     threadScope = tScope.jailBreak
 }
 
@@ -1311,7 +1311,7 @@ class TestExample : Test {
            .build
 
         // create an instance of the threaded scope
-        reg.rootScope.createChildScope("thread") { this.scope = it.jailBreak }
+        reg.rootScope.createChild("thread") { this.scope = it.jailBreak }
 
         // use the threaded scope to set MyService and other @Inject'ed fields
         scope.inject(this)
