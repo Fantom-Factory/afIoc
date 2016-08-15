@@ -3,6 +3,7 @@ Versions
 v3.0.4
 ======
  - New: Added 'Scope.isThreaded()'.
+ - Chg: 'RegistryBuilder' methods 'onScopeCreate()', 'onScopeDestroy()', 'onServiceBuild()', and 'decorateService()' now all throw an err if a matching scope / service could not be found. 
  - Chg: Refined how active scopes work vs the default scope.
  - Chg: Updated Scope documentation.
  - Chg: Renamed 'Scope.createChildScope() -> Scope.createChild()' to retain backwards binary compatibility.

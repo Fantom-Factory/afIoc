@@ -35,6 +35,12 @@ internal class TestDecoratorHook : IocTest {
 		verifyEq(s87.typeof, T_MyService87Alt2#)
 		verifyEq(s87.mrHappy, "Mr Fussy / Mr Happy / Mr Grumpy")
 	}
+	
+	Void testServiceNotFound() {
+		verifyErrMsg(ServiceNotFoundErr#, "decorateService: Could not match glob 'wotever' to any service") {
+			RegistryBuilder().decorateService("wotever") { }.build
+		}
+	}
 }
 
 @Js
