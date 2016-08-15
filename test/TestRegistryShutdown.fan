@@ -6,7 +6,7 @@ internal class TestRegistryShutdown : IocTest {
 		reg := RegistryBuilder() { addScope("thread", true) }.addModule(T_MyModule01#).build
 		
 		thread := (Scope?) null
-		reg.rootScope.createChildScope("thread") {
+		reg.rootScope.createChild("thread") {
 			thread = it.jailBreak
 		}
 		

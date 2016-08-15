@@ -69,7 +69,7 @@ internal class TestProviderFunc : IocTest {
 			addService(T_MyService02#).withId("s02").withScope("thread-2")
 		}.build
 
-		reg.rootScope.createChildScope("thread-1") |threadScope| {			
+		reg.rootScope.createChild("thread-1") |threadScope| {			
 			s60 := (T_MyService60) threadScope.serviceById("s60")
 	
 			verifyErrMsg(ServiceNotFoundErr#, ErrMsgs.scope_couldNotFindServiceByType(T_MyService02#, "builtIn root thread-1".split)) {
@@ -77,7 +77,7 @@ internal class TestProviderFunc : IocTest {
 			}
 	
 			// --==%% -- FEEL THE POWER!!! -- %%==--
-			threadScope.createChildScope("thread-2") {
+			threadScope.createChild("thread-2") {
 				s02 := s60.lazyFunc()
 				verifyType(s02, T_MyService02#)
 			}
@@ -95,7 +95,7 @@ internal class TestProviderFunc : IocTest {
 			addService(T_MyService02#).withId("s02").withScope("thread-2")
 		}.build
 		
-		reg.rootScope.createChildScope("thread-1") |threadScope| {			
+		reg.rootScope.createChild("thread-1") |threadScope| {			
 			s60 := (T_MyService60) threadScope.serviceById("s60")
 			
 			verifyIocErrMsg(ErrMsgs.autobuilder_couldNotFindAutobuildCtor(T_MyService64#, [Str#])) {
@@ -103,7 +103,7 @@ internal class TestProviderFunc : IocTest {
 			}
 	
 			// --==%% -- FEEL THE POWER!!! -- %%==--
-			reg.rootScope.createChildScope("thread-2") {
+			reg.rootScope.createChild("thread-2") {
 				s64 := (T_MyService64) s60.factoryFunc("Dude!")
 				verifyEq(s64.str, "Dude!")
 				verifyType(s64.s02, T_MyService02#)

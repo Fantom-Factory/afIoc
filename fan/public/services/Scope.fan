@@ -29,6 +29,9 @@ const mixin Scope {
 	** Returns the registry instance this scope belongs to.
 	abstract Registry	registry()
 	
+	** Returns 'true' if this scope is threaded and may hold non-const services.
+	abstract Bool isThreaded()
+	
 	** Autobuilds an instance of the given type. Autobuilding performs the following:
 	** 
 	**  - creates an instance via the ctor marked with '@Inject' or the *best* fitting ctor with the most parameters
@@ -53,6 +56,7 @@ const mixin Scope {
 	** 'instance' may be 'null' if calling a static method.
 	** Method parameters should be defined in the following order:
 	** 
+	** 
 	**   Void myMethod(<args>, <dependencies>, <default params>) { ... }
 	** 
 	** Note that nullable and default parameters are treated as optional dependencies.
@@ -76,28 +80,50 @@ const mixin Scope {
 	** Resolves a service by its Type. Throws 'IocErr' if the service is not found, unless 'checked' is 'false'.
 	abstract Obj? serviceByType(Type serviceType, Bool checked := true)
 	
-	** Creates a nested child scope and makes it available to the given function.
+	** Creates a nested child scope and makes it available to the given function,
+	** which is called straight away.
+	** The child scope also becomes the *active* scope for the duration of the function.
 	** 
 	** pre>
 	** syntax: fantom
-	** scope.createChildScope("childScopeId") |Scope childScope| {
+	** scope.createChild("childScopeId") |Scope childScope| {
 	**     ...
 	** }
 	** <pre
-	**   
-	abstract Void createChildScope(Str scopeId, |Scope| f)
+	** 
+	** If a function is passed in then 'null' is returned because the scope is not valid 
+	** outside of the function.
+	** 
+	** Advanced users may create *non-active* scopes by **not** passing in a function and
+	** using the returned scope. Non-active scopes must be manually destroyed.
+	** 
+	** pre>
+	** syntax: fantom
+	** myScope := scope.createChild("myScope")
+	** 
+	** ... use myScope ...
+	** 
+	** myScope.destroy
+	** <pre
+	abstract Scope? createChild(Str scopeId, |Scope|? f := null)
 
-	** Jail breaks a scope so it may be used from outside its closure.
+	@NoDoc @Deprecated { msg="Use createChild() instead" }
+	virtual Void createChildScope(Str scopeId, |Scope| func) {
+		createChild(scopeId, func)
+	}
+
+	** Jail breaks an active scope so it may be used from outside its closure.
 	** 
 	** pre>
 	** syntax: fantom
 	** childScope := (Scope?) null
 	** 
-	** scope.createChildScope("childScopeId") |childScopeInClosure| {
+	** scope.createChild("childScopeId") |childScopeInClosure| {
 	**     childScope = childScopeInClosure.jailbreak
 	** }
 	** 
 	** ... use childScope here ...
+	** childScope.serviceByType(...)
 	** 
 	** childScope.destroy
 	** <pre
@@ -138,6 +164,10 @@ internal const class ScopeImpl : Scope {
 
 	override Str id() {
 		scopeDef.id
+	}
+	
+	override Bool isThreaded() {
+		scopeDef.threaded
 	}
 
 	override Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
@@ -233,25 +263,36 @@ internal const class ScopeImpl : Scope {
 		return serviceInstance.getOrBuild(this)			
 	}
 	
-	override Void createChildScope(Str scopeId, |Scope| f) {
+	override Scope? createChild(Str scopeId, |Scope|? f := null) {
 		destroyedCheck
 
 		childScopeDef	:= registry.findScopeDef(scopeId, this)
 		childScope 		:= ScopeImpl(registry, this, childScopeDef)
-		registry.activeScopeStack.push(childScope)
-		childScopeDef.callCreateHooks(childScope)
+		
+		if (f != null)
+			registry.activeScopeStack.push(childScope)
 
+		errors := null as Err[]
 		try {
-			f.call(childScope)
-		} finally {
-			createChildScopeFinally(childScope)
-		}
-	}
+			// if createHooks errors, we should still call destroyHooks, because *some* create hooks may have succeeded
+			errors = childScopeDef.callCreateHooks(childScope)
 
-	// see http://fantom.org/forum/topic/2481
-	private Void createChildScopeFinally(ScopeImpl childScope) {
-		try		{childScope.destroyInternal}
-		finally {registry.activeScopeStack.pop}		
+			f?.call(childScope)
+		} finally {
+			if (f != null) {
+				errs := childScope.destroyInternal
+				if (errs != null) {
+					if (errors == null)
+						errors = Err[,]
+					errors.addAll(errs)
+				}
+			}
+		}
+		
+		if (errors != null && errors.size > 0)
+			throw errors.first
+		
+		return f == null ? childScope : null
 	}
 
 	override This jailBreak() {
@@ -260,7 +301,17 @@ internal const class ScopeImpl : Scope {
 		return this
 	}
 
+	internal Err[]? destroyInternal() {
+		jailBroken.val ? null : _destroy
+	}
+
 	override Void destroy() {
+		errors := _destroy
+		if (errors != null && errors.size > 0)
+			throw errors.first		
+	}
+
+	internal Err[]? _destroy() {
 		// keeping a thread safe / synchronised list of active children is only achievable using 
 		// Actors or a couple of locking flags. Either way, the contention overhead for dealing 
 		// with multiple threads (e.g. BedSheet) makes it unrealistic for what little gain it 
@@ -268,18 +319,19 @@ internal const class ScopeImpl : Scope {
 		// only of concern if someone has destroy hooks on both scopes.
 		//
 		// An IoC module could easily be created to compensate for this if absolutely needed. 
-		if (destroyedLock.locked) return
-		
-		scopeDef.callDestroyHooks(this)
+		if (destroyedLock.locked) return null
 
-		destroyedLock.lock
+		try {
+			return scopeDef.callDestroyHooks(this)
 
-		serviceStore.destroy
-	}
+		} finally {
+			destroyedLock.lock
 	
-	internal Void destroyInternal() {
-		if (!jailBroken.val)
-			destroy
+			serviceStore.destroy
+			
+			// only pop ourselves off the end of the stack
+			registry.activeScopeStack.pop(this)
+		}
 	}
 
 	internal Void destroyedCheck() {

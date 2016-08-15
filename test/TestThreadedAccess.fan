@@ -9,7 +9,7 @@ internal class TestThreadedAccess : IocTest {
 		the1 := root.serviceById("the")
 
 		Actor(ActorPool()) |->| {
-			root.createChildScope("thread") {
+			root.createChild("thread") {
 				app2 := serviceById("app")
 				assertSame(app1, app2)
 				
@@ -19,7 +19,7 @@ internal class TestThreadedAccess : IocTest {
 		}.send(null).get
 
 		Actor(ActorPool()) |->| {
-			root.createChildScope("thread") {
+			root.createChild("thread") {
 				app2 := serviceById("app")
 				assertSame(app1, app2)
 				
@@ -55,13 +55,13 @@ internal class TestThreadedAccess : IocTest {
 		root := threadScope { addModule(T_MyModule17#) }.registry.rootScope
 		s02a := null
 
-		root.createChildScope("thread") {
+		root.createChild("thread") {
 			verifyEq(root.registry.serviceDefs["s12"].noOfInstancesBuilt, 0)
 			s02a = serviceById("s12")
 			verifyEq(root.registry.serviceDefs["s12"].noOfInstancesBuilt, 1)
 		}
 		
-		root.createChildScope("thread") {
+		root.createChild("thread") {
 			verifyEq(root.registry.serviceDefs["s12"].noOfInstancesBuilt, 1)
 			s02b := serviceById("s12")
 			verifyEq(root.registry.serviceDefs["s12"].noOfInstancesBuilt, 2)

@@ -23,9 +23,9 @@ mixin ScopeBuilder {
 	** syntax: fantom
 	** reg := regBuilder.addScope("thread").withAlias("request").build
 	** 
-	** reg.rootScope.createChildScope("thread") { ... }
+	** reg.rootScope.createChild("thread") { ... }
 	** 
-	** reg.rootScope.createChildScope("request") { ... }
+	** reg.rootScope.createChild("request") { ... }
 	** <pre
 	** 
 	abstract This addAlias(Str serviceAlias)

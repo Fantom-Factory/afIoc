@@ -102,8 +102,10 @@ internal const class ActiveScopeStack {
 		get(false)?.peek
 	}
 	
-	Void pop() {
-		get(true).pop
+	Void pop(Scope scope) {
+		stacked := get(false)?.peek
+		if (stacked == scope)
+			get(false)?.pop
 	}
 	
 	private ThreadStack getOrAdd() {

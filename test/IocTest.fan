@@ -54,7 +54,7 @@ abstract internal class IocTest : Test {
 		bobFunc.call(bob)
 		
 		thread := null
-		bob.build.rootScope.createChildScope("thread") {
+		bob.build.rootScope.createChild("thread") {
 			thread = it.jailBreak
 		}
 
