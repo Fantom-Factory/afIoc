@@ -426,11 +426,14 @@ class RegistryBuilder {
 	** }
 	** <pre
 	** 
+	** Where 'scopeGlob' is a not a service ID, but a regex glob that is used to match 
+	** against service IDs and their aliases.
+	** 
 	** The difference between decorating and overriding, is that when decorating you are passed the 
 	** original instance. This makes it perfect for wrapping implementations with logging methods, 
 	** or other cross cutting / AOP style operations. 
-	This decorateService(Str serviceId, |Configuration| decoratorHook) {
-		_decoratorHooks.add([_currentModule, serviceId, _toImmutableObj(decoratorHook)])
+	This decorateService(Str serviceGlob, |Configuration| decoratorHook) {
+		_decoratorHooks.add([_currentModule, Regex.glob(serviceGlob), _toImmutableObj(decoratorHook)])
 		return this
 	}
 
@@ -595,7 +598,31 @@ class RegistryBuilder {
 			if (scopeDefs.containsKey(def.id))
 				throw IocErr(ErrMsgs.regBuilder_scopeAlreadyDefined(def.id, def.moduleId, scopeDefs[def.id].moduleId))
 			scopeDefs[def.id] = def
-		}		
+		}
+		
+		_scopeCreateHooks.each |hook| {
+			matches := scopeDefs.any |scpDef| { scpDef.matchesGlob(hook[1]) }
+			if (!matches)
+				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeCreate:", hook[1], hook[0].toStr, scopeDefs.vals))
+		}
+
+		_scopeDestroyHooks.each |hook| {
+			matches := scopeDefs.any |scpDef| { scpDef.matchesGlob(hook[1]) }
+			if (!matches)
+				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeDestroy:", hook[1], hook[0].toStr, scopeDefs.vals))
+		}
+
+		_serviceBuildHooks.each |hook| {
+			matches := services.any |srvDef| { srvDef.matchesGlob(hook[1]) }
+			if (!matches)
+				throw ServiceNotFoundErr(ErrMsgs.regBuilder_serviceNotMatched("onServiceBuild:", hook[1], hook[0].toStr), services.vals)
+		}
+		
+		_decoratorHooks.each |hook| {
+			matches := services.any |srvDef| { srvDef.matchesGlob(hook[1]) }
+			if (!matches)
+				throw ServiceNotFoundErr(ErrMsgs.regBuilder_serviceNotMatched("decorateService:", hook[1], hook[0].toStr), services.vals)
+		}
 		
 		scopeDefs.each |ScpDef scpDef| {
 			scpDef.createContribs  = _scopeCreateHooks .findAll { scpDef.matchesGlob(it[1]) }.map { it[2] }
@@ -608,7 +635,7 @@ class RegistryBuilder {
 
 		services.each |srvDef| {
 			srvDef.buildHookContribs	= _serviceBuildHooks .findAll { srvDef.matchesGlob(it[1]) }.map { it[2] }
-			srvDef.decorateHookContribs	= _decoratorHooks	 .findAll { srvDef.matchesId(it[1])   }.map { it[2] }
+			srvDef.decorateHookContribs	= _decoratorHooks	 .findAll { srvDef.matchesGlob(it[1]) }.map { it[2] }
 			if (srvDef.buildHookContribs.isEmpty)
 				srvDef.buildHookContribs = null
 			if (srvDef.decorateHookContribs.isEmpty)

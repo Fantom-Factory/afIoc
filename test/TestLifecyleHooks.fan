@@ -42,6 +42,10 @@ internal class TestLifecyleHooks : IocTest {
 		}
 		
 		reg.shutdown
+
+		verifyErrMsg(IocErr#, "onScopeCreate: Could not match glob 'wotever' to any scope: root, builtIn") {
+			RegistryBuilder().onScopeCreate("wotever") { }.build
+		}
 	}
 
 	Void testScopeDestroy() {
@@ -62,6 +66,10 @@ internal class TestLifecyleHooks : IocTest {
 		verifyEq(T_ConstClass.eventRef.val, "scopeDestroyHook - thread - thread")
 		
 		reg.shutdown
+
+		verifyErrMsg(IocErr#, "onScopeDestroy: Could not match glob 'wotever' to any scope: root, builtIn") {
+			RegistryBuilder().onScopeDestroy("wotever") { }.build
+		}
 	}
 
 	Void testServiceBuild() {
@@ -83,6 +91,10 @@ internal class TestLifecyleHooks : IocTest {
 			T_ConstClass.eventRef.val = null
 			thread.build(T_MyService02#)
 			verifyEq(T_ConstClass.eventRef.val, null)
+		}
+		
+		verifyErrMsg(ServiceNotFoundErr#, "onServiceBuild: Could not match glob 'wotever' to any service") {
+			RegistryBuilder().onServiceBuild("wotever") |Configuration config| { }.build
 		}
 	}
 

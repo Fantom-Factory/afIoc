@@ -40,6 +40,18 @@ internal mixin ErrMsgs {
         "Scope '${scopeId}' from ${conflictMod.qname} has already been defined in ${existingMod.qname}"
     }
 
+    static Str regBuilder_scopeNotMatched(Str hint, Regex glob, Str moduleId, ScpDef[] scopeDefs) {
+		moduleId == RegistryBuilder#.qname
+			? "$hint Could not match glob '${glob}' to any scope: " + scopeDefs.join(", ") { it.id }
+			: "$hint Could not match glob '${glob}' (from ${moduleId}) to any scope: " + scopeDefs.join(", ") { it.id }
+    }
+
+    static Str regBuilder_serviceNotMatched(Str hint, Regex glob, Str moduleId) {
+		moduleId == RegistryBuilder#.qname
+			? "$hint Could not match glob '${glob}' to any service"
+			: "$hint Could not match glob '${glob}' (from ${moduleId}) to any service"
+    }
+
     static Str regBuilder_cannotRemoveModule(Type moduleType) {
         "Cannot remove ${moduleType.qname}"
     }

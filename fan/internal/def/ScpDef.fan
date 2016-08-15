@@ -28,4 +28,6 @@ internal class ScpDef {
 			it.destroyRefs	= Unsafe(destroyContribs)
 		}
 	}
+	
+	override Str toStr() { id }
 }
