@@ -5,7 +5,7 @@ v3.0.4
  - New: Added 'Scope.isThreaded()'.
  - Chg: Refined how active scopes work vs the default scope.
  - Chg: Updated Scope documentation.
- - Chg: Renamed 'Scope.createChild() -> Scope.createChild()' to retain backwards binary compatibility.
+ - Chg: Renamed 'Scope.createChildScope() -> Scope.createChild()' to retain backwards binary compatibility.
  - Chg: 'Scope.createChild()' optionally takes a func, and returns the scope should the func be null.
  - Chg: Jailbroken scopes remain active in thread until destroyed.
 
