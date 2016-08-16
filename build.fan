@@ -5,12 +5,12 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
-		version = Version("3.0.3")
+		version = Version("3.0.4")
 
 		meta = [	
 			"proj.name"		: "IoC",
 			"repo.tags"		: "system",
-			"repo.public"	: "false"
+			"repo.public"	: "true"
 		]
 
 		depends = [
@@ -19,7 +19,7 @@ class Build : BuildPod {
 			"afBeanUtils  1.0.8  - 1.0",	// used for ReflectUtils, NotFoundErr, TypeCoercer
 			
 			// ---- Test ----
-			"afConcurrent 1.0.12 - 1.0"
+			"afConcurrent 1.0.14 - 1.0"
 		]
 
 		srcDirs = [`fan/`, `fan/internal/`, `fan/internal/def/`, `fan/internal/inspectors/`, `fan/internal/providers/`, `fan/public/`, `fan/public/advanced/`, `fan/public/facets/`, `fan/public/services/`, `test/`]

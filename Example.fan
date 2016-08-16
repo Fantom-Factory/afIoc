@@ -31,8 +31,8 @@
     ** This is the central place where services are defined and configured
     const class AppModule {
         Void defineServices(RegistryBuilder bob) {
-            bob.addService(DinnerMenu#).withRootScope
-            bob.addService(ChefsSpecials#).withRootScope
+            bob.addService(DinnerMenu#)
+            bob.addService(ChefsSpecials#)
         }
         
         @Contribute { serviceType=DinnerMenu# }

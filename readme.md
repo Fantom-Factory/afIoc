@@ -1,7 +1,7 @@
-#IoC v3.0.2
+#IoC v3.0.4
 ---
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v3.0.2](http://img.shields.io/badge/pod-v3.0.2-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+[![pod: v3.0.4](http://img.shields.io/badge/pod-v3.0.4-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
 ![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
 
 ## Overview
@@ -86,8 +86,8 @@ The `Main::main()` method creates a registry instance, obtains instances of the 
         
             // 1. Service definition
             Void defineServices(RegistryBuilder bob) {
-                bob.addService(DinnerMenu#).withRootScope
-                bob.addService(ChefsSpecials#).withRootScope
+                bob.addService(DinnerMenu#)
+                bob.addService(ChefsSpecials#)
             }
         
             // 2. Service configuration
@@ -100,7 +100,7 @@ The `Main::main()` method creates a registry instance, obtains instances of the 
         
         
         
-        // ---- Use Sopes to access the services --------------------------------------
+        // ---- Use Scopes to access the services -------------------------------------
         
         class Main {
             Void main() {
@@ -152,7 +152,7 @@ The `Main::main()` method creates a registry instance, obtains instances of the 
           / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __
          / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // /
         /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /
-                                    Alien-Factory IoC v3.0.0 /___/
+                                    Alien-Factory IoC v3.0.4 /___/
         
         IoC Registry built in 75ms and started up in 20ms
         
@@ -643,86 +643,6 @@ class MyClass {
 Here the registry service is injected, and a new instance of `otherClass` is created and injected. `arg1` and `arg2` are used as ctor arguments when building `MyOtherClass`.
 
 The `@Autobuild` facet is an example of custom dependency injection. See [Dependency Providers](#dependecnyProviders) for details.
-
-## Service Scopes
-
-Services are created just once per `Scope`, but may be created in multiple scopes. Scopes are nested and, if a service can not be found in one scope, the search is delegated to the parent scope.
-
-IoC defines just one scope - the **root scope**. All other scopes are derived from the root scope. The root scope is a non-threaded scope, meaning it can only hold instances of `const` classes and services. Threaded scopes are created and destroyed in the same thread, hence they may only contain non-const classes and services.
-
-Non-threaded scopes (like the root scope) may create and contain any type of scope, but threaded scopes may only contain other threaded scopes.
-
-The scope of a *service* may be explicitly set when you define the service - either in the `@Build` / `@Override` facet or in the `RegistryBuilder.addService()` method. If no scope is explicitly set then, by default, const classes are matched to *all* non-threaded scopes. And non-const classes are matched to *all* threaded scopes.
-
-You can define custom scopes via `RegistryBuilder.addScope()` method and create it with `Scope.createChild()`. But largely, it is just IoC containers that define and creates scopes. Both [Reflux](http://pods.fantomfactory.org/pods/afReflux) and [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) are examples of IoC containers.
-
-### Reflux Applications
-
-In a [Reflux](http://pods.fantomfactory.org/pods/afReflux) application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called `uiThread` and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
-
-*Happy days!*
-
-### BedSheet Applications
-
-[BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called `request`.
-
-**Request Scope:** Here a new instance of the service will be created for each thread / web request. BedSheet's `WebReq` and `WebRes` are good examples of `request` services. Note in some situations this *per thread* object creation could be considered wasteful. In other situations, such as sharing database connections, it is not even viable.
-
-**Root Scope:** In IoC's default scope, only one instance of the service is created for the entire application. *Root scoped* services need to be `const` classes.
-
-Writing `const` services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) shows you how.
-
-The smart ones may be thinking that `root` scoped services can only hold other `root` scoped services. Well, they would be wrong too! Using the magic of *Lazy Funcs*, `request` scoped services may be injected into `root` scoped services. See [Lazy Functions](#lazyFunctions) for more info.
-
-### Custom Applications
-
-Here is a quick example of how to create and use your own threaded scope, running in its own Actor:
-
-```
-registry := RegistryBuilder() {
-    addScope("thread")
-    addService(MyService#).withScope("thread")
-}.build
-
-rootScope := registry.rootScope
-
-Actor(ActorPool()) |->| {
-    rootScope.createChild("thread") |threadScope| {
-        myService := threadScope.serviceById("serviceId")
-        ...
-    }
-}.send(null).get
-
-registry.shutdown
-```
-
-### Jail Breaking
-
-As you can see above, the `thread` scope is constrained to the closure passed into `Scope.createChild()`. Sometimes this is not desirable. If so, it is possible to *jail break* the child scope from the closure:
-
-```
-registry := RegistryBuilder() {
-	addScope("thread")
-	addService(MyService#).withScope("thread")
-}.build
-
-rootScope   := registry.rootScope
-threadScope := (Scope?) null
-
-rootScope.createChild("thread") |tScope| {
-    threadScope = tScope.jailBreak
-}
-
-// use thread scope from outside the defining closure
-myService := threadScope.serviceById("serviceId")
-
-...
-
-threadScope.destroy
-registry.shutdown
-```
-
-Note that if you jail break a scope then it is your responsibility to `destroy()` it! Also note that once jail broken, the scopes is no longer returned as the registry's *active* scope.
 
 ## Lazy Functions
 
@@ -1215,6 +1135,139 @@ class Example {
 }
 ```
 
+## Service Scopes
+
+Scopes are where services definitions and service instances are held. They form a tree like, hierarchical structure. When looking for a service in a scope, if it is not found then the search is delegated to the parent.
+
+    builtin
+     |
+     +-root
+        |
+        +-myScope1
+        |
+        +-myScope2
+
+IoC defines two scopes - the **builtin scope** which is used for system services defined by afIoc itself, and the **root scope** which. Any other scope is defined by the application and must be derived from the root scope.
+
+Services are created just once per Scope, but may be created in multiple scopes.
+
+The scope of a service may be explicitly set when you define the service - either in the `@Build` / `@Override` facet or in the `RegistryBuilder.addService()` method.
+
+### Const vs Non-Const
+
+The root scope is a non-threaded scope, meaning it can only hold instances of const classes and services. Threaded scopes are created and destroyed in the same thread, hence they may contain non-const classes and services.
+
+Non-threaded scopes (like the root scope) may create and contain any type of scope, but threaded scopes may only contain other threaded scopes.
+
+If a service does not explicitly define a scope, then by default const classes are matched to all non-threaded scopes. And non-const classes are matched to all threaded scopes.
+
+Note that the root scope is a non-threaded scope, meaning it can only hold instances of const classes and services.
+
+### Reflux Applications
+
+In a [Reflux](http://pods.fantomfactory.org/pods/afReflux) application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called `uiThread` and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
+
+*Happy days!*
+
+### BedSheet Applications
+
+[BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called `request`.
+
+**Request Scope:** Here a new instance of request services will be created for each thread / web request. BedSheet's `WebReq` and `WebRes` are good examples of `request` services. Note in some situations this *per thread* object creation could be considered wasteful. In other situations, such as sharing database connections, it is not even viable.
+
+**Root Scope:** In IoC's default scope, only one instance of the service is created for the entire application. *Root scoped* services need to be `const` classes.
+
+Writing `const` services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) shows you how.
+
+The smart ones may be thinking that `root` scoped services can only hold other `root` scoped services. Well, they would be wrong too! Using the magic of *Lazy Funcs*, `request` scoped services may be injected into `root` scoped services. See [Lazy Functions](#lazyFunctions) for more info.
+
+### Custom Scopes
+
+In any thread, there can be only one active scope. By default this is the **root** scope. To create new scope (as the child of another) and make it active, use `Scope.createChild()`.
+
+`createChild()` takes a function that is executed straight away. The new scope also becomes the default active scope for the duration of the function.
+
+```
+registry := RegistryBuilder() {
+    addScope("myScope")
+}.build
+
+rootScope := registry.rootScope
+
+rootScope.createChild("myScope") |myScope| {
+	echo(myScope)               // --> Scope: myScope
+	echo(registry.activeScope)  // --> Scope: myScope
+
+    ...
+}
+
+registry.shutdown
+```
+
+### Jail Breaking
+
+As you can see above, the `myScope` scope is constrained to the closure passed into `Scope.createChild()`. Sometimes this is not desirable and you want to set a default scope for the thread. If so, it is possible to **jail break** the child scope from the closure.
+
+If you jail break a scope then remember, it is your responsibility to `destroy()` it! Calling destroy ensures all thread state related to the scope, including service instances, are correctly disposed of. It also ensures all registered destroy hooks are called.
+
+The next example uses the [afConcurrent](http://pods.fantomfactory.org/pods/afConcurrent) library to run code in a separate thread. It calls into the other thread 3 times:
+
+1. To create and jailbreak an instance of `myScope`
+2. To prove that indeed `myScope` is the default scope for the thread
+3. To destroy the `myScope` instance
+
+```
+run := afConcurrent::Synchronized(concurrent::ActorPool())
+registry := RegistryBuilder() {
+    addScope("myScope")
+}.build
+
+rootScope   := registry.rootScope
+
+run.synchronized |->| {
+	// create and jailbreak myScope
+	rootScope.createChild("myScope") |myScope| {
+		myScope.jailBreak
+	}
+}
+
+// prove that root scope is active by default
+echo(registry.activeScope)  // --> Scope: root
+
+run.synchronized |->| {
+	// prove that this thread has myScope active by default!
+	echo(registry.activeScope)  // --> Scope: myScope
+}
+
+// all jailbroken scopes must be manually destroyed
+run.synchronized |->| {
+	registry.activeScope.destroy
+}
+
+registry.shutdown
+```
+
+Also note that once jail broken, the scopes is no longer returned as the registry's active scope.
+
+To create a new scope, and not have it become the default active scope for the thread, then just call `Scope.createChild()` but don't pass in a function. Note you still have to destroy the scope.
+
+```
+registry := RegistryBuilder() {
+    addScope("myScope")
+}.build
+
+rootScope := registry.rootScope
+
+myScope := rootScope.createChild("myScope")
+
+echo(registry.activeScope)  // --> Scope: root
+
+myScope.destroy
+registry.shutdown
+```
+
+Note, to set a new scope that becomes the global default in any new thread (instead of `root` scope), use `Registry.defaultScope`.
+
 ## Testing IoC Applications
 
 To test an application that uses IoC it is reccommended you use the following approach:
@@ -1362,5 +1415,21 @@ Stack Trace:
   afIoc::ScopeImpl.serviceByType_ (Scope.fan:151)
   afIoc::ScopeImpl.serviceByType (Scope.fan:142)
   ...
+```
+
+### Disable Startup Messages
+
+To disable IoC's startup and shutdown messages, add the following to your `AppModule`:
+
+```
+Void onRegistryStartup(Configuration config) {
+    config.remove("afIoc.logServices")
+    config.remove("afIoc.logBanner")
+    config.remove("afIoc.logStartupTimes")
+}
+
+Void onRegistryShutdown(Configuration config) {
+    config.remove("afIoc.sayGoodbye")
+}
 ```
 
