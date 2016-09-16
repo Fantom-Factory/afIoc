@@ -71,7 +71,9 @@ internal class TestScopeChildScope : IocTest {
 
 		myScope := registry.rootScope.createChild("myScope")
 		
-		// verify myScope is not sctive
+		verifyFalse(myScope.isDestroyed)
+		
+		// verify myScope is not active
 		verifyEq("Scope: root", registry.activeScope.toStr)
 		
 		myScope.destroy
