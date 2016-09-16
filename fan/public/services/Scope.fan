@@ -132,7 +132,12 @@ const mixin Scope {
 	abstract This jailBreak()
 	
 	** Destroys this scope and releases references to any services created. Calls any scope destroy hooks. 
+	** 
+	** 'destroy()' does nothing if called more than once.
 	abstract Void destroy()
+
+	** Returns 'true' if this 'Scope' has been destroyed.
+	abstract Bool isDestroyed()
 
 	@NoDoc @Deprecated { msg="Use 'build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) { build(type, ctorArgs, fieldVals) }
@@ -302,6 +307,10 @@ internal const class ScopeImpl : Scope {
 		return this
 	}
 
+	override Bool isDestroyed() {
+		destroyedLock.locked
+	}
+	
 	internal Err[]? destroyInternal() {
 		jailBroken.val ? null : _destroy
 	}
