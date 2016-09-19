@@ -91,7 +91,7 @@ const mixin Scope {
 	** }
 	** <pre
 	** 
-	** If a function is passed in then 'null' is returned because the scope is not valid 
+	** When a function is passed in then 'null' is returned because the scope would not be valid 
 	** outside of the function.
 	** 
 	** Advanced users may create *non-active* scopes by **not** passing in a function and
@@ -105,6 +105,8 @@ const mixin Scope {
 	** 
 	** myScope.destroy
 	** <pre
+	** 
+	** To create an active scope that remains active outside of the closure, use [jailBreak()]`jailBreak`. 
 	abstract Scope? createChild(Str scopeId, |Scope|? f := null)
 
 	@NoDoc @Deprecated { msg="Use createChild() instead" }
@@ -112,7 +114,10 @@ const mixin Scope {
 		createChild(scopeId, func)
 	}
 
-	** Jail breaks an active scope so it may be used from outside its closure.
+	** *(Advanced Use Only)*
+	** 
+	** Jail breaks an active scope so it remains active outside its closure. 
+	** Jail broken scopes are not destroyed so you are responsible for calling 'destroy()' yourself.
 	** 
 	** pre>
 	** syntax: fantom
@@ -122,13 +127,17 @@ const mixin Scope {
 	**     childScope = childScopeInClosure.jailbreak
 	** }
 	** 
+	** // --> "childScopeId" is still active!
+	** echo(scope.registry.activeScope)
+	** 
 	** ... use childScope here ...
 	** childScope.serviceByType(...)
 	** 
 	** childScope.destroy
 	** <pre
 	** 
-	** Once jailbroken, you are responsible for calling 'destroy()'.
+	** Note that jail broken scopes are only active in the current thread, but will remain the active 
+	** scope even if the thread is re-entered. 
 	abstract This jailBreak()
 	
 	** Destroys this scope and releases references to any services created. Calls any scope destroy hooks. 
@@ -276,6 +285,9 @@ internal const class ScopeImpl : Scope {
 		
 		if (f != null)
 			registry.activeScopeStack.push(childScope)
+		else
+			// this isn't strictly needed, for it will never be checked, but it doesn't hurt to keep everything in check
+			childScope.jailBroken.val = true
 
 		errors := null as Err[]
 		try {
@@ -303,7 +315,7 @@ internal const class ScopeImpl : Scope {
 
 	override This jailBreak() {
 		destroyedCheck
-		this.jailBroken.val = true
+		jailBroken.val = true
 		return this
 	}
 
@@ -311,14 +323,14 @@ internal const class ScopeImpl : Scope {
 		destroyedLock.locked
 	}
 	
-	internal Err[]? destroyInternal() {
-		jailBroken.val ? null : _destroy
-	}
-
 	override Void destroy() {
 		errors := _destroy
 		if (errors != null && errors.size > 0)
 			throw errors.first		
+	}
+
+	internal Err[]? destroyInternal() {
+		jailBroken.val ? null : _destroy
 	}
 
 	internal Err[]? _destroy() {
