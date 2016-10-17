@@ -2,6 +2,7 @@ Versions
 ********
 v3.0.6
 ======
+ - New: Added 'Scope.inheritance()'.
  - New: Added 'Scope.isDestroyed()'.
 
 v3.0.4

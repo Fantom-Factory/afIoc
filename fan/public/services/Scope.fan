@@ -148,6 +148,13 @@ const mixin Scope {
 	** Returns 'true' if this 'Scope' has been destroyed.
 	abstract Bool isDestroyed()
 
+	** Returns a recursive list of all the Scopes this Scope inherits from.
+	** The result list always starts with this Scope itself.
+	** 
+	** syntax: fantom
+	** scope.inheritance() // --> [ui, root, builtIn]
+	abstract Scope[] inheritance()
+	
 	@NoDoc @Deprecated { msg="Use 'build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) { build(type, ctorArgs, fieldVals) }
 
@@ -182,6 +189,16 @@ internal const class ScopeImpl : Scope {
 	
 	override Bool isThreaded() {
 		scopeDef.threaded
+	}
+
+	override Scope[] inheritance() {
+		scope  := (Scope?) this
+		scopes := Scope[,]
+		while (scope != null) {
+			scopes.add(scope)
+			scope = scope.parent
+		}
+		return scopes
 	}
 
 	override Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
