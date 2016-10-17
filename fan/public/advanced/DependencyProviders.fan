@@ -28,7 +28,7 @@ const class DependencyProviders {
 		}
 
 		if (depPro == null)
-			return checked ? throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx)) : null
+			return checked ? throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx, currentScope.inheritance)) : null
 		
 		dependency := depPro.provide(currentScope, ctx)
 		
@@ -98,7 +98,7 @@ const class DependencyProviders {
 					return false
 				}
 
-				throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx))
+				throw IocErr(ErrMsgs.dependencyProviders_dependencyNotFound(ctx, currentScope.inheritance))
 			}
 			
 			dependency := depPro.provide(currentScope, ctx)

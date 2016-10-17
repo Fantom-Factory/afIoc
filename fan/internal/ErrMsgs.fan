@@ -256,9 +256,9 @@ internal mixin ErrMsgs {
 	
 	// ---- Dependency Provider Messages ----------------------------------------------------------
 	
-	static Str dependencyProviders_dependencyNotFound(InjectionCtx ctx) {
+	static Str dependencyProviders_dependencyNotFound(InjectionCtx ctx, Scope[] scopes) {
 		type := ctx.field?.type ?: ctx.funcParam?.type
-		return stripSys("No dependency matches type ${type.signature}. Try defining it as a service in your AppModule?")
+		return stripSys("No dependency matches type ${type.signature} in Scopes " + scopes.join(",") { it.id } + ". Try defining it as a service in your AppModule?")
 	}
 	
 	static Str dependencyProviders_dependencyDoesNotFit(Type? providedArg, Type paramArg) {
