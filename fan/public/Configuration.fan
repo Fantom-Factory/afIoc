@@ -45,11 +45,6 @@ using afBeanUtils::TypeCoercer
 @Js
 mixin Configuration {
 
-	@NoDoc @Deprecated { msg="use 'build()' instead" }
-	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		scope.build(type, ctorArgs, fieldVals)
-	}
-
 	** Convenience method for `Scope.build`; builds an instance of the given 'Type' injecting in all dependencies.  
 	Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		scope.build(type, ctorArgs, fieldVals)

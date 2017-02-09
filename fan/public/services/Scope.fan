@@ -109,11 +109,6 @@ const mixin Scope {
 	** To create an active scope that remains active outside of the closure, use [jailBreak()]`jailBreak`. 
 	abstract Scope? createChild(Str scopeId, |Scope|? f := null)
 
-	@NoDoc @Deprecated { msg="Use createChild() instead" }
-	virtual Void createChildScope(Str scopeId, |Scope| func) {
-		createChild(scopeId, func)
-	}
-
 	** *(Advanced Use Only)*
 	** 
 	** Jail breaks an active scope so it remains *active* outside its closure. 
@@ -164,15 +159,6 @@ const mixin Scope {
 	** syntax: fantom
 	** scope.inheritance() // --> [ui, root, builtIn]
 	abstract Scope[] inheritance()
-	
-	@NoDoc @Deprecated { msg="Use 'build()' instead" }
-	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) { build(type, ctorArgs, fieldVals) }
-
-	@NoDoc @Deprecated { msg="Use 'inject()' instead" }
-	Obj injectIntoFields(Obj obj) { inject(obj) }
-
-	@NoDoc @Deprecated { msg="Use 'serviceByType()' instead" }
-	Obj? dependencyByType(Type objType, Bool checked := true) {	serviceByType(objType, checked) }
 }
 
 
