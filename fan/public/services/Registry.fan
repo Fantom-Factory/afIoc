@@ -61,6 +61,13 @@ const mixin Registry {
 	** Only non-threaded scopes may be set as the global default.
 	abstract Scope setDefaultScope(Scope defaultScope)
 	
+	** *For advanced use only.*
+	** 
+	** Sets the given scope as the active scope in this thread.
+	** Call 'Scope.destroy()' to pop this scope off the active stack,
+	** or pass 'null' to this method to clear the active stack.
+	abstract Void setActiveScope(Scope? activeScope)
+	
 	@NoDoc @Deprecated { msg="Use 'rootScope.build()' instead" }
 	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		rootScope.build(type, ctorArgs, fieldVals)
@@ -383,6 +390,13 @@ internal const class RegistryImpl : Registry {
 		oldScope := this.defaultScopeRef.val
 		this.defaultScopeRef.val = scope
 		return oldScope
+	}
+	
+	override Void setActiveScope(Scope? activeScope) {
+		if (activeScope == null)
+			activeScopeStack.clear
+		else
+			activeScopeStack.push(activeScope)
 	}
 	
 	ScopeDefImpl findScopeDef(Str scopeId, ScopeImpl? currentScope) {

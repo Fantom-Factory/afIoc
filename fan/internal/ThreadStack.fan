@@ -25,6 +25,10 @@ internal class ThreadStack {
 		return obj
 	}
 	
+	Void clear() {
+		while (peek != null) pop
+	}
+	
 	override Str toStr() {
 		str	:= "ThreadStack '${stackId}' is ($stack.size) deep:"
 		stack.each { str += "\n  - $it" }
@@ -106,6 +110,10 @@ internal const class ActiveScopeStack {
 		stacked := get(false)?.peek
 		if (stacked == scope)
 			get(false)?.pop
+	}
+	
+	Void clear() {
+		get(false)?.clear
 	}
 	
 	private ThreadStack getOrAdd() {
