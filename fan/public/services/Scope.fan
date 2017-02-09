@@ -116,7 +116,7 @@ const mixin Scope {
 
 	** *(Advanced Use Only)*
 	** 
-	** Jail breaks an active scope so it remains active outside its closure. 
+	** Jail breaks an active scope so it remains *active* outside its closure. 
 	** Jail broken scopes are not destroyed so you are responsible for calling 'destroy()' yourself.
 	** 
 	** pre>
@@ -140,10 +140,20 @@ const mixin Scope {
 	** scope even if the thread is re-entered. 
 	abstract This jailBreak()
 	
+	** *(Advanced Use Only)*
+	** 
 	** Destroys this scope and releases references to any services created. Calls any scope destroy hooks. 
+	** Pops this scope off the active stack.
 	** 
 	** 'destroy()' does nothing if called more than once.
 	abstract Void destroy()
+	
+	** *(Advanced Use Only)*
+	** 
+	** Runs the given function with this 'Scope' as the active one. Note this method does *not* destroy the scope. 
+	** 
+	** Under normal usage, consider using 'createChild(...)' instead.
+	abstract Void asActive(|Scope| f)
 
 	** Returns 'true' if this 'Scope' has been destroyed.
 	abstract Bool isDestroyed()
@@ -344,6 +354,12 @@ internal const class ScopeImpl : Scope {
 		errors := _destroy
 		if (errors != null && errors.size > 0)
 			throw errors.first		
+	}
+	
+	override Void asActive(|Scope| f) {
+		registry.activeScopeStack.push(this)
+		try		f(this)
+		finally	registry.activeScopeStack.pop(this)
 	}
 
 	internal Err[]? destroyInternal() {

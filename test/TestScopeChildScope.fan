@@ -78,4 +78,32 @@ internal class TestScopeChildScope : IocTest {
 		
 		myScope.destroy
 	}
+	
+	Void testClearActiveScopeStack() {
+		registry := RegistryBuilder() {
+		    addScope("myScope")
+		}.build
+		myScope := registry.rootScope.createChild("myScope")
+		
+		registry.setActiveScope(myScope)		
+		verifyEq(registry.activeScope, myScope)
+		
+		registry.setActiveScope(null)
+		verifyEq(registry.activeScope, registry.rootScope)
+		
+		myScope.destroy
+	}
+
+	Void testDestroyClearsActiveScope() {
+		registry := RegistryBuilder() {
+		    addScope("myScope")
+		}.build
+		myScope := registry.rootScope.createChild("myScope")
+		
+		registry.setActiveScope(myScope)		
+		verifyEq(registry.activeScope, myScope)
+		
+		myScope.destroy
+		verifyEq(registry.activeScope, registry.rootScope)
+	}
 }
