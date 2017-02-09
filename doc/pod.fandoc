@@ -811,8 +811,8 @@ syntax: fantom
 using afIoc
 
 const class AppModule {
-    Void defineServices(ServiceDefinitions defs) {
-        defs.add(Penguins#)
+    Void defineServices(RegistryBuilder bob) {
+        bob.addService(Penguins#)
     }
 
     @Contribute { serviceType=Penguins# }
@@ -1030,9 +1030,9 @@ MyService overrideMyService(Uri[] urls, Scope scope) {
 
 pre>
 syntax: fantom
-Void defineServices(ServiceDefinitions defs) {
+Void defineServices(RegistryBuilder bob) {
     // define a different MyService instance
-    defs.overrideServiceByType(MyService#).withImpl(MyServiceImpl#)
+    bob.overrideServiceByType(MyService#).withImpl(MyServiceImpl#)
 }
 <pre
 

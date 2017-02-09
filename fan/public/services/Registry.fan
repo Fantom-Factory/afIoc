@@ -67,34 +67,6 @@ const mixin Registry {
 	** Call 'Scope.destroy()' to pop this scope off the active stack,
 	** or pass 'null' to this method to clear the active stack.
 	abstract Void setActiveScope(Scope? activeScope)
-	
-	@NoDoc @Deprecated { msg="Use 'rootScope.build()' instead" }
-	Obj autobuild(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
-		rootScope.build(type, ctorArgs, fieldVals)
-	}
-
-	@NoDoc @Deprecated { msg="Removed without replacement" }
-	This startup() { this }
-
-	@NoDoc @Deprecated { msg="Use 'rootScope.inject()' instead" }
-	Obj injectIntoFields(Obj obj) {
-		rootScope.inject(obj)
-	}
-
-	@NoDoc @Deprecated { msg="Use 'rootScope.callMethod()' instead" }
-	Obj? callMethod(Method method, Obj? instance, Obj?[]? args := null) {
-		rootScope.callMethod(method, instance, args)
-	}
-
-	@NoDoc @Deprecated { msg="Use 'rootScope.serviceById()' instead" }
-	Obj? serviceById(Str serviceId, Bool checked := true) {
-		rootScope.serviceById(serviceId, checked)
-	}
-
-	@NoDoc @Deprecated { msg="Use 'rootScope.serviceByType()' instead" }
-	Obj? dependencyByType(Type objType, Bool checked := true) {
-		rootScope.serviceByType(objType, checked)
-	}
 }
 
 @Js

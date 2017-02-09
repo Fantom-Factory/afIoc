@@ -43,7 +43,6 @@ class RegistryBuilder {
 		inspectors	= [
 			StandardInspector(),
 			FacetInspector(),
-			LegacyInspector(),
 			NonInvasiveInspector()
 		]
 		addModule(IocModule())
@@ -154,11 +153,6 @@ class RegistryBuilder {
 		}
 		_scopeDefs.add(scopeDef)
 		return ScopeBuilderImpl { it.scopeDef = scopeDef }
-	}
-	
-	@NoDoc @Deprecated { msg="Use 'addService()' instead" }
-	ServiceBuilder add(Type? serviceType := null, Type? serviceImplType := null) {
-		addService(serviceType, serviceImplType)
 	}
 
 	** Defines a new service to be added to the registry.
