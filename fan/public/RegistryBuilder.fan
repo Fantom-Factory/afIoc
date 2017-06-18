@@ -48,6 +48,27 @@ class RegistryBuilder {
 		addModule(IocModule())
 	}
 
+	** Suppresses surplus logging by 'RegistryBuilder' and 'Registry'.
+	** 
+	** Removes the following contributions from registry startup: 
+	**  - 'afIoc.logBanner'
+	**  - 'afIoc.logServices'
+	** 
+	** And the following from registry shutdown:
+	**  - 'afIoc.sayGoodbye'
+	This silent() {
+		suppressLogging = true
+		onRegistryStartup |Configuration config| {
+			config.remove("afIoc.logBanner",		"afIoc.silentBanner")
+			config.remove("afIoc.logServices",		"afIoc.silentServices")
+			config.remove("afIoc.logStartupTimes",	"afIoc.silentStartupTimes")
+		}
+		onRegistryShutdown|Configuration config| {
+			config.remove("afIoc.sayGoodbye", "afIoc.silentBoodbye")
+		}
+		return this
+	}
+	
 	** Adds a module to the registry. The given 'module' may be:
 	**  - a module instance, 
 	**  - a module 'Type'

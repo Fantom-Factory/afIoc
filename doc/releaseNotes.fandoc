@@ -4,6 +4,7 @@ v3.0.6
 ======
  - New: Added advanced 'Registry.setActiveScope()' and 'Scope.asActive()' methods that allow setting a given scope as the active one in the thread.
  - New: Added 'Scope.inheritance()' and 'Scope.isDestroyed()'.
+ - New: Added 'RegistryBuilder.silent()' to disbale startup and shutdown messages.
  - Chg: Removed '@Deprecated' methods that eased the transition from IoC v2 (Potential breaking change.)
  - Chg: 'RegistryBuilder.addModule()' now accepts 'null' for convenience.
 

@@ -1292,8 +1292,8 @@ registry := RegistryBuilder() {
 rootScope := registry.rootScope
 
 rootScope.createChild("myScope") |myScope| {
-	echo(myScope)               // --> Scope: myScope
-	echo(registry.activeScope)  // --> Scope: myScope
+    echo(myScope)               // --> Scope: myScope
+    echo(registry.activeScope)  // --> Scope: myScope
 
     ...
 }
@@ -1326,23 +1326,23 @@ registry := RegistryBuilder() {
 rootScope   := registry.rootScope
 
 run.synchronized |->| {
-	// create and jailbreak myScope
-	rootScope.createChild("myScope") |myScope| {
-		myScope.jailBreak
-	}
+    // create and jailbreak myScope
+    rootScope.createChild("myScope") |myScope| {
+        myScope.jailBreak
+    }
 }
 
 // prove that root scope is active by default
 echo(registry.activeScope)  // --> Scope: root
 
 run.synchronized |->| {
-	// prove that this thread has myScope active by default!
-	echo(registry.activeScope)  // --> Scope: myScope
+    // prove that this thread has myScope active by default!
+    echo(registry.activeScope)  // --> Scope: myScope
 }
 
 // all jailbroken scopes must be manually destroyed
 run.synchronized |->| {
-	registry.activeScope.destroy
+    registry.activeScope.destroy
 }
 
 registry.shutdown
@@ -1533,7 +1533,7 @@ Stack Trace:
 
 Disable Startup Messages
 ========================
-To disable IoC's startup and shutdown messages, add the following to your 'AppModule':
+To disable IoC's startup and shutdown messages, call 'RegistryBuilder.silent()'. Or to disable specific messages, add the following to your 'AppModule':
 
 pre>
 syntax: fantom
