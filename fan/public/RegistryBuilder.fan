@@ -53,14 +53,17 @@ class RegistryBuilder {
 	**  - a module 'Type'
 	**  - a qualified module name ( 'Str' )
 	**  - a pod name ( 'Str' )
+	**  - 'null' (does nothing)
 	** 
 	** If a pod name then dependencies are also added.
 	** 
 	** Any modules defined with the '@SubModule' facet are also added.
 	** 
 	** Don't forget you can always call 'removeModule(...)' too!
-	This addModule(Obj module) {
+	This addModule(Obj? module) {
 		_lock.check
+		
+		if (module == null) return this
 		
 		// check _modulesRemove in case module is added during inspection
 		moduleType := ((Type) (module is Type ? module : module.typeof)).toNonNullable
@@ -108,8 +111,11 @@ class RegistryBuilder {
 	}
 
 	** Removes modules of the given type. If a module of the given type is subsequently added, it is silently ignored.
-	This removeModule(Type moduleType) {
+	This removeModule(Type? moduleType) {
 		_lock.check
+
+		if (moduleType == null) return this
+
 		if (moduleType.fits(IocModule#))
 			throw ArgErr(ErrMsgs.regBuilder_cannotRemoveModule(IocModule#))
 
