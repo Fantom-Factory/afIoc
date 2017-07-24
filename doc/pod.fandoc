@@ -1464,14 +1464,14 @@ class TestExample : Test {
     MyService? myService
 
     override Void setup() {
-        reg = RegistryBuilder()
+        rb = RegistryBuilder()
 
         // define a threaded scope
-        reg.addScope("thread", true)
+        rb.addScope("thread", true)
 
-        reg.addModule(AppModule#)
-           .addModule(TestModule#)
-           .build
+        reg := rb.addModule(AppModule#)
+                 .addModule(TestModule#)
+                 .build
 
         // create an instance of the threaded scope
         reg.rootScope.createChild("thread") { this.scope = it.jailBreak }
