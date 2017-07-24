@@ -6,7 +6,7 @@
 class RegistryBuilder {
 	private const Log		_logger			:= RegistryBuilder#.pod.log
 
-	private OneShotLock 	_lock			:= OneShotLock(ErrMsgs.registryBuilt)
+	private OneShotLock 	_lock			:= OneShotLock(ErrMsgs.registry_alreadyBuilt)
 	private ScpDef[]		_scopeDefs		:= ScpDef[,]
 	internal SrvDef[]		_serviceDefs	:= SrvDef[,]
 	internal OvrDef[]		_overrideDefs	:= OvrDef[,]

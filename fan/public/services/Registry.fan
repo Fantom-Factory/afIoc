@@ -55,26 +55,79 @@ const mixin Registry {
 	** <pre
 	abstract Str printBanner()
 	
-	** *For advanced use only.*
+	** *Advanced use only.*
 	** 
 	** Sets a new global default scope and returns the old one.
 	** Only non-threaded scopes may be set as the global default.
 	abstract Scope setDefaultScope(Scope defaultScope)
 	
-	** *For advanced use only.*
+	** *Advanced use only.*
 	** 
 	** Sets the given scope as the active scope in this thread.
 	** Call 'Scope.destroy()' to pop this scope off the active stack,
 	** or pass 'null' to this method to clear the active stack.
 	abstract Void setActiveScope(Scope? activeScope)
+	
+	** Sets the global 'Registry' instance. (In essence, this just sets a static field to this 
+	** 'Registry' instance.)
+	** 
+	** To make sure the JVM is only running the one IoC container, this method throws an Err if 
+	** the global instance has already been set.
+	** 
+	** See `#getGlobal`
+	abstract This setAsGlobal()
+	
+	** Returns the global 'Registry' instance for this application.
+	** A global Registry lets class instances create / inject themselves;
+	** handy for when the IoC Container is not accessible 
+	** 
+	** pre>
+	** syntax: fantom
+	** class MyClass {
+	**     @Inject MyService myService
+	** 
+	**     // private it-block ctor for IoC instantiation
+	**     private new makeViaItBlock(|This| f) { f(this) }
+	** 
+	**     // public static ctor that creates itself via the global Registry 
+	**     static new make() {
+	**         Registry.getGlobal.activeScope.build(MyClass#)
+	**     }
+	** }
+	** <pre
+	** 
+	** Now when you create an instance of 'MyClass' it comes fully loaded with injected services.
+	** Just don't forget to set a global Registry instance first.
+	** 
+	** pre>
+	** syntax: fantom
+	** registry := RegistryBuilder() { .... }.build
+	** registry.setAsGlobal
+	** 
+	** ...
+	** 
+	**// myClass now comes fully loaded with injected services
+	** myClass := MyClass()
+	** <pre
+	** 
+	** See `#setAsGlobal`.
+	static Registry? getGlobal(Bool checked := true) {
+		RegistryImpl.globalRegRef.val ?: (checked ? throw Err(ErrMsgs.registry_globalNotSet) : null)
+	}	
+
+	** Clears the global Registry instance.
+	@NoDoc
+	static Void clearGlobal() {
+		RegistryImpl.globalRegRef.val = null
+	}
 }
 
 @Js
 internal const class RegistryImpl : Registry {
 	static 
 	const AtomicInt				instanceCount	 := AtomicInt(0)
-	const OneShotLock 			shuttingdownLock := OneShotLock(ErrMsgs.registryShutdown, RegistryShutdownErr#)
-	const OneShotLock 			shutdownLock	 := OneShotLock(ErrMsgs.registryShutdown, RegistryShutdownErr#)
+	const OneShotLock 			shuttingdownLock := OneShotLock(ErrMsgs.registry_alreadyShutdown, RegistryShutdownErr#)
+	const OneShotLock 			shutdownLock	 := OneShotLock(ErrMsgs.registry_alreadyShutdown, RegistryShutdownErr#)
 	const Str:ScopeDefImpl		scopeDefs_
 	const Str:ServiceDefImpl	serviceDefs_
 	const ScopeImpl				rootScope_
@@ -87,6 +140,7 @@ internal const class RegistryImpl : Registry {
 	const ActiveScopeStack		activeScopeStack
 	const OperationsStack		opStack
 	const AtomicRef				defaultScopeRef		:= AtomicRef()
+	static const AtomicRef		globalRegRef		:= AtomicRef(null)
 
 	override const Str:ScopeDef		scopeDefs
 	override const Str:ServiceDef	serviceDefs
@@ -369,6 +423,13 @@ internal const class RegistryImpl : Registry {
 			activeScopeStack.clear
 		else
 			activeScopeStack.push(activeScope)
+	}
+	
+	override This setAsGlobal() {
+		if (globalRegRef.val != null)
+			throw Err(ErrMsgs.registry_globalAlreadySet)
+		globalRegRef.val = this
+		return this
 	}
 	
 	ScopeDefImpl findScopeDef(Str scopeId, ScopeImpl? currentScope) {
