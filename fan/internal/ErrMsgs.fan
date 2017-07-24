@@ -285,16 +285,24 @@ internal mixin ErrMsgs {
 		"Method may no longer be invoked - $because"
 	}
 
-	static Str registryBuilt() {
+	static Str registry_alreadyBuilt() {
 		"IoC Registry has already been built"
 	}
 
-	static Str registryStarted() {
+	static Str registry_alreadyStarted() {
 		"IoC Registry has already started"
 	}
 
-	static Str registryShutdown() {
+	static Str registry_alreadyShutdown() {
 		"IoC Registry has been shutdown"
+	}
+
+	static Str registry_globalAlreadySet() {
+		"Global Registry instance has already been set"
+	}
+
+	static Str registry_globalNotSet() {
+		"Global Registry instance has not been set"
 	}
 
 	static Str scopeDestroyed(Str scopeId) {
