@@ -360,8 +360,8 @@ using afIoc
 
 class AppModule {
     Void defineServices(RegistryBuilder bob) {
-        bob.add(MyService#).withCtorArgs([ 3 ])
-        bob.add(Penguins#)
+        bob.addService(MyService#).withCtorArgs([ 3 ])
+        bob.addService(Penguins#)
     }
 }
 <pre
@@ -510,7 +510,7 @@ Then IoC would choose 'make2()' because it doesn't know how to inject 'Int not_a
 pre>
 syntax: fantom
 Void defineServices(RegistyBuilder bob) {
-    bob.add(CtorTest#).withCtorArgs([69])
+    bob.addService(CtorTest#).withCtorArgs([69])
 }
 <pre
 
