@@ -495,7 +495,7 @@ class RegistryBuilder {
 		
 		moduleTypeNames := (Str?) null
 		try		moduleTypeNames = pod.meta.get("afIoc.module")
-		catch	_logger.warn("WARNING: Pod ${pod.name} does not define any meta - ensure it's not built with F4 - see https://github.com/xored/f4/issues/49")
+		catch	_logger.warn("WARNING: Pod ${pod.name} does not define any meta")
 		
 		if (moduleTypeNames != null)
 			_addModulesFromTypeNames(moduleTypeNames)
