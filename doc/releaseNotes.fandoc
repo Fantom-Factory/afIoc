@@ -203,15 +203,15 @@ v1.4.6
  - New: 'NotFoundErr' now pretty prints available values.
  - Chg: [Plastic]`pod:afPlastic` has been broken out into an external dependency.
  - Chg: Rejigged the stack trace filter not to throw internal 'IocErrs' as the cause.
- - Bug: `DependencyProvider`s could Err when they depended on lazy services (recursion error).
+ - Bug: 'DependencyProviders' could Err when they depended on lazy services (recursion error).
  - Bug: 'ThreadStash' name prefix tidy.
 
 v1.4.4
 ======
  - New: 'PlasticCompilationErr' gives detailed info and code snippets.
- - Chg: Made the useful 'OperationTrace' a field of `IocErr`.
+ - Chg: Made the useful 'OperationTrace' a field of 'IocErr'.
  - Chg: afPlastic now generates 'using' statements.
- - Chg: Toned down `RegistryBuilder` logging.
+ - Chg: Toned down 'RegistryBuilder' logging.
  - Bug: 'Before' and 'After' ordering constraint prefixes were not case insensitive.
 
 v1.4.2
@@ -261,7 +261,7 @@ v1.3.6
 
 v1.3.4
 ======
- - Chg: `DependencyProvider`s may now provide 'null' values.
+ - Chg: 'DependencyProviders' may now provide 'null' values.
  - Chg: 'OrderedConfig' values may be 'null'.
  - Chg: 'MappedConfig' values may be 'null'.
  - Chg: Tweaked 'OrderedConfig' placeholder default ordering logic.
@@ -292,7 +292,7 @@ v1.3.0
 
 v1.2.2
 ======
- - Chg: `Registry.autobuild` now accepts optional parameters to pass / mix into the ctor.
+ - Chg: 'Registry.autobuild' now accepts optional parameters to pass / mix into the ctor.
  - Chg: 'ConcurrentState' now accepts a factory method for creating / initialising state.
 
 v1.2.0
@@ -308,9 +308,9 @@ v1.2.0
 
 v1.1.0
 ======
- - New: Extend IoC by defining your own `DependencyProvider`s.
+ - New: Extend IoC by defining your own 'DependencyProviders'.
  - New: '@ServiceId' lets you disambiguate between different implmentations of the same service mixin.
- - New: [@Autobuild]`Autobuild` injects a fresh service on every injection.
+ - New: '@Autobuild' injects a fresh service on every injection.
  - New: Ordered configuration contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
 

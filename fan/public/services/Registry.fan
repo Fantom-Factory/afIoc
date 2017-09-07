@@ -74,7 +74,7 @@ const mixin Registry {
 	** To make sure the JVM is only running the one IoC container, this method throws an Err if 
 	** the global instance has already been set.
 	** 
-	** See `#getGlobal`
+	** See `getGlobal`
 	abstract This setAsGlobal()
 	
 	** Returns the global 'Registry' instance for this application.
@@ -110,7 +110,7 @@ const mixin Registry {
 	** myClass := MyClass()
 	** <pre
 	** 
-	** See `#setAsGlobal`.
+	** See `setAsGlobal`.
 	static Registry? getGlobal(Bool checked := true) {
 		RegistryImpl.globalRegRef.val ?: (checked ? throw Err(ErrMsgs.registry_globalNotSet) : null)
 	}	
