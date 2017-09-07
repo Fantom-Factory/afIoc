@@ -157,7 +157,7 @@ const mixin Scope {
 	** The result list always starts with this Scope itself.
 	** 
 	** syntax: fantom
-	** scope.inheritance() // --> [ui, root, builtIn]
+	** scope.inheritance() // --> ui, root, builtIn
 	abstract Scope[] inheritance()
 }
 
