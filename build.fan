@@ -10,7 +10,7 @@ class Build : BuildPod {
 		meta = [
 			"pod.dis"		: "IoC",
 			"repo.tags"		: "system",
-			"repo.public"	: "false"
+			"repo.public"	: "true"
 		]
 
 		depends = [
