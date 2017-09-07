@@ -1,8 +1,9 @@
-#IoC v3.0.4
+#IoC v3.0.6
 ---
-[![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom.org/)
-[![pod: v3.0.4](http://img.shields.io/badge/pod-v3.0.4-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
-![Licence: MIT](http://img.shields.io/badge/licence-MIT-blue.svg)
+
+[![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom-lang.org/)
+[![pod: v3.0.6](http://img.shields.io/badge/pod-v3.0.6-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
+![Licence: ISC](http://img.shields.io/badge/licence-ISC-blue.svg)
 
 ## Overview
 
@@ -18,23 +19,27 @@ Like [Guice](http://code.google.com/p/google-guice/)? Know [Spring](http://www.s
 - Simple API
 - **Runs in Javascript!**
 
-See frameworks such as [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) and [Reflux](http://pods.fantomfactory.org/pods/afReflux) for ready to go IoC containers.
+See frameworks such as [BedSheet](http://eggbox.fantomfactory.org/pods/afBedSheet) and [Reflux](http://eggbox.fantomfactory.org/pods/afReflux) for ready to go IoC containers.
 
 IoC was inspired by the most excellent [Tapestry 5 IoC](http://tapestry.apache.org/ioc.html) for Java.
 
 ## Install
 
-Install `IoC` with the Fantom Repository Manager ( [fanr](http://fantom.org/doc/docFanr/Tool.html#install) ):
+Install `IoC` with the Fantom Pod Manager ( [FPM](http://eggbox.fantomfactory.org/pods/afFpm) ):
 
-    C:\> fanr install -r http://pods.fantomfactory.org/fanr/ afIoc
+    C:\> fpm install afIoc
 
-To use in a [Fantom](http://fantom.org/) project, add a dependency to `build.fan`:
+Or install `IoC` with [fanr](http://fantom.org/doc/docFanr/Tool.html#install):
+
+    C:\> fanr install -r http://eggbox.fantomfactory.org/fanr/ afIoc
+
+To use in a [Fantom](http://fantom-lang.org/) project, add a dependency to `build.fan`:
 
     depends = ["sys 1.0", ..., "afIoc 3.0"]
 
 ## Documentation
 
-Full API & fandocs are available on the [Fantom Pod Repository](http://pods.fantomfactory.org/pods/afIoc/).
+Full API & fandocs are available on the [Eggbox](http://eggbox.fantomfactory.org/pods/afIoc/) - the Fantom Pod Repository.
 
 ## Quick Start
 
@@ -185,15 +190,15 @@ The **registry** is the top level object in an IoC application. It holds service
 
 A **service** is a Fantom class whose instances are created and managed by IoC Scopes. Services are identified by a unique ID, typically the qualified class name. A service may also be referenced by its Type. Multiple services may share the same Type as long as their IDs are different. Services may solicit, and be instantiated with, a configuration map or or map.
 
-A **dependency** is any object a service depends on. A dependency may or may not be a service. Dependencies are provided by [dependency providers](http://pods.fantomfactory.org/pods/afIoc/api/DependencyProvider).
+A **dependency** is any object a service depends on. A dependency may or may not be a service. Dependencies are provided by [dependency providers](http://eggbox.fantomfactory.org/pods/afIoc/api/DependencyProvider).
 
 A **module** is a class whose methods define and configure services.
 
 ## The IoC Registry
 
-Frameworks such as [BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) and [Reflux](http://pods.fantomfactory.org/pods/afReflux) are IoC containers. That is, they create and look after a `Registry` instance, using it to create classes and provide access to services.
+Frameworks such as [BedSheet](http://eggbox.fantomfactory.org/pods/afBedSheet) and [Reflux](http://eggbox.fantomfactory.org/pods/afReflux) are IoC containers. That is, they create and look after a `Registry` instance, using it to create classes and provide access to services.
 
-Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://pods.fantomfactory.org/pods/afIoc/api/RegistryBuilder), passing in the module(s) that define your services:
+Sometimes you don't have access to an IoC container and have to create the `Registry` instance yourself. (Running unit tests is a good example.) In these cases you will need to use the [RegistryBuilder](http://eggbox.fantomfactory.org/pods/afIoc/api/RegistryBuilder), passing in the module(s) that define your services:
 
     registry := RegistryBuilder().addModule(AppModule()).build()
     scope    := registry.rootScope
@@ -202,7 +207,7 @@ Sometimes you don't have access to an IoC container and have to create the `Regi
     ...
     registry.shutdown
 
-If your code uses other IoC libraries, make sure modules from these pods are added too. Example, if using the [IocEnv library](http://pods.fantomfactory.org/pods/afIocEnv) then add a dependency on the `afIocEnv` pod:
+If your code uses other IoC libraries, make sure modules from these pods are added too. Example, if using the [IocEnv library](http://eggbox.fantomfactory.org/pods/afIocEnv) then add a dependency on the `afIocEnv` pod:
 
     registry := RegistryBuilder()
         .addModule(MyModule())
@@ -225,7 +230,7 @@ Where `<module-qname>` is the qualified type name of the pod's main module class
 
 This is how IoC knows what modules are in each pod. It is how the `addModulesFromPod("afIocEnv")` method works; IoC inspects the meta-data in the `afIocEnv` pod and looks up the `afIoc.module` key. It then loads the modules listed.
 
-The `afIoc.module` meta may be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://pods.fantomfactory.org/pods/afIoc/api/SubModule) facet on a single module class.
+The `afIoc.module` meta may be a Comma Separated List (CSV) of module names; handy if the pod has many modules. Though it is generally better (more explicit / less prone to error) to use the [@SubModule](http://eggbox.fantomfactory.org/pods/afIoc/api/SubModule) facet on a single module class.
 
 ## Services
 
@@ -355,8 +360,8 @@ using afIoc
 
 class AppModule {
     Void defineServices(RegistryBuilder bob) {
-        bob.add(MyService#).withCtorArgs([ 3 ])
-        bob.add(Penguins#)
+        bob.addService(MyService#).withCtorArgs([ 3 ])
+        bob.addService(Penguins#)
     }
 }
 ```
@@ -496,7 +501,7 @@ Then IoC would choose `make2()` because it doesn't know how to inject `Int not_a
 
 ```
 Void defineServices(RegistyBuilder bob) {
-    bob.add(CtorTest#).withCtorArgs([69])
+    bob.addService(CtorTest#).withCtorArgs([69])
 }
 ```
 
@@ -766,8 +771,8 @@ If the first parameter of a service's ctor is a List, IoC assumes it is configur
 using afIoc
 
 const class AppModule {
-    Void defineServices(ServiceDefinitions defs) {
-        defs.add(Penguins#)
+    Void defineServices(RegistryBuilder bob) {
+        bob.addService(Penguins#)
     }
 
     @Contribute { serviceType=Penguins# }
@@ -809,7 +814,7 @@ Because the service configuration is a list of Uris, the contribution methods mu
 afIoc::IocErr: Contribution 'Int' does not match service configuration value of Uri
 ```
 
-That said, all contribution values are `coerced` via [afBeanUtils::TypeCoercer](http://pods.fantomfactory.org/pods/afBeanUtils/api/TypeCoercer) which gives a little leeway. `TypeCoercer` looks for `toXXX()` and `fromXXX()` methods to *coerce* values from one type to another. This is useful when contributing the likes of `Regex` which has a `fromStr()` method, or `File` which has a Uri ctor:
+That said, all contribution values are `coerced` via [afBeanUtils::TypeCoercer](http://eggbox.fantomfactory.org/pods/afBeanUtils/api/TypeCoercer) which gives a little leeway. `TypeCoercer` looks for `toXXX()` and `fromXXX()` methods to *coerce* values from one type to another. This is useful when contributing the likes of `Regex` which has a `fromStr()` method, or `File` which has a Uri ctor:
 
 ```
 using afIoc
@@ -965,9 +970,9 @@ MyService overrideMyService(Uri[] urls, Scope scope) {
 `@Override` methods can be a little cumbersome, so services may also be override via the `defineServices()` method:
 
 ```
-Void defineServices(ServiceDefinitions defs) {
+Void defineServices(RegistryBuilder bob) {
     // define a different MyService instance
-    defs.overrideServiceByType(MyService#).withImpl(MyServiceImpl#)
+    bob.overrideServiceByType(MyService#).withImpl(MyServiceImpl#)
 }
 ```
 
@@ -1102,7 +1107,7 @@ Note that wrapping / decorating services isn't possible with normal overrides be
 
 ## Dependency Providers
 
-IoC injects services, but it can also inject other custom classes and objects. By contributing instances of [DependencyProvider](http://pods.fantomfactory.org/pods/afIoc/api/DependencyProvider) to the `DependencyProviders` service you can inject your own objects:
+IoC injects services, but it can also inject other custom classes and objects. By contributing instances of [DependencyProvider](http://eggbox.fantomfactory.org/pods/afIoc/api/DependencyProvider) to the `DependencyProviders` service you can inject your own objects:
 
 ```
 @Contribute { serviceType=DependencyProviders# }
@@ -1121,7 +1126,7 @@ Note that the `DependencyProviders` service is currently annotated with `@NoDoc`
     ** Should return the object to be injected.
     Obj? provide(Scope scope, InjectionCtx injectionCtx)
 
-The [InjectionCtx](http://pods.fantomfactory.org/pods/afIoc/api/InjectionCtx) class holds details of the injection currently being performed, e.g. ctor / field / method / it-block injection, field / method details, etc...
+The [InjectionCtx](http://eggbox.fantomfactory.org/pods/afIoc/api/InjectionCtx) class holds details of the injection currently being performed, e.g. ctor / field / method / it-block injection, field / method details, etc...
 
 Note that `canProvide()` is called for *all* fields of a class, not just those annotated with `@Inject`. The `@Autobuild` facet is an example of this. IoC has an (internal) `AutobuildDependencyProvider` that looks for fields annotated with `@Autobuild`. It then autobuilds the field value as required and returns it for injection.
 
@@ -1165,19 +1170,19 @@ Note that the root scope is a non-threaded scope, meaning it can only hold insta
 
 ### Reflux Applications
 
-In a [Reflux](http://pods.fantomfactory.org/pods/afReflux) application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called `uiThread` and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
+In a [Reflux](http://eggbox.fantomfactory.org/pods/afReflux) application all processing happens in the UI thread. As such, Reflux defines a single threaded scope called `uiThread` and all services are created from this. This means all your services can be non-const, and you don't have to even think about scopes.
 
 *Happy days!*
 
 ### BedSheet Applications
 
-[BedSheet](http://pods.fantomfactory.org/pods/afBedSheet) Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called `request`.
+[BedSheet](http://eggbox.fantomfactory.org/pods/afBedSheet) Web applications are multi-threaded; each web request is served on a different thread. For that reason BedSheet defines a threaded scope called `request`.
 
 **Request Scope:** Here a new instance of request services will be created for each thread / web request. BedSheet's `WebReq` and `WebRes` are good examples of `request` services. Note in some situations this *per thread* object creation could be considered wasteful. In other situations, such as sharing database connections, it is not even viable.
 
 **Root Scope:** In IoC's default scope, only one instance of the service is created for the entire application. *Root scoped* services need to be `const` classes.
 
-Writing `const` services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...](http://www.fantomfactory.org/articles/from-one-thread-to-another) shows you how.
+Writing `const` services may be off-putting to some - because they're constant and can't hold mutable data, right!? ** *Wrong!* ** Const classes *can* hold *mutable* data. The article [From One Thread to Another...](http://www.alienfactory.co.uk/articles/from-one-thread-to-another) shows you how.
 
 The smart ones may be thinking that `root` scoped services can only hold other `root` scoped services. Well, they would be wrong too! Using the magic of *Lazy Funcs*, `request` scoped services may be injected into `root` scoped services. See [Lazy Functions](#lazyFunctions) for more info.
 
@@ -1195,8 +1200,8 @@ registry := RegistryBuilder() {
 rootScope := registry.rootScope
 
 rootScope.createChild("myScope") |myScope| {
-	echo(myScope)               // --> Scope: myScope
-	echo(registry.activeScope)  // --> Scope: myScope
+    echo(myScope)               // --> Scope: myScope
+    echo(registry.activeScope)  // --> Scope: myScope
 
     ...
 }
@@ -1210,7 +1215,7 @@ As you can see above, the `myScope` scope is constrained to the closure passed i
 
 If you jail break a scope then remember, it is your responsibility to `destroy()` it! Calling destroy ensures all thread state related to the scope, including service instances, are correctly disposed of. It also ensures all registered destroy hooks are called.
 
-The next example uses the [afConcurrent](http://pods.fantomfactory.org/pods/afConcurrent) library to run code in a separate thread. It calls into the other thread 3 times:
+The next example uses the [afConcurrent](http://eggbox.fantomfactory.org/pods/afConcurrent) library to run code in a separate thread. It calls into the other thread 3 times:
 
 1. To create and jailbreak an instance of `myScope`
 2. To prove that indeed `myScope` is the default scope for the thread
@@ -1225,23 +1230,23 @@ registry := RegistryBuilder() {
 rootScope   := registry.rootScope
 
 run.synchronized |->| {
-	// create and jailbreak myScope
-	rootScope.createChild("myScope") |myScope| {
-		myScope.jailBreak
-	}
+    // create and jailbreak myScope
+    rootScope.createChild("myScope") |myScope| {
+        myScope.jailBreak
+    }
 }
 
 // prove that root scope is active by default
 echo(registry.activeScope)  // --> Scope: root
 
 run.synchronized |->| {
-	// prove that this thread has myScope active by default!
-	echo(registry.activeScope)  // --> Scope: myScope
+    // prove that this thread has myScope active by default!
+    echo(registry.activeScope)  // --> Scope: myScope
 }
 
 // all jailbroken scopes must be manually destroyed
 run.synchronized |->| {
-	registry.activeScope.destroy
+    registry.activeScope.destroy
 }
 
 registry.shutdown
@@ -1315,7 +1320,7 @@ The `setup()` method builds the IoC Registry, passing in the application's `AppM
 
 See how the registry is used to inject dependencies into the test class. These may then be used in the test methods.
 
-Note that you need to add modules from other IoC libraries the application / test uses. For instance, if using the [IocEnv library](http://pods.fantomfactory.org/pods/afIocEnv) library, it would need to added to the builder:
+Note that you need to add modules from other IoC libraries the application / test uses. For instance, if using the [IocEnv library](http://eggbox.fantomfactory.org/pods/afIocEnv) library, it would need to added to the builder:
 
     override Void setup() {
         reg = RegistryBuilder()
@@ -1354,14 +1359,14 @@ class TestExample : Test {
     MyService? myService
 
     override Void setup() {
-        reg = RegistryBuilder()
+        rb = RegistryBuilder()
 
         // define a threaded scope
-        reg.addScope("thread", true)
+        rb.addScope("thread", true)
 
-        reg.addModule(AppModule#)
-           .addModule(TestModule#)
-           .build
+        reg := rb.addModule(AppModule#)
+                 .addModule(TestModule#)
+                 .build
 
         // create an instance of the threaded scope
         reg.rootScope.createChild("thread") { this.scope = it.jailBreak }
@@ -1419,7 +1424,7 @@ Stack Trace:
 
 ### Disable Startup Messages
 
-To disable IoC's startup and shutdown messages, add the following to your `AppModule`:
+To disable IoC's startup and shutdown messages, call `RegistryBuilder.silent()`. Or to disable specific messages, add the following to your `AppModule`:
 
 ```
 Void onRegistryStartup(Configuration config) {
