@@ -1,30 +1,30 @@
 using build
 
 class Build : BuildPod {
-	
+
 	new make() {
 		podName = "afIoc"
 		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
-		version = Version("3.0.5")
+		version = Version("3.0.6")
 
-		meta = [	
-			"proj.name"		: "IoC",
+		meta = [
+			"pod.dis"		: "IoC",
 			"repo.tags"		: "system",
 			"repo.public"	: "false"
 		]
 
 		depends = [
-			"sys          1.0.68 - 1.0", 
+			"sys          1.0.68 - 1.0",
 			"concurrent   1.0.68 - 1.0", 	// used for Actor.locals, Actor.sleep, AtomicInt, AtomicBool
 			"afBeanUtils  1.0.8  - 1.0",	// used for ReflectUtils, NotFoundErr, TypeCoercer
-			
+
 			// ---- Test ----
 			"afConcurrent 1.0.14 - 1.0"
 		]
 
 		srcDirs = [`fan/`, `fan/internal/`, `fan/internal/def/`, `fan/internal/inspectors/`, `fan/internal/providers/`, `fan/public/`, `fan/public/advanced/`, `fan/public/facets/`, `fan/public/services/`, `test/`]
 		resDirs = [`doc/`]
-		
+
 		meta["afBuild.testPods"]	= "afConcurrent"
 	}
 }
