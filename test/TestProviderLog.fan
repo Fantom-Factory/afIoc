@@ -7,7 +7,7 @@ internal class TestProviderLog : IocTest {
 		s86 := (T_MyService86) reg.serviceById("s86")
 		s86.log.warn("Yo!")
 
-		rec := logs.list.last as LogRec
+		rec := logs.val.last as LogRec
 		verifyEq(rec.msg, "Yo!")
 		verifyEq(rec.logName, "afIoc")
 	}
@@ -17,7 +17,7 @@ internal class TestProviderLog : IocTest {
 		s86 := (T_MyService86) reg.serviceById("s86")
 		s86.log.warn("Yo Yo!")
 
-		rec := logs.list.last as LogRec
+		rec := logs.val.last as LogRec
 		verifyEq(rec.msg, "Yo Yo!")
 		verifyEq(rec.logName, "T_MyService86")
 	}
@@ -27,7 +27,7 @@ internal class TestProviderLog : IocTest {
 		s86 := (T_MyService86_2) reg.serviceById("s86-2")
 		s86.log.warn("Yo!")
 
-		rec := logs.list.last as LogRec
+		rec := logs.val.last as LogRec
 		verifyEq(rec.msg, "Yo!")
 		verifyEq(rec.logName, "afIoc")
 	}
@@ -37,7 +37,7 @@ internal class TestProviderLog : IocTest {
 		s86 := (T_MyService86_3) reg.serviceById("s86-3")
 		s86.log.warn("Yo!")
 
-		rec := logs.list.last as LogRec
+		rec := logs.val.last as LogRec
 		verifyEq(rec.msg, "Yo!")
 		verifyEq(rec.logName, "slimer.dude")
 	}
