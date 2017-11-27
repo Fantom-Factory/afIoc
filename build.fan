@@ -19,7 +19,7 @@ class Build : BuildPod {
 			"afBeanUtils  1.0.8  - 1.0",	// used for ReflectUtils, NotFoundErr, TypeCoercer
 
 			// ---- Test ----
-			"afConcurrent 1.0.14 - 1.0"
+			"afConcurrent 1.0.20 - 1.0"
 		]
 
 		srcDirs = [`fan/`, `fan/internal/`, `fan/internal/def/`, `fan/internal/inspectors/`, `fan/internal/providers/`, `fan/public/`, `fan/public/advanced/`, `fan/public/facets/`, `fan/public/services/`, `test/`]
