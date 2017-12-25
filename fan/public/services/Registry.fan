@@ -393,10 +393,10 @@ internal const class RegistryImpl : Registry {
 	override Str printBanner() {
 		heading := (Str) (regMeta.options["afIoc.bannerText"] ?: "Err...")
 		title := "\n"
-		title += Str<|   ___    __                 _____        _                  
-		                / _ |  / /_____  _____    / ___/__  ___/ /_________  __ __ 
-		               / _  | / // / -_|/ _  /===/ __// _ \/ _/ __/ _  / __|/ // / 
-		              /_/ |_|/_//_/\__|/_//_/   /_/   \_,_/__/\__/____/_/   \_, /  
+		title += Str<|    ___    __                _____        __                 
+		                 / _ |  / /____  _____    / ___/_  ____/ /_________  __ __ 
+		                / _  | / / / -_|/ _  /===/ __/ _ \/ __/ __/ _  / __|/ // / 
+		               /_/ |_|/_/_/\__|/_//_/   /_/  \_,_/___/\__/____/_/   \_, /  
 		              |>
 		first := true
 		while (!heading.isEmpty) {
