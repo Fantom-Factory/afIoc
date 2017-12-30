@@ -43,7 +43,7 @@ internal class TestLifecyleHooks : IocTest {
 		
 		reg.shutdown
 
-		verifyErrMsg(IocErr#, "onScopeCreate: Could not match glob 'wotever' to any scope: root, builtIn") {
+		verifyErrMsg(IocErr#, "onScopeCreate: Could not match glob 'wotever' to any scope: builtIn, root") {
 			RegistryBuilder().onScopeCreate("wotever") { }.build
 		}
 	}
@@ -67,7 +67,7 @@ internal class TestLifecyleHooks : IocTest {
 		
 		reg.shutdown
 
-		verifyErrMsg(IocErr#, "onScopeDestroy: Could not match glob 'wotever' to any scope: root, builtIn") {
+		verifyErrMsg(IocErr#, "onScopeDestroy: Could not match glob 'wotever' to any scope: builtIn, root") {
 			RegistryBuilder().onScopeDestroy("wotever") { }.build
 		}
 	}
