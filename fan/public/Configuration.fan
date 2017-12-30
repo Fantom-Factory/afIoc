@@ -199,7 +199,7 @@ internal class ConfigurationImpl : Configuration {
 	}
 
 	override Constraints add(Obj value) {
-		if (keyType != Str#)
+		if (!Str#.fits(keyType))
 			throw IocErr(ErrMsgs.contributions_keyTypeNotKnown(keyType))
 
 		key := "afIoc.unordered-" + impliedCount.toStr.padl(2)
@@ -384,7 +384,7 @@ internal class ConfigurationImpl : Configuration {
 	}
 
 	private once Type keyType() {
-		contribType.name == "Map" ? contribType.params["K"] : Str#
+		contribType.name == "Map" ? contribType.params["K"] : Obj#
 	}
 
 	private once Type valueType() {

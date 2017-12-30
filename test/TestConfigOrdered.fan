@@ -213,6 +213,22 @@ internal class TestConfigOrdered : IocTest {
 		verifyEq(s82.filters[0], "HttpCleanupFilter#")
 		verifyEq(s82.filters[1], "IeAjaxCacheBustingFilter#")		
 	}
+
+	** Bug discovered by afSleepSafe in v3.0.6!
+	Void testRemoveNonStrDefaultKeys() {
+		s71 := (T_MyService71) threadScope {
+			it.addService(T_MyService71#)
+			it.contributeToServiceType(T_MyService71#) |Configuration config| {
+				config[Str#] = "str"
+				config[Int#] = "int"
+			}
+			it.contributeToServiceType(T_MyService71#) |Configuration config| {
+				config.remove(Str#)
+			}
+		}.serviceById(T_MyService71#.qname)
+		verifyEq(s71.config.first, "int")
+		verifyEq(s71.config.size, 1)
+	}
 }
 
 @Js

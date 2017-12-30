@@ -624,13 +624,13 @@ class RegistryBuilder {
 		_scopeCreateHooks.each |hook| {
 			matches := scopeDefs.any |scpDef| { scpDef.matchesGlob(hook[1]) }
 			if (!matches)
-				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeCreate:", hook[1], hook[0].toStr, scopeDefs.vals))
+				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeCreate:", hook[1], hook[0].toStr, scopeDefs.vals.sort |s1, s2| { s1.id <=> s2.id }))
 		}
 
 		_scopeDestroyHooks.each |hook| {
 			matches := scopeDefs.any |scpDef| { scpDef.matchesGlob(hook[1]) }
 			if (!matches)
-				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeDestroy:", hook[1], hook[0].toStr, scopeDefs.vals))
+				throw IocErr(ErrMsgs.regBuilder_scopeNotMatched("onScopeDestroy:", hook[1], hook[0].toStr, scopeDefs.vals.sort |s1, s2| { s1.id <=> s2.id }))
 		}
 
 		_serviceBuildHooks.each |hook| {
