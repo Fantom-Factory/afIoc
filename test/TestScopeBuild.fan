@@ -95,7 +95,7 @@ internal class TestScopeBuild : IocTest {
 
 @Js
 internal class T_MyService02 {
-	Str kick	:= "ASS!"
+	virtual Str kick	:= "ASS!"
 }
 
 @Js

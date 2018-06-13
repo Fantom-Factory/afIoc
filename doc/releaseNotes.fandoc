@@ -2,6 +2,7 @@ v3.0
 ****
 v3.0.8
 ======
+ - Chg: Let 'afIoc::AutoBuilderHooks.onBuild' hooks decorate / replace the built instance.
  - Bug: Could not remove ordered config with non-string keys.
 
 v3.0.6

@@ -44,7 +44,7 @@ const mixin Scope {
 	**   new make(<config>, <ctorArgs>, <dependencies>, <it-block>) { ... }
 	** 
 	** Note that 'fieldVals' are set by an it-block function, should the ctor define one.
-	abstract Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
+	abstract Obj? build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null)
 	
 	** Injects services and dependencies into fields of all visibilities and
 	** calls any method on the class annotated with '@PostInjection'.
@@ -197,7 +197,7 @@ internal const class ScopeImpl : Scope {
 		return scopes
 	}
 
-	override Obj build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
+	override Obj? build(Type type, Obj?[]? ctorArgs := null, [Field:Obj?]? fieldVals := null) {
 		destroyedCheck
 
 		registry.opStack.push("Building", type.qname)

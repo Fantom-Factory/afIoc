@@ -26,7 +26,7 @@ const class AutoBuilder {
 		this.buildHooksRef			= Unsafe(buildHooks)
 	}
 	
-	virtual Obj autobuild(Scope currentScope, Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals, Str? serviceId) {
+	virtual Obj? autobuild(Scope currentScope, Type type, Obj?[]? ctorArgs, [Field:Obj?]? fieldVals, Str? serviceId) {
 		
 		if (serviceId == null) {
 			// we can't easily bring back the serviceDef, 'cos there may be multiple services
@@ -76,9 +76,15 @@ const class AutoBuilder {
 
 		callPostInjectionMethods(currentScope, serviceId, inst, impl)
 		
-		buildHooks := (Str:|Scope, Obj|) buildHooksRef.val
+		buildHooks := (Str:|Scope, Obj->Obj?|) buildHooksRef.val
 		// call with scope first so it matches onServiceBuild and other methods
-		buildHooks.each { it.call(currentScope, inst) }
+		buildHooks.each {
+			newVal := it.call(currentScope, inst)
+			
+			// allow our new instance to be re-assigned / decorated
+			if (it.returns != Void#)
+				inst = newVal
+		}
 		
 		return inst
 	}
