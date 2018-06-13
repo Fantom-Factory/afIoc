@@ -1,9 +1,9 @@
-#IoC v3.0.6
+# IoC v3.0.6
 ---
 
 [![Written in: Fantom](http://img.shields.io/badge/written%20in-Fantom-lightgray.svg)](http://fantom-lang.org/)
-[![pod: v3.0.6](http://img.shields.io/badge/pod-v3.0.6-yellow.svg)](http://www.fantomfactory.org/pods/afIoc)
-![Licence: ISC](http://img.shields.io/badge/licence-ISC-blue.svg)
+[![pod: v3.0.6](http://img.shields.io/badge/pod-v3.0.6-yellow.svg)](http://eggbox.fantomfactory.org/pods/afIoc)
+[![Licence: ISC](http://img.shields.io/badge/licence-ISC-blue.svg)](https://choosealicense.com/licenses/isc/)
 
 ## Overview
 

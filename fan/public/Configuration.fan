@@ -144,7 +144,7 @@ mixin Configuration {
 
 @Js
 internal class ConfigurationImpl : Configuration {
-	
+	static const	TypeCoercer			typeCoercer := TypeCoercer()
 	internal const	Type 				contribType
 	override 	  	Scope	 			scope
 	private	const	Str					serviceId
@@ -154,7 +154,6 @@ internal class ConfigurationImpl : Configuration {
 	private			Obj:Contrib			modConfig
 	private			Obj:Contrib			overrides
 	private			Int					overrideCount
-	private			TypeCoercer			typeCoercer
 	private			Contrib[]?			orderedContribs
 
 	internal new make(Scope scope, Type contribType, Str serviceId) {
@@ -171,7 +170,6 @@ internal class ConfigurationImpl : Configuration {
 		this.modConfig		= makeMap(Obj#, Contrib#)
 		this.overrides		= makeMap(Obj#, Contrib#)
 		this.overrideCount	= 1
-		this.typeCoercer	= TypeCoercer()
 	}
 
 	override Constraints set(Obj key, Obj? value) {

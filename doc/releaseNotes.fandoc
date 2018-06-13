@@ -1,5 +1,5 @@
-Versions
-********
+v3.0
+****
 v3.0.8
 ======
  - Bug: Could not remove ordered config with non-string keys.
@@ -33,6 +33,11 @@ v3.0.0
 ======
  - New: IoC now availble in Javascript!
  - New: IoC v3 is a re-write - it's lighter, faster, and more cusomisable than ever before!
+
+
+
+v2.0
+****
 
 v2.0.10
 =======
@@ -89,6 +94,11 @@ v2.0.0
  - Chg: Merged 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' into the one 'LocalProvider'.
  - Bug: 'IocService' methods now more closely follow those of 'Registry'.
 
+
+
+v1.7
+****
+
 v1.7.6
 ======
  - New: Added a dedicated 'IocShutdownErr' throw when registry methods are invoked after it has been shutdown.
@@ -115,6 +125,11 @@ v1.7.0
  - Chg: 'LocalRefProvider', 'LocalListProvider' and 'LocalMapProvider' now use the Type's qualified name as the key
  - Chg: Deleted all existing @Deprecated classes.
  - Bug: Could not always contribute empty maps and lists created with shorthand notation, e.g. '[,]'.
+
+
+
+v1.6
+****
 
 v1.6.4
 ======
@@ -159,6 +174,11 @@ v1.6.0
  - Chg: Re-jigged 'StrategyRegistry' to add 'findAllChildren()'.
  - Chg: 'TypeCoercer' is now 'const'.
 
+
+
+v1.5
+****
+
 v1.5.4
 ======
  - Chg: Available values in 'NotFoundErr' are now sorted alphabetically.
@@ -189,6 +209,11 @@ v1.5.0
  - Chg: Removed dependency type from 'DependencyProvider' method signatures. It moved to 'InjectionCtx'. (Breaking change.)
  - Chg: Liberated the 'PipelineBuilder' util service. It moved to BedSheet. (Breaking change.)
  - Chg: Overhauled 'InjectionCtx' to make use of ThreadStacks so it doesn't need to be passed around.
+
+
+
+v1.4
+****
 
 v1.4.10
 =======
@@ -236,6 +261,11 @@ v1.4.0
  - Chg: Test code is no longer distributed with the afIoc.pod - pod size was nearing 500 Kb!
  - Chg: ThreadStashs have less verbose names.
  - Bug: Could not override ordered config if it was referenced by constraints.
+
+
+
+v1.3
+****
 
 v1.3.10
 =======
@@ -294,6 +324,11 @@ v1.3.0
  - Bug: Distributed mapped overide could throw an invalid override not found err.
  - Bug: Autobuild now checks if the type is instantiable.
 
+
+
+v1.2
+****
+
 v1.2.2
 ======
  - Chg: 'Registry.autobuild' now accepts optional parameters to pass / mix into the ctor.
@@ -310,6 +345,11 @@ v1.2.0
  - Chg: Improved Registry startup times by only inspecting Pods (for modules) the once.
  - Chg: 'IocService' rethrows any startup Errs when getting the registry. See [Errs on Service.start()]`http://fantom.org/sidewalk/topic/2133`.
 
+
+
+v1.1
+****
+
 v1.1.0
 ======
  - New: Extend IoC by defining your own 'DependencyProviders'.
@@ -318,12 +358,22 @@ v1.1.0
  - New: Ordered configuration contributions are ordered across modules.
  - Bug: Services can be created even if they don't define any ctors.
 
+
+
+v1.0
+****
+
 v1.0.0
 ======
  - New: Added 'addUnorderedAll' and 'addMappedAll' to 'OrderedConfig' and 'MappedConfig'.
  - Chg: Multiple instances of 'ConcurrentState' can be created with the same state class.
  - Bug: Made public the 'withState()' and 'getState()' methods on 'ConcurrentState'.
  - Bug: NPE could be thrown if ctor depdendency not found.
+
+
+
+v0.0
+****
 
 v0.0.2
 ======
