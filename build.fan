@@ -5,7 +5,7 @@ class Build : BuildPod {
 	new make() {
 		podName = "afIoc"
 		summary = "A fast, lightweight, and highly customisable Dependency Injection framework"
-		version = Version("3.0.7")
+		version = Version("3.0.8")
 
 		meta = [
 			"pod.dis"		: "IoC",
@@ -26,5 +26,6 @@ class Build : BuildPod {
 		resDirs = [`doc/`]
 
 		meta["afBuild.testPods"]	= "afConcurrent"
+		//meta["afBuild.testDirs"]	= ""
 	}
 }

@@ -247,8 +247,8 @@ internal const class RegistryImpl : Registry {
 		}
 		hooks := (Str:Func) config.toMap
 		
-		// ensure system messages are printed at the end 
-		order	:= "afIoc.logBanner".split	// this makes moar sense when there are more keys in the list! See DependencyProviders
+		// ensure system messages are printed at the end
+		order	:= ("afIoc.logBanner " + options.get("afIoc.afterStartup", "")).split
 		hooks.keys.sort |k1, k2| {
 			(order.index(k1) ?: -1) <=> (order.index(k2) ?: -1)
 		}.each {
